@@ -1,0 +1,110 @@
+---
+/**
+ * MemberReviewForm — logged-in member review composer for a title.
+ * Props: { tmdbId, media='movie', viewerId=null, csrfToken='', loginPath='/login', loginNext='' }
+ * Logged-out (no viewerId): links to loginPath?next=<loginNext>.
+ * Posts JSON to /api/member/reviews via an inline is:inline script
+ * (same pattern as member WatchlistButton / Admin logout); reloads on success.
+ */
+interface Props {
+  tmdbId: number;
+  media?: 'movie' | 'tv';
+  viewerId?: string | null;
+  csrfToken?: string;
+  loginPath?: string;
+  loginNext?: string;
+}
+const {
+  tmdbId,
+  media = 'movie',
+  viewerId = null,
+  csrfToken = '',
+  loginPath = '/login',
+  loginNext = '',
+} = Astro.props;
+const id = `mr-form-${media}-${tmdbId}`;
+const next = loginNext || `/movies/${tmdbId}`;
+---
+{!viewerId ? (
+  <p class="d-empty">
+    <a href={`${loginPath}?next=${encodeURIComponent(next)}`}>Log in to write a member review</a>.
+  </p>
+) : (
+  <form class="mr-form" data-mr-form={id} data-tmdb-id={tmdbId} data-media={media} data-csrf={csrfToken} novalidate>
+    <div class="mr-row">
+      <label>Title (optional, ≤120)
+        <input type="text" name="title" maxlength="120" autocomplete="off" data-mr-title />
+      </label>
+      <label>Rating (optional, 0–10)
+        <input type="number" name="rating" min="0" max="10" step="1" inputmode="numeric" data-mr-rating />
+      </label>
+    </div>
+    <label>Review (20–5000 characters)
+      <textarea name="body" rows="5" minlength="20" maxlength="5000" required data-mr-body></textarea>
+    </label>
+    <p class="mr-error" data-mr-error hidden></p>
+    <button class="mr-submit" type="submit" data-mr-submit>Post review</button>
+  </form>
+)}
+<script is:inline>
+(() => {
+  const init = (root) => {
+    if (root.dataset.mrBound === 'true') return;
+    root.dataset.mrBound = 'true';
+    const titleEl = root.querySelector('[data-mr-title]');
+    const ratingEl = root.querySelector('[data-mr-rating]');
+    const bodyEl = root.querySelector('[data-mr-body]');
+    const errEl = root.querySelector('[data-mr-error]');
+    const btn = root.querySelector('[data-mr-submit]');
+    root.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (errEl) errEl.hidden = true;
+      const tmdbId = Number(root.dataset.tmdbId);
+      const media = root.dataset.media || 'movie';
+      const csrf = root.dataset.csrf || '';
+      const title = (titleEl?.value ?? '').trim();
+      const ratingRaw = (ratingEl?.value ?? '').trim();
+      const body = bodyEl?.value ?? '';
+      const fail = (msg) => {
+        if (errEl) { errEl.textContent = msg; errEl.hidden = false; }
+      };
+      if (title.length > 120) return fail('Title must be 120 characters or fewer.');
+      let rating = null;
+      if (ratingRaw !== '') {
+        rating = Number(ratingRaw);
+        if (!Number.isInteger(rating) || rating < 0 || rating > 10) {
+          return fail('Rating must be a whole number from 0 to 10 (or blank).');
+        }
+      }
+      if (body.trim().length < 20) return fail('Review must be at least 20 characters.');
+      if (body.length > 5000) return fail('Review must be 5000 characters or fewer.');
+      if (btn) { btn.disabled = true; btn.textContent = 'Posting…'; }
+      try {
+        const res = await fetch('/api/member/reviews', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', ...(csrf ? { 'x-csrf-token': csrf } : {}) },
+          body: JSON.stringify({ tmdbId, media, rating, title, body }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data.ok) return fail(data.error ?? 'Could not save your review.');
+        window.location.reload();
+      } catch (err) {
+        fail(err instanceof Error ? err.message : 'Could not save your review.');
+      } finally {
+        if (btn) { btn.disabled = false; btn.textContent = 'Post review'; }
+      }
+    });
+  };
+  document.querySelectorAll('[data-mr-form]').forEach(init);
+})();
+</script>
+<style>
+.mr-form { display: grid; gap: 0.75rem; margin-top: 1rem; }
+.mr-row { display: grid; gap: 0.75rem; grid-template-columns: 2fr 1fr; }
+@media (max-width: 640px) { .mr-row { grid-template-columns: 1fr; } }
+.mr-form label { display: grid; gap: 0.35rem; font-weight: 700; }
+.mr-form input, .mr-form textarea { font: inherit; font-weight: 400; padding: 0.6rem 0.7rem; border-radius: 10px; border: 1px solid color-mix(in srgb, currentColor 25%, transparent); background: transparent; color: inherit; }
+.mr-error { color: #b3261e; font-weight: 700; }
+.mr-submit { justify-self: start; min-height: 44px; padding: 0.5rem 1.1rem; border-radius: 999px; border: 1px solid var(--brand-accent); background: var(--brand-accent); color: var(--brand-accent-ink); font-weight: 700; cursor: pointer; }
+.mr-submit:disabled { opacity: 0.6; cursor: wait; }
+</style>

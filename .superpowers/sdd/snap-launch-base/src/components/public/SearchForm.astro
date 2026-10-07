@@ -1,0 +1,25 @@
+---
+/**
+ * Plain GET search form — works with JS disabled.
+ * studied-DNA: dark catalogue rail companion; gold kicker + Lato labels
+ * come from existing hooks (kicker/section-head/search-form), no inline
+ * colors/fonts. Route + copy unchanged: GET /search?q=.
+ */
+interface Props {
+  query?: string;
+}
+const { query = "" } = Astro.props;
+---
+<form class="search-form" action="/search" method="get" role="search">
+  <label class="sr-only" for="site-search">Search reviews</label>
+  <input
+    id="site-search"
+    type="search"
+    name="q"
+    value={query}
+    placeholder="Title, genre, or year…"
+    autocomplete="off"
+    maxlength="120"
+  />
+  <button type="submit">Search</button>
+</form>

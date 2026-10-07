@@ -1,0 +1,58 @@
+---
+/** Admin shell — server-rendered. Mirrors React AdminLayout markup/classes. */
+import "../styles/admin.css";
+
+interface Props {
+  email: string;
+  csrfToken: string;
+  current?: string;
+}
+
+const { email, csrfToken, current = "" } = Astro.props;
+const nav = [
+  { href: "/admin", label: "Dashboard" },
+  { href: "/admin/reviews", label: "Reviews" },
+  { href: "/admin/reviews/new", label: "New Review" },
+  { href: "/admin/settings", label: "Settings" },
+];
+---
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Admin · Movie Review</title>
+  </head>
+  <body>
+    <div class="admin-shell">
+      <header class="admin-top">
+        <strong>Movie Review · Admin</strong>
+        <nav>
+          {nav.map((n) => (
+            <a href={n.href} class={current === n.href ? "active" : ""}>{n.label}</a>
+          ))}
+        </nav>
+        <span class="muted">{email}</span>
+        <button type="button" class="btn ghost" id="admin-logout">Logout</button>
+      </header>
+      <main class="admin-main">
+        <slot />
+      </main>
+    </div>
+    <script define:vars={{ csrfToken }}>
+      document.getElementById("admin-logout")?.addEventListener("click", async (e) => {
+        const btn = e.currentTarget;
+        btn.disabled = true;
+        try {
+          await fetch("/api/admin/logout", {
+            method: "POST",
+            headers: { "x-csrf-token": csrfToken },
+          });
+        } finally {
+          window.location.href = "/admin/login";
+        }
+      });
+    </script>
+  </body>
+</html>

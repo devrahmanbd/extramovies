@@ -1,0 +1,65 @@
+---
+import { getTitleBadges } from "../../lib/badges";
+/** Poster tile — links to the discovery detail page. Zero JS.
+ * Streaming-guide rebuild: full 2:3 posters (w342, object-fit contain via
+ * global), small neutral title/year/score, 44px link targets (CSS), lazy art
+ * below the fold (eager only for lead/above-fold). Single h1 lives in the
+ * page hero — tiles carry no headings. No data claims beyond TMDB fields.
+ */
+interface Props {
+  tmdbId: number;
+  title: string;
+  year: number | null;
+  posterUrl: string | null;
+  rating: number | null;
+  /** "tmdb" (default) or "ours" (author's own score on local reviews). */
+  source?: "tmdb" | "ours";
+  href?: string;
+  /** Density variant: rail (snap rail) | lead (large feature) | compact (dense flow). */
+  variant?: "rail" | "lead" | "compact";
+  /** Override lazy art (true = eager above the fold). Defaults to lead-only. */
+  eager?: boolean;
+}
+const { tmdbId, title, year, posterUrl, rating, source = "tmdb", href, variant = "rail", eager } = Astro.props;
+const badges = getTitleBadges(tmdbId);
+const link = href ?? `/movies/${tmdbId}`;
+const isLong = title.length > 40;
+const isLead = variant === "lead";
+const isEager = typeof eager === "boolean" ? eager : isLead;
+const ratingText =
+  rating === null
+    ? null
+    : source === "ours"
+      ? `Our rating ${rating.toFixed(1)}/10`
+      : `TMDB ${rating.toFixed(1)}`;
+const metaLine = [year !== null ? String(year) : null, ratingText]
+  .filter((s): s is string => s !== null)
+  .join("  ·  ");
+---
+<li class={`d-tile is-${variant}`}>
+  <a href={link}>
+    {posterUrl ? (
+      <img
+        src={posterUrl}
+        alt={`Poster for ${title}`}
+        width={isLead ? "780" : "342"}
+        height={isLead ? "1170" : "513"}
+        loading={isEager ? "eager" : "lazy"}
+        fetchpriority={isEager ? "high" : undefined}
+        decoding="async"
+      />
+    ) : (
+      <span class="d-tile-fallback" aria-hidden="true">{title.charAt(0) || "•"}</span>
+    )}
+    {badges.reviewed || badges.platformPick ? (
+      <span class="title-badges" aria-hidden="true">
+        {badges.reviewed ? <span class="title-reviewed">Reviewed</span> : null}
+        {badges.platformPick ? <span class="platform-pick">Platform Pick</span> : null}
+      </span>
+    ) : null}
+    <span class="d-tile-text">
+      <span class={`d-tile-title${isLong ? " display--long" : ""}`}>{title}</span>
+      {metaLine ? <span class="d-tile-meta tnum">{metaLine}</span> : null}
+    </span>
+  </a>
+</li>

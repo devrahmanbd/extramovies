@@ -1,0 +1,102 @@
+---
+/**
+ * MagazineHome — cover story + article grid + ratings sidebar.
+ * Rendered by the homepage when the active brand preset has layout: magazine.
+ */
+import RatingMark from "./RatingMark.astro";
+import GenreNav from "./GenreNav.astro";
+import type { PublicReview } from "../../lib/seo/content";
+import { formatRuntime } from "../../lib/seo/content";
+
+interface Props {
+  featured: PublicReview | null;
+  latest: PublicReview[];
+  shelf: PublicReview[];
+  genres: string[];
+  publishedDate: string;
+}
+const { featured, latest, shelf, genres, publishedDate } = Astro.props;
+const featuredIsLong = (featured?.reviewTitle?.length ?? 0) > 40;
+---
+{featured ? (
+  <section class="mag-cover band section--lg pub-cover" aria-labelledby="cover-title">
+    <div>
+      <p class="mag-kicker">Cover story · {publishedDate}</p>
+      <h1 id="cover-title" class={featuredIsLong ? "is-long" : undefined}>{featured.reviewTitle}</h1>
+      <p class="mag-lede">{featured.excerpt}</p>
+      <p class="mag-meta tnum">
+        <RatingMark rating={featured.rating} />
+        <span>{featured.movieTitle}{featured.year ? ` (${featured.year})` : ""}</span>
+        <span>By {featured.authorName}</span>
+      </p>
+      <p><a href={`/reviews/${featured.slug}`}>Read the cover story</a></p>
+    </div>
+    {featured.backdropUrl ? (
+      <figure>
+        <img
+          src={featured.backdropUrl}
+          alt={`Still from ${featured.movieTitle}`}
+          width="1280"
+          height="960"
+          fetchpriority="high"
+          decoding="async"
+        />
+        <figcaption class="mag-meta">{featured.movieTitle}{featured.year ? ` (${featured.year})` : ""}</figcaption>
+      </figure>
+    ) : null}
+  </section>
+) : null}
+
+<section aria-labelledby="mag-latest" class="band section--md pub-grid">
+  <div class="section-head">
+    <h2 id="mag-latest">In this issue</h2>
+    <p>Fresh reviews, magazine order — strongest first is for the shelf below.</p>
+  </div>
+  {latest.length > 0 ? (
+    <div class="mag-grid">
+      {latest.map((r) => (
+        <article class="mag-card">
+          <p class="mag-meta tnum">{r.genres[0] ?? "Review"} · {r.year ?? ""}</p>
+          <h3 class={r.reviewTitle.length > 40 ? "is-long" : undefined}><a href={`/reviews/${r.slug}`}>{r.reviewTitle}</a></h3>
+          <p>{r.excerpt}</p>
+          <p class="mag-meta tnum">
+            <RatingMark rating={r.rating} />
+            <span>{formatRuntime(r.runtimeMinutes) ?? ""}</span>
+          </p>
+        </article>
+      ))}
+    </div>
+  ) : (
+    <p>More reviews are on the way — the archive starts here.</p>
+  )}
+  <p><a href="/reviews">Browse the full archive</a></p>
+</section>
+
+{shelf.length > 0 ? (
+  <aside class="mag-shelf band--alt section--sm pub-shelf" aria-labelledby="mag-shelf-h">
+    <div class="section-head">
+      <h2 id="mag-shelf-h">Top rated — the shelf</h2>
+      <p>Highest-scored films in the journal right now.</p>
+    </div>
+    <ol>
+      {shelf.map((r) => (
+        <li>
+          <RatingMark rating={r.rating} />
+          <div>
+            <a href={`/reviews/${r.slug}`}>{r.movieTitle}</a>
+            <p class="mag-meta">{r.verdict}</p>
+          </div>
+        </li>
+      ))}
+    </ol>
+  </aside>
+) : null}
+
+{genres.length > 0 ? (
+  <section aria-labelledby="mag-genres" class="band section--sm pub-sections">
+    <div class="section-head">
+      <h2 id="mag-genres">Sections</h2>
+    </div>
+    <GenreNav genres={genres} />
+  </section>
+) : null}

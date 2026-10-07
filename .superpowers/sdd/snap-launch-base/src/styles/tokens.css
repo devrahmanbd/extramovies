@@ -1,0 +1,204 @@
+/* Hallmark · macrostructure: Photographic hero + catalogue rails · theme: studied-DNA amended (source: url) · studied: yes
+ * Genre: editorial. Audience = solo cinephile readers · use = read reviews + find where to watch · tone = editorial.
+ * Locked tokens: every color/font/space below is referenced by var(), never inline hex.
+ * Per-brand overrides arrive via <html style="..."> (same --color-* and --font-* names) — never hardcode a brand.
+ * Roman display only (no italic headers). Mobile verified 320 / 375 / 414 / 768.
+ * Amended 2026-10-06: type scale text-xs→display, tracking -0.02em, leading rhythm,
+ * hero size-by-length, tnum scores, 3vw rail gutters, band rhythm, snap edge-fade.
+ */
+:root {
+  /* studied-DNA — paper #060d17 · accent #fbc500 gold */
+  --color-paper: oklch(0.157 0.025 256);
+  --color-paper-2: oklch(0.228 0.027 256);
+  --color-paper-3: oklch(0.287 0.037 258);
+  --color-ink: oklch(0.940 0.004 271);
+  --color-ink-2: oklch(0.691 0.006 248);
+  --color-ink-3: oklch(0.591 0.008 248);
+  --color-ink-soft: oklch(0.819 0.004 248);
+  --color-rule: oklch(0.260 0.023 251);
+  --color-line: oklch(0.260 0.023 251);
+  --color-line-strong: oklch(0.355 0.035 254);
+  --color-accent: oklch(0.76 0.10 80);
+  --color-accent-2: oklch(0.763 0.157 84);
+  --color-accent-ink: oklch(0.157 0.025 256);
+  --color-focus: oklch(0.76 0.10 80);
+  --color-verdict-high: oklch(0.800 0.182 152);
+  --color-verdict-mid: oklch(0.76 0.10 80);
+  --color-verdict-low: oklch(0.711 0.166 22);
+
+  --font-display: "Anton", "Arial Narrow", sans-serif;
+  --font-body: "Lato", system-ui, sans-serif;
+  --font-sans: Lato, system-ui, sans-serif;
+  --font-mono: ui-monospace, monospace;
+
+  /* Type scale — text-xs → display (DNA: Anton display + Lato body, locked) */
+  --text-xs: 0.75rem;
+  --text-sm: 0.85rem;
+  --text-base: 1.0625rem;
+  --text-lg: clamp(1.1rem, 2vw, 1.35rem);
+  --text-xl: clamp(1.25rem, 2.6vw, 1.6rem);
+  --text-2xl: clamp(1.5rem, 3vw, 2.2rem);
+  --text-3xl: clamp(2rem, 4.5vw, 3rem);
+  --text-display: clamp(2rem, 4.5vw, 3.25rem);
+  --text-hero-long: clamp(1.75rem, 4vw, 2.5rem);
+  --text-mega: clamp(2.75rem, 7vw, 5rem);
+
+  /* Leading rhythm — display 1.0 · body 1.65 · lede 1.5 (locked) */
+  --leading-display: 1.0;
+  --leading-body: 1.65;
+  --leading-lede: 1.5;
+  --tracking-display: -0.02em;
+
+  /* Layout — 80rem measure-wide cap verified; 3vw rail gutters (discovery) */
+  --gutter-rail: 3vw;
+  --section-pad-sm: clamp(1.75rem, 4vw, 2.5rem);
+  --section-pad-md: clamp(2.5rem, 6vw, 3.5rem);
+  --section-pad-lg: clamp(3rem, 7vw, 4.5rem);
+
+  --measure: 68ch;
+  --measure-wide: 80rem;
+  --content-max: var(--measure-wide);
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-24: 6rem;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-fast: 180ms;  --dur-base: 240ms;  --dur-slow: 320ms;
+  --radius-card: 8px;  --radius-pill: 999px;  --radius-input: 4px;
+  --radius: var(--radius-card);
+  --rule: 1px solid var(--color-line);
+}
+
+html, body { overflow-x: clip; }
+html { color-scheme: dark; scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  line-height: var(--leading-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Typographic hierarchy — marquee rhythm, roman display only */
+h1, h2, h3, .display {
+  font-family: var(--font-display);
+  font-style: normal;
+  font-weight: 700;
+  line-height: var(--leading-display);
+  letter-spacing: var(--tracking-display);
+  overflow-wrap: anywhere;
+  min-width: 0;
+  text-wrap: balance;
+}
+h1 { font-size: var(--text-display); margin: var(--space-8) 0 var(--space-4); }
+h2 { font-size: var(--text-2xl); margin: var(--space-12) 0 var(--space-3); }
+h3 { font-size: var(--text-xl); }
+/* Hero size-by-length rule: titles > ~40 chars (or .is-long) step down one tier */
+.hero h1.is-long,
+.movie-head h1.is-long,
+.display--long {
+  font-size: var(--text-hero-long);
+}
+small, .text-xs { font-size: var(--text-xs); }
+.text-sm { font-size: var(--text-sm); }
+/* Tabular numerals for scores / years / counts — apply alongside rating/meta */
+.tnum,
+.rating-mark,
+.rating-value,
+.index-meta,
+.showcase-year {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+.dek {
+  font-size: var(--text-lg);
+  color: var(--color-ink-2);
+  max-width: var(--measure);
+  line-height: var(--leading-lede);
+}
+
+a { color: inherit; }
+a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 3px;
+}
+
+.wrap {
+  max-width: var(--measure-wide);
+  margin-inline: auto;
+  padding-inline: clamp(1rem, 4vw, 2rem);
+  min-width: 0;
+}
+
+.skip-link {
+  position: absolute;
+  left: -999px;
+  top: 0;
+  background: var(--color-ink);
+  color: var(--color-paper);
+  padding: var(--space-2) var(--space-4);
+  z-index: var(--z-skip);
+}
+.skip-link:focus { left: 0; }
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: clip;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}
+
+/* ---- Layout family: full-bleed rails + band rhythm (additive, discovery-first) ----
+ * Rails: full-bleed with 3vw gutters (.rail-bleed). Content cap stays 80rem
+ * (--measure-wide verified). Sections alternate paper/paper-2 bands with
+ * varied padding (sm/md/lg) — never equal-everywhere. Ranked rows keep
+ * ghost numerals (see global .index-num). Mobile rails snap + edge-fade.
+ */
+.rail-bleed {
+  margin-inline: calc(-1 * var(--gutter-rail));
+  padding-inline: var(--gutter-rail);
+  min-width: 0;
+}
+.band { padding-block: var(--section-pad-md); }
+.band--alt { background: var(--color-paper-2); }
+.section--sm { padding-block: var(--section-pad-sm); }
+.section--md { padding-block: var(--section-pad-md); }
+.section--lg { padding-block: var(--section-pad-lg); }
+.rail-snap {
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  scrollbar-width: thin;
+}
+.rail-snap > * { scroll-snap-align: start; }
+@media (max-width: 48rem) {
+  .rail-snap--fade {
+    mask-image: linear-gradient(to right, black 88%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to right, black 88%, transparent 100%);
+  }
+}
+
+/* ---- z-scale (six levels, locked · append-only) ---- */
+:root {
+  --z-base: 0;
+  --z-content: 1;
+  --z-nav: 50;
+  --z-overlay: 80;
+  --z-dialog: 90;
+  --z-skip: 100;
+}

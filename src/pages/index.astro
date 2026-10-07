@@ -1,0 +1,261 @@
+---
+/** Homepage — journal (Letter + Hero hybrid) or magazine (cover + grid), by brand preset layout. */
+import Base from "../layouts/Base.astro";
+import ReviewCard from "../components/public/ReviewCard.astro";
+import RatingMark from "../components/public/RatingMark.astro";
+import GenreNav from "../components/public/GenreNav.astro";
+import MagazineHome from "../components/public/MagazineHome.astro";
+import { getBrand } from "../lib/seo/brand";
+import { getBrand as getPresetBrand, brandLayout } from "../lib/branding/resolve";
+import { websiteJsonLd, organizationJsonLd, breadcrumbJsonLd } from "../lib/seo/jsonld";
+import {
+  getFeaturedReview,
+  getLatestReviews,
+  getTopRated,
+  listGenres,
+  formatRuntime,
+} from "../lib/seo/content";
+import DiscoverHome from "../components/discover/DiscoverHome.astro";
+import { displayAuthor } from "../lib/site-author";
+import {
+  currentTheme,
+  discoverBy,
+  getNowPlaying,
+  getPopular,
+  getTrending,
+  getUpcoming,
+  hasTmdbKey,
+  listTmdbGenres,
+} from "../lib/tmdb/discover";
+
+const brand = getBrand();
+// Layout family comes from the raw preset (the seo adapter drops the field).
+const layout = brandLayout(getPresetBrand());
+const origin = Astro.url.origin;
+const featured = getFeaturedReview();
+const latest = getLatestReviews(9).filter((r) => r.slug !== featured?.slug).slice(0, 6);
+const shelf = getTopRated(3);
+const genres = listGenres();
+// Theme 1 "discovery" branch — publication fallback so pages never crash.
+let theme: string = "publication";
+try {
+  theme = await currentTheme();
+} catch {
+  theme = "publication";
+}
+const isDiscovery = theme === "discovery";
+const discoveryKey = isDiscovery ? hasTmdbKey() : false;
+// Discovery branch only — publication variables above stay untouched.
+const trending = isDiscovery ? await getTrending().catch(() => []) : [];
+const popular = isDiscovery ? await getPopular().catch(() => []) : [];
+const nowPlaying = isDiscovery ? await getNowPlaying().catch(() => []) : [];
+const upcoming = isDiscovery ? await getUpcoming().catch(() => []) : [];
+const freeTiles = isDiscovery ? await discoverBy("free", "US").catch(() => []) : [];
+const streamTiles = isDiscovery ? await discoverBy("stream").catch(() => []) : [];
+const rentTiles = isDiscovery ? await discoverBy("rent").catch(() => []) : [];
+const tmdbGenres = isDiscovery ? await listTmdbGenres().catch(() => []) : [];
+const discoveryTop = isDiscovery ? getTopRated(5) : [];
+const discoveryFeatured = isDiscovery
+  ? (getTopRated(1)[0] ?? getFeaturedReview())
+  : null;
+const featuredRuntime = featured ? formatRuntime(featured.runtimeMinutes) : null;
+const featuredMeta = featured
+  ? [
+      featured.year ? String(featured.year) : null,
+      featured.genres.join(" · ") || null,
+      featuredRuntime,
+    ]
+      .filter(Boolean)
+      .join("  ·  ")
+  : "";
+const featuredIsLong = (featured?.reviewTitle?.length ?? 0) > 40;
+const jsonld = [
+  websiteJsonLd({ ...brand, origin }),
+  organizationJsonLd({ ...brand, origin }),
+  breadcrumbJsonLd(origin, [{ name: "Home", path: "/" }]),
+];
+const publishedDate = featured
+  ? new Date(featured.publishedAt).toLocaleDateString("en-US", {
+      year: "numeric", month: "long", day: "numeric", timeZone: "UTC",
+    })
+  : "";
+---
+<Base
+  title="Independent film reviews, personal and opinionated"
+  description="Slow, personal, opinionated criticism of movies worth your evening — every review argued from a real viewing, newest first."
+  descriptionExtra="New reviews weekly. No hype without evidence, no spoilers without warning."
+  path="/"
+  image={featured?.backdropUrl ?? featured?.posterUrl ?? null}
+  imageAlt={featured ? `${featured.movieTitle} artwork` : undefined}
+  jsonld={jsonld}
+  current="home"
+>
+  {isDiscovery ? (
+    <div class="wrap d-guide-wrap">
+      {/* Theme 1 discovery streaming guide: slim hero + 12 ordered sections; single h1 preserved */}
+      <DiscoverHome
+        trending={trending}
+        popular={popular}
+        nowPlaying={nowPlaying}
+        upcoming={upcoming}
+        free={freeTiles}
+        stream={streamTiles}
+        rent={rentTiles}
+        tmdbGenres={tmdbGenres}
+        localGenres={genres}
+        localLatest={latest}
+        topRated={discoveryTop}
+        featured={discoveryFeatured}
+        hasTmdbKey={discoveryKey}
+      />
+    </div>
+  ) : (
+  <>
+  {layout === "magazine" ? (
+    <div class="wrap">
+      <MagazineHome featured={featured} latest={latest} shelf={shelf} genres={genres} publishedDate={publishedDate} />
+    </div>
+  ) : null}
+  {layout !== "magazine" && featured ? (
+    featured.backdropUrl ? (
+    /* Photographic cover: full-bleed field, backdrop + scrim, poster overlapping,
+       giant verdict-led title (mega where short), meta/rating/verdict/CTA layered.
+       Ghost rating watermark is the single signature treatment. */
+    <section class="glam-cover glam-cover--photo" aria-labelledby="featured-title">
+      <img
+        class="glam-cover-bg"
+        src={featured.backdropUrl}
+        alt={`Still from ${featured.movieTitle}`}
+        fetchpriority="high"
+        decoding="async"
+      />
+      <span class="glam-cover-scrim" aria-hidden="true"></span>
+      <span class="glam-cover-watermark" aria-hidden="true">{featured.rating.toFixed(0)}</span>
+      <div class="wrap glam-cover-grid">
+        {featured.posterUrl ? (
+          <a class="glam-cover-poster-link" href={`/reviews/${featured.slug}`} tabindex="-1" aria-hidden="true">
+            <img
+              class="glam-cover-poster"
+              src={featured.posterUrl}
+              alt=""
+              width="300"
+              height="450"
+              fetchpriority="high"
+              decoding="async"
+            />
+          </a>
+        ) : null}
+        <div class="glam-cover-copy">
+          <p class="glam-kicker">Featured review</p>
+          <h1 id="featured-title" class={featuredIsLong ? "is-long" : undefined}>{featured.reviewTitle}</h1>
+          <p class="glam-meta tnum">
+            <span>{featured.movieTitle}</span>
+            {featuredMeta ? <span>{featuredMeta}</span> : null}
+          </p>
+          <p class="glam-cover-score">
+            <RatingMark rating={featured.rating} />
+            <span class="glam-verdict glam-manifesto">{featured.verdict}</span>
+          </p>
+          <p class="glam-byline tnum">
+            <span>By {displayAuthor(featured.authorName)}</span>
+            <time datetime={featured.publishedAt}>{publishedDate}</time>
+          </p>
+          <p class="glam-cover-cta"><a href={`/reviews/${featured.slug}`}>Read review</a></p>
+        </div>
+      </div>
+    </section>
+    ) : (
+    /* Typographic cover: no artwork on file, so the art zone collapses entirely —
+       manifesto verdict statement is the visual, compact type block, poster thumb
+       inline only when one exists. Never faked. */
+    <section class="glam-cover glam-cover--type" aria-labelledby="featured-title">
+      <span class="glam-cover-watermark" aria-hidden="true">{featured.rating.toFixed(0)}</span>
+      <div class="wrap glam-type-grid">
+        {featured.posterUrl ? (
+          <a class="glam-type-thumb-link" href={`/reviews/${featured.slug}`} tabindex="-1" aria-hidden="true">
+            <img
+              class="glam-type-thumb"
+              src={featured.posterUrl}
+              alt=""
+              width="120"
+              height="180"
+              fetchpriority="high"
+              decoding="async"
+            />
+          </a>
+        ) : null}
+        <div class="glam-type-copy">
+          <p class="glam-kicker">Featured review</p>
+          <h1 id="featured-title" class={featuredIsLong ? "is-long" : undefined}>{featured.reviewTitle}</h1>
+          <p class="glam-meta tnum">
+            <span>{featured.movieTitle}</span>
+            {featuredMeta ? <span>{featuredMeta}</span> : null}
+          </p>
+          <p class="glam-cover-score">
+            <RatingMark rating={featured.rating} />
+            <span class="glam-verdict glam-manifesto glam-type-manifesto">{featured.verdict}</span>
+          </p>
+          <p class="glam-byline tnum">
+            <span>By {displayAuthor(featured.authorName)}</span>
+            <time datetime={featured.publishedAt}>{publishedDate}</time>
+          </p>
+          <p class="glam-cover-cta"><a href={`/reviews/${featured.slug}`}>Read review</a></p>
+        </div>
+      </div>
+    </section>
+    )
+    ) : null}
+
+    {layout !== "magazine" ? (
+      <>
+      <section aria-labelledby="latest-heading" class="band section--md glam-latest">
+        <div class="wrap">
+          <div class="section-head">
+            <h2 id="latest-heading">Latest reviews</h2>
+            <p>New writing, in the order it was published. No algorithm, no filler.</p>
+          </div>
+          {latest.length > 0 ? (
+            <ol class="glam-mosaic glam-latest-diptychs">
+              {latest.map((r, i) => i === 0
+                ? <ReviewCard review={r} variant="mosaic-lead" />
+                : i === 1
+                  ? <ReviewCard review={r} variant="diptych" showExcerpt={true} />
+                  : i === 2
+                    ? <ReviewCard review={r} variant="diptych-flip" showExcerpt={true} />
+                    : <ReviewCard review={r} index={i} variant="mosaic-compact" />)}
+            </ol>
+          ) : (
+            <p>More reviews are on the way — the archive starts here.</p>
+          )}
+          <p class="glam-more"><a href="/reviews">Browse the full archive</a></p>
+        </div>
+      </section>
+
+      {shelf.length > 0 ? (
+        <section aria-labelledby="shelf-heading" class="band--alt section--sm glam-shelf">
+          <div class="wrap">
+            <div class="section-head">
+              <h2 id="shelf-heading">My ratings — the current shelf</h2>
+              <p>The highest-scored films in the journal right now.</p>
+            </div>
+            <ol class="glam-shelf-list">
+              {shelf.map((r, i) => <ReviewCard review={r} index={i} variant="shelf" />)}
+            </ol>
+          </div>
+        </section>
+      ) : null}
+
+      {genres.length > 0 ? (
+        <section aria-labelledby="genres-heading" class="band section--sm glam-genres-band">
+          <div class="wrap">
+            <div class="section-head">
+              <h2 id="genres-heading">Browse by genre</h2>
+            </div>
+            <GenreNav genres={genres} limit={8} />
+          </div>
+        </section>
+      ) : null}
+      </>
+    ) : null}
+  </>)}
+</Base>

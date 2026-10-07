@@ -1,0 +1,145 @@
+---
+/**
+ * /u/[handle] — public member profile.
+ * Single column: identity + counts, FollowButton (viewer-aware server-side),
+ * member reviews (full bodies), then the watchlist crew's WatchlistSection
+ * partial (props { items, owner, viewerId, csrfToken } — fetched best-effort;
+ * when the watchlist store/table is absent the section renders its empty state).
+ * Unknown handles 404. Profiles are public content: indexable, one h1.
+ */
+import Base from "../../layouts/Base.astro";
+import FollowButton from "../../components/member/FollowButton.astro";
+import MemberReviewList from "../../components/member/MemberReviewList.astro";
+import WatchlistSection from "../../components/member/WatchlistSection.astro";
+import { getDb } from "../../lib/db/adapter";
+import { getSession, getSessionToken } from "../../lib/auth/session";
+import { getUserByHandle } from "../../lib/users/store";
+import { countReviewsForUser, listForUser } from "../../lib/members/reviews";
+import { counts as followCounts, isFollowing } from "../../lib/members/follows";
+import { countForUser as countWatchlist, listForUser as listWatchlist } from "../../lib/watchlist/store";
+
+export const prerender = false;
+
+const rawHandle = Astro.params.handle ?? "";
+
+// Viewer (member sessions only; admins and anonymous see the logged-out state).
+let viewerId: string | null = null;
+let viewerCsrf = "";
+try {
+  const sess = getSession(getSessionToken(Astro.cookies as never));
+  if (sess && sess.role === "member" && sess.userId) {
+    viewerId = sess.userId;
+    viewerCsrf = sess.csrfToken;
+  }
+} catch {
+  viewerId = null;
+}
+
+let profile: Awaited<ReturnType<typeof getUserByHandle>> = null;
+try {
+  profile = await getUserByHandle(getDb({}) as never, rawHandle);
+} catch {
+  profile = null;
+}
+if (!profile) {
+  return new Response("Member not found", { status: 404 });
+}
+
+let memberReviews: Awaited<ReturnType<typeof listForUser>> = [];
+let reviewTotal = 0;
+let followers = 0;
+let following = 0;
+let watchlistItems: Awaited<ReturnType<typeof listWatchlist>> = [];
+let listTotal: number | null = null;
+try {
+  const db = getDb({});
+  const [reviews, total, fc] = await Promise.all([
+    listForUser(db as never, profile.id, 50).catch(() => []),
+    countReviewsForUser(db as never, profile.id).catch(() => 0),
+    followCounts(db as never, profile.id).catch(() => ({ followers: 0, following: 0 })),
+  ]);
+  memberReviews = reviews;
+  reviewTotal = total;
+  followers = fc.followers;
+  following = fc.following;
+  try {
+    const [items, lc] = await Promise.all([
+      listWatchlist(db as never, profile.id).catch(() => []),
+      countWatchlist(db as never, profile.id).catch(() => null),
+    ]);
+    watchlistItems = items ?? [];
+    listTotal = typeof lc === "number" ? lc : null;
+  } catch {
+    watchlistItems = [];
+    listTotal = null;
+  }
+} catch {
+  memberReviews = [];
+}
+
+let viewerFollowing = false;
+if (viewerId && viewerId !== profile.id) {
+  try {
+    viewerFollowing = await isFollowing(getDb({}) as never, viewerId, profile.id);
+  } catch {
+    viewerFollowing = false;
+  }
+}
+
+const path = `/u/${profile.handle}`;
+const titleText = `${profile.displayName} (@${profile.handle})`;
+const descText = profile.bio
+  ? profile.bio.slice(0, 160)
+  : `Member reviews and watchlist from @${profile.handle}.`;
+---
+<Base title={titleText} description={descText} path={path} current="">
+  <div class="wrap">
+    <section class="band section--md" aria-labelledby="profile-name">
+      <p class="d-kicker">Member</p>
+      <h1 id="profile-name">{profile.displayName}</h1>
+      <p class="d-detail-sub">@{profile.handle}</p>
+      {profile.bio ? <p>{profile.bio}</p> : null}
+      <dl class="fact-list tnum">
+        <div><dt>Reviews</dt><dd>{reviewTotal}</dd></div>
+        <div><dt>Followers</dt><dd>{followers}</dd></div>
+        <div><dt>Following</dt><dd>{following}</dd></div>
+        {listTotal !== null ? <div><dt>Watchlist</dt><dd>{listTotal}</dd></div> : null}
+      </dl>
+      <FollowButton
+        handle={profile.handle}
+        following={viewerFollowing}
+        viewerId={viewerId}
+        ownerId={profile.id}
+        csrfToken={viewerCsrf}
+        followers={followers}
+      />
+    </section>
+
+    <section class="band--alt section--sm" aria-labelledby="profile-reviews-heading">
+      <div class="section-head">
+        <h2 id="profile-reviews-heading">Reviews</h2>
+      </div>
+      <MemberReviewList
+        reviews={memberReviews.map((r) => ({
+          id: r.id,
+          tmdbId: r.tmdbId,
+          media: r.media,
+          rating: r.rating,
+          title: r.title,
+          body: r.body,
+          createdAt: r.createdAt,
+          handle: profile.handle,
+          displayName: profile.displayName,
+        }))}
+        full={true}
+      />
+    </section>
+
+    <WatchlistSection
+      items={watchlistItems}
+      owner={profile.id}
+      viewerId={viewerId}
+      csrfToken={viewerCsrf}
+    />
+  </div>
+</Base>

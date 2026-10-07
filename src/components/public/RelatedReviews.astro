@@ -1,0 +1,25 @@
+---
+/**
+ * Related reviews — internal linking block for SEO + discovery.
+ * Calm ruled rows in the shared publication item language (same copy/routes/SEO).
+ * Props/shape unchanged. Zero client JS.
+ */
+import type { PublicReview } from "../../lib/seo/content";
+import ReviewCard from "./ReviewCard.astro";
+
+interface Props {
+  reviews: PublicReview[];
+}
+const { reviews } = Astro.props;
+---
+{reviews.length > 0 ? (
+  <section aria-labelledby="related-reviews" class="band section--sm glam-related">
+    <div class="section-head">
+      <h2 id="related-reviews">Related reviews</h2>
+      <p>More films in a similar vein, from our own archive.</p>
+    </div>
+    <ol class="glam-results">
+      {reviews.map((r, i) => <ReviewCard review={r} index={i} variant="search" />)}
+    </ol>
+  </section>
+) : null}

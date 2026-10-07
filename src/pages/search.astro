@@ -1,0 +1,130 @@
+---
+/** Search — server-rendered, no JS. Indexed out of robots via noindex. */
+import Base from "../layouts/Base.astro";
+import ReviewCard from "../components/public/ReviewCard.astro";
+import MovieTile from "../components/discover/MovieTile.astro";
+import SearchForm from "../components/public/SearchForm.astro";
+import { breadcrumbJsonLd } from "../lib/seo/jsonld";
+import { getBrand } from "../lib/seo/brand";
+import { searchReviews } from "../lib/seo/content";
+import { searchMoviesByTitle } from "../lib/tmdb/client";
+import { mapToTile } from "../lib/tmdb/discover";
+
+const brand = getBrand();
+const origin = Astro.url.origin;
+const query = (Astro.url.searchParams.get("q") ?? "").trim().slice(0, 120);
+const typeParam = (Astro.url.searchParams.get("type") ?? "all").trim().toLowerCase();
+const activeType = typeParam === "movie" || typeParam === "review" ? typeParam : "all";
+const showMovies = activeType === "all" || activeType === "movie";
+const showReviews = activeType === "all" || activeType === "review";
+const results = query && showReviews ? searchReviews(query) : [];
+const movieTiles = query && showMovies ? (await searchMoviesByTitle(query)).slice(0, 20).map(mapToTile) : [];
+const jsonld = [breadcrumbJsonLd(origin, [{ name: "Home", path: "/" }, { name: "Search", path: "/search" }])];
+const searchTitle = query ? `Search: ${query}` : "Search";
+const searchTitleIsLong = searchTitle.length > 40;
+const chipHref = (t: string) => `/search?q=${encodeURIComponent(query)}${t === "all" ? "" : `&type=${t}`}`;
+const MOVIE_SHOW = 6;
+const movieHead = movieTiles.slice(0, MOVIE_SHOW);
+const movieRest = movieTiles.slice(MOVIE_SHOW);
+---
+<Base
+  title={searchTitle}
+  description={`Search movies (TMDB) and the review archive by film title, genre, or year.`}
+  path="/search"
+  robots="noindex, follow"
+  jsonld={jsonld}
+  current="search"
+>
+  <div class="wrap">
+    <section aria-labelledby="search-title" class="band section--lg glam-search-head">
+      <div class="section-head">
+        <p class="glam-kicker tnum">Index search</p>
+        <h1 id="search-title" class={searchTitleIsLong ? "display--long" : undefined}>Search</h1>
+      </div>
+      <SearchForm query={query} />
+      {query ? (
+        <p role="status" class="tnum">
+          {movieTiles.length} {movieTiles.length === 1 ? "movie" : "movies"} ·{" "}
+          {results.length} {results.length === 1 ? "review" : "reviews"} for
+          {" "}“{query}”.
+        </p>
+      ) : (
+        <p>Try a film title, a genre like “Drama”, or a year like “2024”.</p>
+      )}
+      {query ? (
+        <nav class="d-search-filters" aria-label="Filter results">
+          <a href={chipHref("all")} aria-current={activeType === "all" ? "page" : undefined}>All</a>
+          <a href={chipHref("movie")} aria-current={activeType === "movie" ? "page" : undefined}>Movies ({movieTiles.length})</a>
+          <a href={chipHref("review")} aria-current={activeType === "review" ? "page" : undefined}>Reviews ({results.length})</a>
+        </nav>
+      ) : null}
+    </section>
+  </div>
+
+  {query && showMovies ? (
+    <div class="band section--md glam-search-band">
+      <div class="wrap">
+        <div class="section-head">
+          <h2 id="search-movies-heading">Movies</h2>
+        </div>
+        {movieTiles.length > 0 ? (
+          <>
+            <ol class="d-guide-grid">
+              {movieHead.map((t, i) => (
+                <MovieTile
+                  tmdbId={t.tmdbId}
+                  title={t.title}
+                  year={t.year}
+                  posterUrl={t.posterUrl}
+                  rating={t.rating}
+                  source="tmdb"
+                  href={`/movies/${t.tmdbId}`}
+                  variant="compact"
+                  eager={i === 0}
+                />
+              ))}
+            </ol>
+            {movieRest.length > 0 ? (
+              <details class="d-search-more">
+                <summary>Show all {movieTiles.length} movies</summary>
+                <ol class="d-guide-grid">
+                  {movieRest.map((t) => (
+                    <MovieTile
+                      tmdbId={t.tmdbId}
+                      title={t.title}
+                      year={t.year}
+                      posterUrl={t.posterUrl}
+                      rating={t.rating}
+                      source="tmdb"
+                      href={`/movies/${t.tmdbId}`}
+                      variant="compact"
+                    />
+                  ))}
+                </ol>
+              </details>
+            ) : null}
+          </>
+        ) : (
+          <p>No movies matched “{query}” (or TMDB is unreachable).</p>
+        )}
+      </div>
+    </div>
+  ) : null}
+
+  {query && showReviews ? (
+    <div class="band section--md glam-search-band">
+      <div class="wrap">
+        <div class="section-head">
+          <h2 id="search-reviews-heading">Reviews</h2>
+        </div>
+        {results.length > 0 ? (
+          <ol class="glam-results">
+            {results.map((r, i) => <ReviewCard review={r} index={i} variant="search" showExcerpt={true} />)}
+          </ol>
+        ) : (
+          <p>Nothing matched. <a href="/reviews">Browse the full archive</a> instead.</p>
+        )}
+      </div>
+    </div>
+  ) : null}
+</Base>

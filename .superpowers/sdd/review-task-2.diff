@@ -1,0 +1,68 @@
+=== TASK 2 REVIEW PACKAGE (no git — snapshot diff) ===
+=== Files: _store.ts, save-draft.ts, ReviewEditor.tsx (modified), tests/platform-pick.test.ts (expected unchanged) ===
+
+=== DIFF: src/pages/api/admin/_store.ts ===
+--- .superpowers/sdd/snap-task-2/src/pages/api/admin/_store.ts	2026-10-07 03:31:11
++++ src/pages/api/admin/_store.ts	2026-10-07 03:32:14
+@@ -35,6 +35,8 @@
+   movie?: ReviewMovie;
+   rating?: number;
+   region?: string;
++  /** Owner-curated "Platform Pick" badge shown on public title/review cards. */
++  platformPick?: boolean;
+   /** Manual watch links (custom free sites + paid options), edited in the dashboard. */
+   customWatch?: CustomWatch;
+   seo?: ReviewSeo;
+
+=== DIFF: src/pages/api/admin/save-draft.ts ===
+--- .superpowers/sdd/snap-task-2/src/pages/api/admin/save-draft.ts	2026-10-07 03:31:11
++++ src/pages/api/admin/save-draft.ts	2026-10-07 03:32:22
+@@ -46,6 +46,7 @@
+       movie: body.movie ?? existing.movie,
+       rating: typeof body.rating === "number" ? body.rating : existing.rating,
+       region: (body.region ?? existing.region ?? "").toString(),
++      platformPick: body.platformPick === true ? true : undefined,
+       customWatch: body.customWatch !== undefined
+         ? normalizeCustomWatch(body.customWatch)
+         : existing.customWatch,
+@@ -66,6 +67,7 @@
+       movie: body.movie,
+       rating: typeof body.rating === "number" ? body.rating : undefined,
+       region: (body.region ?? "").toString(),
++      platformPick: body.platformPick === true ? true : undefined,
+       customWatch: body.customWatch !== undefined
+         ? normalizeCustomWatch(body.customWatch)
+         : undefined,
+
+=== DIFF: src/components/admin/ReviewEditor.tsx ===
+--- .superpowers/sdd/snap-task-2/src/components/admin/ReviewEditor.tsx	2026-10-07 03:31:11
++++ src/components/admin/ReviewEditor.tsx	2026-10-07 03:32:40
+@@ -76,6 +76,7 @@
+   const [movie, setMovie] = React.useState<MovieResult | null>(initial?.movie ? { ...(initial.movie as MovieResult), imdbId: initial.movie.imdbId ?? "" } : null);
+   const [rating, setRating] = React.useState<number>(initial?.rating ?? 0);
+   const [region, setRegion] = React.useState(initial?.region ?? defaultRegion);
++  const [platformPick, setPlatformPick] = React.useState(initial?.platformPick ?? false);
+   const [notes, setNotes] = React.useState("");
+   const [title, setTitle] = React.useState(initial?.title ?? "");
+   const [slug, setSlug] = React.useState(initial?.slug ?? "");
+@@ -113,6 +114,7 @@
+       markdown,
+       rating: rating || undefined,
+       region: region.trim(),
++      platformPick: platformPick || undefined,
+       movie: movie ?? undefined,
+       customWatch: {
+         free: customWatch.free.filter((l) => l.label.trim() && l.url.trim()),
+@@ -269,6 +271,10 @@
+           <label>Slug<input value={slug} onChange={(e) => setSlug(e.target.value)} /></label>
+           <label>Excerpt<input value={excerpt} onChange={(e) => setExcerpt(e.target.value)} /></label>
+         </div>
++        <label className="check-row" style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginTop: "0.75rem" }}>
++          <input type="checkbox" checked={platformPick} onChange={(e) => setPlatformPick(e.target.checked)} />
++          <span>Platform Pick — show badge on title cards</span>
++        </label>
+       </section>
+ 
+       <WatchLinksEditor value={customWatch} onChange={setCustomWatch} />
+
+=== DIFF: tests/platform-pick.test.ts ===

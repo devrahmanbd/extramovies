@@ -1,0 +1,41 @@
+---
+import Admin from "../../layouts/Admin.astro";
+import { getSession, getSessionToken } from "../../lib/auth/session";
+import { listReviews } from "../api/admin/_store";
+
+export const prerender = false;
+
+const token = getSessionToken(Astro.cookies as never);
+const session = getSession(token);
+if (!session) {
+  const next = Astro.url.pathname + Astro.url.search;
+  return Astro.redirect(`/admin/login?next=${encodeURIComponent(next)}`);
+}
+const reviews = await listReviews();
+const published = reviews.filter((r) => r.status === "published").length;
+const drafts = reviews.filter((r) => r.status === "draft").length;
+const recent = reviews.slice(0, 8);
+---
+<Admin email={session.email} csrfToken={session.csrfToken} current="/admin">
+  <div class="stats">
+    <div class="card stat"><span class="stat-num">{published}</span><span>Published</span></div>
+    <div class="card stat"><span class="stat-num">{drafts}</span><span>Drafts</span></div>
+    <a href="/admin/reviews/new" class="btn primary quick-new">+ Quick New Review</a>
+  </div>
+  <section class="card">
+    <h2>Recent</h2>
+    {recent.length === 0 ? (
+      <p class="muted">No reviews yet. Start with Quick New Review.</p>
+    ) : (
+      <ul class="list">
+        {recent.map((r) => (
+          <li>
+            <a href={`/admin/reviews/${r.id}`}>{r.title || "(untitled)"}</a>
+            <span class={`badge ${r.status}`}>{r.status}</span>
+            <span class="muted small">{r.updatedAt?.slice(0, 10)}</span>
+          </li>
+        ))}
+      </ul>
+    )}
+  </section>
+</Admin>

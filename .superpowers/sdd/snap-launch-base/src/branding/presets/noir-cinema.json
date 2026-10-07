@@ -1,0 +1,37 @@
+{
+  "id": "noir-cinema",
+  "siteName": "The Long Take",
+  "tagline": "Slow criticism for fast times — an independent film journal",
+  "domain": "reviews.example.com",
+  "defaultRegion": "US",
+  "logo": "/brand/noir-cinema/logo.svg",
+  "icon": "/brand/noir-cinema/icon.svg",
+  "favicon": "/brand/noir-cinema/favicon.svg",
+  "colors": {
+    "paper": "oklch(0.96 0.008 95)",
+    "paper2": "oklch(0.92 0.012 90)",
+    "ink": "oklch(0.18 0.01 250)",
+    "inkSoft": "oklch(0.35 0.015 250)",
+    "accent": "oklch(0.55 0.19 25)",
+    "accent2": "oklch(0.72 0.14 75)",
+    "line": "oklch(0.82 0.01 90)",
+    "focus": "oklch(0.6 0.18 250)"
+  },
+  "fonts": {
+    "display": "Anton, \"Arial Narrow\", sans-serif",
+    "body": "Lato, system-ui, sans-serif",
+    "mono": "ui-monospace, monospace",
+    "displayUrl": "https://fonts.googleapis.com/css2?family=Anton&family=Lato:wght@400;700;900&display=swap"
+  },
+  "social": {
+    "x": "https://x.com/longtake",
+    "instagram": "https://instagram.com/longtake",
+    "youtube": "https://youtube.com/@longtake",
+    "rss": true
+  },
+  "seo": {
+    "defaultOgImage": "/brand/noir-cinema/og.jpg",
+    "twitterCard": "summary_large_image",
+    "themeColor": "#141210"
+  }
+}

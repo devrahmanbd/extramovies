@@ -1,0 +1,166 @@
+---
+/**
+ * Review page — film-magazine order:
+ * MOVIE hero (MovieShowcase dramatic photographic title block: full-bleed
+ * backdrop + scrim, poster overlapping the image edge, manifesto h1 + film
+ * identity + compact meta + credits, then monumental MY RATING + verdict in
+ * an overlap band over the art field) → WHERE TO WATCH (WhereToWatch,
+ * unified rows above the prose) → MY REVIEW (article, opened by a designed
+ * art-edge bridge rule + lede drop-cap, never a plain stack) →
+ * MOVIE DETAILS (compact, secondary) → RELATED (cinematic strip).
+ * Article is server-rendered HTML: fully readable with JS disabled.
+ * Single h1 (review title, rendered inside MovieShowcase via reviewTitle);
+ * JSON-LD untouched.
+ */
+import Base from "../../layouts/Base.astro";
+import MovieShowcase from "../../components/public/MovieShowcase.astro";
+import WhereToWatch from "../../components/public/WhereToWatch.astro";
+import RelatedReviews from "../../components/public/RelatedReviews.astro";
+import { getBrand } from "../../lib/seo/brand";
+import {
+  articleJsonLd,
+  myReviewJsonLd,
+  movieJsonLd,
+  breadcrumbJsonLd,
+} from "../../lib/seo/jsonld";
+import {
+  getLatestReviews,
+  resolveSlug,
+  formatRuntime,
+} from "../../lib/seo/content";
+import { relatedReviews } from "../../lib/related";
+import { renderMarkdown, readingMinutes } from "../../lib/markdown";
+import { displayAuthor } from "../../lib/site-author";
+
+export function getStaticPaths() {
+  return getLatestReviews(100).map((r) => ({ params: { slug: r.slug } }));
+}
+
+const { slug } = Astro.params;
+const resolved = resolveSlug(slug ?? "");
+if (resolved.type === "redirect") {
+  // Stable URLs: a changed published slug leaves a 301 behind.
+  return Astro.redirect(resolved.to, 301);
+}
+if (resolved.type === "not-found") {
+  return new Response("Review not found", { status: 404 });
+}
+const review = resolved.review;
+
+const brand = getBrand();
+const origin = Astro.url.origin;
+const path = `/reviews/${review.slug}`;
+const canonical = `${origin}${path}`;
+const runtime = formatRuntime(review.runtimeMinutes);
+const articleHtml = renderMarkdown(review.bodyMarkdown);
+const minutes = readingMinutes(review.bodyMarkdown);
+const publishedDate = new Date(review.publishedAt).toLocaleDateString("en-US", {
+  year: "numeric", month: "long", day: "numeric", timeZone: "UTC",
+});
+const related = relatedReviews(review, getLatestReviews(100), 3);
+const isLong = review.reviewTitle.length > 40;
+const jsonld = [
+  articleJsonLd(review, { ...brand, origin }, canonical),
+  myReviewJsonLd(review, { ...brand, origin }, canonical),
+  movieJsonLd(review, origin),
+  breadcrumbJsonLd(origin, [
+    { name: "Home", path: "/" },
+    { name: "Reviews", path: "/reviews" },
+    { name: review.movieTitle, path },
+  ]),
+];
+const pageTitle = `${review.movieTitle} review: ${review.reviewTitle}`;
+---
+<Base
+  title={pageTitle}
+  description={review.excerpt}
+  descriptionExtra={`Full ${review.movieTitle}${review.year ? ` (${review.year})` : ""} review — rated ${review.rating}/10, with verdict, where to watch, and related films.`}
+  path={path}
+  image={review.backdropUrl ?? review.posterUrl ?? null}
+  imageAlt={review.movieTitle ? `${review.movieTitle} artwork` : undefined}
+  ogType="article"
+  publishedTime={review.publishedAt}
+  modifiedTime={review.updatedAt}
+  jsonld={jsonld}
+  current="reviews"
+>
+  <article class="pub-review pub-review--cine pub-review--glam">
+    <div class="pub-hero pub-hero--cine pub-hero--glam band section--lg">
+      <MovieShowcase
+        movieTitle={review.movieTitle}
+        year={review.year}
+        genres={review.genres}
+        runtime={runtime}
+        director={review.director}
+        cast={review.cast}
+        posterUrl={review.posterUrl}
+        backdropUrl={review.backdropUrl}
+        rating={review.rating}
+        verdict={review.verdict}
+        authorName={review.authorName}
+        bylineAuthor={displayAuthor(review.authorName)}
+        showMyRating
+        reviewTitle={review.reviewTitle}
+        reviewExcerpt={review.excerpt}
+        publishedAt={review.publishedAt}
+        publishedDate={publishedDate}
+        minutes={minutes}
+        tmdbId={review.tmdbId}
+      />
+    </div>
+
+    <div class="wrap">
+      {review.providers || review.customWatch ? (
+        <div class="pub-buybox pub-buybox--glam band--alt section--sm">
+        <WhereToWatch
+          providers={review.providers ?? { streaming: [], rent: [], buy: [], free: [], fetchedAt: review.updatedAt, hideSection: true, link: null }}
+          movieTitle={review.movieTitle}
+          slug={review.slug}
+          customWatch={review.customWatch ?? null}
+        />
+        </div>
+      ) : null}
+
+      <div class="pub-bridge pub-bridge--glam" aria-hidden="true">
+        <span class="pub-bridge-rule"></span>
+        <span class="pub-bridge-mark">❦</span>
+        <span class="pub-bridge-rule"></span>
+      </div>
+
+      <section aria-labelledby="my-review" class="pub-article pub-article--glam band section--md">
+      <div class="section-head">
+        <h2 id="my-review">My review</h2>
+      </div>
+      <div class="prose prose--glam" set:html={articleHtml} />
+      </section>
+
+      <section aria-labelledby="movie-info" class="band section--sm pub-info pub-info--compact pub-info--glam">
+        <div class="section-head">
+          <h2 id="movie-info">Movie info</h2>
+        </div>
+        <dl class="fact-list">
+          <div><dt>Title</dt><dd>{review.movieTitle}</dd></div>
+          {review.year ? <div><dt>Year</dt><dd class="tnum">{review.year}</dd></div> : null}
+          {review.genres.length > 0 ? (
+            <div><dt>Genres</dt><dd>{review.genres.join(", ")}</dd></div>
+          ) : null}
+          {runtime ? <div><dt>Runtime</dt><dd>{runtime}</dd></div> : null}
+          {review.director ? <div><dt>Director</dt><dd>{review.director}</dd></div> : null}
+          {review.cast.length > 0 ? (
+            <div><dt>Cast</dt><dd>{review.cast.join(", ")}</dd></div>
+          ) : null}
+          {review.tmdbId ? (
+            <div>
+              <dt>More data</dt>
+              <dd><a href={`https://www.themoviedb.org/movie/${review.tmdbId}`} rel="noopener">View on TMDB</a></dd>
+            </div>
+          ) : null}
+        </dl>
+      </section>
+
+      <div class="pub-related-strip pub-related-strip--glam">
+        <RelatedReviews reviews={related} />
+      </div>
+    </div>
+  </article>
+</Base>

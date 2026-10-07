@@ -1,0 +1,63 @@
+---
+/**
+ * WatchlistSection — profile-page partial (included, not a page).
+ * Props: { items, owner, viewerId, csrfToken='' }
+ * items: { tmdb_id, media_type, added_at, title?, poster?, year? }[]
+ * Shows remove button only when viewer owns the page (viewerId === owner).
+ */
+import WatchlistButton from './WatchlistButton.astro';
+interface Item {
+  tmdb_id: number;
+  media_type: 'movie' | 'tv';
+  added_at: string;
+  title?: string | null;
+  poster?: string | null;
+  year?: number | null;
+}
+interface Props {
+  items: Item[];
+  owner: string;
+  viewerId?: string | null;
+  csrfToken?: string;
+}
+const { items, owner, viewerId = null, csrfToken = '' } = Astro.props;
+const isOwner = !!viewerId && viewerId === owner;
+---
+<section class="wl-section" aria-labelledby="wl-heading">
+  <div class="section-head">
+    <h2 id="wl-heading">Watchlist</h2>
+    <p class="tnum">{items.length} saved</p>
+  </div>
+  {items.length === 0 ? (
+    <p class="d-empty">{isOwner ? 'Your watchlist is empty — tap + Watchlist on any film.' : 'No saved titles yet.'}</p>
+  ) : (
+    <ul class="wl-grid">
+      {items.map((it) => (
+        <li class="wl-tile" data-wl-tile={`${it.media_type}-${it.tmdb_id}`}>
+          <a href={it.media_type === 'tv' ? `/series/${it.tmdb_id}` : `/movies/${it.tmdb_id}`}>
+            {it.poster ? (
+              <img src={it.poster} alt={it.title ? `Poster for ${it.title}` : `Poster ${it.tmdb_id}`} width="342" height="513" loading="lazy" decoding="async" />
+            ) : (
+              <span class="d-tile-fallback" aria-hidden="true">{(it.title ?? String(it.tmdb_id)).charAt(0) || '•'}</span>
+            )}
+            <span class="d-tile-text">
+              <span class="d-tile-title">{it.title ?? `${it.media_type} ${it.tmdb_id}`}</span>
+              {it.year ? <span class="d-tile-meta tnum">{it.year} · {it.media_type}</span> : <span class="d-tile-meta tnum">{it.media_type}</span>}
+            </span>
+          </a>
+          {isOwner ? (
+            <div class="wl-tile-actions">
+              <WatchlistButton tmdbId={it.tmdb_id} media={it.media_type} onList={true} csrfToken={csrfToken} />
+            </div>
+          ) : null}
+        </li>
+      ))}
+    </ul>
+  )}
+</section>
+<style>
+.wl-grid { list-style: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 1rem; padding: 0; }
+.wl-tile { border: 1px solid color-mix(in srgb, currentColor 15%, transparent); border-radius: 12px; overflow: hidden; }
+.wl-tile img { width: 100%; height: auto; display: block; aspect-ratio: 2/3; object-fit: cover; }
+.wl-tile-actions { padding: 0.5rem; }
+</style>

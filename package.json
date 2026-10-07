@@ -1,0 +1,51 @@
+{
+  "name": "movie-review-cms",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Personal movie-review CMS + publishing site. Editorial cinematic magazine, Astro 5 SSR, D1/SQLite, multi-brand presets.",
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "check": "astro check",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "migrate": "tsx scripts/migrate-local.ts",
+    "backup": "tsx scripts/backup.ts",
+    "export": "tsx scripts/export.ts",
+    "import": "tsx scripts/import.ts",
+    "import:tmdb": "tsx scripts/import-tmdb.ts",
+    "db:generate": "drizzle-kit generate --dialect sqlite --schema src/lib/db/schema.ts --out migrations",
+    "db:migrate:local": "mkdir -p data && sqlite3 data/local.db < migrations/0001_init.sql",
+    "db:seed": "echo 'seed via Astro DB studio or src/lib/db seed in admin pass'",
+    "db:migrate:d1": "wrangler d1 migrations apply movie_reviews --remote --migrations migrations/",
+    "cf:types": "wrangler types",
+    "deploy": "astro build && wrangler deploy"
+  },
+  "dependencies": {
+    "@astrojs/cloudflare": "^12.0.0",
+    "@astrojs/node": "^9.5.5",
+    "@astrojs/react": "^4.4.2",
+    "astro": "^5.0.0",
+    "better-sqlite3": "^13.0.3",
+    "drizzle-orm": "^0.36.0",
+    "gsap": "^3.15.0",
+    "lightningcss": "^1.33.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.0",
+    "@cloudflare/workers-types": "^4.20241127.0",
+    "@types/better-sqlite3": "^7.6.0",
+    "drizzle-kit": "^0.30.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0",
+    "vitest": "^3.0.0",
+    "zod": "^3.23.0"
+  },
+  "engines": {
+    "node": ">=20.12.0"
+  }
+}

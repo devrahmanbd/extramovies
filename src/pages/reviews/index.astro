@@ -1,0 +1,127 @@
+---
+/** Archive — full review index with optional ?genre= filter. */
+import Base from "../../layouts/Base.astro";
+import ReviewCard from "../../components/public/ReviewCard.astro";
+import GenreNav from "../../components/public/GenreNav.astro";
+import MovieTile from "../../components/discover/MovieTile.astro";
+import { getBrand } from "../../lib/seo/brand";
+import { breadcrumbJsonLd } from "../../lib/seo/jsonld";
+import { getLatestReviews, getReviewsByGenre, listGenres } from "../../lib/seo/content";
+import { currentTheme } from "../../lib/tmdb/discover";
+
+let theme: string = "publication";
+try {
+  theme = await currentTheme();
+} catch {
+  theme = "publication";
+}
+const isDiscovery = theme === "discovery";
+
+const brand = getBrand();
+const origin = Astro.url.origin;
+const genre = Astro.url.searchParams.get("genre")?.trim() || null;
+const genres = listGenres();
+const reviews = genre ? getReviewsByGenre(genre) : getLatestReviews(100);
+const heading = genre ? `${genre} reviews` : "Every film review in the journal, newest first";
+const descSource = genre
+  ? `Every ${genre.toLowerCase()} review in the journal, newest first.`
+  : `The complete review archive, newest first — every film covered in the journal.`;
+// Filtered views canonicalize to /reviews to avoid duplicate-content drift.
+const jsonld = [breadcrumbJsonLd(origin, [{ name: "Home", path: "/" }, { name: "Reviews", path: "/reviews" }])];
+const headingIsLong = heading.length > 40;
+const reviewHref = (r: (typeof reviews)[number]) =>
+  r.tmdbId ? `/movies/${r.tmdbId}` : `/reviews/${r.slug}`;
+const countText =
+  reviews.length === 1 ? "1 review" : `${reviews.length} reviews`;
+---
+<Base
+  title={heading}
+  description={descSource}
+  descriptionExtra="Browse the full collection by genre — horror, drama, comedy, and more, every entry argued from a real viewing."
+  path="/reviews"
+  jsonld={jsonld}
+  current="reviews"
+>
+  {isDiscovery ? (
+  <div class="wrap">
+    <section class="band section--md d-browse-head" aria-labelledby="archive-title">
+      <nav class="d-crumb" aria-label="Breadcrumb">
+        <a href="/">Home</a><span aria-hidden="true"> / </span><span aria-current="page">Reviews</span>
+      </nav>
+      <p class="d-kicker">The archive</p>
+      <h1 id="archive-title" class={headingIsLong ? "display--long" : undefined}>{heading}</h1>
+      <p class="d-lede tnum">
+        {countText}
+        {genre ? ` filed under ${genre}` : ", newest first"}.
+      </p>
+      <GenreNav genres={genres} active={genre} />
+    </section>
+
+    {reviews.length > 0 ? (
+      <section class="band--alt section--md d-results" aria-labelledby="d-results-heading">
+        <div class="section-head d-section-row">
+          <div>
+            <h2 id="d-results-heading" class="tnum">{countText}</h2>
+            <p>Every review, newest first.</p>
+          </div>
+        </div>
+        <ol class="d-guide-grid">
+          {reviews.map((r, i) => (
+            <MovieTile
+              tmdbId={r.tmdbId ?? -1}
+              title={r.movieTitle}
+              year={r.year}
+              posterUrl={r.posterUrl}
+              rating={r.rating}
+              source="ours"
+              href={reviewHref(r)}
+              variant="compact"
+              eager={i === 0}
+            />
+          ))}
+        </ol>
+      </section>
+    ) : (
+      <section class="band section--sm" aria-label="No reviews">
+        <p>
+          Nothing filed here yet. <a href="/reviews">Back to the full archive</a>.
+        </p>
+      </section>
+    )}
+  </div>
+  ) : (
+  <>
+  <div class="wrap">
+    <section aria-labelledby="archive-title" class="band section--lg glam-archive-head">
+      <div class="section-head">
+        <p class="glam-kicker tnum">The archive</p>
+        <h1 id="archive-title" class={headingIsLong ? "display--long" : undefined}>{heading}</h1>
+        <p class="tnum glam-archive-dek">
+          {reviews.length} {reviews.length === 1 ? "review" : "reviews"}
+          {genre ? ` filed under ${genre}` : ", newest first"}.
+        </p>
+      </div>
+      <GenreNav genres={genres} active={genre} />
+    </section>
+  </div>
+
+  {reviews.length > 0 ? (
+    <div class="band section--md glam-archive-band">
+      <div class="wrap">
+        <ol class="glam-archive">
+          {reviews.map((r, i) => i === 0
+            ? <ReviewCard review={r} index={i} variant="archive-lead" />
+            : <ReviewCard review={r} index={i} variant="archive-cell" />)}
+        </ol>
+      </div>
+    </div>
+  ) : (
+    <div class="wrap">
+      <p>
+        Nothing filed here yet. <a href="/reviews">Back to the full archive</a>.
+      </p>
+    </div>
+  )}
+  </>
+  )}
+</Base>

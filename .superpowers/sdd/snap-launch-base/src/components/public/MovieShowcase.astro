@@ -1,0 +1,128 @@
+---
+/**
+ * MovieShowcase — film-magazine title block, auto-filled from stored
+ * TMDB/IMDb metadata (poster, backdrop, year, genres, runtime, director,
+ * cast, TMDB link). No invented data: every row renders only
+ * when the underlying field exists.
+ * Publication dramatic hero (08 Photographic glamour): full-bleed backdrop +
+ * scrim, poster overlapping the image edge, review title at manifesto scale
+ * (mega when short, stepping down when long), movie identity + compact meta +
+ * Directed/Starring microcopy, then monumental MyRating + verdict in an
+ * overlap band over the art field (never stacked below it). When artwork
+ * absent the .is-typographic modifier renders a compact typographic block
+ * (no void). Discovery reuse unchanged: without reviewTitle/reviewExcerpt
+ * the block renders the legacy movie h2 + RatingMark path (showMyRating
+ * default false). Optional props showMyRating/bylineAuthor/kicker preserved.
+ */
+import RatingMark from "./RatingMark.astro";
+import MyRating from "./MyRating.astro";
+import TmdbAttribution from "./TmdbAttribution.astro";
+
+interface Props {
+  movieTitle: string;
+  year: number | null;
+  genres: string[];
+  runtime: string | null;
+  director: string | null;
+  cast: string[];
+  posterUrl: string | null;
+  backdropUrl: string | null;
+  rating: number;
+  verdict: string;
+  authorName: string;
+  publishedAt: string;
+  publishedDate: string;
+  minutes: number;
+  tmdbId: number | null;
+  /** Render the personal typographic MyRating instead of the legacy mark. Default false (discovery reuse unaffected). */
+  showMyRating?: boolean;
+  /** Byline override wired by the review page; another crew supplies the value. Defaults to authorName when absent. */
+  bylineAuthor?: string | null;
+  /** Publication review headline (single h1). When absent, no h1 renders (discovery reuse unaffected). */
+  reviewTitle?: string | null;
+  /** Publication standfirst under the headline. Rendered only when reviewTitle is present. */
+  reviewExcerpt?: string | null;
+  /** Kicker above the headline. Eyebrow rule: no default — explicit prop only. */
+  kicker?: string | null;
+}
+const p = Astro.props;
+const showMyRating = p.showMyRating ?? false;
+const bylineRaw = typeof p.bylineAuthor === "string" ? p.bylineAuthor.trim() : "";
+const displayAuthor = bylineRaw ? bylineRaw : p.authorName;
+const reviewTitle = typeof p.reviewTitle === "string" ? p.reviewTitle.trim() : "";
+const reviewExcerpt = typeof p.reviewExcerpt === "string" ? p.reviewExcerpt.trim() : "";
+const kickerRaw = typeof p.kicker === "string" ? p.kicker.trim() : "";
+const kicker = kickerRaw;
+const hasArt = Boolean(p.backdropUrl || p.posterUrl);
+const reviewLong = reviewTitle.length > 40;
+const editLine = [
+  p.year ? String(p.year) : null,
+  ...(p.genres ?? []),
+  p.runtime,
+].filter(Boolean).join(" · ");
+---
+<section class={`showcase showcase--mag showcase--cine showcase--glam${hasArt ? "" : " is-typographic"}`} aria-label={`${p.movieTitle} at a glance`}>
+  {p.backdropUrl ? (
+    <div class="showcase-backdrop cine-backdrop cine-backdrop--glam" aria-hidden="true">
+      <img
+        src={p.backdropUrl}
+        alt=""
+        width="1280"
+        height="720"
+        fetchpriority="high"
+        decoding="async"
+      />
+      <span class="showcase-scrim cine-scrim" aria-hidden="true"></span>
+    </div>
+  ) : null}
+  <div class="cine-content">
+    <div class="showcase-body cine-body cine-body--glam">
+      {p.posterUrl ? (
+        <img
+          class="showcase-poster cine-poster"
+          src={p.posterUrl}
+          alt={`Poster for ${p.movieTitle}`}
+          width="220"
+          height="330"
+          loading="eager"
+          decoding="async"
+        />
+      ) : null}
+      <div class="showcase-info cine-info">
+        {reviewTitle ? (
+          <>
+            {kicker ? <p class="cine-kicker">{kicker}</p> : null}
+            <h1 class={`cine-title cine-title--manifesto review-h${reviewLong ? " is-long" : ""}`}>{reviewTitle}</h1>
+            {reviewExcerpt ? <p class="cine-standfirst">{reviewExcerpt}</p> : null}
+            <p class="cine-film"><span class="cine-film-title">{p.movieTitle}</span>{p.year ? <span class="showcase-year tnum"> ({p.year})</span> : null}</p>
+          </>
+        ) : (
+          <>
+            <TmdbAttribution variant="compact" />
+            <h2 class="showcase-title cine-film-title">{p.movieTitle}{p.year ? <span class="showcase-year"> ({p.year})</span> : null}</h2>
+          </>
+        )}
+      </div>
+    </div>
+    <div class="cine-score cine-score--overlap">
+      <div class="showcase-ratings cine-ratings">
+        {showMyRating ? <MyRating rating={p.rating} /> : <RatingMark rating={p.rating} />}
+        <div class="cine-verdict-block">
+          <p class="showcase-verdict cine-verdict"><strong>Our verdict — </strong>{p.verdict}</p>
+          <p class="byline cine-byline">
+            <span>By {displayAuthor}</span>
+            <time datetime={p.publishedAt}>{p.publishedDate}</time>
+            <span>{p.minutes} min read</span>
+          </p>
+        </div>
+      </div>
+      {p.tmdbId ? (
+        <p class="showcase-src cine-src">
+          <a href={`https://www.themoviedb.org/movie/${p.tmdbId}`} rel="noopener">Full credits & data on TMDB</a>
+          <span aria-hidden="true"> · </span>
+          <a href={`https://www.themoviedb.org/movie/${p.tmdbId}/watch`} rel="nofollow noopener">Check JustWatch availability</a>
+        </p>
+      ) : null}
+    </div>
+  </div>
+</section>

@@ -1,0 +1,69 @@
+---
+/**
+ * WatchlistButton — member watchlist toggle.
+ * Props: { tmdbId, media='movie', onList=false, count=null, csrfToken='', loginPath='/login' }
+ * api-adapter parses JSON only (no form-encoded), so this uses fetch + x-csrf-token
+ * via an inline is:inline script (same pattern as Admin logout). Works logged-out
+ * by redirecting to loginPath?next=<current path>.
+ */
+interface Props {
+  tmdbId: number;
+  media?: 'movie' | 'tv';
+  onList?: boolean;
+  count?: number | null;
+  csrfToken?: string;
+  loginPath?: string;
+}
+const { tmdbId, media = 'movie', onList = false, count = null, csrfToken = '', loginPath = '/login' } = Astro.props;
+const id = `wl-${media}-${tmdbId}`;
+const initialLabel = onList ? 'On watchlist ✓' : '+ Watchlist';
+---
+<div class="wl-wrap" data-wl-wrap={id} data-tmdb-id={tmdbId} data-media={media} data-csrf={csrfToken} data-login={loginPath}>
+  <button type="button" class="wl-btn" data-wl-btn aria-pressed={onList ? 'true' : 'false'}>{initialLabel}</button>
+  {count !== null && count !== undefined ? <span class="wl-count tnum" data-wl-count>{count}</span> : null}
+</div>
+<script is:inline>
+(() => {
+  const init = (root) => {
+    const btn = root.querySelector('[data-wl-btn]');
+    const countEl = root.querySelector('[data-wl-count]');
+    if (!btn) return;
+    btn.addEventListener('click', async () => {
+      const tmdbId = Number(root.dataset.tmdbId);
+      const media = root.dataset.media || 'movie';
+      const csrf = root.dataset.csrf || '';
+      const login = root.dataset.login || '/login';
+      const pressed = btn.getAttribute('aria-pressed') === 'true';
+      const action = pressed ? 'remove' : 'add';
+      btn.disabled = true;
+      try {
+        const res = await fetch(`/api/list/${action}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', ...(csrf ? { 'x-csrf-token': csrf } : {}) },
+          body: JSON.stringify({ tmdbId, media }),
+        });
+        if (res.status === 401) {
+          const next = encodeURIComponent(window.location.pathname + window.location.search);
+          window.location.href = `${login}?next=${next}`;
+          return;
+        }
+        if (!res.ok) return;
+        const data = await res.json().catch(() => ({}));
+        const onList = action === 'add' ? true : (typeof data.onList === 'boolean' ? data.onList : !pressed);
+        btn.setAttribute('aria-pressed', onList ? 'true' : 'false');
+        btn.textContent = onList ? 'On watchlist ✓' : '+ Watchlist';
+        if (countEl && typeof data.count === 'number') countEl.textContent = String(data.count);
+      } finally {
+        btn.disabled = false;
+      }
+    });
+  };
+  document.querySelectorAll('[data-wl-wrap]').forEach(init);
+})();
+</script>
+<style>
+.wl-wrap { display: inline-flex; align-items: center; gap: 0.5rem; }
+.wl-btn { min-height: 44px; padding: 0.5rem 0.9rem; border-radius: 999px; border: 1px solid var(--brand-accent); background: transparent; color: inherit; cursor: pointer; font-weight: 700; }
+.wl-btn[aria-pressed="true"] { background: var(--brand-accent); color: var(--brand-accent-ink); }
+.wl-count { opacity: 0.75; font-size: 0.9em; }
+</style>

@@ -1,0 +1,37 @@
+{
+  "id": "midnight-festival",
+  "siteName": "Midnight Festival",
+  "tagline": "Dispatches from the late shows — genre, midnight, beyond",
+  "domain": "midnightfest.example.com",
+  "defaultRegion": "US",
+  "logo": "/brand/midnight-festival/logo.svg",
+  "icon": "/brand/midnight-festival/icon.svg",
+  "favicon": "/brand/midnight-festival/favicon.svg",
+  "colors": {
+    "paper": "oklch(0.17 0.02 280)",
+    "paper2": "oklch(0.22 0.03 280)",
+    "ink": "oklch(0.94 0.01 90)",
+    "inkSoft": "oklch(0.75 0.02 280)",
+    "accent": "oklch(0.75 0.18 330)",
+    "accent2": "oklch(0.75 0.15 200)",
+    "line": "oklch(0.32 0.03 280)",
+    "focus": "oklch(0.8 0.15 200)"
+  },
+  "fonts": {
+    "display": "Anton, \"Arial Narrow\", sans-serif",
+    "body": "Lato, system-ui, sans-serif",
+    "mono": "ui-monospace, monospace",
+    "displayUrl": "https://fonts.googleapis.com/css2?family=Anton&family=Lato:wght@400;700;900&display=swap"
+  },
+  "social": {
+    "x": "https://x.com/midnightfest",
+    "instagram": "https://instagram.com/midnightfest",
+    "youtube": "https://youtube.com/@midnightfest",
+    "rss": true
+  },
+  "seo": {
+    "defaultOgImage": "/brand/midnight-festival/og.jpg",
+    "twitterCard": "summary_large_image",
+    "themeColor": "#120e1f"
+  }
+}

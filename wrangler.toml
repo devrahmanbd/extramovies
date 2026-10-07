@@ -1,0 +1,42 @@
+# Cloudflare Workers + D1 + static assets.
+# Local dev uses platformProxy (no wrangler dev needed for `npm run dev`).
+name = "movie-review-cms"
+main = "dist/_worker.js"
+compatibility_date = "2024-11-27"
+compatibility_flags = ["nodejs_compat"]
+
+[assets]
+directory = "dist"
+binding = "ASSETS"
+not_found_handling = "single-page-application"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "movie_reviews"
+database_id = "REPLACE_WITH_D1_ID"
+
+[vars]
+BRAND_PRESET = "noir-cinema"
+SITE_URL = "https://reviews.example.com"
+SITE_NAME = "The Long Take"
+DEFAULT_REGION = "US"
+
+# Secrets (never in this file):
+#   wrangler secret put TMDB_API_KEY
+#   wrangler secret put OMDB_API_KEY
+#   wrangler secret put OPENROUTER_API_KEY
+#   wrangler secret put ADMIN_PASSWORD
+
+[observability.logs]
+enabled = true
+
+# --- cPanel / generic Node host (alternative path) ---
+# 1. In astro.config.mjs swap @astrojs/cloudflare -> @astrojs/node (standalone).
+# 2. Build: npm run build -> outputs dist/server/entry.mjs.
+# 3. Upload dist/ + package.json; run with NODE_ENV=production node dist/server/entry.mjs
+#    behind Passenger / PM2. SQLite file via DB_FILE env (see src/lib/db/adapter.ts).
+#
+# --- Static mode (no SSR, no runtime admin) ---
+# 1. astro.config.mjs: output:'static', remove adapter.
+# 2. `npm run build` -> dist/ is pure HTML/CSS. Upload to any static host.
+# 3. Search falls back to prebuilt index; forms/admin disabled.

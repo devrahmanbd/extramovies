@@ -1,0 +1,153 @@
+---
+/**
+ * WatchBox — one unified module, plain consumer language (zero JavaScript).
+ * Four groups only: Watch free → Stream → Rent → Buy. Editor manual links
+ * merge into them (free links into Watch free, paid links into Buy) and carry
+ * an "Editor's pick" mark. Every row has a Watch action: manual rows link
+ * directly; automatic TMDB rows link to TMDB's own watch-options page
+ * (providers.link — the only honest destination TMDB supplies, never a
+ * fabricated deep link). Empty groups hide automatically. Region + last-checked
+ * + disclaimer render as a secondary footnote.
+ */
+import type { WatchProviders } from "../../lib/seo/content";
+import type { CustomWatch } from "../../lib/watch-links";
+import { hasCustomWatch, initialOf } from "../../lib/watch-links";
+import TmdbAttribution from "./TmdbAttribution.astro";
+
+interface Props {
+  providers: WatchProviders;
+  movieTitle: string;
+  slug: string;
+  customWatch?: CustomWatch | null;
+  region?: string;
+}
+const { providers, movieTitle, slug, customWatch, region = "US" } = Astro.props;
+
+interface Row {
+  name: string;
+  logoUrl: string | null;
+  tag: string;
+  url: string | null;
+  rel: string | null;
+  manual: boolean;
+}
+
+interface Group {
+  key: string;
+  label: string;
+  rows: Row[];
+}
+
+const watchOptionsUrl = providers.link ?? null;
+const auto = (
+  list: { name: string; logoUrl: string | null }[],
+  tag: string
+): Row[] =>
+  list.map((p) => ({
+    name: p.name,
+    logoUrl: p.logoUrl,
+    tag,
+    url: watchOptionsUrl,
+    rel: "nofollow noopener",
+    manual: false,
+  }));
+
+const groups: Group[] = [
+  {
+    key: "free",
+    label: "Watch free",
+    rows: auto(providers.free, "Free"),
+  },
+  {
+    key: "freesites",
+    label: "Free sites",
+    rows: (customWatch?.free ?? []).map((l) => ({
+      name: l.label,
+      logoUrl: null,
+      tag: "Free",
+      url: l.url,
+      rel: "nofollow noopener",
+      manual: true,
+    })),
+  },
+  {
+    key: "streaming",
+    label: "Stream",
+    rows: auto(providers.streaming, "Subscription"),
+  },
+  {
+    key: "rent",
+    label: "Rent",
+    rows: auto(providers.rent, "Rent"),
+  },
+  {
+    key: "buy",
+    label: "Buy",
+    rows: [
+      ...auto(providers.buy, "Buy"),
+      ...(customWatch?.paid ?? []).map((l) => ({
+        name: l.label,
+        logoUrl: null,
+        tag: "Paid",
+        url: l.url,
+        rel: "nofollow sponsored noopener",
+        manual: true,
+      })),
+    ],
+  },
+].filter((g) => g.rows.length > 0);
+
+const fetched = new Date(providers.fetchedAt).toLocaleDateString("en-US", {
+  year: "numeric", month: "long", day: "numeric", timeZone: "UTC",
+});
+const showAuto = !providers.hideSection && (providers.free.length + providers.streaming.length + providers.rent.length + providers.buy.length > 0);
+const showBox = groups.length > 0 && (showAuto || hasCustomWatch(customWatch));
+---
+
+{showBox ? (
+  <section aria-labelledby="where-to-watch" class="watchbox watchbox--unified watchbox--rows watchbox--glam" id={`watch-${slug}`}>
+    <div class="section-head">
+      <h2 id="where-to-watch">Where to watch</h2>
+      <p>
+        {showAuto ? <>Availability for {movieTitle}.</> : null}
+        {!showAuto && hasCustomWatch(customWatch) ? <>Editor-picked ways to watch {movieTitle}.</> : null}
+      </p>
+    </div>
+
+    <div class="watch-unified watch-rows">
+      {groups.map((g) => (
+        <div class={`watch-group watch-row-group${g.key === "freesites" ? " manual" : ""}`}>
+          <h3>{g.label}<span class="watch-count tnum"> {g.rows.length}</span>{g.key === "freesites" ? <span class="editor-badge">Added by the editor</span> : null}</h3>
+          <ul class="watch-row-list">
+            {g.rows.map((r) => (
+              <li class="watch-row">
+                {r.logoUrl ? (
+                  <img src={r.logoUrl} alt="" width="48" height="48" loading="lazy" decoding="async" />
+                ) : (
+                  <span class="watch-initial" aria-hidden="true">{initialOf(r.name)}</span>
+                )}
+                <span class="watch-row-main">
+                  <span class="watch-row-name">{r.name}{r.manual ? <span class="row-manual">Editor's pick</span> : null}</span>
+                  <span class="watch-row-tag">{r.tag}</span>
+                </span>
+                {r.url ? (
+                  <a class="watch-row-cta" href={r.url} rel={r.rel} target="_blank">Watch</a>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+          {g.key === "buy" && g.rows.some((r) => r.manual) ? (
+            <p class="watch-note">Paid links may earn us a commission — it keeps the journal independent.</p>
+          ) : null}
+        </div>
+      ))}
+    </div>
+
+    <p class="watch-note watch-footnote">
+      <span class="watch-region" aria-label="Region">{region}</span>
+      {showAuto ? <>Checked {fetched}. <TmdbAttribution variant="compact" /> Streaming availability by <a href="https://www.justwatch.com/" rel="nofollow noopener">JustWatch</a> via TMDB — varies by region and changes often, confirm on the provider.</> : null}
+      {showAuto && providers.link ? <> <a href={providers.link} rel="nofollow noopener">More options on TMDB</a>.</> : null}
+      {!showAuto && hasCustomWatch(customWatch) ? <>Ways to watch picked by the editor.</> : null}
+    </p>
+  </section>
+) : null}

@@ -1,0 +1,39 @@
+---
+/**
+ * Genre strip — editorial index line: small-caps links separated by rules/slashes.
+ * Single ruled line above/below, slash separators aria-hidden, active gold.
+ * Restrained by design: few links, plain uppercase text. No JS.
+ */
+interface Props {
+  genres: string[];
+  active?: string | null;
+  limit?: number;
+}
+const { genres, active = null, limit } = Astro.props;
+const visible = typeof limit === "number" ? genres.slice(0, limit) : genres;
+const truncated = typeof limit === "number" && genres.length > limit;
+---
+{genres.length > 0 ? (
+  <nav class="glam-genres" aria-label="Browse by genre">
+    <ul>
+      {visible.map((g, i) => (
+        <li>
+          <a
+            href={`/reviews?genre=${encodeURIComponent(g)}`}
+            aria-current={active === g ? "true" : undefined}
+          >
+            {g}
+          </a>
+          {i < visible.length - 1 || truncated ? (
+            <span class="glam-genres-sep" aria-hidden="true">/</span>
+          ) : null}
+        </li>
+      ))}
+      {truncated ? (
+        <li class="glam-genres-all">
+          <a href="/reviews">All genres</a>
+        </li>
+      ) : null}
+    </ul>
+  </nav>
+) : null}

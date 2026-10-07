@@ -1,0 +1,137 @@
+---
+/**
+ * MemberReviewList — server-rendered member reviews.
+ * Props: { reviews=[], full=false, viewerId=null, csrfToken='' }
+ * review: { id?, userId?, tmdbId?, media?, rating?, title?, body?, createdAt?, handle?, displayName? }
+ * Excerpts are sliced server-side (≤300 chars); each item links the author's
+ * handle to /u/<handle> (the profile renders the full body).
+ * Report: member-only <details> form per review, shown when viewerId is set
+ * and viewerId !== review.userId; POSTs /api/member/report + x-csrf-token.
+ */
+interface ReviewItem {
+  id?: string;
+  userId?: string;
+  tmdbId?: number;
+  media?: 'movie' | 'tv';
+  rating?: number | null;
+  title?: string;
+  body?: string;
+  createdAt?: string;
+  handle?: string | null;
+  displayName?: string | null;
+}
+interface Props {
+  reviews?: ReviewItem[];
+  full?: boolean;
+  viewerId?: string | null;
+  csrfToken?: string;
+}
+const { reviews = [], full = false, viewerId = null, csrfToken = '' } = Astro.props;
+
+function excerpt(body: string): { text: string; cut: boolean } {
+  const clean = (body ?? '').trim();
+  if (clean.length <= 300) return { text: clean, cut: false };
+  return { text: clean.slice(0, 300).trimEnd(), cut: true };
+}
+---
+{reviews.length === 0 ? (
+  <p class="d-empty">No member reviews yet — be the first to write one.</p>
+) : (
+  <ul class="mr-list">
+    {reviews.map((r) => {
+      const who = r.displayName || (r.handle ? `@${r.handle}` : 'Member');
+      const { text, cut } = excerpt(r.body ?? '');
+      return (
+        <li class="mr-item">
+          <p class="mr-meta">
+            {r.handle ? (
+              <a href={`/u/${r.handle}`}>{who}</a>
+            ) : (
+              <span>{who}</span>
+            )}
+            {typeof r.rating === 'number' ? (
+              <span class="mr-rating tnum" aria-label={`Rated ${r.rating} out of 10`}>★ {r.rating}/10</span>
+            ) : null}
+          </p>
+          {r.title ? <p class="mr-title">{r.title}</p> : null}
+          <p class="mr-body">{full || !cut ? (r.body ?? '') : `${text}…`}</p>
+          {!full && cut && r.handle ? (
+            <p class="mr-more"><a href={`/u/${r.handle}`}>Read the full review on @{r.handle}’s profile</a></p>
+          ) : null}
+          {viewerId && r.id && viewerId !== r.userId ? (
+            <details class="mr-report">
+              <summary>Report</summary>
+              <form data-report-form data-review-id={r.id} data-csrf={csrfToken} novalidate>
+                <label>Reason (3–200 characters)
+                  <textarea name="reason" rows="2" minlength="3" maxlength="200" required data-report-reason></textarea>
+                </label>
+                <p class="mr-report-error" data-report-error hidden></p>
+                <p class="mr-report-done" data-report-done hidden>Reported — thanks.</p>
+                <button class="mr-report-submit" type="submit" data-report-submit>Submit report</button>
+              </form>
+            </details>
+          ) : null}
+        </li>
+      );
+    })}
+  </ul>
+)}
+<script is:inline>
+(() => {
+  const init = (root) => {
+    if (root.dataset.reportBound === 'true') return;
+    root.dataset.reportBound = 'true';
+    const reasonEl = root.querySelector('[data-report-reason]');
+    const errEl = root.querySelector('[data-report-error]');
+    const doneEl = root.querySelector('[data-report-done]');
+    const btn = root.querySelector('[data-report-submit]');
+    root.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (errEl) errEl.hidden = true;
+      const reviewId = root.dataset.reviewId || '';
+      const csrf = root.dataset.csrf || '';
+      const reason = (reasonEl?.value ?? '').trim();
+      const fail = (msg) => {
+        if (errEl) { errEl.textContent = msg; errEl.hidden = false; }
+      };
+      if (reason.length < 3 || reason.length > 200) {
+        return fail('Reason must be 3–200 characters.');
+      }
+      if (btn) { btn.disabled = true; btn.textContent = 'Reporting…'; }
+      try {
+        const res = await fetch('/api/member/report', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', ...(csrf ? { 'x-csrf-token': csrf } : {}) },
+          body: JSON.stringify({ reviewId, reason }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data.ok) return fail(data.error ?? 'Could not submit your report.');
+        if (doneEl) doneEl.hidden = false;
+        if (reasonEl) reasonEl.value = '';
+      } catch (err) {
+        fail(err instanceof Error ? err.message : 'Could not submit your report.');
+      } finally {
+        if (btn) { btn.disabled = false; btn.textContent = 'Submit report'; }
+      }
+    });
+  };
+  document.querySelectorAll('[data-report-form]').forEach(init);
+})();
+</script>
+<style>
+.mr-list { list-style: none; display: grid; gap: 1rem; padding: 0; margin: 1rem 0 0; }
+.mr-item { border: 1px solid color-mix(in srgb, currentColor 15%, transparent); border-radius: 12px; padding: 1rem; }
+.mr-meta { display: flex; align-items: center; gap: 0.6rem; margin: 0 0 0.4rem; font-weight: 700; }
+.mr-rating { margin-left: auto; font-weight: 700; }
+.mr-title { margin: 0 0 0.35rem; font-weight: 700; }
+.mr-body { margin: 0; white-space: pre-wrap; }
+.mr-more { margin: 0.5rem 0 0; }
+.mr-report { margin-top: 0.6rem; }
+.mr-report summary { cursor: pointer; font-weight: 700; font-size: 0.85em; opacity: 0.75; }
+.mr-report form { display: grid; gap: 0.5rem; margin-top: 0.5rem; }
+.mr-report label { display: grid; gap: 0.35rem; font-weight: 700; font-size: 0.9em; }
+.mr-report textarea { font: inherit; font-weight: 400; padding: 0.5rem 0.6rem; border-radius: 8px; border: 1px solid color-mix(in srgb, currentColor 25%, transparent); background: transparent; color: inherit; }
+.mr-report-error { color: #b3261e; font-weight: 700; margin: 0; }
+.mr-report-done { color: inherit; font-weight: 700; margin: 0; }
+.mr-report-submit { justify-self: start; min-height: 36px; padding: 0.35rem 0.9rem; border-radius: 999px; border: 1px solid var(--brand-accent); background: transparent; color: inherit; font-weight: 700; cursor: pointer; }
+</style>

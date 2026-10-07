@@ -1,0 +1,36 @@
+---
+import Admin from "../../../layouts/Admin.astro";
+import { getSession, getSessionToken, sessionDbFromAstro } from "../../../lib/auth/session";
+import { listReviews } from "../../api/admin/_store";
+
+export const prerender = false;
+
+const token = getSessionToken(Astro.cookies as never);
+const session = await getSession(token, sessionDbFromAstro(Astro));
+if (!session) {
+  const next = Astro.url.pathname + Astro.url.search;
+  return Astro.redirect(`/admin/login?next=${encodeURIComponent(next)}`);
+}
+const reviews = await listReviews();
+---
+<Admin email={session.email} csrfToken={session.csrfToken} current="/admin/reviews">
+  <div class="page-head">
+    <h1>Reviews</h1>
+    <a href="/admin/reviews/new" class="btn primary">+ New Review</a>
+  </div>
+  <section class="card">
+    {reviews.length === 0 ? (
+      <p class="muted">Nothing here yet.</p>
+    ) : (
+      <ul class="list">
+        {reviews.map((r) => (
+          <li>
+            <a href={`/admin/reviews/${r.id}`}>{r.title || "(untitled)"}</a>
+            <span class={`badge ${r.status}`}>{r.status}</span>
+            <span class="muted small">{r.movie?.title ?? ""} · {r.slug}</span>
+          </li>
+        ))}
+      </ul>
+    )}
+  </section>
+</Admin>

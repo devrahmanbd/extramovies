@@ -1,0 +1,62 @@
+---
+/** Archive — full review index with optional ?genre= filter. */
+import Base from "../../layouts/Base.astro";
+import ReviewCard from "../../components/public/ReviewCard.astro";
+import GenreNav from "../../components/public/GenreNav.astro";
+import { getBrand } from "../../lib/seo/brand";
+import { breadcrumbJsonLd } from "../../lib/seo/jsonld";
+import { getLatestReviews, getReviewsByGenre, listGenres } from "../../lib/seo/content";
+
+const brand = getBrand();
+const origin = Astro.url.origin;
+const genre = Astro.url.searchParams.get("genre")?.trim() || null;
+const genres = listGenres();
+const reviews = genre ? getReviewsByGenre(genre) : getLatestReviews(100);
+const heading = genre ? `${genre} reviews` : "Every film review in the journal, newest first";
+const descSource = genre
+  ? `Every ${genre.toLowerCase()} review in the journal, newest first.`
+  : `The complete review archive, newest first — every film covered in the journal.`;
+// Filtered views canonicalize to /reviews to avoid duplicate-content drift.
+const jsonld = [breadcrumbJsonLd(origin, [{ name: "Home", path: "/" }, { name: "Reviews", path: "/reviews" }])];
+const headingIsLong = heading.length > 40;
+---
+<Base
+  title={heading}
+  description={descSource}
+  descriptionExtra="Browse the full collection by genre — horror, drama, comedy, and more, every entry argued from a real viewing."
+  path="/reviews"
+  jsonld={jsonld}
+  current="reviews"
+>
+  <div class="wrap">
+    <section aria-labelledby="archive-title" class="band section--lg glam-archive-head">
+      <div class="section-head">
+        <p class="glam-kicker tnum">The archive</p>
+        <h1 id="archive-title" class={headingIsLong ? "display--long" : undefined}>{heading}</h1>
+        <p class="tnum glam-archive-dek">
+          {reviews.length} {reviews.length === 1 ? "review" : "reviews"}
+          {genre ? ` filed under ${genre}` : ", newest first"}.
+        </p>
+      </div>
+      <GenreNav genres={genres} active={genre} />
+    </section>
+  </div>
+
+  {reviews.length > 0 ? (
+    <div class="band section--md glam-archive-band">
+      <div class="wrap">
+        <ol class="glam-archive">
+          {reviews.map((r, i) => i === 0
+            ? <ReviewCard review={r} index={i} variant="archive-lead" />
+            : <ReviewCard review={r} index={i} variant="archive-cell" />)}
+        </ol>
+      </div>
+    </div>
+  ) : (
+    <div class="wrap">
+      <p>
+        Nothing filed here yet. <a href="/reviews">Back to the full archive</a>.
+      </p>
+    </div>
+  )}
+</Base>

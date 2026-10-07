@@ -1,0 +1,89 @@
+---
+/** N1 fixed utility bar (studied-DNA) — brand-driven, no hardcoded names.
+ * DNA map: single 56px bar — wordmark left, dominant search center,
+ * muted links + bold active right with RSS in the sign-in slot.
+ * Hooks only (.masthead/.masthead-top/.masthead-wordmark/.masthead-nav/.wrap/.skip-link);
+ * the search form carries no classes so global.css targets it by element/role.
+ */
+import type { Brand } from "../../lib/seo/brand";
+
+interface Props {
+  brand: Brand;
+  current?: string;
+  member?: { handle: string; displayName: string } | null;
+  csrfToken?: string;
+}
+
+const { brand, current = "", member = null, csrfToken = "" } = Astro.props;
+const nav = [
+  { href: "/", label: "Latest", key: "home" },
+  { href: "/reviews", label: "Reviews", key: "reviews" },
+];
+---
+<header class="masthead">
+  <div class="wrap">
+    <a class="masthead-wordmark" href="/" aria-label={`${brand.name} — home`}>
+      {brand.logo ? (
+        <img src={brand.logo} alt={brand.name} width="220" height="56" decoding="async" />
+      ) : (
+        <>
+          <span class="brand-name">{brand.name}</span>
+          <span class="brand-tagline">{brand.tagline}</span>
+        </>
+      )}
+    </a>
+    <form action="/search" method="get" role="search">
+      <label class="skip-link" for="site-search">Search reviews</label>
+      <input
+        id="site-search"
+        type="search"
+        name="q"
+        placeholder="Search movies, reviews…"
+        autocomplete="off"
+      />
+      <button type="submit">Search</button>
+    </form>
+    <nav class="masthead-nav" aria-label="Primary">
+      <ul>
+        {nav.map((item) => (
+          <li>
+            <a href={item.href} aria-current={current === item.key ? "page" : undefined}>
+              {item.label}
+            </a>
+          </li>
+        ))}
+        {member ? (
+          <>
+            <li>
+              <a href={`/u/${member.handle}`} aria-current={current === "profile" ? "page" : undefined}>
+                @{member.handle}
+              </a>
+            </li>
+            <li>
+              <button type="button" class="masthead-logout" id="member-logout">Log out</button>
+            </li>
+          </>
+        ) : (
+          <>
+            <li><a href="/login">Sign in</a></li>
+            <li><a href="/signup" class="masthead-join">Sign up</a></li>
+          </>
+        )}
+      </ul>
+    </nav>
+  </div>
+  {member ? (
+    <script define:vars={{ csrfToken }} is:inline>
+      document.getElementById("member-logout")?.addEventListener("click", async () => {
+        try {
+          await fetch("/api/auth/logout", {
+            method: "POST",
+            headers: { "x-csrf-token": csrfToken },
+          });
+        } finally {
+          window.location.href = "/";
+        }
+      });
+    </script>
+  ) : null}
+</header>

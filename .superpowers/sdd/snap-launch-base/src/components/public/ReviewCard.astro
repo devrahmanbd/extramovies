@@ -1,0 +1,251 @@
+---
+/**
+ * Publication item — glamorous film-publication composition.
+ * Cover diptychs (split-studio alternating), mosaic lead/medium/compact,
+ * monumental shelf, archive mosaic, calm search.
+ * Artwork renders only when the review carries it; otherwise pure typography.
+ * Never fakes or invents posters. Zero client JS.
+ */
+import type { PublicReview } from "../../lib/seo/content";
+import { formatRuntime } from "../../lib/seo/content";
+import RatingMark from "./RatingMark.astro";
+
+interface Props {
+  review: PublicReview;
+  index?: number;
+  variant?:
+    | "mosaic-lead" | "mosaic-medium" | "mosaic-compact"
+    | "diptych" | "diptych-flip"
+    | "shelf"
+    | "archive-lead" | "archive-cell"
+    | "search"
+    | "standard" | "feature" | "medium" | "compact" | "lead";
+  showExcerpt?: boolean;
+}
+
+const { review, index, variant = "search", showExcerpt = false } = Astro.props;
+// Legacy aliases from the pre-glamour journal (feature/medium/compact/lead/standard).
+const v =
+  variant === "feature" ? "mosaic-lead"
+  : variant === "medium" ? "mosaic-medium"
+  : variant === "compact" ? "mosaic-compact"
+  : variant === "lead" ? "archive-lead"
+  : variant === "standard" ? "search"
+  : variant;
+
+const url = `/reviews/${review.slug}`;
+const runtime = formatRuntime(review.runtimeMinutes);
+const meta = [
+  review.year ? String(review.year) : null,
+  review.genres.join(" · ") || null,
+  runtime,
+].filter(Boolean).join("  ·  ");
+const isLong = review.reviewTitle.length > 40;
+const num = typeof index === "number" ? String(index + 1).padStart(2, "0") : null;
+const kicker = [
+  review.genres[0] ?? "Review",
+  review.year ? String(review.year) : null,
+].filter(Boolean).join(" · ");
+const leadArt = review.backdropUrl ?? review.posterUrl;
+const leadArtAlt = review.backdropUrl
+  ? `Still from ${review.movieTitle}`
+  : `Poster for ${review.movieTitle}`;
+const thumbArt = review.posterUrl ?? review.backdropUrl;
+const thumbAlt = review.posterUrl
+  ? `Poster for ${review.movieTitle}`
+  : `Still from ${review.movieTitle}`;
+const titleClass = isLong ? "is-long" : undefined;
+---
+{v === "mosaic-lead" || v === "archive-lead" ? (
+  <li class={v === "archive-lead" ? "glam-item glam-arch-lead" : "glam-item glam-lead"}>
+    {leadArt ? (
+      <figure class="glam-lead-figure">
+        <a class="glam-art-link" href={url} tabindex="-1" aria-hidden="true">
+          <img
+            src={leadArt}
+            alt=""
+            width="1280"
+            height="720"
+            loading="lazy"
+            decoding="async"
+          />
+        </a>
+      </figure>
+    ) : null}
+    <div class="glam-lead-copy">
+      <p class="glam-kicker tnum">{num ? <span>№ {num} · </span> : null}{kicker}</p>
+      <h3 class={`glam-lead-title${isLong ? " is-long" : ""}`}>
+        <a href={url}>{review.reviewTitle}</a>
+      </h3>
+      <p class="glam-meta tnum">{review.platformPick ? <span class="platform-pick">Platform Pick</span> : null}{review.movieTitle}{meta ? ` — ${meta}` : ""}</p>
+      <p class="glam-score">
+        <RatingMark rating={review.rating} />
+        <span class="glam-verdict glam-manifesto">{review.verdict}</span>
+      </p>
+      {review.excerpt ? <p class="glam-excerpt">{review.excerpt}</p> : null}
+      <p class="glam-more"><a href={url}>Read review</a></p>
+    </div>
+  </li>
+) : null}
+
+{v === "diptych" || v === "diptych-flip" ? (
+  <li class={v === "diptych-flip" ? "glam-item glam-diptych is-flip" : "glam-item glam-diptych"}>
+    {thumbArt ? (
+      <figure class="glam-diptych-figure">
+        <a class="glam-art-link glam-diptych-art" href={url} tabindex="-1" aria-hidden="true">
+          <img
+            src={thumbArt}
+            alt=""
+            width="600"
+            height="900"
+            loading="lazy"
+            decoding="async"
+          />
+        </a>
+      </figure>
+    ) : null}
+    <div class="glam-diptych-copy">
+      <p class="glam-kicker tnum">{kicker}</p>
+      <h3 class={`glam-diptych-title${isLong ? " is-long" : ""}`}>
+        <a href={url}>{review.reviewTitle}</a>
+      </h3>
+      <p class="glam-meta tnum">{review.platformPick ? <span class="platform-pick">Platform Pick</span> : null}{review.movieTitle}{meta ? ` — ${meta}` : ""}</p>
+      <p class="glam-score">
+        <RatingMark rating={review.rating} />
+        <span class="glam-verdict glam-manifesto">{review.verdict}</span>
+      </p>
+      {showExcerpt && review.excerpt ? <p class="glam-excerpt">{review.excerpt}</p> : null}
+      <p class="glam-more"><a href={url}>Read review</a></p>
+    </div>
+  </li>
+) : null}
+
+{v === "mosaic-medium" ? (
+  <li class="glam-item glam-medium">
+    {thumbArt ? (
+      <figure class="glam-medium-figure">
+        <a class="glam-art-link" href={url} tabindex="-1" aria-hidden="true">
+          <img
+            src={thumbArt}
+            alt=""
+            width="600"
+            height="900"
+            loading="lazy"
+            decoding="async"
+          />
+        </a>
+      </figure>
+    ) : null}
+    <div class="glam-medium-copy">
+      <p class="glam-kicker tnum">{kicker}</p>
+      <h3 class={`glam-medium-title${isLong ? " is-long" : ""}`}>
+        <a href={url}>{review.reviewTitle}</a>
+      </h3>
+      <p class="glam-meta tnum">{review.platformPick ? <span class="platform-pick">Platform Pick</span> : null}{review.movieTitle}{meta ? ` — ${meta}` : ""}</p>
+      <p class="glam-score">
+        <RatingMark rating={review.rating} />
+        <span class="glam-verdict glam-manifesto">{review.verdict}</span>
+      </p>
+      {showExcerpt && review.excerpt ? <p class="glam-excerpt">{review.excerpt}</p> : null}
+    </div>
+  </li>
+) : null}
+
+{v === "mosaic-compact" ? (
+  <li class="glam-item glam-terse">
+    {num ? <span class="glam-num" aria-hidden="true">{num}</span> : null}
+    <div class="glam-terse-main">
+      <h3 class="glam-terse-title">
+        <a href={url}>{review.reviewTitle}</a>
+      </h3>
+      <p class="glam-meta tnum">{review.platformPick ? <span class="platform-pick">Platform Pick</span> : null}{review.movieTitle}{meta ? ` — ${meta}` : ""}</p>
+      <p class="glam-verdict">{review.verdict}</p>
+    </div>
+    <RatingMark rating={review.rating} />
+  </li>
+) : null}
+
+{v === "shelf" ? (
+  <li class="glam-item glam-shelf-item">
+    {num ? <span class="glam-ghost" aria-hidden="true">{num}</span> : null}
+    {thumbArt ? (
+      <a class="glam-art-link glam-shelf-art" href={url} tabindex="-1" aria-hidden="true">
+        <img
+          class="glam-shelf-thumb"
+          src={thumbArt}
+          alt=""
+          width="120"
+          height="180"
+          loading="lazy"
+          decoding="async"
+        />
+      </a>
+    ) : null}
+    <div class="glam-shelf-main">
+      <h3 class={`glam-shelf-title${isLong ? " is-long" : ""}`}>
+        <a href={url}>{review.reviewTitle}</a>
+      </h3>
+      <p class="glam-meta tnum">{review.platformPick ? <span class="platform-pick">Platform Pick</span> : null}{review.movieTitle}{meta ? ` — ${meta}` : ""}</p>
+      <p class="glam-verdict glam-manifesto">{review.verdict}</p>
+    </div>
+    <RatingMark rating={review.rating} />
+  </li>
+) : null}
+
+{v === "archive-cell" ? (
+  <li class="glam-item glam-arch-cell">
+    {thumbArt ? (
+      <figure class="glam-cell-figure">
+        <a class="glam-art-link" href={url} tabindex="-1" aria-hidden="true">
+          <img
+            src={thumbArt}
+            alt=""
+            width="600"
+            height="900"
+            loading="lazy"
+            decoding="async"
+          />
+        </a>
+      </figure>
+    ) : null}
+    <div class="glam-cell-copy">
+      <p class="glam-kicker tnum">{num ? <span>№ {num} · </span> : null}{kicker}</p>
+      <h3 class={`glam-cell-title${isLong ? " is-long" : ""}`}>
+        <a href={url}>{review.reviewTitle}</a>
+      </h3>
+      <p class="glam-meta tnum">{review.platformPick ? <span class="platform-pick">Platform Pick</span> : null}{review.movieTitle}{meta ? ` — ${meta}` : ""}</p>
+      <p class="glam-score">
+        <RatingMark rating={review.rating} />
+        <span class="glam-verdict glam-manifesto">{review.verdict}</span>
+      </p>
+      {review.excerpt ? <p class="glam-excerpt">{review.excerpt}</p> : null}
+    </div>
+  </li>
+) : null}
+
+{v === "search" ? (
+  <li class="glam-item glam-result">
+    {thumbArt ? (
+      <a class="glam-art-link" href={url} tabindex="-1" aria-hidden="true">
+        <img
+          class="glam-result-thumb"
+          src={thumbArt}
+          alt=""
+          width="88"
+          height="132"
+          loading="lazy"
+          decoding="async"
+        />
+      </a>
+    ) : null}
+    <div class="glam-result-main">
+      <h3 class="glam-result-title">
+        <a href={url}>{review.reviewTitle}</a>
+      </h3>
+      <p class="glam-meta tnum">{review.platformPick ? <span class="platform-pick">Platform Pick</span> : null}{review.movieTitle}{meta ? ` — ${meta}` : ""}</p>
+      <p class="glam-verdict">{review.verdict}</p>
+      {showExcerpt && review.excerpt ? <p class="glam-excerpt">{review.excerpt}</p> : null}
+    </div>
+    <RatingMark rating={review.rating} />
+  </li>
+) : null}

@@ -1,0 +1,28 @@
+---
+import Admin from "../../layouts/Admin.astro";
+import { getSession, getSessionToken } from "../../lib/auth/session";
+import { SettingsForm } from "../../components/admin/SettingsForm";
+import { effective } from "../../lib/settings";
+
+export const prerender = false;
+
+const token = getSessionToken(Astro.cookies as never);
+const session = getSession(token);
+if (!session) {
+  const next = Astro.url.pathname + Astro.url.search;
+  return Astro.redirect(`/admin/login?next=${encodeURIComponent(next)}`);
+}
+
+// Dashboard is source of truth; serverDefaults are last-resort fallbacks
+// (env seed -> builtin default) for first paint before the island loads
+// live values from GET /api/admin/settings.
+const serverDefaults = {
+  defaultRegion: effective('region.default', null),
+  sitePreset: effective('brand.preset', null),
+  seoTitleSuffix: effective('seo.title_suffix', null),
+  seoAuthor: effective('seo.author', null),
+};
+---
+<Admin email={session.email} csrfToken={session.csrfToken} current="/admin/settings">
+  <SettingsForm serverDefaults={serverDefaults} csrfToken={session.csrfToken} client:load />
+</Admin>

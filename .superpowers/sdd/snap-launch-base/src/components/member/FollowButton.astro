@@ -1,0 +1,90 @@
+---
+/**
+ * FollowButton — member follow toggle.
+ * Props: { handle, following=false, viewerId=null, ownerId='', csrfToken='', loginPath='/login', followers=null }
+ * - viewer is the page owner (viewerId === ownerId): renders nothing (no self-follow).
+ * - logged-out (no viewerId): links to loginPath?next=<current path>.
+ * - logged-in: POSTs /api/follow + x-csrf-token via an inline is:inline script
+ *   (same pattern as member WatchlistButton / Admin logout).
+ */
+interface Props {
+  handle: string;
+  following?: boolean;
+  viewerId?: string | null;
+  ownerId?: string;
+  csrfToken?: string;
+  loginPath?: string;
+  followers?: number | null;
+}
+const {
+  handle,
+  following = false,
+  viewerId = null,
+  ownerId = '',
+  csrfToken = '',
+  loginPath = '/login',
+  followers = null,
+} = Astro.props;
+const isSelf = !!viewerId && !!ownerId && viewerId === ownerId;
+const id = `follow-${handle}`;
+---
+{isSelf ? null : !viewerId ? (
+  <a class="follow-login" href={`${loginPath}?next=${encodeURIComponent(`/u/${handle}`)}`}>Follow</a>
+) : (
+  <div class="follow-wrap" data-follow-wrap={id} data-handle={handle} data-csrf={csrfToken} data-login={loginPath}>
+    <button
+      type="button"
+      class="follow-btn"
+      data-follow-btn
+      aria-pressed={following ? 'true' : 'false'}
+    >{following ? 'Following ✓' : 'Follow'}</button>
+    {followers !== null && followers !== undefined ? (
+      <span class="follow-count tnum" data-follow-count>{followers}</span>
+    ) : null}
+  </div>
+)}
+<script is:inline>
+(() => {
+  const init = (root) => {
+    const btn = root.querySelector('[data-follow-btn]');
+    const countEl = root.querySelector('[data-follow-count]');
+    if (!btn) return;
+    if (btn.dataset.followBound === 'true') return;
+    btn.dataset.followBound = 'true';
+    btn.addEventListener('click', async () => {
+      const handle = root.dataset.handle || '';
+      const csrf = root.dataset.csrf || '';
+      const login = root.dataset.login || '/login';
+      btn.disabled = true;
+      try {
+        const res = await fetch('/api/follow', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', ...(csrf ? { 'x-csrf-token': csrf } : {}) },
+          body: JSON.stringify({ handle }),
+        });
+        if (res.status === 401) {
+          const next = encodeURIComponent(window.location.pathname + window.location.search);
+          window.location.href = `${login}?next=${next}`;
+          return;
+        }
+        if (!res.ok) return;
+        const data = await res.json().catch(() => ({}));
+        const on = !!data.following;
+        btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+        btn.textContent = on ? 'Following ✓' : 'Follow';
+        if (countEl && typeof data.followers === 'number') countEl.textContent = String(data.followers);
+      } finally {
+        btn.disabled = false;
+      }
+    });
+  };
+  document.querySelectorAll('[data-follow-wrap]').forEach(init);
+})();
+</script>
+<style>
+.follow-wrap { display: inline-flex; align-items: center; gap: 0.5rem; }
+.follow-btn { min-height: 44px; padding: 0.5rem 1rem; border-radius: 999px; border: 1px solid var(--brand-accent); background: transparent; color: inherit; cursor: pointer; font-weight: 700; }
+.follow-btn[aria-pressed="true"] { background: var(--brand-accent); color: var(--brand-accent-ink); }
+.follow-count { opacity: 0.75; font-size: 0.9em; }
+.follow-login { display: inline-block; min-height: 44px; line-height: 44px; padding: 0 1rem; border-radius: 999px; border: 1px solid var(--brand-accent); text-decoration: none; font-weight: 700; }
+</style>

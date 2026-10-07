@@ -1,0 +1,72 @@
+---
+import "../styles/admin.css";
+import { getSession, getSessionToken } from "../lib/auth/session";
+
+export const prerender = false;
+
+const token = getSessionToken(Astro.cookies as never);
+const session = getSession(token);
+const next = Astro.url.searchParams.get("next") ?? "/";
+if (session?.role === "member") {
+  return Astro.redirect(next.startsWith("/") ? next : "/");
+}
+---
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Sign up · Movie Review</title>
+  </head>
+  <body>
+    <div class="login-wrap">
+      <form class="card login-card" id="signup-form">
+        <h1>Sign up</h1>
+        <p class="muted">Join to follow critics, build a watchlist, and write reviews.</p>
+        <label>Handle<input type="text" autocomplete="username" id="handle" minlength="3" maxlength="20" required /></label>
+        <label>Display name<input type="text" id="displayName" maxlength="40" required /></label>
+        <label>Email<input type="email" autocomplete="email" id="email" required /></label>
+        <label>Password<input type="password" autocomplete="new-password" id="password" minlength="10" required /></label>
+        <p class="error" id="signup-error" hidden></p>
+        <button class="btn primary" type="submit" id="signup-btn">Create account</button>
+        <p class="muted small">Already have an account? <a href="/login">Log in</a>.</p>
+      </form>
+    </div>
+    <script define:vars={{ next }}>
+      const form = document.getElementById("signup-form");
+      form?.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById("signup-btn");
+        const err = document.getElementById("signup-error");
+        const handle = document.getElementById("handle").value;
+        const displayName = document.getElementById("displayName").value;
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
+        btn.disabled = true;
+        btn.textContent = "Creating…";
+        err.hidden = true;
+        try {
+          const res = await fetch("/api/auth/signup", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ handle, displayName, email, password }),
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok || !data.ok) {
+            err.textContent = data.error ?? "signup failed";
+            err.hidden = false;
+            return;
+          }
+          window.location.href = next.startsWith("/") ? next : "/";
+        } catch (e) {
+          err.textContent = e instanceof Error ? e.message : "signup failed";
+          err.hidden = false;
+        } finally {
+          btn.disabled = false;
+          btn.textContent = "Create account";
+        }
+      });
+    </script>
+  </body>
+</html>

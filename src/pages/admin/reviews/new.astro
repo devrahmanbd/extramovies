@@ -1,0 +1,21 @@
+---
+import Admin from "../../../layouts/Admin.astro";
+import { getSession, getSessionToken, sessionDbFromAstro } from "../../../lib/auth/session";
+import { ReviewEditor } from "../../../components/admin/ReviewEditor";
+
+export const prerender = false;
+
+const token = getSessionToken(Astro.cookies as never);
+const session = await getSession(token, sessionDbFromAstro(Astro));
+if (!session) {
+  const next = Astro.url.pathname + Astro.url.search;
+  return Astro.redirect(`/admin/login?next=${encodeURIComponent(next)}`);
+}
+import { effectiveWithoutDb } from "../../../lib/settings";
+const defaultRegion = effectiveWithoutDb('region.default');
+---
+<Admin email={session.email} csrfToken={session.csrfToken} current="/admin/reviews/new">
+  <h1>New Review</h1>
+  <p class="muted">Generation writes a <strong>draft only</strong> — publishing is always an explicit click.</p>
+  <ReviewEditor csrfToken={session.csrfToken} defaultRegion={defaultRegion} client:load />
+</Admin>

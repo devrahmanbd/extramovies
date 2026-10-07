@@ -1,0 +1,36 @@
+{
+  "id": "golden-hour",
+  "siteName": "Golden Hour",
+  "tagline": "Warm-hearted notes on cinema that glows",
+  "domain": "goldenhour.example.com",
+  "defaultRegion": "US",
+  "logo": "/brand/golden-hour/logo.svg",
+  "icon": "/brand/golden-hour/icon.svg",
+  "favicon": "/brand/golden-hour/favicon.svg",
+  "colors": {
+    "paper": "oklch(0.97 0.02 80)",
+    "paper2": "oklch(0.93 0.04 75)",
+    "ink": "oklch(0.25 0.03 60)",
+    "inkSoft": "oklch(0.42 0.04 60)",
+    "accent": "oklch(0.62 0.17 55)",
+    "accent2": "oklch(0.55 0.12 160)",
+    "line": "oklch(0.85 0.03 75)",
+    "focus": "oklch(0.6 0.16 55)"
+  },
+  "fonts": {
+    "display": "Anton, \"Arial Narrow\", sans-serif",
+    "body": "Lato, system-ui, sans-serif",
+    "mono": "ui-monospace, monospace",
+    "displayUrl": "https://fonts.googleapis.com/css2?family=Anton&family=Lato:wght@400;700;900&display=swap"
+  },
+  "social": {
+    "x": "https://x.com/goldenhourfilm",
+    "instagram": "https://instagram.com/goldenhourfilm",
+    "rss": true
+  },
+  "seo": {
+    "defaultOgImage": "/brand/golden-hour/og.jpg",
+    "twitterCard": "summary_large_image",
+    "themeColor": "#2b1d0e"
+  }
+}

@@ -1,0 +1,82 @@
+=== TASK 3 REVIEW PACKAGE (no git — snapshot diff) ===
+
+=== DIFF: src/components/discover/MovieTile.astro ===
+--- .superpowers/sdd/snap-task-3/src/components/discover/MovieTile.astro	2026-10-07 03:37:01
++++ src/components/discover/MovieTile.astro	2026-10-07 03:37:50
+@@ -1,4 +1,5 @@
+ ---
++import { getTitleBadges } from "../../lib/badges";
+ /** Poster tile — links to the discovery detail page. Zero JS.
+  * Streaming-guide rebuild: full 2:3 posters (w342, object-fit contain via
+  * global), small neutral title/year/score, 44px link targets (CSS), lazy art
+@@ -20,6 +21,7 @@
+   eager?: boolean;
+ }
+ const { tmdbId, title, year, posterUrl, rating, source = "tmdb", href, variant = "rail", eager } = Astro.props;
++const badges = getTitleBadges(tmdbId);
+ const link = href ?? `/movies/${tmdbId}`;
+ const isLong = title.length > 40;
+ const isLead = variant === "lead";
+@@ -49,6 +51,12 @@
+     ) : (
+       <span class="d-tile-fallback" aria-hidden="true">{title.charAt(0) || "•"}</span>
+     )}
++    {badges.reviewed || badges.platformPick ? (
++      <span class="title-badges">
++        {badges.reviewed ? <span class="title-reviewed">Reviewed</span> : null}
++        {badges.platformPick ? <span class="platform-pick">Platform Pick</span> : null}
++      </span>
++    ) : null}
+     <span class="d-tile-text">
+       <span class={`d-tile-title${isLong ? " display--long" : ""}`}>{title}</span>
+       {metaLine ? <span class="d-tile-meta tnum">{metaLine}</span> : null}
+
+=== DIFF: src/styles/global.css ===
+--- .superpowers/sdd/snap-task-3/src/styles/global.css	2026-10-07 03:37:01
++++ src/styles/global.css	2026-10-07 03:37:59
+@@ -5407,4 +5407,45 @@
+   transform: translate(-50%, -50%);
+   font-size: 1.25em;
+   line-height: 1;
++}
++
++/* === Platform badges (sub-project A) 2026-10-07 — APPEND-ONLY === */
++.d-tile a { position: relative; }
++
++.title-badges {
++  position: absolute;
++  top: var(--space-1);
++  left: var(--space-1);
++  display: flex;
++  flex-wrap: wrap;
++  gap: 4px;
++  z-index: 1;
++  pointer-events: none;
+ }
++
++.title-reviewed,
++.platform-pick {
++  font-family: var(--font-sans);
++  font-size: 0.62rem;
++  font-weight: 700;
++  letter-spacing: 0.08em;
++  text-transform: uppercase;
++  border-radius: var(--radius-input);
++  padding: 2px var(--space-1);
++  white-space: nowrap;
++  line-height: 1.4;
++}
++
++.title-reviewed {
++  color: var(--color-ink-2);
++  background: var(--color-paper-2);
++  border: 1px solid var(--color-rule);
++}
++
++.platform-pick {
++  color: oklch(0.28 0.06 75);
++  background: oklch(0.76 0.10 80);
++  border: 1px solid oklch(0.65 0.10 80);
++}
++
++.glam-meta .platform-pick { margin-right: var(--space-1); }

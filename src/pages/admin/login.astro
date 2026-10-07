@@ -1,0 +1,68 @@
+---
+import "../../styles/admin.css";
+import { getSession, getSessionToken, sessionDbFromAstro } from "../../lib/auth/session";
+
+export const prerender = false;
+
+const token = getSessionToken(Astro.cookies as never);
+const session = await getSession(token, sessionDbFromAstro(Astro));
+const next = Astro.url.searchParams.get("next") ?? "/admin";
+if (session) {
+  return Astro.redirect(next.startsWith("/") ? next : "/admin");
+}
+---
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Admin login · Movie Review</title>
+  </head>
+  <body>
+    <div class="login-wrap">
+      <form class="card login-card" id="login-form">
+        <h1>Admin login</h1>
+        <p class="muted">Single admin. No registration.</p>
+        <label>Email<input type="email" autocomplete="username" id="email" required /></label>
+        <label>Password<input type="password" autocomplete="current-password" id="password" required /></label>
+        <p class="error" id="login-error" hidden></p>
+        <button class="btn primary" type="submit" id="login-btn">Sign in</button>
+        <p class="muted small">Seeded via ADMIN_EMAIL / ADMIN_PASSWORD env.</p>
+      </form>
+    </div>
+    <script define:vars={{ next }}>
+      const form = document.getElementById("login-form");
+      form?.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById("login-btn");
+        const err = document.getElementById("login-error");
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
+        btn.disabled = true;
+        btn.textContent = "Signing in…";
+        err.hidden = true;
+        try {
+          const res = await fetch("/api/admin/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, password }),
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok || !data.ok) {
+            err.textContent = data.error ?? "login failed";
+            err.hidden = false;
+            return;
+          }
+          window.location.href = next.startsWith("/") ? next : "/admin";
+        } catch (e) {
+          err.textContent = e instanceof Error ? e.message : "login failed";
+          err.hidden = false;
+        } finally {
+          btn.disabled = false;
+          btn.textContent = "Sign in";
+        }
+      });
+    </script>
+  </body>
+</html>

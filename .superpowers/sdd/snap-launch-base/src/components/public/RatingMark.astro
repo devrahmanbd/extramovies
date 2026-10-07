@@ -1,0 +1,13 @@
+---
+/** CSS-only score mark. No emoji, no stars-as-images; screen-reader label included. */
+interface Props {
+  rating: number;
+}
+const { rating } = Astro.props;
+const band = rating >= 7 ? "high" : rating >= 5 ? "mid" : "low";
+const shown = (Math.round(rating * 10) / 10).toFixed(1);
+---
+<span class="rating-mark" data-band={band} role="img" aria-label={`Rated ${shown} out of 10`}>
+  <span class="rating-value">{shown}</span>
+  <span class="rating-scale">/10</span>
+</span>

@@ -1,0 +1,25 @@
+---
+/**
+ * MyRating — the author's own 0–10 score, personal and typographic.
+ * Monumental publication treatment: giant numeral + MY RATING label +
+ * "my score out of 10" caption + outlined mega watermark behind the score
+ * (signature detail for the glamour pass, --text-mega + text-stroke).
+ * Never an aggregate; nothing like an IMDb badge/fraction treatment:
+ * no "/10" fraction styling. Caption carries the scale instead.
+ * Props unchanged (rating only) — discovery reuse via MovieShowcase
+ * showMyRating default false is unaffected.
+ */
+interface Props {
+  rating: number;
+}
+const { rating } = Astro.props;
+const shown = (Math.round(rating * 10) / 10).toFixed(1);
+---
+<div class="my-rating my-rating--monument my-rating--glam" role="img" aria-label={`My rating ${shown} out of 10`}>
+  <span class="my-rating-label">My rating</span>
+  <span class="my-rating-score">
+    <span class="my-rating-ghost" aria-hidden="true">{shown}</span>
+    <span class="my-rating-value tnum" aria-hidden="true">{shown}</span>
+  </span>
+  <span class="my-rating-caption">my score out of 10</span>
+</div>

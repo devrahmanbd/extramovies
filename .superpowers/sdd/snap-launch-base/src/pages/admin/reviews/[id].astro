@@ -1,0 +1,26 @@
+---
+import Admin from "../../../layouts/Admin.astro";
+import { getSession, getSessionToken } from "../../../lib/auth/session";
+import { getReviewById } from "../../api/admin/_store";
+import { ReviewEditor } from "../../../components/admin/ReviewEditor";
+
+export const prerender = false;
+
+const token = getSessionToken(Astro.cookies as never);
+const session = getSession(token);
+if (!session) {
+  const next = Astro.url.pathname + Astro.url.search;
+  return Astro.redirect(`/admin/login?next=${encodeURIComponent(next)}`);
+}
+const { id } = Astro.params;
+const review = await getReviewById((id ?? "").toString());
+if (!review) {
+  return new Response("Review not found", { status: 404 });
+}
+const defaultRegion = process.env.DEFAULT_REGION ?? "US";
+---
+<Admin email={session.email} csrfToken={session.csrfToken} current="/admin/reviews">
+  <p><a href="/admin/reviews">← All reviews</a></p>
+  <h1>Edit: {review.title || "(untitled)"}</h1>
+  <ReviewEditor csrfToken={session.csrfToken} initial={review} defaultRegion={defaultRegion} client:load />
+</Admin>

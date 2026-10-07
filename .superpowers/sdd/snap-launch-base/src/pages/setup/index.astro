@@ -1,0 +1,144 @@
+---
+/**
+ * GET /setup — first-run setup wizard (single page, three progressive sections).
+ * Redirects to / unless the install is still unconfigured
+ * (no stored site.theme AND no SITE_THEME env), or ?force is given.
+ */
+import Base from "../../layouts/Base.astro";
+import { readSetupFile, setupEnv, isUnconfigured, storedTheme } from "../api/setup/_store";
+
+export const prerender = false;
+
+const file = await readSetupFile().catch(() => ({} as Record<string, string>));
+const forced = Astro.url.searchParams.has("force");
+if (!forced && !isUnconfigured(file)) {
+  return Astro.redirect("/");
+}
+
+const saved = Astro.url.searchParams.get("saved");
+const error = Astro.url.searchParams.get("error");
+const currentTheme = storedTheme(file);
+const envTheme = (setupEnv().SITE_THEME ?? "").trim();
+const themeLocked = currentTheme === "discovery" || currentTheme === "publication" || envTheme === "discovery" || envTheme === "publication";
+const notice = saved ? `Saved ${saved}. Continue below.` : null;
+const errText =
+  error === "theme"
+    ? "Please pick a website type: discovery or publication."
+    : error === "locked"
+      ? "A theme is already set for this install — it cannot be changed."
+      : error === "keys"
+        ? "Those API keys could not be saved. Check the values and try again."
+        : error === "site"
+          ? "Those site details could not be saved. Check the values and try again."
+          : null;
+---
+<Base
+  title="Set up your site"
+  description="First-run setup: pick a website type, add API keys, and name your site."
+  path="/setup"
+  robots="noindex, nofollow"
+>
+  <div class="wrap">
+    <section aria-labelledby="setup-heading">
+      <div class="section-head">
+        <h1 id="setup-heading">Set up your site</h1>
+        <p>Three quick steps. Your website type is <strong>permanent for this install</strong> — there is no theme switcher, so choose with intent.</p>
+      </div>
+
+      {notice ? <p class="setup-note" role="status">{notice}</p> : null}
+      {errText ? <p class="setup-error" role="alert">{errText}</p> : null}
+      {forced && themeLocked ? (
+        <p class="setup-note" role="status">This install already has a website type ({currentTheme || envTheme}) — that choice is locked. You can still update keys and site details below.</p>
+      ) : null}
+
+      <hr class="rule-double" />
+
+      <div class="section-head">
+        <h2 id="step-type">1 · Choose your website type</h2>
+        <p>Permanent for this install. No switcher later.</p>
+      </div>
+      <form method="post" action="/api/setup/theme" class="card">
+        <div class="setup-cards">
+          <label class="setup-radio">
+            <input type="radio" name="site.theme" value="discovery" required checked={currentTheme === "discovery"} disabled={themeLocked} />
+            <span><strong>Discovery</strong> — movie discovery + streaming guide: help people find what to watch and where.</span>
+          </label>
+          <label class="setup-radio">
+            <input type="radio" name="site.theme" value="publication" required checked={currentTheme !== "discovery"} disabled={themeLocked} />
+            <span><strong>Publication</strong> — personal review magazine: slow, opinionated criticism under your own name.</span>
+          </label>
+        </div>
+        <p><button type="submit" disabled={themeLocked}>{themeLocked ? "Website type locked" : "Save website type"}</button></p>
+      </form>
+
+      <div class="section-head">
+        <h2 id="step-keys">2 · API keys <span class="setup-optional">(optional)</span></h2>
+        <p>Server-only keys — never shown publicly. You can skip this and add them later in /admin/settings.</p>
+      </div>
+      <form method="post" action="/api/setup/keys" class="card">
+        <p>
+          <label for="setup-tmdb">TMDB API key</label><br />
+          <input id="setup-tmdb" type="password" name="tmdb.api_key" autocomplete="off" placeholder="Optional" />
+        </p>
+        <p>
+          <label for="setup-or">OpenRouter API key</label><br />
+          <input id="setup-or" type="password" name="openrouter.api_key" autocomplete="off" placeholder="Optional" />
+        </p>
+        <p><button type="submit">Save keys</button></p>
+      </form>
+
+      <div class="section-head">
+        <h2 id="step-site">3 · Name your site</h2>
+        <p>Finishing takes you to /admin/settings.</p>
+      </div>
+      <form method="post" action="/api/setup/finish" class="card">
+        <p>
+          <label for="setup-name">Site name</label><br />
+          <input id="setup-name" type="text" name="site.name" maxlength="120" placeholder="The Long Take" />
+        </p>
+        <p>
+          <label for="setup-region">Default region (2-letter code)</label><br />
+          <input id="setup-region" type="text" name="region.default" maxlength="2" placeholder="US" />
+        </p>
+        <p>
+          <label for="setup-brand">Brand preset</label><br />
+          <select id="setup-brand" name="brand.preset">
+            <option value="noir-cinema">noir-cinema</option>
+            <option value="golden-hour">golden-hour</option>
+            <option value="midnight-festival">midnight-festival</option>
+            <option value="reel-magazine">reel-magazine</option>
+          </select>
+        </p>
+        <p><button type="submit">Finish setup</button></p>
+      </form>
+    </section>
+  </div>
+</Base>
+
+<style>
+  .setup-cards { display: grid; gap: var(--space-4); margin-bottom: var(--space-4); }
+  .setup-radio {
+    display: flex; gap: var(--space-3); align-items: flex-start;
+    border: var(--rule); border-radius: var(--radius-card); padding: var(--space-4);
+    cursor: pointer;
+  }
+  .setup-radio input { margin-top: var(--space-1); min-width: 44px; min-height: 44px; }
+  .setup-optional { color: var(--color-ink-2); font-size: 1rem; }
+  .setup-note, .setup-error {
+    border: var(--rule); border-radius: var(--radius-card); padding: var(--space-3) var(--space-4);
+  }
+  .setup-error { border-color: var(--color-verdict-low); }
+  form.card input[type="text"], form.card input[type="password"], form.card select {
+    width: 100%; max-width: 32rem;
+    background: var(--color-paper-2); color: var(--color-ink);
+    border: var(--rule); border-radius: var(--radius-input);
+    padding: var(--space-2) var(--space-3); font: inherit;
+  }
+  form.card button {
+    background: var(--color-accent); color: var(--color-accent-ink);
+    border: 1px solid transparent; border-radius: var(--radius-pill);
+    padding: var(--space-2) var(--space-6); font: inherit; font-weight: 700;
+    min-height: 44px; cursor: pointer;
+  }
+  form.card button:disabled { opacity: 0.55; cursor: not-allowed; }
+</style>

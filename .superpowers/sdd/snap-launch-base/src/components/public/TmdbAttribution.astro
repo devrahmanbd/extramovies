@@ -1,0 +1,29 @@
+---
+/**
+ * TMDB attribution lockup per https://www.themoviedb.org/about/logos-attribution
+ * (every app using TMDB data/images must attribute TMDB with their logo).
+ * Logo is self-hosted at /vendor/tmdb-logo.svg (official "Alt short" mark).
+ * variant="compact": logo + short line (showcases, watchbox footnotes).
+ * variant="full": logo + short line + not-endorsed notice (footer, about areas).
+ */
+interface Props {
+  variant?: "compact" | "full";
+}
+const { variant = "compact" } = Astro.props;
+---
+<p class={`tmdb-attr${variant === "full" ? " tmdb-attr--full" : ""}`}>
+  <a href="https://www.themoviedb.org/" rel="noopener">
+    <img
+      src="/vendor/tmdb-logo.svg"
+      alt="The Movie Database (TMDB)"
+      width="120"
+      height="16"
+      loading="lazy"
+      decoding="async"
+    />
+  </a>
+  <span>Movie data and artwork by <a href="https://www.themoviedb.org/" rel="noopener">TMDB</a>.</span>
+  {variant === "full" ? (
+    <span class="tmdb-attr-notice">This product uses the TMDB API but is not endorsed or certified by TMDB. Streaming availability by <a href="https://www.justwatch.com/" rel="nofollow noopener">JustWatch</a> via TMDB.</span>
+  ) : null}
+</p>

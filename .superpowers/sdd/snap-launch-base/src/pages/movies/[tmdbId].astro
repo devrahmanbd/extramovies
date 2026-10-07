@@ -1,0 +1,267 @@
+---
+/**
+ * /movies/[tmdbId] — discovery detail: TMDB showcase + automatic providers.
+ * MovieShowcase is reused as-is when a linked journal review exists;
+ * otherwise a TMDB-data header renders (no verdict/rating framing invented).
+ * Custom manual links are out of scope here (no review-keyed store index),
+ * so customWatch is always null — never fabricated. Zero client JS.
+ * Amended 2026-10-06 (Ecosystem Index): surrounding page composition only
+ * (crumb + title header, linked-review slot, spacing rhythm). MovieShowcase /
+ * WhereToWatch reused as-is visually. All data/SEO/JSON-LD behavior identical.
+ * Frontmatter/data-fetch unchanged.
+ */
+import Base from "../../layouts/Base.astro";
+import MovieShowcase from "../../components/public/MovieShowcase.astro";
+import WhereToWatch from "../../components/public/WhereToWatch.astro";
+import { getBrand } from "../../lib/seo/brand";
+import {
+  breadcrumbJsonLd,
+  myReviewJsonLd,
+  type JsonLd,
+} from "../../lib/seo/jsonld";
+import { getMovieMetaSafe } from "../../lib/tmdb/client";
+import {
+  currentTheme,
+  defaultRegion,
+  findReviewForTmdbId,
+  hasTmdbKey,
+  toContentProviders,
+} from "../../lib/tmdb/discover";
+import { getStreamingAvailability } from "../../lib/streaming";
+import {
+  formatRuntime,
+  getLatestReviews,
+} from "../../lib/seo/content";
+import { readingMinutes } from "../../lib/markdown";
+import MemberReviewList from "../../components/member/MemberReviewList.astro";
+import MemberReviewForm from "../../components/member/MemberReviewForm.astro";
+import { getSession, getSessionToken } from "../../lib/auth/session";
+import { getDb } from "../../lib/db/adapter";
+import { listForMovie as listMemberReviews } from "../../lib/members/reviews";
+
+let theme: string = "publication";
+try {
+  theme = await currentTheme();
+} catch {
+  theme = "publication";
+}
+void theme;
+
+const rawId = Astro.params.tmdbId ?? "";
+if (!/^\d+$/.test(rawId)) {
+  return new Response("Movie not found", { status: 404 });
+}
+const tmdbId = Number(rawId);
+if (!Number.isSafeInteger(tmdbId)) {
+  return new Response("Movie not found", { status: 404 });
+}
+
+const brand = getBrand();
+const origin = Astro.url.origin;
+const path = `/movies/${tmdbId}`;
+const canonical = `${origin}${path}`;
+const region = defaultRegion();
+
+const [{ movie, ok }, providersRes] = await Promise.all([
+  getMovieMetaSafe(tmdbId, region),
+  getStreamingAvailability(tmdbId, region),
+]);
+
+if (!ok) {
+  Astro.response.status = 404;
+}
+
+const providers = toContentProviders(providersRes.providers);
+const review = ok ? findReviewForTmdbId(getLatestReviews(100), tmdbId) : null;
+
+// Member reviews (public slice): best-effort, never breaks the film page.
+let memberReviews: Awaited<ReturnType<typeof listMemberReviews>> = [];
+let memberViewerId: string | null = null;
+let memberCsrf = "";
+try {
+  const sess = getSession(getSessionToken(Astro.cookies as never));
+  if (sess && sess.role === "member" && sess.userId) {
+    memberViewerId = sess.userId;
+    memberCsrf = sess.csrfToken;
+  }
+} catch {
+  memberViewerId = null;
+}
+try {
+  memberReviews = ok ? await listMemberReviews(getDb({}) as never, tmdbId, "movie", 20) : [];
+} catch {
+  memberReviews = [];
+}
+
+const directors = movie.credits?.directors ?? [];
+const cast = (movie.credits?.topCast ?? []).map((c) => c.name);
+const runtime = formatRuntime(movie.runtimeMinutes);
+const genreNames = (movie.genres ?? []).map((g) => g.name);
+
+const jsonld: JsonLd[] = [];
+if (ok) {
+  const movieNode: JsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Movie",
+    name: movie.title,
+    ...(movie.year ? { dateCreated: String(movie.year) } : {}),
+    ...(genreNames.length > 0 ? { genre: genreNames } : {}),
+    ...(directors[0] ? { director: { "@type": "Person", name: directors[0].name } } : {}),
+    ...(movie.posterUrl ? { image: movie.posterUrl } : {}),
+    ...(movie.overview ? { description: movie.overview } : {}),
+  };
+  jsonld.push(
+    movieNode,
+    breadcrumbJsonLd(origin, [
+      { name: "Home", path: "/" },
+      { name: "Movies", path: "/movies" },
+      { name: movie.title, path },
+    ])
+  );
+  if (review) {
+    jsonld.push(myReviewJsonLd(review, { ...brand, origin }, canonical));
+  }
+}
+
+const publishedDate = review
+  ? new Date(review.publishedAt).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      timeZone: "UTC",
+    })
+  : "";
+const titleText = ok ? movie.title : "Movie not available";
+const isLong = ok ? movie.title.length > 40 : false;
+const headMeta = ok
+  ? [
+      movie.year ? String(movie.year) : null,
+      runtime,
+      directors[0] ? `Dir. ${directors[0].name}` : null,
+    ]
+      .filter(Boolean)
+      .join("  ·  ")
+  : "";
+---
+<Base
+  title={titleText}
+  description={ok && movie.overview
+    ? movie.overview
+    : "Look up streaming availability for this film — data by TMDB and JustWatch."}
+  path={path}
+  image={ok ? (movie.backdropUrl ?? movie.posterUrl ?? null) : null}
+  imageAlt={ok ? `${movie.title} artwork` : undefined}
+  robots={ok ? "index, follow" : "noindex, follow"}
+  jsonld={jsonld}
+  current="movies"
+>
+  <div class="wrap">
+    {!ok ? (
+      <section class="band section--md" aria-labelledby="movie-title">
+        <nav class="d-crumb" aria-label="Breadcrumb">
+          <a href="/">Home</a><span aria-hidden="true"> / </span><a href="/movies">Movies</a>
+        </nav>
+        <h1 id="movie-title">Movie not available</h1>
+        {!hasTmdbKey() ? (
+          <p class="d-empty">Discovery needs a TMDB key. <a href="/admin/settings">Add your TMDB key in setup</a> to load film pages.</p>
+        ) : (
+          <p class="d-empty">We could not load this film from TMDB right now. Please try again later.</p>
+        )}
+        <p><a href="/movies">Back to browse</a></p>
+      </section>
+    ) : (
+      <>
+        <section class="band section--md d-detail-head" aria-labelledby="movie-title">
+          <nav class="d-crumb" aria-label="Breadcrumb">
+            <a href="/">Home</a><span aria-hidden="true"> / </span><a href="/movies">Movies</a><span aria-hidden="true"> / </span><span aria-current="page">{movie.title}</span>
+          </nav>
+          <p class="d-kicker">Film · streaming guide</p>
+          <h1 id="movie-title" class={isLong ? "display--long" : undefined}>{movie.title}{movie.year ? <span class="tnum"> ({movie.year})</span> : ""}</h1>
+          {headMeta ? <p class="d-detail-sub tnum">{headMeta}</p> : null}
+          {movie.tagline ? <p class="d-detail-tagline">{movie.tagline}</p> : null}
+        </section>
+
+        {review ? (
+          <>
+            <MovieShowcase
+              movieTitle={review.movieTitle}
+              year={review.year}
+              genres={review.genres}
+              runtime={formatRuntime(review.runtimeMinutes)}
+              director={review.director}
+              cast={review.cast}
+              posterUrl={review.posterUrl ?? movie.posterUrl}
+              backdropUrl={review.backdropUrl ?? movie.backdropUrl}
+              rating={review.rating}
+              verdict={review.verdict}
+              authorName={review.authorName}
+              publishedAt={review.publishedAt}
+              publishedDate={publishedDate}
+              minutes={readingMinutes(review.bodyMarkdown)}
+              tmdbId={review.tmdbId ?? movie.tmdbId}
+            />
+            <section class="band--alt section--sm d-journal-slot" aria-labelledby="d-review-heading">
+              <div class="section-head">
+                <h2 id="d-review-heading">From The Platform</h2>
+              </div>
+              <p class="d-journal-excerpt">{review.excerpt}</p>
+              <p class="d-journal-link"><a href={`/reviews/${review.slug}`}>Read the full review</a></p>
+            </section>
+          </>
+        ) : (
+          <>
+            <div class="d-detail band section--md">
+              {movie.posterUrl ? (
+                <img
+                  class="d-detail-poster"
+                  src={movie.posterUrl}
+                  alt={`Poster for ${movie.title}`}
+                  width="342"
+                  height="513"
+                  fetchpriority="high"
+                  decoding="async"
+                />
+              ) : null}
+              <div class="d-detail-info">
+                {movie.overview ? <p>{movie.overview}</p> : null}
+                <dl class="fact-list">
+                  {movie.year ? <div><dt>Year</dt><dd class="tnum">{movie.year}</dd></div> : null}
+                  {runtime ? <div><dt>Runtime</dt><dd>{runtime}</dd></div> : null}
+                  {genreNames.length > 0 ? <div><dt>Genres</dt><dd>{genreNames.join(", ")}</dd></div> : null}
+                  {directors.length > 0 ? <div><dt>Director</dt><dd>{directors.map((d) => d.name).join(", ")}</dd></div> : null}
+                  {cast.length > 0 ? <div><dt>Cast</dt><dd>{cast.slice(0, 6).join(", ")}</dd></div> : null}
+                  {movie.voteAverage !== null ? (
+                    <div><dt>TMDB score</dt><dd class="tnum">{movie.voteAverage.toFixed(1)}/10{movie.voteCount ? ` (${movie.voteCount} votes)` : ""}</dd></div>
+                  ) : null}
+                </dl>
+                <p class="d-empty">No review yet — <a href="/reviews">browse the journal</a>.</p>
+              </div>
+            </div>
+          </>
+        )}
+
+        <WhereToWatch
+          providers={providers}
+          movieTitle={movie.title}
+          slug={`movie-${tmdbId}`}
+          customWatch={null}
+          region={region}
+        />
+
+        <section class="band section--sm" aria-labelledby="member-reviews-heading">
+          <div class="section-head">
+            <h2 id="member-reviews-heading">Member reviews</h2>
+          </div>
+          <MemberReviewList reviews={memberReviews} />
+          <MemberReviewForm
+            tmdbId={tmdbId}
+            media="movie"
+            viewerId={memberViewerId}
+            csrfToken={memberCsrf}
+            loginNext={path}
+          />
+        </section>
+      </>
+    )}
+  </div>
+</Base>

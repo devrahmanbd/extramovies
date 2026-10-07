@@ -1,0 +1,174 @@
+---
+/**
+ * /movies — server-rendered discovery grid with filters (q, genre, year, watch).
+ * Filtered views are robots noindex; the clean /movies URL stays indexable.
+ * Zero client JS. Fail-soft: TMDB errors render honest empty states, never 500s.
+ * Amended 2026-10-06 (Ecosystem Index): slim utility filter strip + dense varied
+ * flow (lead result large, rest compact) — not a uniform grid. Single h1.
+ * Frontmatter/data-fetch unchanged.
+ */
+import Base from "../../layouts/Base.astro";
+import MovieTile from "../../components/discover/MovieTile.astro";
+import { getBrand } from "../../lib/seo/brand";
+import { breadcrumbJsonLd } from "../../lib/seo/jsonld";
+import {
+  currentTheme,
+  defaultRegion,
+  discoverMovies,
+  getListTiles,
+  hasTmdbKey,
+  listTmdbGenres,
+  mapToTile,
+  parseDiscoverFilters,
+  resolveGenreId,
+  searchMovies,
+  LIST_TITLES,
+  LIST_BLURBS,
+  type DiscoverTile,
+} from "../../lib/tmdb/discover";
+
+let theme: string = "publication";
+try {
+  theme = await currentTheme();
+} catch {
+  theme = "publication";
+}
+
+const brand = getBrand();
+const origin = Astro.url.origin;
+const filters = parseDiscoverFilters(Astro.url.searchParams);
+const region = defaultRegion();
+const keyPresent = hasTmdbKey();
+
+let tmdbGenres = await listTmdbGenres().catch(() => []);
+const genreId = resolveGenreId(tmdbGenres, filters.genre);
+
+let tiles: DiscoverTile[] = [];
+if (keyPresent) {
+  try {
+    if (filters.q) {
+      tiles = await searchMovies(filters.q);
+    } else if (filters.list) {
+      tiles = await getListTiles(filters.list, region);
+    } else {
+      tiles = await discoverMovies(filters, { region, genreId });
+    }
+  } catch {
+    tiles = [];
+  }
+}
+
+const robots = filters.hasFilters ? "noindex, follow" : "index, follow";
+const jsonld = [
+  breadcrumbJsonLd(origin, [
+    { name: "Home", path: "/" },
+    { name: "Movies", path: "/movies" },
+  ]),
+];
+const resultText = keyPresent
+  ? tiles.length === 1
+    ? "1 film"
+    : `${tiles.length} films`
+  : "Discovery unavailable";
+const activeGenreLabel =
+  genreId !== null
+    ? (tmdbGenres.find((g) => g.id === genreId)?.name ?? filters.genre)
+    : null;
+const listTitle = filters.list ? (LIST_TITLES[filters.list] ?? "Browse movies") : null;
+const listBlurb = filters.list ? (LIST_BLURBS[filters.list] ?? null) : null;
+const h1Text = filters.q ? `Results for “${filters.q}”` : (listTitle ?? "Browse movies");
+const isLong = h1Text.length > 40;
+---
+<Base
+  title={filters.q ? `Results for ${filters.q}` : (listTitle ?? "Browse movies")}
+  description={filters.q
+    ? `TMDB results for “${filters.q}” with streaming availability — search films and see where to watch.`
+    : filters.list && listBlurb
+      ? `${listTitle} — ${listBlurb} Streaming availability by JustWatch via TMDB.`
+      : "Browse films by genre, year, and where to watch — streaming availability by JustWatch via TMDB."}
+  path="/movies"
+  robots={robots}
+  jsonld={jsonld}
+  current="movies"
+>
+  <div class="wrap">
+    <section class="band section--md d-browse-head" aria-labelledby="movies-title">
+      <nav class="d-crumb" aria-label="Breadcrumb">
+        <a href="/">Home</a><span aria-hidden="true"> / </span><span aria-current="page">Movies</span>
+      </nav>
+      <h1 id="movies-title" class={isLong ? "display--long" : undefined}>{h1Text}</h1>
+      <p class="d-lede">
+        {listBlurb && !filters.q ? <>{listBlurb} </> : null}
+        {activeGenreLabel ? <>Genre: {activeGenreLabel}. </> : null}
+        {filters.year !== null ? <>Year: {filters.year}. </> : null}
+        {filters.watch ? <>Where to watch: {filters.watch}. </> : null}
+        Streaming availability by JustWatch via TMDB.
+      </p>
+
+      <form class="d-filters d-filterbar" action="/movies" method="get" role="search" aria-label="Filter movies">
+        <div class="d-field">
+          <label for="f-q">Title</label>
+          <input id="f-q" type="search" name="q" value={filters.q} placeholder="Search by title…" autocomplete="off" />
+        </div>
+        <div class="d-field">
+          <label for="f-genre">Genre</label>
+          <select id="f-genre" name="genre">
+            <option value="">All genres</option>
+            {tmdbGenres.map((g) => (
+              <option value={String(g.id)} selected={genreId === g.id}>{g.name}</option>
+            ))}
+          </select>
+        </div>
+        <div class="d-field">
+          <label for="f-year">Year</label>
+          <input
+            id="f-year"
+            type="number"
+            name="year"
+            min="1888"
+            max={new Date().getFullYear() + 2}
+            value={filters.year ?? ""}
+            placeholder="Any"
+          />
+        </div>
+        <div class="d-field">
+          <label for="f-watch">Where to watch</label>
+          <select id="f-watch" name="watch">
+            <option value="">Anywhere</option>
+            <option value="stream" selected={filters.watch === "stream"}>Stream</option>
+            <option value="free" selected={filters.watch === "free"}>Free</option>
+            <option value="rent" selected={filters.watch === "rent"}>Rent</option>
+            <option value="buy" selected={filters.watch === "buy"}>Buy</option>
+          </select>
+        </div>
+        <div class="d-filters-actions">
+          <button type="submit">Apply</button>
+          {filters.hasFilters ? <a href="/movies">Clear</a> : null}
+        </div>
+      </form>
+    </section>
+
+    <section class="band--alt section--md d-results" aria-labelledby="d-results-heading">
+      <div class="section-head d-section-row">
+        <div>
+          <h2 id="d-results-heading" class="tnum">{resultText}</h2>
+          {filters.hasFilters ? <p>Filtered view — not indexed. <a href="/movies">Clear filters</a> for the full browse.</p> : <p>Lead pick first, then the compact flow.</p>}
+        </div>
+      </div>
+      {!keyPresent ? (
+        <p class="d-empty">Discovery needs a TMDB key. <a href="/admin/settings">Add your TMDB key in setup</a> to browse films.</p>
+      ) : tiles.length > 0 ? (
+        <ol class="d-flow">
+          {tiles.map((t, i) => (
+            <MovieTile tmdbId={t.tmdbId} title={t.title} year={t.year} posterUrl={t.posterUrl} rating={t.rating} variant={i === 0 ? "lead" : "compact"} />
+          ))}
+        </ol>
+      ) : (
+        <p class="d-empty">
+          No films found for these filters.
+          {filters.hasFilters ? <> <a href="/movies">Clear filters</a> and try again.</> : null}
+        </p>
+      )}
+    </section>
+  </div>
+</Base>

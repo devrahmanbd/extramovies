@@ -1,0 +1,156 @@
+---
+/** Base layout — every public page flows through here and reads getBrand(). */
+import "../styles/tokens.css";
+import "../styles/global.css";
+import { getBrand } from "../lib/seo/brand";
+import { buildPageMeta } from "../lib/seo/meta";
+import type { JsonLd } from "../lib/seo/jsonld";
+import SiteHeader from "../components/public/SiteHeader.astro";
+import { getSession, getSessionToken } from "../lib/auth/session";
+import { getUserById } from "../lib/users/store";
+import { getDb } from "../lib/db/adapter";
+import SiteFooter from "../components/public/SiteFooter.astro";
+import { listGenres } from "../lib/seo/content";
+
+interface Props {
+  title: string;
+  description?: string;
+  descriptionExtra?: string;
+  path?: string;
+  image?: string | null;
+  imageAlt?: string;
+  robots?: string;
+  ogType?: "website" | "article";
+  publishedTime?: string;
+  modifiedTime?: string;
+  jsonld?: JsonLd[];
+  current?: string;
+}
+
+const {
+  title,
+  description,
+  descriptionExtra,
+  image,
+  imageAlt,
+  robots = "index, follow",
+  ogType = "website",
+  publishedTime,
+  modifiedTime,
+  jsonld = [],
+  current = "",
+} = Astro.props;
+
+const brand = getBrand();
+const origin = Astro.url.origin;
+const path = Astro.props.path ?? Astro.url.pathname;
+const meta = buildPageMeta({
+  brand,
+  title,
+  descriptionSource: description ?? brand.description,
+  descriptionExtra,
+  path,
+  origin,
+});
+const ogImage = image ?? brand.defaultOgImage ?? null;
+const brandVars = [
+  `--brand-accent:${brand.colors.accent}`,
+  `--brand-accent-ink:${brand.colors.accentInk}`,
+  `--brand-gold:${brand.colors.gold}`,
+  `--font-display:${brand.fonts.display}`,
+  `--font-body:${brand.fonts.body}`,
+].join(";");
+const genres = listGenres();
+// Member state for the nav (best-effort; pages render identically anonymous).
+let member: { handle: string; displayName: string } | null = null;
+let memberCsrf = "";
+try {
+  const sess = getSession(getSessionToken(Astro.cookies as never));
+  if (sess && sess.role === "member" && sess.userId) {
+    memberCsrf = sess.csrfToken;
+    try {
+      const u = await getUserById(getDb({}), sess.userId);
+      if (u) member = { handle: u.handle, displayName: u.displayName };
+    } catch {
+      /* DB unavailable — stay anonymous */
+    }
+  }
+} catch {
+  /* never break page render for nav state */
+}
+---
+<!DOCTYPE html>
+<html lang="en" style={brandVars}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{meta.seoTitle}</title>
+    <meta name="description" content={meta.metaDesc} />
+    <link rel="canonical" href={meta.canonical} />
+    <meta name="robots" content={robots} />
+    <meta name="theme-color" content={brand.themeColor} />
+    {brand.fonts.fontUrl ? (
+      <>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link rel="stylesheet" href={brand.fonts.fontUrl} media="print" onload="this.media='all'" />
+      </>
+    ) : (
+      <>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Lato:wght@400;700;900&display=swap" media="print" onload="this.media='all'" />
+      </>
+    )}
+
+    <meta property="og:type" content={ogType} />
+    <meta property="og:site_name" content={brand.name} />
+    <meta property="og:title" content={meta.seoTitle} />
+    <meta property="og:description" content={meta.metaDesc} />
+    <meta property="og:url" content={meta.canonical} />
+    <meta property="og:locale" content={brand.locale} />
+    {ogImage ? <meta property="og:image" content={ogImage} /> : null}
+    {ogImage && imageAlt ? <meta property="og:image:alt" content={imageAlt} /> : null}
+    {ogType === "article" && publishedTime ? (
+      <meta property="article:published_time" content={publishedTime} />
+    ) : null}
+    {ogType === "article" && modifiedTime ? (
+      <meta property="article:modified_time" content={modifiedTime} />
+    ) : null}
+
+    <meta
+      name="twitter:card"
+      content={ogImage ? "summary_large_image" : "summary"}
+    />
+    <meta name="twitter:title" content={meta.seoTitle} />
+    <meta name="twitter:description" content={meta.metaDesc} />
+    {ogImage ? <meta name="twitter:image" content={ogImage} /> : null}
+
+    <link rel="icon" href={brand.icon} />
+    <link
+      rel="alternate"
+      type="application/rss+xml"
+      title={`${brand.name} — latest reviews`}
+      href={`${origin}/rss.xml`}
+    />
+    {jsonld.map((node) => (
+      <script type="application/ld+json" set:html={JSON.stringify(node)} />
+    ))}
+    <script is:inline>
+      try {
+        const t = localStorage.getItem("theme");
+        if (t === "dark" || t === "light") {
+          document.documentElement.dataset.theme = t;
+        }
+      } catch (e) {}
+    </script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <SiteHeader brand={brand} current={current} member={member} csrfToken={memberCsrf} />
+    <main id="main">
+      <slot />
+    </main>
+    <SiteFooter brand={brand} genres={genres} />
+  </body>
+</html>

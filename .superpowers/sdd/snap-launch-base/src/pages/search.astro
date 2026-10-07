@@ -1,0 +1,58 @@
+---
+/** Search — server-rendered, no JS. Indexed out of robots via noindex. */
+import Base from "../layouts/Base.astro";
+import ReviewCard from "../components/public/ReviewCard.astro";
+import SearchForm from "../components/public/SearchForm.astro";
+import { breadcrumbJsonLd } from "../lib/seo/jsonld";
+import { getBrand } from "../lib/seo/brand";
+import { searchReviews } from "../lib/seo/content";
+
+const brand = getBrand();
+const origin = Astro.url.origin;
+const query = (Astro.url.searchParams.get("q") ?? "").trim().slice(0, 120);
+const results = searchReviews(query);
+const jsonld = [breadcrumbJsonLd(origin, [{ name: "Home", path: "/" }, { name: "Search", path: "/search" }])];
+const searchTitle = query ? `Search: ${query}` : "Search reviews";
+const searchTitleIsLong = searchTitle.length > 40;
+---
+<Base
+  title={query ? `Search: ${query}` : "Search reviews"}
+  description={`Search the review archive by film title, genre, or year.`}
+  path="/search"
+  robots="noindex, follow"
+  jsonld={jsonld}
+  current="search"
+>
+  <div class="wrap">
+    <section aria-labelledby="search-title" class="band section--lg glam-search-head">
+      <div class="section-head">
+        <p class="glam-kicker tnum">Index search</p>
+        <h1 id="search-title" class={searchTitleIsLong ? "display--long" : undefined}>Search reviews</h1>
+      </div>
+      <SearchForm query={query} />
+      {query ? (
+        <p role="status" class="tnum">
+          {results.length} {results.length === 1 ? "result" : "results"} for
+          {" "}“{query}”.
+        </p>
+      ) : (
+        <p>Try a film title, a genre like “Drama”, or a year like “2024”.</p>
+      )}
+    </section>
+  </div>
+
+  {query && results.length > 0 ? (
+    <div class="band section--md glam-search-band">
+      <div class="wrap">
+        <ol class="glam-results">
+          {results.map((r, i) => <ReviewCard review={r} index={i} variant="search" showExcerpt={true} />)}
+        </ol>
+      </div>
+    </div>
+  ) : null}
+  {query && results.length === 0 ? (
+    <div class="wrap">
+      <p>Nothing matched. <a href="/reviews">Browse the full archive</a> instead.</p>
+    </div>
+  ) : null}
+</Base>

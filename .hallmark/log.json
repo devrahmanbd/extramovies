@@ -1,0 +1,72 @@
+[
+ {
+  "date": "2026-10-06",
+  "macrostructure": "08 Photographic + manifesto voice",
+  "theme": "studied-DNA glamour-final",
+  "enrichment": "photographic-content",
+  "brief": "Glamour rebuild re-audit 0/0/0, kicker default removed"
+ },
+ {
+  "date": "2026-10-06",
+  "macrostructure": "08 Photographic + 20 Ecosystem Index",
+  "theme": "studied-DNA glamour",
+  "enrichment": "photographic-content",
+  "brief": "Glamour rebuild verified: re-audit 0/0/0"
+ },
+ {
+  "date": "2026-10-06",
+  "macrostructure": "Photographic hero + catalogue rails",
+  "theme": "studied-DNA publication refinement",
+  "enrichment": "none",
+  "brief": "Ghost-track fixes, unified watchbox, MyRating, author identity verified live"
+ },
+ {
+  "date": "2026-10-06",
+  "macrostructure": "Photographic hero + catalogue rails",
+  "theme": "studied-DNA reskin+import",
+  "enrichment": "none",
+  "brief": "Type scale/bands/rails reskin both themes; series table + bulk importer live"
+ },
+ {
+  "date": "2026-10-06",
+  "macrostructure": "Photographic hero + catalogue rails",
+  "theme": "studied-DNA amended",
+  "enrichment": "none",
+  "brief": "Multi-page amendment: type scale + leading rhythm + hero size-by-length + tnum; 3vw rail gutters + band rhythm + snap edge-fade (design.md + tokens.css only)"
+ },
+ {
+  "date": "2026-10-05",
+  "macrostructure": "Photographic hero + catalogue rails",
+  "theme": "studied-DNA two-theme",
+  "enrichment": "none",
+  "brief": "SITE_THEME discovery/publication + setup wizard + discovery pages"
+ },
+ {
+  "date": "2026-10-05",
+  "macrostructure": "Photographic hero + catalogue rails",
+  "theme": "studied-DNA full-bleed fix",
+  "enrichment": "none",
+  "brief": "Hero lifted out of .wrap to true full-bleed marquee"
+ },
+ {
+  "date": "2026-10-05",
+  "macrostructure": "Photographic hero + catalogue rails",
+  "theme": "studied-DNA re-audit",
+  "enrichment": "none",
+  "brief": "Audit fixes verified: 0 critical 0 major 0 minor"
+ },
+ {
+  "date": "2026-10-05",
+  "macrostructure": "Photographic hero + catalogue rails",
+  "theme": "studied-DNA built",
+  "enrichment": "none",
+  "brief": "JustWatch DNA build: dark/gold/Anton+Lato, buybox, rails, magazine variant"
+ },
+ {
+  "date": "2026-10-05",
+  "macrostructure": "Photographic hero + catalogue rails",
+  "theme": "studied-DNA",
+  "enrichment": "none",
+  "brief": "JustWatch title-page DNA for movie showcase + watch buybox"
+ }
+]

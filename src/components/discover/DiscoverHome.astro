@@ -1,0 +1,468 @@
+---
+/**
+ * DiscoverHome — streaming-guide homepage (Theme 1).
+ * Dense movie shelves: compact hero band (modest h1 + inline search +
+ * 4 quick links); calm shelf headers (small uppercase label + rule +
+ * count + right-aligned See-all); snap-scroll poster rails (5-8 desktop,
+ * 3-4 mobile; full 2:3 contain posters, no card boxes); one asymmetric
+ * featured band (backdrop art with overlaid copy) + one collections
+ * spotlight; genre text index; reviewed grid; top-rated rows.
+ * Server-rendered, zero client JS. Sections render ONLY when data non-empty.
+ * Single h1. Plain language only. No technical labels.
+ */
+import MovieTile from "./MovieTile.astro";
+import type { DiscoverTile, SiteTheme } from "../../lib/tmdb/discover";
+import { COLLECTIONS, buildListHref } from "../../lib/tmdb/discover";
+import type { Genre } from "../../lib/tmdb/types";
+import type { PublicReview } from "../../lib/seo/content";
+
+interface Props {
+  trending: DiscoverTile[];
+  popular: DiscoverTile[];
+  nowPlaying: DiscoverTile[];
+  upcoming: DiscoverTile[];
+  free: DiscoverTile[];
+  stream: DiscoverTile[];
+  rent: DiscoverTile[];
+  tmdbGenres: Genre[];
+  localGenres: string[];
+  localLatest: PublicReview[];
+  topRated: PublicReview[];
+  featured: PublicReview | null;
+  hasTmdbKey: boolean;
+  theme?: SiteTheme;
+}
+const {
+  trending,
+  popular,
+  nowPlaying,
+  upcoming,
+  free,
+  stream,
+  rent,
+  tmdbGenres,
+  localGenres,
+  localLatest,
+  topRated,
+  featured,
+  hasTmdbKey,
+} = Astro.props;
+const safe = <T,>(v: T | undefined | null, fallback: T): T =>
+  Array.isArray(v) ? (v as T) : (v ?? fallback);
+const trendingTiles = safe(trending, []);
+const popularTiles = safe(popular, []);
+const nowPlayingTiles = safe(nowPlaying, []);
+const upcomingTiles = safe(upcoming, []);
+const freeTiles = safe(free, []);
+const streamTiles = safe(stream, []);
+const rentTiles = safe(rent, []);
+const latest = safe(localLatest, []);
+const top = safe(topRated, []);
+const genreRail = tmdbGenres.length > 0
+  ? tmdbGenres.map((g) => ({ label: g.name, href: `/movies?genre=${g.id}` }))
+  : localGenres.map((g) => ({ label: g, href: `/movies?genre=${encodeURIComponent(g)}` }));
+const reviewHref = (r: PublicReview) =>
+  r.tmdbId ? `/movies/${r.tmdbId}` : `/reviews/${r.slug}`;
+const ratingBand = (rating: number | null) =>
+  rating !== null && rating >= 7 ? "high" : rating !== null && rating >= 5 ? "mid" : "low";
+/** Rent rail is thin by nature — skip silently when fewer than 4 tiles. */
+const rentRail = rentTiles.length >= 4 ? rentTiles : [];
+const featuredPick = featured ?? null;
+const showFeatured = featuredPick !== null;
+/** Carousel covers every reviewed film (featured first), deduped by slug. */
+const carousel = [featuredPick, ...latest].filter(
+  (r, i, arr): r is PublicReview => r !== null && arr.findIndex((x) => x?.slug === r.slug) === i
+);
+/** Hero slider: trending (then popular) titles carrying backdrop art, max 6. */
+const heroSlides = (() => {
+  const pool = [...trendingTiles, ...popularTiles].filter((t) => t.backdropUrl);
+  const seen = new Set<number>();
+  return pool
+    .filter((t) => (seen.has(t.tmdbId) ? false : (seen.add(t.tmdbId), true)))
+    .slice(0, 10);
+})();
+const countText = (n: number, singular: string, plural: string) =>
+  n === 1 ? `1 ${singular}` : `${n} ${plural}`;
+---
+{heroSlides.length > 0 ? (
+  <section class="d-hero-slider" aria-label="Trending titles">
+    <div class="d-hero-head">
+      <h1 id="discover-title">Trending this week</h1>
+      {heroSlides.length > 1 ? (
+        <nav class="d-hero-dots" aria-label="Choose slide">
+          {heroSlides.map((t, i) => (
+            <a href={`#hero-slide-${i}`} aria-label={`Show slide ${i + 1}: ${t.title}`}></a>
+          ))}
+        </nav>
+      ) : null}
+    </div>
+    <div class="d-hero-track">
+      {heroSlides.map((t, i) => {
+        const prev = (i - 1 + heroSlides.length) % heroSlides.length;
+        const next = (i + 1) % heroSlides.length;
+        return (
+          <article class="d-hero-slide" id={`hero-slide-${i}`} aria-roledescription="slide" aria-label={`${i + 1} of ${heroSlides.length}`}>
+            <img
+              class="d-hero-bg"
+              src={t.backdropUrl!}
+              alt=""
+              width="1280"
+              height="720"
+              loading={i === 0 ? "eager" : "lazy"}
+              fetchpriority={i === 0 ? "high" : undefined}
+              decoding="async"
+            />
+            <span class="d-hero-vignette" aria-hidden="true"></span>
+            <div class="d-hero-copy">
+              <p class="d-hero-eyebrow">Trending this week</p>
+              <h2 class="d-hero-title"><a href={`/movies/${t.tmdbId}`}>{t.title}</a></h2>
+              <p class="d-hero-meta tnum">
+                {t.rating !== null ? <><span aria-hidden="true">★ </span>{t.rating.toFixed(1)}<span aria-hidden="true"> · </span></> : null}
+                {t.year ?? ""}
+                <span aria-hidden="true"> · </span>Movie
+              </p>
+              {t.overview ? <p class="d-hero-overview">{t.overview}</p> : null}
+              <div class="d-hero-actions">
+                <a class="d-btn-primary" href={`/movies/${t.tmdbId}#watch-movie-${t.tmdbId}`}>Where to watch</a>
+                <a class="d-btn-secondary" href={`/movies/${t.tmdbId}`}><span aria-hidden="true">ⓘ </span>Details</a>
+              </div>
+            </div>
+            {heroSlides.length > 1 ? (
+              <nav class="d-hero-arrows" aria-label="Move between slides">
+                <a href={`#hero-slide-${prev}`} aria-label="Previous title" data-hero-goto={prev}>‹</a>
+                <a href={`#hero-slide-${next}`} aria-label="Next title" data-hero-goto={next}>›</a>
+              </nav>
+            ) : null}
+          </article>
+        );
+      })}
+    </div>
+    {heroSlides.length > 1 ? (
+      <script>
+        import { gsap } from "gsap";
+        (() => {
+          const root = document.querySelector(".d-hero-slider");
+          if (!root) return;
+          const track = root.querySelector(".d-hero-track");
+          const slides = [...root.querySelectorAll(".d-hero-slide")];
+          const dots = [...root.querySelectorAll(".d-hero-dots a")];
+          if (!track || slides.length < 2) return;
+          if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+          let index = 0;
+          let timer: ReturnType<typeof setInterval> | null = null;
+          const mark = (n: number) => {
+            dots.forEach((d, i) => {
+              if (i === n) d.setAttribute("aria-current", "true");
+              else d.removeAttribute("aria-current");
+            });
+          };
+          const go = (n: number, instant = false) => {
+            index = (n + slides.length) % slides.length;
+            const left = index * track.clientWidth;
+            if (instant) {
+              track.scrollLeft = left;
+            } else {
+              gsap.to(track, { scrollLeft: left, duration: 1, ease: "power3.inOut" });
+            }
+            mark(index);
+          };
+          const play = () => {
+            stop();
+            timer = setInterval(() => go(index + 1), 6000);
+          };
+          const stop = () => {
+            if (timer) clearInterval(timer);
+            timer = null;
+          };
+          root.querySelectorAll("[data-hero-goto]").forEach((a) => {
+            a.addEventListener("click", (e) => {
+              e.preventDefault();
+              go(Number((a as HTMLElement).dataset.heroGoto ?? "0"));
+              play();
+            });
+          });
+          dots.forEach((d, i) => {
+            d.addEventListener("click", (e) => {
+              e.preventDefault();
+              go(i);
+              play();
+            });
+          });
+          track.addEventListener("scroll", () => {
+            const n = Math.round(track.scrollLeft / track.clientWidth);
+            if (n !== index) {
+              index = (n + slides.length) % slides.length;
+              mark(index);
+            }
+          }, { passive: true });
+          root.addEventListener("mouseenter", stop);
+          root.addEventListener("mouseleave", play);
+          root.addEventListener("focusin", stop);
+          root.addEventListener("focusout", play);
+          document.addEventListener("visibilitychange", () => {
+            if (document.hidden) stop();
+            else play();
+          });
+          mark(0);
+          play();
+        })();
+      </script>
+    ) : null}
+    {!hasTmdbKey ? (
+      <p class="d-empty-note">Streaming rows unlock with a TMDB key — <a href="/admin/settings">add it in setup</a>. Reviews always work.</p>
+    ) : null}
+  </section>
+) : null}
+{carousel.length > 0 ? (
+  <section class="d-carousel band" aria-roledescription="carousel" aria-label="Reviewed movies">
+    <div class="d-car-head">
+      <h2 id="discover-reviewed" class="d-section-title">Reviewed movies</h2>
+      <p class="d-car-count tnum">{countText(carousel.length, "review", "reviews")}</p>
+    </div>
+    <div class="d-car-track">
+      {carousel.map((r, i) => {
+        const art = r.backdropUrl ?? r.posterUrl;
+        const prev = carousel[(i - 1 + carousel.length) % carousel.length]!;
+        const next = carousel[(i + 1) % carousel.length]!;
+        return (
+          <article class="d-car-slide" id={`review-slide-${i}`} aria-roledescription="slide" aria-label={`${i + 1} of ${carousel.length}`}>
+            {art ? (
+              <a class="d-car-art" href={reviewHref(r)} tabindex="-1" aria-hidden="true">
+                <img
+                  src={art}
+                  alt=""
+                  width="1280"
+                  height="720"
+                  loading="lazy"
+                  decoding="async"
+                />
+                <span class="d-car-scrim" aria-hidden="true"></span>
+              </a>
+            ) : null}
+            <div class="d-car-copy">
+              <p class="d-shelf-label">Reviewed · {r.rating !== null ? `Our rating ${r.rating.toFixed(1)}/10` : "Preview"}</p>
+              <h2 class="d-car-title"><a href={reviewHref(r)}>{r.movieTitle}{r.year ? ` (${r.year})` : ""}</a></h2>
+              <p class="d-car-verdict">{r.verdict}</p>
+              <p class="d-car-cta"><a href={reviewHref(r)}>Read review →</a></p>
+            </div>
+            {carousel.length > 1 ? (
+              <nav class="d-car-nav" aria-label="Choose slide">
+                <a href={`#review-slide-${carousel.indexOf(prev)}`} aria-label="Previous review">‹</a>
+                <a href={`#review-slide-${carousel.indexOf(next)}`} aria-label="Next review">›</a>
+              </nav>
+            ) : null}
+          </article>
+        );
+      })}
+    </div>
+  </section>
+) : (
+  <section class="d-guide-hero band section--sm" aria-labelledby="discover-title">
+    <div class="d-guide-hero-inner">
+      <h1 id="discover-title">Find your next movie</h1>
+      <p class="d-lede">Reviews land here first — add a TMDB key in setup to unlock streaming rows.</p>
+    </div>
+  </section>
+)}
+
+{trendingTiles.length > 0 ? (
+  <section class="band section--sm d-guide-section" aria-labelledby="d-trending-heading">
+    <div class="d-shelf-head">
+      <h2 id="d-trending-heading" class="d-shelf-label">Trending now</h2>
+      <span class="d-shelf-rule" aria-hidden="true"></span>
+      <span class="d-shelf-count tnum">{countText(trendingTiles.length, "film", "films")}</span>
+      <a class="d-shelf-see" href={buildListHref("trending")}>See all →</a>
+    </div>
+    <ol class="d-rail-posters d-guide-rail rail-bleed rail-snap rail-snap--fade">
+      {trendingTiles.map((t) => (
+        <MovieTile tmdbId={t.tmdbId} title={t.title} year={t.year} posterUrl={t.posterUrl} rating={t.rating} variant="rail" />
+      ))}
+    </ol>
+  </section>
+) : null}
+
+{popularTiles.length > 0 ? (
+  <section class="band--alt section--sm d-guide-section" aria-labelledby="d-popular-heading">
+    <div class="d-shelf-head">
+      <h2 id="d-popular-heading" class="d-shelf-label">Popular movies</h2>
+      <span class="d-shelf-rule" aria-hidden="true"></span>
+      <span class="d-shelf-count tnum">{countText(popularTiles.length, "film", "films")}</span>
+      <a class="d-shelf-see" href={buildListHref("popular")}>See all →</a>
+    </div>
+    <ol class="d-rail-posters d-guide-rail rail-bleed rail-snap rail-snap--fade">
+      {popularTiles.map((t) => (
+        <MovieTile tmdbId={t.tmdbId} title={t.title} year={t.year} posterUrl={t.posterUrl} rating={t.rating} variant="rail" />
+      ))}
+    </ol>
+  </section>
+) : null}
+
+{nowPlayingTiles.length > 0 ? (
+  <section class="band section--sm d-guide-section" aria-labelledby="d-new-heading">
+    <div class="d-shelf-head">
+      <h2 id="d-new-heading" class="d-shelf-label">New in cinemas</h2>
+      <span class="d-shelf-rule" aria-hidden="true"></span>
+      <span class="d-shelf-count tnum">{countText(nowPlayingTiles.length, "film", "films")}</span>
+      <a class="d-shelf-see" href={buildListHref("now_playing")}>See all →</a>
+    </div>
+    <ol class="d-rail-posters d-guide-rail rail-bleed rail-snap rail-snap--fade">
+      {nowPlayingTiles.map((t) => (
+        <MovieTile tmdbId={t.tmdbId} title={t.title} year={t.year} posterUrl={t.posterUrl} rating={t.rating} variant="rail" />
+      ))}
+    </ol>
+  </section>
+) : null}
+
+{freeTiles.length > 0 ? (
+  <section class="band--alt section--sm d-guide-section" aria-labelledby="d-free-heading">
+    <div class="d-shelf-head">
+      <h2 id="d-free-heading" class="d-shelf-label">Watch free</h2>
+      <span class="d-shelf-rule" aria-hidden="true"></span>
+      <span class="d-shelf-count tnum">{countText(freeTiles.length, "film", "films")}</span>
+      <a class="d-shelf-see" href={buildListHref("free")}>See all →</a>
+    </div>
+    <ol class="d-rail-posters d-guide-rail rail-bleed rail-snap rail-snap--fade">
+      {freeTiles.map((t) => (
+        <MovieTile tmdbId={t.tmdbId} title={t.title} year={t.year} posterUrl={t.posterUrl} rating={t.rating} variant="rail" />
+      ))}
+    </ol>
+  </section>
+) : null}
+
+{streamTiles.length > 0 ? (
+  <section class="band section--sm d-guide-section" aria-labelledby="d-stream-heading">
+    <div class="d-shelf-head">
+      <h2 id="d-stream-heading" class="d-shelf-label">Available to stream</h2>
+      <span class="d-shelf-rule" aria-hidden="true"></span>
+      <span class="d-shelf-count tnum">{countText(streamTiles.length, "film", "films")}</span>
+      <a class="d-shelf-see" href={buildListHref("stream")}>See all →</a>
+    </div>
+    <ol class="d-rail-posters d-guide-rail rail-bleed rail-snap rail-snap--fade">
+      {streamTiles.map((t) => (
+        <MovieTile tmdbId={t.tmdbId} title={t.title} year={t.year} posterUrl={t.posterUrl} rating={t.rating} variant="rail" />
+      ))}
+    </ol>
+  </section>
+) : null}
+
+{rentRail.length > 0 ? (
+  <section class="band--alt section--sm d-guide-section" aria-labelledby="d-rent-heading">
+    <div class="d-shelf-head">
+      <h2 id="d-rent-heading" class="d-shelf-label">New to rent</h2>
+      <span class="d-shelf-rule" aria-hidden="true"></span>
+      <span class="d-shelf-count tnum">{countText(rentRail.length, "film", "films")}</span>
+      <a class="d-shelf-see" href={buildListHref("rent")}>See all →</a>
+    </div>
+    <ol class="d-rail-posters d-guide-rail rail-bleed rail-snap rail-snap--fade">
+      {rentRail.map((t) => (
+        <MovieTile tmdbId={t.tmdbId} title={t.title} year={t.year} posterUrl={t.posterUrl} rating={t.rating} variant="rail" />
+      ))}
+    </ol>
+  </section>
+) : null}
+
+{genreRail.length > 0 ? (
+  <section class="band section--sm d-genres d-guide-section" aria-labelledby="d-genres-heading">
+    <div class="d-shelf-head">
+      <h2 id="d-genres-heading" class="d-shelf-label">Browse by genre</h2>
+      <span class="d-shelf-rule" aria-hidden="true"></span>
+      <span class="d-shelf-count tnum">{countText(genreRail.length, "genre", "genres")}</span>
+    </div>
+    <nav class="d-genre-index" aria-label="Browse movies by genre">
+      <ul>
+        {genreRail.map((g) => (
+          <li><a href={g.href}>{g.label}</a></li>
+        ))}
+      </ul>
+    </nav>
+  </section>
+) : null}
+
+{latest.length > 0 ? (
+  <section class="band--alt section--sm d-guide-section" aria-labelledby="d-reviewed-heading">
+    <div class="d-shelf-head">
+      <h2 id="d-reviewed-heading" class="d-shelf-label">Reviewed by us</h2>
+      <span class="d-shelf-rule" aria-hidden="true"></span>
+      <span class="d-shelf-count tnum">{countText(latest.length, "review", "reviews")}</span>
+      <a class="d-shelf-see" href="/reviews">See all →</a>
+    </div>
+    <ol class="d-guide-grid">
+      {latest.map((r) => (
+        <MovieTile tmdbId={r.tmdbId ?? -1} title={r.movieTitle} year={r.year} posterUrl={r.posterUrl} rating={r.rating} source="ours" href={reviewHref(r)} variant="compact" />
+      ))}
+    </ol>
+  </section>
+) : null}
+
+{top.length > 0 ? (
+  <section class="band section--sm d-guide-section" aria-labelledby="d-top-heading">
+    <div class="d-shelf-head">
+      <h2 id="d-top-heading" class="d-shelf-label">Highest rated by us</h2>
+      <span class="d-shelf-rule" aria-hidden="true"></span>
+      <span class="d-shelf-count tnum">{countText(top.length, "film", "films")}</span>
+      <a class="d-shelf-see" href="/reviews">See all →</a>
+    </div>
+    <ol class="index-list d-top-ranked d-guide-top">
+      {top.map((r, i) => (
+        <li class="index-row">
+          <span class="index-num" aria-hidden="true">{String(i + 1).padStart(2, "0")}</span>
+          {r.posterUrl ? (
+            <img
+              class="index-thumb"
+              src={r.posterUrl}
+              alt={`Poster for ${r.movieTitle}`}
+              width="88"
+              height="132"
+              loading="lazy"
+              decoding="async"
+            />
+          ) : null}
+          <div class="index-main">
+            <h3 class="index-title"><a href={reviewHref(r)}>{r.movieTitle}</a></h3>
+            <p class="index-meta tnum">{r.year ? String(r.year) : ""}{r.year && r.rating !== null ? "  ·  " : ""}{r.rating !== null ? `Our rating ${r.rating.toFixed(1)}/10` : ""}</p>
+          </div>
+          <span class="rating-mark tnum" data-band={ratingBand(r.rating)}>
+            <span class="rating-value">{r.rating !== null ? r.rating.toFixed(1) : "–"}</span><span class="rating-scale">/10</span>
+          </span>
+        </li>
+      ))}
+    </ol>
+  </section>
+) : null}
+
+{COLLECTIONS.length > 0 ? (
+  <section class="band--alt section--sm d-guide-section" aria-labelledby="d-collections-heading">
+    <div class="d-shelf-head">
+      <h2 id="d-collections-heading" class="d-shelf-label">Collections</h2>
+      <span class="d-shelf-rule" aria-hidden="true"></span>
+      <span class="d-shelf-count tnum">{countText(COLLECTIONS.length, "list", "lists")}</span>
+      <a class="d-shelf-see" href="/movies">See all →</a>
+    </div>
+    <ul class="d-guide-collections">
+      {COLLECTIONS.map((c, i) => (
+        <li class={i === 0 ? "is-spot" : undefined}>
+          <a href={c.href}>
+            <span class="d-collection-label">{c.label}</span>
+            <span class="d-collection-blurb">{c.blurb}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </section>
+) : null}
+
+{upcomingTiles.length > 0 ? (
+  <section class="band section--sm d-guide-section" aria-labelledby="d-coming-heading">
+    <div class="d-shelf-head">
+      <h2 id="d-coming-heading" class="d-shelf-label">Coming soon</h2>
+      <span class="d-shelf-rule" aria-hidden="true"></span>
+      <span class="d-shelf-count tnum">{countText(upcomingTiles.length, "film", "films")}</span>
+      <a class="d-shelf-see" href={buildListHref("upcoming")}>See all →</a>
+    </div>
+    <ol class="d-rail-posters d-guide-rail rail-bleed rail-snap rail-snap--fade">
+      {upcomingTiles.map((t) => (
+        <MovieTile tmdbId={t.tmdbId} title={t.title} year={t.year} posterUrl={t.posterUrl} rating={t.rating} variant="rail" />
+      ))}
+    </ol>
+  </section>
+) : null}

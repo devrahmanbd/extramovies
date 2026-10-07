@@ -1,0 +1,50 @@
+---
+/** Ft-standard index footer (studied-DNA) — brand-driven.
+ * DNA map: statement line (.footer-statement) + link columns (.footer-cols)
+ * + fine print (.footer-fine). No inline styles; global.css owns the paint. */
+import TmdbAttribution from "./TmdbAttribution.astro";
+import type { Brand } from "../../lib/seo/brand";
+
+interface Props {
+  brand: Brand;
+  genres?: string[];
+}
+
+const { brand, genres = [] } = Astro.props;
+const year = new Date().getUTCFullYear();
+---
+<footer class="site-footer">
+  <div class="wrap">
+    <p class="footer-statement">Every film gets one honest evening of our attention.</p>
+    <div class="footer-cols">
+      <section aria-label="Sections">
+        <h2>Sections</h2>
+        <ul>
+          <li><a href="/">Latest reviews</a></li>
+          <li><a href="/reviews">Review archive</a></li>
+          <li><a href="/search">Search</a></li>
+          <li><a href="/rss.xml">RSS feed</a></li>
+        </ul>
+      </section>
+      <section aria-label="Genres">
+        <h2>Genres</h2>
+        <ul>
+          {genres.slice(0, 5).map((g) => (
+            <li><a href={`/reviews?genre=${encodeURIComponent(g)}`}>{g}</a></li>
+          ))}
+        </ul>
+      </section>
+      <section aria-label="About">
+        <h2>About</h2>
+        <ul>
+          <li><a href="/sitemap.xml">Sitemap</a></li>
+        </ul>
+        <p>{brand.description}</p>
+      </section>
+    </div>
+    <div class="footer-fine">
+      <span>© {year} {brand.name}. All reviews are the author's own opinion.</span>
+      <TmdbAttribution variant="full" />
+    </div>
+  </div>
+</footer>
