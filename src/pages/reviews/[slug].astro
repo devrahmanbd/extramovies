@@ -155,6 +155,12 @@ const pageTitle = `${review.movieTitle}${review.year ? ` (${review.year})` : ""}
               <dd><a href={`https://www.themoviedb.org/movie/${review.tmdbId}`} rel="noopener">View on TMDB</a></dd>
             </div>
           ) : null}
+          {review.tmdbId ? (
+            <div>
+              <dt>Title hub</dt>
+              <dd><a href={`/movies/${review.tmdbId}`}>Streaming options, details &amp; member reviews</a></dd>
+            </div>
+          ) : null}
         </dl>
       </section>
 

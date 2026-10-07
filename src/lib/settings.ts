@@ -66,7 +66,7 @@ const DEFAULTS: Record<SettingKey, string> = {
   'site.theme': 'publication',
   'brand.preset': 'noir-cinema',
   'region.default': 'US',
-  'seo.title_suffix': '— Movie Review',
+  'seo.title_suffix': '— Extramovies',
   'seo.author': '',
   'seo.desc_template': '{title} ({year}) review: verdict, performances, and where to watch.',
   'taste.profile': '',

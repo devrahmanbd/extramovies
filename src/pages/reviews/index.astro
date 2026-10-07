@@ -28,10 +28,27 @@ const descSource = genre
   ? `Every ${genre.toLowerCase()} review in the journal, newest first.`
   : `The complete review archive, newest first — every film covered in the journal.`;
 // Filtered views canonicalize to /reviews to avoid duplicate-content drift.
-const jsonld = [breadcrumbJsonLd(origin, [{ name: "Home", path: "/" }, { name: "Reviews", path: "/reviews" }])];
-const headingIsLong = heading.length > 40;
 const reviewHref = (r: (typeof reviews)[number]) =>
   r.tmdbId ? `/movies/${r.tmdbId}` : `/reviews/${r.slug}`;
+const jsonld = [
+  breadcrumbJsonLd(origin, [{ name: "Home", path: "/" }, { name: "Reviews", path: "/reviews" }]),
+  {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: heading,
+    url: `${origin}/reviews`,
+    mainEntity: {
+      "@type": "ItemList",
+      itemListElement: reviews.map((r, i) => ({
+        "@type": "ListItem",
+        position: i + 1,
+        name: r.movieTitle,
+        url: `${origin}${reviewHref(r)}`,
+      })),
+    },
+  },
+];
+const headingIsLong = heading.length > 40;
 const countText =
   reviews.length === 1 ? "1 review" : `${reviews.length} reviews`;
 ---

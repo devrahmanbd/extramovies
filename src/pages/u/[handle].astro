@@ -14,6 +14,8 @@ import WatchlistSection from "../../components/member/WatchlistSection.astro";
 import { getDb } from "../../lib/db/adapter";
 import { getSession, getSessionToken, sessionDbFromAstro } from "../../lib/auth/session";
 import { getUserByHandle } from "../../lib/users/store";
+import { getBrand } from "../../lib/seo/brand";
+import type { JsonLd } from "../../lib/seo/jsonld";
 import { countReviewsForUser, listForUser } from "../../lib/members/reviews";
 import { counts as followCounts, isFollowing } from "../../lib/members/follows";
 import { countForUser as countWatchlist, listForUser as listWatchlist } from "../../lib/watchlist/store";
@@ -91,8 +93,26 @@ const titleText = `${profile.displayName} (@${profile.handle})`;
 const descText = profile.bio
   ? profile.bio.slice(0, 160)
   : `Member reviews and watchlist from @${profile.handle}.`;
+const brand = getBrand();
+const origin = Astro.url.origin.replace(/\/$/, "");
+const canonical = `${origin}${path}`;
+const personNode: JsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  name: profile.displayName,
+  alternateName: profile.handle,
+  url: canonical,
+  ...(profile.bio ? { description: profile.bio.slice(0, 300) } : {}),
+};
+const jsonld: JsonLd[] = [
+  {
+    "@context": "https://schema.org",
+    "@type": "ProfilePage",
+    mainEntity: personNode,
+  },
+];
 ---
-<Base title={titleText} description={descText} path={path} current="">
+<Base title={titleText} description={descText} path={path} current="" jsonld={jsonld}>
   <div class="wrap">
     <section class="band section--md" aria-labelledby="profile-name">
       <p class="d-kicker">Member</p>

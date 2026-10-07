@@ -22,7 +22,7 @@ export function AdminLayout({ email, csrfToken, current = "", children }: { emai
   return (
     <div className="admin-shell">
       <header className="admin-top">
-        <strong>Movie Review · Admin</strong>
+        <strong>Extramovies · Admin</strong>
         <nav>
           {nav.map((n) => (
             <a key={n.href} href={n.href} className={current === n.href ? "active" : ""}>{n.label}</a>
