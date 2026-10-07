@@ -1,6 +1,13 @@
 # Auto-deploy to CyberPanel VPS on push to main.
 # Required repo secrets (Settings → Secrets and variables → Actions):
 #   SSH_HOST, SSH_USER, SSH_PORT, SSH_KEY (private deploy key; server holds the public half)
+#
+# Server assumptions (validated 2026-10-07 — keep this list current):
+#   - node/npm via nvm at $HOME/.nvm (non-interactive SSH skips .bashrc)
+#   - sqlite3 CLI present; PM2 installed globally; app on PORT 3100
+#   - repo at /home/extramovies.org/public_html (site user extra9617)
+#   - DB at /home/extramovies.org/private/prod.sqlite; env in
+#     /home/extramovies.org/ecosystem.config.js (both outside the repo)
 name: Deploy to production
 
 on:
@@ -20,21 +27,52 @@ jobs:
           ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=accept-new \
             -p "${{ secrets.SSH_PORT }}" \
             "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}" 'bash -s' <<'EOF'
-          set -e
-          cd /home/extramovies.org/public_html
-          # Repo files belong to the site user; git runs as root
-          git config --global --add safe.directory /home/extramovies.org/public_html
+          set -euo pipefail
+          APP_DIR=/home/extramovies.org/public_html
+          APP_PORT=3100
+
+          # 1. Toolchain: CI SSH is non-interactive so nvm never loads via .bashrc
+          export NVM_DIR="$HOME/.nvm"
+          # shellcheck disable=SC1091
+          [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+          for cmd in npm node sqlite3 pm2 curl git; do
+            command -v "$cmd" >/dev/null || { echo "FATAL: $cmd not on PATH"; exit 1; }
+          done
+          node --version
+
+          # 2. Code: repo files belong to the site user, git runs as root
+          cd "$APP_DIR"
+          git config --global --add safe.directory "$APP_DIR"
           git pull --ff-only
+          test -f package.json || { echo "FATAL: not a repo checkout"; exit 1; }
+
+          # 3. Build
           npm ci
           npm run build
+          test -f dist/server/entry.mjs || { echo "FATAL: build produced no entry"; exit 1; }
+
+          # 4. Data (all idempotent: IF NOT EXISTS migrations, seed skips existing)
           export DB_FILE=/home/extramovies.org/private/prod.sqlite
+          mkdir -p "$(dirname "$DB_FILE")"
           for f in migrations/*.sql; do sqlite3 "$DB_FILE" < "$f"; done
           npm run seed:reviews
-          pm2 restart extramovies --update-env
-          sleep 6
-          curl -fsS -o /dev/null http://127.0.0.1:3100/
-          # Hand files back to the site user: root-run npm/build/git leave
-          # root-owned paths that break panel-side ops (ManageGIT, File Manager)
-          chown -R extra9617:extra9617 /home/extramovies.org/public_html
+
+          # 5. Restart deterministically (delete+start: restart reuses stale env)
+          pm2 delete extramovies 2>/dev/null || true
+          pm2 start /home/extramovies.org/ecosystem.config.js
+          pm2 save
+
+          # 6. Health check with retries (cold boots are slow on small VPS)
+          ok=""
+          for _ in 1 2 3 4 5 6; do
+            if curl -fsS -o /dev/null "http://127.0.0.1:${APP_PORT}/"; then ok=1; break; fi
+            sleep 5
+          done
+          test -n "$ok" || { echo "FATAL: app never answered on ${APP_PORT}"; pm2 logs extramovies --lines 20 --nostream; exit 1; }
+
+          # 7. Hand files back to the site user (root-run steps leave
+          # root-owned paths that break panel-side ops)
+          chown -R extra9617:extra9617 "$APP_DIR"
+          echo "DEPLOY OK"
           EOF
           rm -f ~/.ssh/deploy_key
