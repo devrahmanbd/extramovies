@@ -262,7 +262,7 @@ First boot per deployment runs a one-time setup wizard at `/setup`:
 | `TMDB_API_KEY` | server-only movie data | Yes for streaming tiles | Falls back to dashboard `tmdb.api_key`; section hides when empty/down |
 | `OMDB_API_KEY` | server-only, optional | No | Dashboard `omdb.api_key` fallback |
 | `OPENROUTER_API_KEY` | server-only AI writer | Yes for AI generation | Dashboard `openrouter.api_key` fallback; never expose client-side |
-| `OPENROUTER_MODEL` / `OPENROUTER_CHEAP_MODEL` / `OPENROUTER_BASE_URL` | AI writer tuning | No | Defaults: `anthropic/claude-sonnet-4` / `anthropic/claude-haiku-4` / `https://openrouter.ai/api/v1` |
+| `OPENROUTER_MODEL` / `OPENROUTER_CHEAP_MODEL` / `OPENROUTER_BASE_URL` | AI writer tuning | No | Defaults: `thinkingmachines/inkling:free` / `nvidia/nemotron-3.5-lightning:free` / `https://openrouter.ai/api/v1` — free tier still needs an API key; `:free` endpoints are rate-limited (20 req/min, 50 req/day) and retried with backoff |
 | `ADMIN_EMAIL` / `ADMIN_PASSWORD` (bootstrap) or `ADMIN_PASSWORD_HASH` | system bootstrap | Yes first boot | Hashed on first run; prefer `ADMIN_PASSWORD_HASH` in production; never commit real values |
 | `SESSION_SECRET` | legacy, unread | No | Sessions use opaque random tokens; nothing reads it — do not set |
 | `SITE_URL` / `SITE_NAME` / `BRAND_PRESET` / `DEFAULT_REGION` | first-boot seeds | No | Dashboard values win after first save (`site.url`, `site.name`, `brand.preset`, `region.default`) |

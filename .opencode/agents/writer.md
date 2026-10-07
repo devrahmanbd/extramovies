@@ -58,6 +58,24 @@ deep research (consensus sentiment, release history), use web search + TMDB
 API directly and cite values. If the skill later appears under
 `.agents/skills/` or `~/.agents/skills/`, prefer it for research passes.
 
+## 5. Model tier policy (free-tier, OpenRouter)
+
+Defaults live in `src/lib/settings.ts` (`openrouter.model` /
+`openrouter.cheap_model`) and are guarded by `tests/openrouter-free.test.ts`
+— they must always end in `:free`.
+
+- Primary (review drafts): `thinkingmachines/inkling:free` — strongest
+  reasoning/instruction-following credentials on the free list; 1M context
+  fits full prompts (system + taste + samples + facts).
+- Cheap (metadata, seo-check, humanize assist): `nvidia/nemotron-3.5-lightning:free`.
+- NEVER `openrouter/free` (random router — voice would drift per request).
+- Free-tier realities, designed around, not against: 20 req/min + 50 req/day
+  caps (fine for 2–3 reviews/week; the client retries 429/502/no-provider
+  with backoff), best-effort uptime (human publish gate catches failures),
+  providers may log prompts (never send secrets/PII/unlisted content).
+- When a funded model lands (e.g. Gemini 3.x free tier or paid budget):
+  blind-bake it against the incumbent on one review before switching primary.
+
 ## Repo constraints (always)
 
 - Review copy lives in `src/lib/seo/content.ts` (DEMO rows) — keep the file
