@@ -31,5 +31,8 @@ jobs:
           pm2 restart extramovies --update-env
           sleep 6
           curl -fsS -o /dev/null http://127.0.0.1:3100/
+          # Hand files back to the site user: root-run npm/build/git leave
+          # root-owned paths that break panel-side ops (ManageGIT, File Manager)
+          chown -R extra9617:extra9617 /home/extramovies.org/public_html
           EOF
           rm -f ~/.ssh/deploy_key
