@@ -7,3 +7,4 @@ Task 3: complete (review clean; Minor: badges in link text — assess aria-hidde
 Task 5: complete (188/188, build Complete, visual + admin-UI round-trip PASS; aria-hidden applied; env: react pinned ^4.4.2, lightningcss declared ^1.33.0)
 Launch-minimal: L1/L2/L3 complete + reviewed; L4 found member session split-brain → L1F unified resolver (resolveDbFromRequest, one DB/env) + B e2e PASS; suite 200/200, build Complete, dry-run clean; prod deploy pending owner credentials
 Post-launch tweaks (2026-10-07): exclusive tile badge (getTileBadge, Platform Pick wins; ReviewCard verified Pick-only) + search page rebuilt (TMDB Movies + local Reviews sections, type filter chips, details expander); suite 203/203, build Complete, browser-verified
+Store-unification e2e PROVEN locally (2026-10-07): published store row → live in search + slug URL; slug collision overrides demo; draft flip → demo restored + search clean; dev data restored byte-identical
