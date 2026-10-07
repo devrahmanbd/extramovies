@@ -165,3 +165,81 @@ export async function searchMoviesByTitle(
     return [];
   }
 }
+
+/** Minimal raw /search/tv result (only fields the Series search tiles use). */
+export interface TmdbTvSearchResult {
+  id: number;
+  name?: string;
+  original_name?: string;
+  overview?: string;
+  first_air_date?: string;
+  poster_path?: string | null;
+  backdrop_path?: string | null;
+  vote_average?: number;
+  vote_count?: number;
+  popularity?: number;
+}
+
+/**
+ * Search TV shows by title (first page). Fail-soft [] on bad input,
+ * missing key, or TMDB failure — mirrors searchMoviesByTitle.
+ */
+export async function searchShowsByTitle(
+  title: string,
+  page = 1
+): Promise<TmdbTvSearchResult[]> {
+  const q = title.trim();
+  if (!q) return [];
+  try {
+    const res = await tmdbFetch<{ results?: TmdbTvSearchResult[] }>(
+      "/search/tv",
+      { query: q, page: String(page), include_adult: "false", language: "en-US" }
+    );
+    return res.results ?? [];
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Map a TV search result to the shared tile shape (same fields as
+ * discover.mapToTile: title=name, year from first_air_date). Pure,
+ * fail-soft — never throws on malformed input.
+ */
+export function mapShowToTile(raw: TmdbTvSearchResult): {
+  tmdbId: number;
+  title: string;
+  year: number | null;
+  posterUrl: string | null;
+  rating: number | null;
+  backdropUrl: string | null;
+  overview: string | null;
+} {
+  const firstAir =
+    typeof raw.first_air_date === "string" ? raw.first_air_date : null;
+  const year =
+    firstAir && /^\d{4}/.test(firstAir) ? Number(firstAir.slice(0, 4)) : null;
+  const overview =
+    typeof raw.overview === "string" && raw.overview.trim()
+      ? raw.overview.trim().slice(0, 180)
+      : null;
+  return {
+    tmdbId: raw.id,
+    title:
+      typeof raw.name === "string" && raw.name.trim()
+        ? raw.name
+        : "Untitled",
+    year: Number.isFinite(year) ? (year as number) : null,
+    posterUrl: imageUrl(raw.poster_path ?? null, "w342"),
+    rating:
+      typeof raw.vote_average === "number" &&
+      Number.isFinite(raw.vote_average)
+        ? raw.vote_average
+        : null,
+    backdropUrl: imageUrl(
+      typeof raw.backdrop_path === "string" ? raw.backdrop_path : null,
+      "w1280"
+    ),
+    overview,
+  };
+}

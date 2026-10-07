@@ -23,7 +23,7 @@ const {
   loginNext = '',
 } = Astro.props;
 const id = `mr-form-${media}-${tmdbId}`;
-const next = loginNext || `/movies/${tmdbId}`;
+const next = loginNext || (media === "tv" ? `/series/${tmdbId}` : `/movies/${tmdbId}`);
 ---
 {!viewerId ? (
   <p class="d-empty">

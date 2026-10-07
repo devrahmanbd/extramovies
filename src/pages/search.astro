@@ -8,18 +8,20 @@ import { breadcrumbJsonLd } from "../lib/seo/jsonld";
 import { siteOrigin } from "../lib/seo/meta";
 import { getBrand } from "../lib/seo/brand";
 import { searchReviews } from "../lib/seo/content";
-import { searchMoviesByTitle } from "../lib/tmdb/client";
+import { mapShowToTile, searchMoviesByTitle, searchShowsByTitle } from "../lib/tmdb/client";
 import { mapToTile } from "../lib/tmdb/discover";
 
 const brand = getBrand();
 const origin = siteOrigin(Astro.url.origin);
 const query = (Astro.url.searchParams.get("q") ?? "").trim().slice(0, 120);
 const typeParam = (Astro.url.searchParams.get("type") ?? "all").trim().toLowerCase();
-const activeType = typeParam === "movie" || typeParam === "review" ? typeParam : "all";
+const activeType = typeParam === "movie" || typeParam === "series" || typeParam === "review" ? typeParam : "all";
 const showMovies = activeType === "all" || activeType === "movie";
+const showSeries = activeType === "all" || activeType === "series";
 const showReviews = activeType === "all" || activeType === "review";
 const results = query && showReviews ? searchReviews(query) : [];
 const movieTiles = query && showMovies ? (await searchMoviesByTitle(query)).slice(0, 20).map(mapToTile) : [];
+const seriesTiles = query && showSeries ? (await searchShowsByTitle(query)).slice(0, 20).map(mapShowToTile) : [];
 const jsonld = [breadcrumbJsonLd(origin, [{ name: "Home", path: "/" }, { name: "Search", path: "/search" }])];
 const searchTitle = query ? `Search: ${query}` : "Search";
 const searchTitleIsLong = searchTitle.length > 40;
@@ -27,10 +29,13 @@ const chipHref = (t: string) => `/search?q=${encodeURIComponent(query)}${t === "
 const MOVIE_SHOW = 6;
 const movieHead = movieTiles.slice(0, MOVIE_SHOW);
 const movieRest = movieTiles.slice(MOVIE_SHOW);
+const SERIES_SHOW = 6;
+const seriesHead = seriesTiles.slice(0, SERIES_SHOW);
+const seriesRest = seriesTiles.slice(SERIES_SHOW);
 ---
 <Base
   title={searchTitle}
-  description={`Search movies (TMDB) and the review archive by film title, genre, or year.`}
+  description={`Search movies and series (TMDB) and the review archive by title, genre, or year.`}
   path="/search"
   robots="noindex, follow"
   jsonld={jsonld}
@@ -46,16 +51,18 @@ const movieRest = movieTiles.slice(MOVIE_SHOW);
       {query ? (
         <p role="status" class="tnum">
           {movieTiles.length} {movieTiles.length === 1 ? "movie" : "movies"} ·{" "}
-          {results.length} {results.length === 1 ? "review" : "reviews"} for
-          {" "}“{query}”.
+          {seriesTiles.length} series for
+          {" "}“{query}” ·{" "}
+          {results.length} {results.length === 1 ? "review" : "reviews"}.
         </p>
       ) : (
-        <p>Try a film title, a genre like “Drama”, or a year like “2024”.</p>
+        <p>Try a film or show title, a genre like “Drama”, or a year like “2024”.</p>
       )}
       {query ? (
         <nav class="d-search-filters" aria-label="Filter results">
           <a href={chipHref("all")} aria-current={activeType === "all" ? "page" : undefined}>All</a>
           <a href={chipHref("movie")} aria-current={activeType === "movie" ? "page" : undefined}>Movies ({movieTiles.length})</a>
+          <a href={chipHref("series")} aria-current={activeType === "series" ? "page" : undefined}>Series ({seriesTiles.length})</a>
           <a href={chipHref("review")} aria-current={activeType === "review" ? "page" : undefined}>Reviews ({results.length})</a>
         </nav>
       ) : null}
@@ -107,6 +114,56 @@ const movieRest = movieTiles.slice(MOVIE_SHOW);
           </>
         ) : (
           <p>No movies matched “{query}” (or TMDB is unreachable).</p>
+        )}
+      </div>
+    </div>
+  ) : null}
+
+  {query && showSeries ? (
+    <div class="band section--md glam-search-band">
+      <div class="wrap">
+        <div class="section-head">
+          <h2 id="search-series-heading">Series</h2>
+        </div>
+        {seriesTiles.length > 0 ? (
+          <>
+            <ol class="d-guide-grid">
+              {seriesHead.map((t, i) => (
+                <MovieTile
+                  tmdbId={t.tmdbId}
+                  title={t.title}
+                  year={t.year}
+                  posterUrl={t.posterUrl}
+                  rating={t.rating}
+                  source="tmdb"
+                  href={`/series/${t.tmdbId}`}
+                  variant="compact"
+                  eager={i === 0}
+                />
+              ))}
+            </ol>
+            {seriesRest.length > 0 ? (
+              <details class="d-search-more">
+                <summary>Show all {seriesTiles.length} series</summary>
+                <ol class="d-guide-grid">
+                  {seriesRest.map((t) => (
+                    <MovieTile
+                      tmdbId={t.tmdbId}
+                      title={t.title}
+                      year={t.year}
+                      posterUrl={t.posterUrl}
+                      rating={t.rating}
+                      source="tmdb"
+                      href={`/series/${t.tmdbId}`}
+                      variant="compact"
+                    />
+                  ))}
+                </ol>
+              </details>
+            ) : null}
+          </>
+        ) : (
+          <p>No series matched “{query}” (or TMDB is unreachable).</p>
         )}
       </div>
     </div>
