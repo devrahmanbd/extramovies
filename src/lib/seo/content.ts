@@ -141,7 +141,7 @@ export const DEMO_REVIEWS: PublicReview[] = [
     genres: ["Science Fiction", "Adventure"],
     runtimeMinutes: 167,
     rating: 8.8,
-    verdict: "The rare blockbuster that earns its scale — see it on the biggest screen available.",
+    verdict: "The rare blockbuster that earns its scale. See it on the biggest screen available.",
     excerpt:
       "Villeneuve turns sand, faith, and giant worms into the rare sequel that outgrows its setup.",
     bodyMarkdown: [
@@ -186,7 +186,7 @@ export const DEMO_REVIEWS: PublicReview[] = [
     genres: ["Crime", "Mystery", "Thriller"],
     runtimeMinutes: 177,
     rating: 7.9,
-    verdict: "A rain-soaked procedural that finally lets Batman detect — long, but earns most of it.",
+    verdict: "A rain-soaked procedural that finally lets Batman detect. Long, but it earns most of it.",
     excerpt:
       "Reeves shoots Gotham like a crime scene and Pattinson plays the world's grumpiest detective.",
     bodyMarkdown: [
