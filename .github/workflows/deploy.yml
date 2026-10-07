@@ -1,4 +1,6 @@
-# Auto-deploy to CyberPanel VPS on push to main.
+# Auto-deploy to CyberPanel VPS on push to prod-v1.
+# Release flow: checkout prod-v1, merge main, ./scripts/prune-prod.sh,
+# commit, push. Main-branch pushes do NOT deploy.
 # Required repo secrets (Settings → Secrets and variables → Actions):
 #   SSH_HOST, SSH_USER, SSH_PORT, SSH_KEY (private deploy key; server holds the public half)
 #
@@ -12,7 +14,7 @@ name: Deploy to production
 
 on:
   push:
-    branches: [main]
+    branches: [prod-v1]
   workflow_dispatch:
 
 jobs:
@@ -43,6 +45,8 @@ jobs:
           # 2. Code: repo files belong to the site user, git runs as root
           cd "$APP_DIR"
           git config --global --add safe.directory "$APP_DIR"
+          git fetch origin
+          git checkout prod-v1
           git pull --ff-only
           test -f package.json || { echo "FATAL: not a repo checkout"; exit 1; }
 
