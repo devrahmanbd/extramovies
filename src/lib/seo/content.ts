@@ -4,6 +4,13 @@
  * Foundation data lives here as clearly-marked DEMO rows so every page
  * renders, builds, and proves its design + SEO before the DB lands.
  *
+ * Store-unification (implemented 2026-10-07): published admin-store rows
+ * (data/reviews.json, see src/pages/api/admin/_store.ts) override the DEMO
+ * rows by slug — admin edits go live. DEMO rows remain the fallback when the
+ * store file is missing/unreadable. Store rows carry no watch-provider
+ * snapshots or backdrop art, so merged rows render those sections empty
+ * (movie hubs still fetch live TMDB data).
+ *
  * TODO(db-owner): replace each loader body with the real query —
  *   - published reviews: SELECT … FROM reviews JOIN movies … WHERE status='published' ORDER BY published_at DESC
  *   - platform pick: add platform_pick BOOLEAN to that SELECT (badges read it via getLatestReviews)
@@ -13,6 +20,9 @@
  *   - watch providers: cached TMDB/JustWatch snapshot per movie+region
  * Keep all exported signatures stable — pages depend on them.
  */
+import fs from "node:fs";
+import path from "node:path";
+import type { Review } from "../../pages/api/admin/_store";
 
 export interface ProviderEntry {
   name: string;
@@ -243,11 +253,92 @@ export const DEMO_REDIRECTS: Record<string, string> = {
 };
 
 // ---------------------------------------------------------------------------
+// Store-unification: published admin rows override DEMO rows by slug.
+// Sync file read (server-only module); missing/corrupt file → DEMO only.
+// ---------------------------------------------------------------------------
+
+function storeDbPath(): string {
+  return (
+    process.env.REVIEWS_DB_PATH ?? path.join(process.cwd(), "data", "reviews.json")
+  );
+}
+
+interface StoreCache {
+  file: string;
+  mtimeMs: number;
+  rows: Review[];
+}
+
+let storeCache: StoreCache | null = null;
+
+function readStoreRows(): Review[] {
+  const file = storeDbPath();
+  try {
+    const stat = fs.statSync(file);
+    if (storeCache && storeCache.file === file && storeCache.mtimeMs === stat.mtimeMs) {
+      return storeCache.rows;
+    }
+    const parsed: unknown = JSON.parse(fs.readFileSync(file, "utf8"));
+    const rows = Array.isArray(parsed) ? (parsed as Review[]) : [];
+    storeCache = { file, mtimeMs: stat.mtimeMs, rows };
+    return rows;
+  } catch {
+    return [];
+  }
+}
+
+function toFiniteNumber(value: unknown): number | null {
+  const n = typeof value === "string" ? Number(value) : value;
+  return typeof n === "number" && Number.isFinite(n) ? n : null;
+}
+
+/** Map an admin-store row onto the public contract. Null when unusable. */
+function storeToPublic(r: Review): PublicReview | null {
+  if (!r || r.status !== "published") return null;
+  const slug = typeof r.slug === "string" ? r.slug.trim() : "";
+  const title = typeof r.title === "string" ? r.title.trim() : "";
+  const markdown = typeof r.markdown === "string" ? r.markdown : "";
+  const excerpt = typeof r.excerpt === "string" && r.excerpt.trim() ? r.excerpt.trim() : "";
+  if (!slug || !title || !markdown || !excerpt) return null;
+  const movie = r.movie ?? {};
+  const tmdbId = toFiniteNumber(movie.movieId);
+  return {
+    slug,
+    reviewTitle: title,
+    movieTitle: typeof movie.title === "string" && movie.title.trim() ? movie.title.trim() : title,
+    year: toFiniteNumber(movie.year),
+    genres: Array.isArray(movie.genres) ? movie.genres.filter((g): g is string => typeof g === "string") : [],
+    runtimeMinutes: null,
+    rating: typeof r.rating === "number" && Number.isFinite(r.rating) ? r.rating : 0,
+    verdict: excerpt,
+    excerpt,
+    bodyMarkdown: markdown,
+    posterUrl: typeof movie.poster === "string" ? movie.poster : null,
+    backdropUrl: null,
+    director: typeof movie.director === "string" ? movie.director : null,
+    cast: Array.isArray(movie.cast) ? movie.cast.filter((c): c is string => typeof c === "string") : [],
+    publishedAt: r.publishedAt ?? r.updatedAt,
+    updatedAt: r.updatedAt,
+    authorName: "The Editor",
+    ...(r.platformPick === true ? { platformPick: true as const } : {}),
+    providers: null,
+    ...(r.customWatch ? { customWatch: r.customWatch } : {}),
+    tmdbId: tmdbId !== null && Number.isInteger(tmdbId) && tmdbId > 0 ? tmdbId : null,
+  };
+}
+
+// ---------------------------------------------------------------------------
 // Loaders (signatures stable; bodies go DB-backed later)
 // ---------------------------------------------------------------------------
 
 function published(): PublicReview[] {
-  return [...DEMO_REVIEWS].sort(
+  const bySlug = new Map<string, PublicReview>();
+  for (const demo of DEMO_REVIEWS) bySlug.set(demo.slug, demo);
+  for (const row of readStoreRows()) {
+    const pub = storeToPublic(row);
+    if (pub) bySlug.set(pub.slug, pub);
+  }
+  return [...bySlug.values()].sort(
     (a, b) => +new Date(b.publishedAt) - +new Date(a.publishedAt)
   );
 }
@@ -280,7 +371,7 @@ export function resolveSlug(slug: string): SlugResolution {
 
 export function listGenres(): string[] {
   const set = new Set<string>();
-  for (const r of DEMO_REVIEWS) for (const g of r.genres) set.add(g);
+  for (const r of published()) for (const g of r.genres) set.add(g);
   return [...set].sort();
 }
 

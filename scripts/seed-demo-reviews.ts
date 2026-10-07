@@ -6,10 +6,10 @@
  * even though the public site shows reviews. This materializes the demos as
  * editable store rows (idempotent: existing slugs are skipped).
  *
- * NOTE (launch-day scope): public pages still render the embedded DEMO rows.
- * Edits made in /admin take effect publicly only after the planned
- * store-unification (public reads store with DEMO fallback). Do not assume
- * otherwise — see content.ts TODO(db-owner).
+ * NOTE: public pages merge published store rows over the embedded DEMO rows
+ * by slug (store-unification in src/lib/seo/content.ts) — admin edits go
+ * live. Store rows carry no provider snapshots or backdrop art, so merged
+ * rows render those sections from live TMDB data or empty.
  *
  * Usage:
  *   npx tsx scripts/seed-demo-reviews.ts

@@ -90,6 +90,21 @@ node -e "const fs=require('fs'),D=require('better-sqlite3'),db=new D(process.env
 This creates all tables (`users`, `member_reviews`, `sessions`, moderation…).
 Never upload your dev `local.db` — it contains drafts and test users.
 
+### Step 3b — Seed the admin reviews (fresh hosts only)
+
+`data/reviews.json` is gitignored, so a fresh deploy ships with an empty
+`/admin` list (public pages still render the embedded demo rows). Seed it:
+
+```bash
+npm run seed:reviews
+# expects: "done: 3 created, 0 skipped (already present)"
+```
+
+Idempotent — reruns skip existing slugs. After this, the demo reviews are
+editable in `/admin`, and (since store-unification) admin edits go live:
+**published store rows override the embedded demos by slug** on every public
+surface. To unpublish instead of delete, flip a row to `draft` in the editor.
+
 ### Step 4 — Environment variables (cPanel UI, never commit)
 
 | Var | Value |
