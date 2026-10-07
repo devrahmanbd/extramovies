@@ -41,7 +41,7 @@ the site author.
 - [x] Wrangler assets dir fixed; `deploy --dry-run` clean
 - [x] B verified end-to-end (signup → review → report → moderate → profile)
 - [x] Calmer `/reviews` on the Stream preset
-- [ ] Production deploy (owner: D1 id + secrets + domain — see README LAUNCH checklist)
+- [x] Production deploy (CyberPanel + OLS reverse proxy → PM2, live 2026-10-07)
 
 ## Original items
 
