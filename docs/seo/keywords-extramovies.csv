@@ -1,37 +1,37 @@
 # Volumes are strategic estimates only - validate in Search Console post-launch; no numeric volumes invented
 # difficulty = competition for a NEW domain (not absolute volume). new_priority = what a brand-new extramovies.org targets first.
 keyword,intent,priority,opportunity,target_page,placement,notes,difficulty,new_priority
-extramovies review,navigational,P0,High - owns brand verdict intent,/,"title,meta,h1",Brand anchor for homepage and review fronts,Low,P0
-extramovies.org,navigational,P0,High - direct navigation intent,/,"title,meta,sitemap",Ensure homepage ranks for exact domain query,Low,P0
-extramovies movie reviews,navigational,P1,Medium - brand plus category intent,/reviews,"title,meta,h1",Bridge brand searchers into review archive,Low,P0
+extramovies review,navigational,P0,High - owns brand verdict intent,/,"title,meta,h1",CAUTION: brand SERP is 100% pirate download sites - expect piracy-intent contamination; exact-match + review-magazine positioning only,Low,P0
+extramovies.org,navigational,P0,High - direct navigation intent,/,"title,meta,sitemap",Ensure homepage ranks for exact domain query; same piracy-intent caveat,Low,P0
+extramovies movie reviews,navigational,P1,Medium - brand plus category intent,/reviews,"title,meta,h1",Bridge brand searchers into review archive; piracy-intent caveat applies,Low,P0
 movie reviews,informational,P0,High - core editorial demand,/reviews,"title,meta,h1",Flagship archive target with fresh 2026 inventory,High,P2
 honest movie reviews,commercial,P0,High - strong trust-driven click intent,/reviews,"title,meta,content",Differentiator angle for editorial voice and E-E-A-T,High,P2
 film reviews 2026,informational,P0,High - high freshness recency intent,/,"title,h1,content",Homepage front leading with latest 2026 reviews,High,P2
 new movie reviews this week,informational,P1,Medium - repeats weekly discovery habit,/,"title,h1,sitemap",Weekly refresh module for discovery front,Medium,P1
 best movies 2026,commercial,P1,High - strong listicle decision intent,/movies?list=top-2026,"title,h1,internal-link",Curated list hub with internal links to title hubs,High,P2
-horror movie reviews,informational,P0,High - evergreen genre decision demand,/reviews?genre=horror,"title,h1,content",Genre archive with subgenre filters and FAQs,Medium,P1
-action movie reviews,informational,P1,Medium - large mainstream genre audience,/reviews?genre=action,"title,h1,content",Archive targeting blockbuster and streaming action fans,Medium,P1
-comedy movie reviews,informational,P1,Medium - steady feel-good search interest,/reviews?genre=comedy,"title,h1,content",Light tone archive with member ratings mixed in,Medium,P1
-sci-fi movie reviews,informational,P1,Medium - cult plus franchise search depth,/reviews?genre=sci-fi,"title,h1,internal-link",Link franchise hubs and ending explainers together,Medium,P1
-drama movie reviews,informational,P2,Medium - awards season spike potential,/reviews?genre=drama,"title,h1,content",Oscar-season refresh with critic and member scores,Medium,P1
-animated movie reviews,informational,P2,Low - family co-viewing niche intent,/reviews?genre=animation,"title,h1,schema",Family-friendly schema with age guide fields,Low,P0
+horror movie reviews,informational,P0,High - evergreen genre decision demand,/reviews?genre=horror,"title,h1,content",Archive head owned by Ebert/Metacritic/DreadCentral - win via obscure-title reviews inside it not the head term itself,High,P2
+action movie reviews,informational,P1,Medium - large mainstream genre audience,/reviews?genre=action,"title,h1,content",Archive targeting blockbuster and streaming action fans - head owned by authorities,High,P2
+comedy movie reviews,informational,P1,Medium - steady feel-good search interest,/reviews?genre=comedy,"title,h1,content",Light tone archive with member ratings mixed in - head owned by authorities,High,P2
+sci-fi movie reviews,informational,P1,Medium - cult plus franchise search depth,/reviews?genre=sci-fi,"title,h1,internal-link",Link franchise hubs and ending explainers together - head owned by authorities,High,P2
+drama movie reviews,informational,P2,Medium - awards season spike potential,/reviews?genre=drama,"title,h1,content",Oscar-season refresh with critic and member scores - head owned by authorities,High,P2
+animated movie reviews,informational,P2,Low - family co-viewing niche intent,/reviews?genre=animation,"title,h1,schema",CSM covers every major animation - only unreviewed indie titles winnable,High,P2
 "{film} review",commercial,P0,High - strongest title-level verdict intent,/reviews/{slug},"title,meta,h1",Canonical full-review template for every covered title,"High for popular films; Low for obscure/unreviewed titles - target the long tail of titles first",P1
 "{film} {year} review",commercial,P0,High - disambiguates remakes year intent,/reviews/{slug},"title,meta,h1",Year pattern for remakes and franchise collisions,Medium,P1
-"is {film} worth watching",commercial,P0,High - pure stream-or-skip language,/movies/{tmdbId},"title,meta,h1",Title hub verdict module with streaming buttons,Medium,P1
-"should I watch {film}",commercial,P0,High - conversational PAA-style verdict,/movies/{tmdbId},"title,h1,content",PAA-shaped verdict copy on title hubs (no FAQ schema - rich results retired),Medium,P1
-"{film} ending explained",informational,P0,High - huge post-watch search wave,/reviews/{slug},"title,h1,schema",Spoiler-gated section with Article schema (no FAQ schema - retired May 2026),Medium,P1
+"is {film} worth watching",commercial,P0,High - pure stream-or-skip language,/movies/{tmdbId},"title,meta,h1",SERP: blockbusters owned by Wikipedia/IMDb/data giants - winnable ONLY for films they ignore; verdict-first format is the edge,Medium,P1
+"should I watch {film}",commercial,P0,High - conversational PAA-style verdict,/movies/{tmdbId},"title,h1,content",PAA-shaped verdict copy on title hubs (no FAQ schema - rich results retired); same blockbuster caveat,Medium,P1
+"{film} ending explained",informational,P0,High - huge post-watch search wave,/reviews/{slug},"title,h1,schema",Mashable-tier competition on big films - target mid/small titles; spoiler-gated section with Article schema (no FAQ schema - retired May 2026),Medium,P1
 "{film} ending meaning",informational,P1,Medium - long-tail post-watch curiosity,/reviews/{slug},"title,content,schema",Companion to ending explained without cannibalization,Low,P0
 "{film} vs {film2} which is better",commercial,P2,Medium - head-to-head decision fun,/reviews/{slug},"title,h1,content",Versus angle inside reviews + cross-link both title hubs,Low,P0
 "{film} book vs movie differences",informational,P2,Low - adaptation fan deep dive,/reviews/{slug},"title,content,internal-link",Book-to-screen module for literary adaptations,Low,P0
 "{film} spoiler free review",commercial,P1,High - pre-watch trust-seeking query,/reviews/{slug},"title,meta,content",Above-fold spoiler-free verdict box,Medium,P1
 "{film} stream it or skip it",commercial,P1,High - mirrors Decider verdict phrasing,/movies/{tmdbId},"title,h1,content",Short verdict card plus where-to-watch block,Medium,P1
-"{film} parents guide",informational,P2,Medium - family appropriateness check intent,/movies/{tmdbId},"title,content,schema",Age rating plus content notes with schema (needs certification data),Low,P0
+"{film} parents guide",informational,P2,Medium - family appropriateness check intent,/movies/{tmdbId},"title,content,schema",SERP: IMDb + Common Sense Media + Kids-in-Mind + RadioTimes on every major film - viable ONLY for titles they skip; needs certification data,High,P2
 "{film} audience reviews and rating",commercial,P1,Medium - blends critic member trust,/movies/{tmdbId},"title,h1,schema",AggregateRating schema from member reviews (implemented),Low,P0
 "where to watch {film}",transactional,P0,High - direct streaming action intent,/movies/{tmdbId},"title,meta,schema",TMDB watch providers with WatchAction schema (implemented),High,P2
 "where to watch {film} online free",transactional,P2,Low - high risk piracy adjacency,/movies/{tmdbId},"content,meta,internal-link",Answer ONLY with legal sources and filters - never pirate links,Medium,P1
 where to watch movies online,transactional,P0,High - broad streaming discovery demand,/movies?list=streaming,"title,h1,content",Browse hub filtered by service and region,High,P2
 "{film} streaming release date",transactional,P1,Medium - theatrical to streaming window,/movies/{tmdbId},"title,h1,content",Date module updated from TMDB data,Medium,P1
-"is {film} on Netflix",transactional,P2,Medium - service-specific availability check,/movies/{tmdbId},"title,content,schema",Per-service availability copy on title hub (visible text only),Low,P0
+"is {film} on Netflix",transactional,P2,Medium - service-specific availability check,/movies/{tmdbId},"title,content,schema",TV Guide/TVInsider compete on majors - per-service copy on OUR hubs is scarce; winnable on smaller titles,Medium,P1
 best movies streaming now,transactional,P1,High - high click listicle intent,/movies?list=streaming-now,"title,h1,internal-link",Rotating list linking out to title hubs,High,P2
 write movie reviews online,transactional,P1,Medium - recruits contributor flywheel,/,"title,content,internal-link",CTA module from homepage to signup and profiles,Low,P0
 rate movies and track watchlist,transactional,P2,Medium - product-led retention hook,/u/{handle},"title,content,internal-link",Profile pages showcase lists ratings and reviews (Person schema implemented),Low,P0
