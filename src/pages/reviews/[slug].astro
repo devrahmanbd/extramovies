@@ -17,6 +17,7 @@ import MovieShowcase from "../../components/public/MovieShowcase.astro";
 import WhereToWatch from "../../components/public/WhereToWatch.astro";
 import RelatedReviews from "../../components/public/RelatedReviews.astro";
 import { getBrand } from "../../lib/seo/brand";
+import { siteOrigin } from "../../lib/seo/meta";
 import {
   articleJsonLd,
   myReviewJsonLd,
@@ -48,7 +49,7 @@ if (resolved.type === "not-found") {
 const review = resolved.review;
 
 const brand = getBrand();
-const origin = Astro.url.origin;
+const origin = siteOrigin(Astro.url.origin);
 const path = `/reviews/${review.slug}`;
 const canonical = `${origin}${path}`;
 const runtime = formatRuntime(review.runtimeMinutes);

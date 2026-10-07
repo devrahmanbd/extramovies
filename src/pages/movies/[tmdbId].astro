@@ -14,6 +14,7 @@ import Base from "../../layouts/Base.astro";
 import MovieShowcase from "../../components/public/MovieShowcase.astro";
 import WhereToWatch from "../../components/public/WhereToWatch.astro";
 import { getBrand } from "../../lib/seo/brand";
+import { siteOrigin } from "../../lib/seo/meta";
 import {
   breadcrumbJsonLd,
   myReviewJsonLd,
@@ -57,7 +58,7 @@ if (!Number.isSafeInteger(tmdbId)) {
 }
 
 const brand = getBrand();
-const origin = Astro.url.origin;
+const origin = siteOrigin(Astro.url.origin);
 const path = `/movies/${tmdbId}`;
 const canonical = `${origin}${path}`;
 const region = defaultRegion();

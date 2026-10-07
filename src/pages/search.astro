@@ -5,13 +5,14 @@ import ReviewCard from "../components/public/ReviewCard.astro";
 import MovieTile from "../components/discover/MovieTile.astro";
 import SearchForm from "../components/public/SearchForm.astro";
 import { breadcrumbJsonLd } from "../lib/seo/jsonld";
+import { siteOrigin } from "../lib/seo/meta";
 import { getBrand } from "../lib/seo/brand";
 import { searchReviews } from "../lib/seo/content";
 import { searchMoviesByTitle } from "../lib/tmdb/client";
 import { mapToTile } from "../lib/tmdb/discover";
 
 const brand = getBrand();
-const origin = Astro.url.origin;
+const origin = siteOrigin(Astro.url.origin);
 const query = (Astro.url.searchParams.get("q") ?? "").trim().slice(0, 120);
 const typeParam = (Astro.url.searchParams.get("type") ?? "all").trim().toLowerCase();
 const activeType = typeParam === "movie" || typeParam === "review" ? typeParam : "all";

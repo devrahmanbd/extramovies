@@ -8,6 +8,7 @@ import MagazineHome from "../components/public/MagazineHome.astro";
 import { getBrand } from "../lib/seo/brand";
 import { getBrand as getPresetBrand, brandLayout } from "../lib/branding/resolve";
 import { websiteJsonLd, organizationJsonLd, breadcrumbJsonLd } from "../lib/seo/jsonld";
+import { siteOrigin } from "../lib/seo/meta";
 import {
   getFeaturedReview,
   getLatestReviews,
@@ -31,7 +32,7 @@ import {
 const brand = getBrand();
 // Layout family comes from the raw preset (the seo adapter drops the field).
 const layout = brandLayout(getPresetBrand());
-const origin = Astro.url.origin;
+const origin = siteOrigin(Astro.url.origin);
 const featured = getFeaturedReview();
 const latest = getLatestReviews(9).filter((r) => r.slug !== featured?.slug).slice(0, 6);
 const shelf = getTopRated(3);

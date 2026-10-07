@@ -6,6 +6,7 @@ import GenreNav from "../../components/public/GenreNav.astro";
 import MovieTile from "../../components/discover/MovieTile.astro";
 import { getBrand } from "../../lib/seo/brand";
 import { breadcrumbJsonLd } from "../../lib/seo/jsonld";
+import { siteOrigin } from "../../lib/seo/meta";
 import { getLatestReviews, getReviewsByGenre, listGenres } from "../../lib/seo/content";
 import { currentTheme } from "../../lib/tmdb/discover";
 
@@ -18,7 +19,7 @@ try {
 const isDiscovery = theme === "discovery";
 
 const brand = getBrand();
-const origin = Astro.url.origin;
+const origin = siteOrigin(Astro.url.origin);
 const genre = Astro.url.searchParams.get("genre")?.trim() || null;
 const genres = listGenres();
 const reviews = genre ? getReviewsByGenre(genre) : getLatestReviews(100);

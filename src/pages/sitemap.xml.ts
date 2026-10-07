@@ -1,9 +1,10 @@
 import type { APIRoute } from "astro";
 import { buildSitemapXml } from "../lib/seo/sitemap";
+import { siteOrigin } from "../lib/seo/meta";
 import { getLatestReviews } from "../lib/seo/content";
 
 export const GET: APIRoute = ({ url }) => {
-  const origin = url.origin;
+  const origin = siteOrigin(url.origin);
   const xml = buildSitemapXml([
     { loc: `${origin}/`, changefreq: "daily", priority: 1.0 },
     { loc: `${origin}/reviews`, changefreq: "daily", priority: 0.8 },

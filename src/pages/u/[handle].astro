@@ -15,6 +15,7 @@ import { getDb } from "../../lib/db/adapter";
 import { getSession, getSessionToken, sessionDbFromAstro } from "../../lib/auth/session";
 import { getUserByHandle } from "../../lib/users/store";
 import { getBrand } from "../../lib/seo/brand";
+import { siteOrigin } from "../../lib/seo/meta";
 import type { JsonLd } from "../../lib/seo/jsonld";
 import { countReviewsForUser, listForUser } from "../../lib/members/reviews";
 import { counts as followCounts, isFollowing } from "../../lib/members/follows";
@@ -94,7 +95,7 @@ const descText = profile.bio
   ? profile.bio.slice(0, 160)
   : `Member reviews and watchlist from @${profile.handle}.`;
 const brand = getBrand();
-const origin = Astro.url.origin.replace(/\/$/, "");
+const origin = siteOrigin(Astro.url.origin).replace(/\/$/, "");
 const canonical = `${origin}${path}`;
 const personNode: JsonLd = {
   "@context": "https://schema.org",

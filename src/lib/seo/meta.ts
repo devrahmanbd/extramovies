@@ -55,6 +55,20 @@ export function canonicalFor(origin: string, path: string): string {
   return `${origin.replace(/\/$/, "")}${normalized === "/" ? "/" : normalized.replace(/\/$/, "")}`;
 }
 
+/**
+ * Canonical site origin. Behind a reverse proxy (OLS → Node) the request
+ * host is localhost, which would poison canonicals/sitemap/OG URLs — so an
+ * explicit SITE_URL env wins whenever set. Falls back to the request origin
+ * (local dev, where SITE_URL is unset).
+ */
+export function siteOrigin(requestOrigin: string): string {
+  const raw =
+    typeof process !== "undefined" ? (process.env.SITE_URL ?? "").trim() : "";
+  const cleaned = raw.replace(/\/+$/, "");
+  if (/^https?:\/\/[^/]+$/.test(cleaned)) return cleaned;
+  return requestOrigin;
+}
+
 export interface PageMeta {
   seoTitle: string;
   metaDesc: string;

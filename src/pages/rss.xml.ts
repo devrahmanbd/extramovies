@@ -1,5 +1,6 @@
 import type { APIRoute } from "astro";
 import { getBrand } from "../lib/seo/brand";
+import { siteOrigin } from "../lib/seo/meta";
 import { getLatestReviews } from "../lib/seo/content";
 
 function escXml(s: string): string {
@@ -8,7 +9,7 @@ function escXml(s: string): string {
 
 export const GET: APIRoute = ({ url }) => {
   const brand = getBrand();
-  const origin = url.origin;
+  const origin = siteOrigin(url.origin);
   const items = getLatestReviews(30)
     .map(
       (r) => `    <item>
