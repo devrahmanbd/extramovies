@@ -82,9 +82,7 @@ ask the host to enable them or install a prebuilt binary host-side.
 ```bash
 mkdir -p data
 export DB_FILE=/home/<user>/movie-review-cms/data/prod.sqlite
-for f in migrations/*.sql; do sqlite3 "$DB_FILE" < "$f"; done
-# no sqlite3 CLI? equivalent via node:
-node -e "const fs=require('fs'),D=require('better-sqlite3'),db=new D(process.env.DB_FILE);for(const f of fs.readdirSync('migrations').filter(f=>f.endsWith('.sql')).sort())db.exec(fs.readFileSync('migrations/'+f,'utf8'));db.close();console.log('migrated')"
+npm run db:migrate   # idempotent tracker (safe to rerun; replaces raw sqlite3 loop)
 ```
 
 This creates all tables (`users`, `member_reviews`, `sessions`, moderation…).
@@ -151,8 +149,8 @@ is the community-proven one.)
    node -v  # need ≥20.12 — install via NodeSource if older
    sudo apt install -y build-essential python3  # for better-sqlite3
    npm ci && npm run build
-   mkdir -p data && for f in migrations/*.sql; do sqlite3 "$DB_FILE" < "$f"; done
-   # (no sqlite3 CLI? use the node one-liner from §2 Step 3)
+   export DB_FILE=/home/extramovies.org/private/prod.sqlite
+   npm run db:migrate   # idempotent; safe to rerun
    ```
 3. Run under PM2 (fixed port — the proxy below dials it):
    ```bash

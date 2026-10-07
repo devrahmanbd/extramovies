@@ -54,7 +54,7 @@ jobs:
           # 4. Data (all idempotent: IF NOT EXISTS migrations, seed skips existing)
           export DB_FILE=/home/extramovies.org/private/prod.sqlite
           mkdir -p "$(dirname "$DB_FILE")"
-          for f in migrations/*.sql; do sqlite3 "$DB_FILE" < "$f"; done
+          npx tsx scripts/migrate-sql.ts
           npm run seed:reviews
 
           # 5. Restart deterministically (delete+start: restart reuses stale env)
