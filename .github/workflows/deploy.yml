@@ -22,6 +22,8 @@ jobs:
             "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}" 'bash -s' <<'EOF'
           set -e
           cd /home/extramovies.org/public_html
+          # Repo files belong to the site user; git runs as root
+          git config --global --add safe.directory /home/extramovies.org/public_html
           git pull --ff-only
           npm ci
           npm run build
