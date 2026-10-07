@@ -19,6 +19,7 @@
     "db:generate": "drizzle-kit generate --dialect sqlite --schema src/lib/db/schema.ts --out migrations",
     "db:migrate:local": "mkdir -p data && sqlite3 data/local.db < migrations/0001_init.sql",
     "db:seed": "echo 'seed via Astro DB studio or src/lib/db seed in admin pass'",
+    "seed:reviews": "tsx scripts/seed-demo-reviews.ts",
     "db:migrate:d1": "wrangler d1 migrations apply movie_reviews --remote --migrations migrations/",
     "cf:types": "wrangler types",
     "deploy": "astro build && wrangler deploy"
