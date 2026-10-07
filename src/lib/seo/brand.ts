@@ -39,12 +39,16 @@ export interface Brand {
 }
 
 export function adaptPreset(p: BrandPreset): Brand {
+  const origin = `https://${p.domain}`;
+  // Schema.org + Open Graph require absolute URLs — presets store root paths.
+  const absolute = (u: string | null | undefined): string | null =>
+    !u ? null : /^https?:\/\//.test(u) ? u : `${origin}${u.startsWith("/") ? u : `/${u}`}`;
   return {
     name: p.siteName,
     tagline: p.tagline,
     domain: p.domain,
-    origin: `https://${p.domain}`,
-    logo: p.logo ?? null,
+    origin,
+    logo: absolute(p.logo),
     icon: p.favicon ?? p.icon,
     fonts: {
       display: p.fonts.display,
@@ -58,7 +62,7 @@ export function adaptPreset(p: BrandPreset): Brand {
     },
     locale: "en_US",
     description: p.tagline,
-    defaultOgImage: p.seo.defaultOgImage ?? null,
+    defaultOgImage: absolute(p.seo.defaultOgImage),
     themeColor: p.seo.themeColor,
   };
 }
