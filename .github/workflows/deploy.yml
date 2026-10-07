@@ -1,0 +1,35 @@
+# Auto-deploy to CyberPanel VPS on push to main.
+# Required repo secrets (Settings → Secrets and variables → Actions):
+#   SSH_HOST, SSH_USER, SSH_PORT, SSH_KEY (private deploy key; server holds the public half)
+name: Deploy to production
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy over SSH
+        run: |
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          printf '%s\n' "${{ secrets.SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=accept-new \
+            -p "${{ secrets.SSH_PORT }}" \
+            "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}" 'bash -s' <<'EOF'
+          set -e
+          cd /home/extramovies.org/public_html
+          git pull --ff-only
+          npm ci
+          npm run build
+          export DB_FILE=/home/extramovies.org/private/prod.sqlite
+          for f in migrations/*.sql; do sqlite3 "$DB_FILE" < "$f"; done
+          npm run seed:reviews
+          pm2 restart extramovies --update-env
+          sleep 6
+          curl -fsS -o /dev/null http://127.0.0.1:3100/
+          EOF
+          rm -f ~/.ssh/deploy_key
