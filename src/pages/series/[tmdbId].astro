@@ -1,0 +1,240 @@
+---
+/**
+ * /series/[tmdbId] — series hub: TMDB showcase + automatic providers.
+ * Lean mirror of src/pages/movies/[tmdbId].astro (S1, publication-first).
+ * No editorial-review slot (no series rows in content.ts), no related strip,
+ * no sitemap entries (revisit when editorial covers series).
+ * Custom manual links are out of scope here, so customWatch is always
+ * null — never fabricated. Zero client JS.
+ */
+import Base from "../../layouts/Base.astro";
+import WhereToWatch from "../../components/public/WhereToWatch.astro";
+import { siteOrigin } from "../../lib/seo/meta";
+import {
+  breadcrumbJsonLd,
+  type JsonLd,
+} from "../../lib/seo/jsonld";
+import { getTvMetaSafe, getTvProvidersRaw } from "../../lib/tmdb/series";
+import {
+  currentTheme,
+  defaultRegion,
+  hasTmdbKey,
+  toContentProviders,
+} from "../../lib/tmdb/discover";
+import {
+  emptyProviders,
+  normalizeWatchProviders,
+} from "../../lib/streaming";
+import { formatRuntime } from "../../lib/seo/content";
+import MemberReviewList from "../../components/member/MemberReviewList.astro";
+import MemberReviewForm from "../../components/member/MemberReviewForm.astro";
+import { getSession, getSessionToken, sessionDbFromAstro } from "../../lib/auth/session";
+import { getDb } from "../../lib/db/adapter";
+import { listForMovie as listMemberReviews } from "../../lib/members/reviews";
+
+let theme: string = "publication";
+try {
+  theme = await currentTheme();
+} catch {
+  theme = "publication";
+}
+void theme;
+
+const rawId = Astro.params.tmdbId ?? "";
+if (!/^\d+$/.test(rawId)) {
+  return new Response("Series not found", { status: 404 });
+}
+const tmdbId = Number(rawId);
+if (!Number.isSafeInteger(tmdbId)) {
+  return new Response("Series not found", { status: 404 });
+}
+
+const origin = siteOrigin(Astro.url.origin);
+const path = `/series/${tmdbId}`;
+const region = defaultRegion();
+
+const [{ show, ok }, tvProvidersRaw] = await Promise.all([
+  getTvMetaSafe(tmdbId, region),
+  getTvProvidersRaw(tmdbId),
+]);
+
+if (!ok) {
+  Astro.response.status = 404;
+}
+
+const providers = toContentProviders(
+  tvProvidersRaw
+    ? normalizeWatchProviders(tvProvidersRaw, tmdbId, region)
+    : emptyProviders(tmdbId, region)
+);
+
+// Member reviews (public slice): best-effort, never breaks the series page.
+let memberReviews: Awaited<ReturnType<typeof listMemberReviews>> = [];
+let memberViewerId: string | null = null;
+let memberCsrf = "";
+try {
+  const sess = await getSession(getSessionToken(Astro.cookies as never), sessionDbFromAstro(Astro));
+  if (sess && sess.role === "member" && sess.userId) {
+    memberViewerId = sess.userId;
+    memberCsrf = sess.csrfToken;
+  }
+} catch {
+  memberViewerId = null;
+}
+try {
+  memberReviews = ok ? await listMemberReviews(getDb({}) as never, tmdbId, "tv", 20) : [];
+} catch {
+  memberReviews = [];
+}
+
+const creators = show.credits?.creators ?? [];
+const cast = (show.credits?.topCast ?? []).map((c) => c.name);
+const runtime = formatRuntime(show.runtimeMinutes);
+const genreNames = (show.genres ?? []).map((g) => g.name);
+const seasonsLabel = show.seasons
+  ? `${show.seasons} season${show.seasons === 1 ? "" : "s"}`
+  : null;
+
+const jsonld: JsonLd[] = [];
+if (ok) {
+  const seriesNode: JsonLd = {
+    "@context": "https://schema.org",
+    "@type": "TVSeries",
+    name: show.title,
+    ...(show.year ? { dateCreated: String(show.year) } : {}),
+    ...(genreNames.length > 0 ? { genre: genreNames } : {}),
+    ...(creators[0] ? { creator: { "@type": "Person", name: creators[0].name } } : {}),
+    ...(show.posterUrl ? { image: show.posterUrl } : {}),
+    ...(show.overview ? { description: show.overview } : {}),
+  };
+  jsonld.push(
+    seriesNode,
+    breadcrumbJsonLd(origin, [
+      { name: "Home", path: "/" },
+      { name: "Series", path: "/series" },
+      { name: show.title, path },
+    ])
+  );
+  const memberRatings = memberReviews
+    .map((r) => r.rating)
+    .filter((n): n is number => typeof n === "number" && Number.isFinite(n));
+  if (memberRatings.length > 0) {
+    const avg = memberRatings.reduce((a, b) => a + b, 0) / memberRatings.length;
+    (seriesNode as Record<string, unknown>)["aggregateRating"] = {
+      "@type": "AggregateRating",
+      ratingValue: Math.round(avg * 10) / 10,
+      reviewCount: memberRatings.length,
+      bestRating: 10,
+      worstRating: 0,
+    };
+  }
+}
+
+const titleText = ok
+  ? `${show.title}${show.year ? ` (${show.year})` : ""} — reviews, verdict & where to watch`
+  : "Series not available";
+const isLong = ok ? show.title.length > 40 : false;
+const headMeta = ok
+  ? [
+      show.year ? String(show.year) : null,
+      seasonsLabel,
+      creators[0] ? `Created by ${creators[0].name}` : null,
+    ]
+      .filter(Boolean)
+      .join("  ·  ")
+  : "";
+---
+<Base
+  title={titleText}
+  description={ok && show.overview
+    ? `${show.overview} Read our ${show.title} series review: verdict, rating, and where to watch.`
+    : "Look up streaming availability for this series — data by TMDB and JustWatch."}
+  path={path}
+  image={ok ? (show.backdropUrl ?? show.posterUrl ?? null) : null}
+  imageAlt={ok ? `${show.title} artwork` : undefined}
+  robots={ok ? "index, follow" : "noindex, follow"}
+  jsonld={jsonld}
+  current="series"
+>
+  <div class="wrap">
+    {!ok ? (
+      <section class="band section--md" aria-labelledby="series-title">
+        <nav class="d-crumb" aria-label="Breadcrumb">
+          <a href="/">Home</a><span aria-hidden="true"> / </span><span aria-current="page">Series</span>
+        </nav>
+        <h1 id="series-title">Series not available</h1>
+        {!hasTmdbKey() ? (
+          <p class="d-empty">Discovery needs a TMDB key. <a href="/admin/settings">Add your TMDB key in setup</a> to load series pages.</p>
+        ) : (
+          <p class="d-empty">We could not load this series from TMDB right now. Please try again later.</p>
+        )}
+        <p><a href="/">Back to home</a></p>
+      </section>
+    ) : (
+      <>
+        <section class="band section--md d-detail-head" aria-labelledby="series-title">
+          <nav class="d-crumb" aria-label="Breadcrumb">
+            <a href="/">Home</a><span aria-hidden="true"> / </span><span aria-current="page">{show.title}</span>
+          </nav>
+          <p class="d-kicker">Series · streaming guide</p>
+          <h1 id="series-title" class={isLong ? "display--long" : undefined}>{show.title}{show.year ? <span class="tnum"> ({show.year})</span> : ""}</h1>
+          {headMeta ? <p class="d-detail-sub tnum">{headMeta}</p> : null}
+          {show.tagline ? <p class="d-detail-tagline">{show.tagline}</p> : null}
+        </section>
+
+        <div class="d-detail band section--md">
+          {show.posterUrl ? (
+            <img
+              class="d-detail-poster"
+              src={show.posterUrl}
+              alt={`Poster for ${show.title}`}
+              width="342"
+              height="513"
+              fetchpriority="high"
+              decoding="async"
+            />
+          ) : null}
+          <div class="d-detail-info">
+            {show.overview ? <p>{show.overview}</p> : null}
+            <dl class="fact-list">
+              {show.year ? <div><dt>First aired</dt><dd class="tnum">{show.year}</dd></div> : null}
+              {show.status ? <div><dt>Status</dt><dd>{show.status}</dd></div> : null}
+              {show.seasons ? <div><dt>Seasons</dt><dd class="tnum">{show.seasons}</dd></div> : null}
+              {show.episodes ? <div><dt>Episodes</dt><dd class="tnum">{show.episodes}</dd></div> : null}
+              {runtime ? <div><dt>Episode length</dt><dd>{runtime}</dd></div> : null}
+              {genreNames.length > 0 ? <div><dt>Genres</dt><dd>{genreNames.join(", ")}</dd></div> : null}
+              {creators.length > 0 ? <div><dt>Created by</dt><dd>{creators.map((c) => c.name).join(", ")}</dd></div> : null}
+              {cast.length > 0 ? <div><dt>Cast</dt><dd>{cast.slice(0, 6).join(", ")}</dd></div> : null}
+              {show.voteAverage !== null ? (
+                <div><dt>TMDB score</dt><dd class="tnum">{show.voteAverage.toFixed(1)}/10{show.voteCount ? ` (${show.voteCount} votes)` : ""}</dd></div>
+              ) : null}
+            </dl>
+            <p class="d-empty">No review yet — <a href="/reviews">browse the journal</a>.</p>
+          </div>
+        </div>
+
+        <WhereToWatch
+          providers={providers}
+          movieTitle={show.title}
+          slug={`series-${tmdbId}`}
+          customWatch={null}
+          region={region}
+        />
+
+        <section class="band section--sm" aria-labelledby="member-reviews-heading">
+          <div class="section-head">
+            <h2 id="member-reviews-heading">Member reviews</h2>
+          </div>
+          <MemberReviewList reviews={memberReviews} />
+          <MemberReviewForm
+            tmdbId={tmdbId}
+            media="tv"
+            viewerId={memberViewerId}
+            csrfToken={memberCsrf}
+            loginNext={path}
+          />
+        </section>
+      </>
+    )}
+  </div>
+</Base>
