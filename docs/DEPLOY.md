@@ -121,6 +121,57 @@ app root (Passenger stderr). `better-sqlite3` load errors → rebuild:
 `npm rebuild better-sqlite3`. Wrong DB → confirm `DB_FILE` is the absolute
 prod path, not the dev one.
 
+### 2b. CyberPanel + OpenLiteSpeed variant (reverse-proxy path)
+
+Same code and env as §2 above — only process management + front web server
+differ. (OLS native "App Server" contexts are finicky; the proxy path below
+is the community-proven one.)
+
+1. CyberPanel → Websites → Create Website (custom domain, SSL via Let's
+   Encrypt on creation). Note the site user (e.g. `extram6401`).
+2. SSH as root (or sudo): place the app OUTSIDE the docroot, owned by the
+   site user, e.g. `/home/extramovies.org/app`. Upload code (same exclusions
+   as §2), then:
+   ```bash
+   node -v  # need ≥20.12 — install via NodeSource if older
+   sudo apt install -y build-essential python3  # for better-sqlite3
+   npm ci && npm run build
+   mkdir -p data && for f in migrations/*.sql; do sqlite3 "$DB_FILE" < "$f"; done
+   # (no sqlite3 CLI? use the node one-liner from §2 Step 3)
+   ```
+3. Run under PM2 (fixed port — the proxy below dials it):
+   ```bash
+   npm i -g pm2
+   PORT=3000 HOST=127.0.0.1 NODE_ENV=production DB_FILE=/home/extramovies.org/app/data/prod.sqlite \
+     ADMIN_EMAIL=you@example.com ADMIN_PASSWORD_HASH='scrypt:...' TMDB_API_KEY=... \
+     SITE_URL=https://your-domain SITE_THEME=discovery \
+     pm2 start dist/server/entry.mjs --name extramovies
+   pm2 startup && pm2 save   # survive reboots (run the command it prints)
+   ```
+   Prefer env via `pm2 ecosystem` file or `/etc/environment`-style exports over
+   inline secrets in shell history.
+4. CyberPanel → Websites → List → Manage → vHost Conf, append:
+   ```
+   extprocessor extramovies {
+     type                    proxy
+     address                 127.0.0.1:3000
+     maxConns                100
+     pcKeepAliveTimeout      60
+     initTimeout             60
+     retryTimeout            0
+     respBuffer              0
+   }
+   ```
+   Then in Rewrite Rules (same Manage screen):
+   ```
+   RewriteEngine On
+   RewriteRule ^/(.*)$ http://extramovies/$1 [P]
+   ```
+   Graceful-restart OpenLiteSpeed (CyberPanel → Status, or `systemctl restart lsws`).
+5. Same Step 5 smoke test as §2 (homepage, movie page, member flow, admin).
+   File ownership gotcha: `data/` must be writable by the PM2 user; if OLS
+   serves stale content, restart OLS after config edits.
+
 ## 3. Static mode (public only)
 
 ```bash
