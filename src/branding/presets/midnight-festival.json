@@ -1,8 +1,8 @@
 {
   "id": "midnight-festival",
-  "siteName": "Midnight Festival",
+  "siteName": "Extramovies",
   "tagline": "Dispatches from the late shows — genre, midnight, beyond",
-  "domain": "midnightfest.example.com",
+  "domain": "extramovies.org",
   "defaultRegion": "US",
   "logo": "/brand/midnight-festival/logo.svg",
   "icon": "/brand/midnight-festival/icon.svg",

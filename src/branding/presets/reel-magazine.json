@@ -1,9 +1,9 @@
 {
   "id": "reel-magazine",
   "layout": "magazine",
-  "siteName": "The Reel Monthly",
+  "siteName": "Extramovies",
   "tagline": "A movie magazine — covers, grids, and strong opinions",
-  "domain": "magazine.example.com",
+  "domain": "extramovies.org",
   "defaultRegion": "US",
   "logo": "/brand/reel-magazine/logo.svg",
   "icon": "/brand/reel-magazine/icon.svg",

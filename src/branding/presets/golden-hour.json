@@ -1,8 +1,8 @@
 {
   "id": "golden-hour",
-  "siteName": "Golden Hour",
+  "siteName": "Extramovies",
   "tagline": "Warm-hearted notes on cinema that glows",
-  "domain": "goldenhour.example.com",
+  "domain": "extramovies.org",
   "defaultRegion": "US",
   "logo": "/brand/golden-hour/logo.svg",
   "icon": "/brand/golden-hour/icon.svg",
