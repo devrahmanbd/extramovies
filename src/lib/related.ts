@@ -7,7 +7,7 @@ export function relatedReviews(
   limit = 3
 ): PublicReview[] {
   const currentGenres = new Set(current.genres.map((g) => g.toLowerCase()));
-  return all
+  const scored = all
     .filter((r) => r.slug !== current.slug)
     .map((r) => {
       const shared = r.genres.filter((g) => currentGenres.has(g.toLowerCase())).length;
@@ -20,6 +20,13 @@ export function relatedReviews(
       if (b.score !== a.score) return b.score - a.score;
       return +new Date(b.r.publishedAt) - +new Date(a.r.publishedAt);
     })
-    .slice(0, limit)
     .map((x) => x.r);
+  if (scored.length >= limit) return scored.slice(0, limit);
+  // Small-corpus fallback: top up with latest reviews so the strip (and its
+  // internal links) never renders empty. Scored matches always come first.
+  const picked = new Set([current.slug, ...scored.map((r) => r.slug)]);
+  const fallback = [...all]
+    .filter((r) => !picked.has(r.slug))
+    .sort((a, b) => +new Date(b.publishedAt) - +new Date(a.publishedAt));
+  return [...scored, ...fallback].slice(0, limit);
 }
