@@ -69,7 +69,7 @@ const jsonld = [
     { name: review.movieTitle, path },
   ]),
 ];
-const pageTitle = `${review.movieTitle} review: ${review.reviewTitle}`;
+const pageTitle = `${review.movieTitle}${review.year ? ` (${review.year})` : ""} review: ${review.reviewTitle}`;
 ---
 <Base
   title={pageTitle}

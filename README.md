@@ -116,7 +116,7 @@ wrangler secret put ADMIN_PASSWORD
 # Prefer ADMIN_PASSWORD_HASH over ADMIN_PASSWORD in production where supported.
 
 # 5. [repo, no account needed] set vars in wrangler.toml [vars]:
-#    SITE_URL (canonical origin — currently https://reviews.example.com placeholder),
+#    SITE_URL (canonical origin — currently https://extramovies.org placeholder),
 #    ADMIN_EMAIL (admin bootstrap seed), plus BRAND_PRESET / SITE_NAME / DEFAULT_REGION.
 
 # 6. [owner Cloudflare account] build + deploy

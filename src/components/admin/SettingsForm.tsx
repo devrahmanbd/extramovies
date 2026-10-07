@@ -306,8 +306,8 @@ export function SettingsForm({ serverDefaults, csrfToken }: { serverDefaults: Se
       <section className="card">
         <h2>Site & brand</h2>
         <div className="row">
-          <label>Site name<input value={dash.siteName} onChange={setD("siteName")} placeholder="The Long Take" /></label>
-          <label>Site URL<input value={dash.siteUrl} onChange={setD("siteUrl")} placeholder="https://reviews.example.com" inputMode="url" /></label>
+          <label>Site name<input value={dash.siteName} onChange={setD("siteName")} placeholder="Extramovies" /></label>
+          <label>Site URL<input value={dash.siteUrl} onChange={setD("siteUrl")} placeholder="https://extramovies.org" inputMode="url" /></label>
         </div>
       </section>
 

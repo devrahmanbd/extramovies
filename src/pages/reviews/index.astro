@@ -23,6 +23,7 @@ const genre = Astro.url.searchParams.get("genre")?.trim() || null;
 const genres = listGenres();
 const reviews = genre ? getReviewsByGenre(genre) : getLatestReviews(100);
 const heading = genre ? `${genre} reviews` : "Every film review in the journal, newest first";
+const titleText = genre ? `${genre} movie reviews` : "Movie reviews";
 const descSource = genre
   ? `Every ${genre.toLowerCase()} review in the journal, newest first.`
   : `The complete review archive, newest first — every film covered in the journal.`;
@@ -35,9 +36,9 @@ const countText =
   reviews.length === 1 ? "1 review" : `${reviews.length} reviews`;
 ---
 <Base
-  title={heading}
+  title={titleText}
   description={descSource}
-  descriptionExtra="Browse the full collection by genre — horror, drama, comedy, and more, every entry argued from a real viewing."
+  descriptionExtra="Browse the full collection by genre — horror, drama, comedy, and more, every entry an honest review argued from a real viewing."
   path="/reviews"
   jsonld={jsonld}
   current="reviews"

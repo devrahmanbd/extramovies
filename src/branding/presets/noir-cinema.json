@@ -1,8 +1,8 @@
 {
   "id": "noir-cinema",
-  "siteName": "The Long Take",
+  "siteName": "Extramovies",
   "tagline": "Slow criticism for fast times — an independent film journal",
-  "domain": "reviews.example.com",
+  "domain": "extramovies.org",
   "defaultRegion": "US",
   "logo": "/brand/noir-cinema/logo.svg",
   "icon": "/brand/noir-cinema/icon.svg",

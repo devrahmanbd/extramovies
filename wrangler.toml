@@ -17,8 +17,8 @@ database_id = "REPLACE_WITH_D1_ID"
 
 [vars]
 BRAND_PRESET = "noir-cinema"
-SITE_URL = "https://reviews.example.com"
-SITE_NAME = "The Long Take"
+SITE_URL = "https://extramovies.org"
+SITE_NAME = "Extramovies"
 DEFAULT_REGION = "US"
 
 # Secrets (never in this file):

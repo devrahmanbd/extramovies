@@ -121,6 +121,19 @@ if (ok) {
   if (review) {
     jsonld.push(myReviewJsonLd(review, { ...brand, origin }, canonical));
   }
+  const memberRatings = memberReviews
+    .map((r) => r.rating)
+    .filter((n): n is number => typeof n === "number" && Number.isFinite(n));
+  if (memberRatings.length > 0) {
+    const avg = memberRatings.reduce((a, b) => a + b, 0) / memberRatings.length;
+    (movieNode as Record<string, unknown>)["aggregateRating"] = {
+      "@type": "AggregateRating",
+      ratingValue: Math.round(avg * 10) / 10,
+      reviewCount: memberRatings.length,
+      bestRating: 10,
+      worstRating: 0,
+    };
+  }
 }
 
 const publishedDate = review
@@ -131,7 +144,9 @@ const publishedDate = review
       timeZone: "UTC",
     })
   : "";
-const titleText = ok ? movie.title : "Movie not available";
+const titleText = ok
+  ? `${movie.title}${movie.year ? ` (${movie.year})` : ""} review — verdict & where to watch`
+  : "Movie not available";
 const isLong = ok ? movie.title.length > 40 : false;
 const headMeta = ok
   ? [
@@ -146,7 +161,7 @@ const headMeta = ok
 <Base
   title={titleText}
   description={ok && movie.overview
-    ? movie.overview
+    ? `${movie.overview} Read our ${movie.title} review: verdict, rating, and where to watch.`
     : "Look up streaming availability for this film — data by TMDB and JustWatch."}
   path={path}
   image={ok ? (movie.backdropUrl ?? movie.posterUrl ?? null) : null}
