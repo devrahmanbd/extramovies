@@ -138,43 +138,67 @@ prod path, not the dev one.
 
 > **Second (or third) site on the same server?** Everything below uses
 > `extramovies.org` paths as an example — substitute YOUR domain, user, and
-> a FREE port on every line (`3100` is taken by the first app; use `3101`,
-> `3102`…; verify with `ss -tlnp | grep <port>`). Sharing one DB file or
-> one port between sites corrupts both — each site gets its own DB path,
-> its own PM2 name, and its own OLS extprocessor.
+> a FREE port on every line. Verify each port is free (`ss -tlnp | grep
+> <port>`) — the panel stack itself squats on some (e.g. `:3000` answers
+> with nghttpx; proxying to an occupied port loops requests until they die
+> with 431). Sharing one DB file or one port between sites corrupts both —
+> each site gets its own DB path, PM2 name, OLS extprocessor, and port.
 
 Same code and env as §2 above — only process management + front web server
 differ. (OLS native "App Server" contexts are finicky; the proxy path below
 is the community-proven one.)
 
 1. CyberPanel → Websites → Create Website (custom domain, SSL via Let's
-   Encrypt on creation). Note the site user (e.g. `extram6401`).
-2. SSH as root (or sudo): place the app OUTSIDE the docroot, owned by the
-   site user, e.g. `/home/extramovies.org/app`. Upload code (same exclusions
-   as §2), then:
+   Encrypt on creation). Note the site user. Repo lives in `public_html`
+   if you use ManageGIT (it only tracks the docroot) — secrets and the DB
+   live OUTSIDE it (see step 3).
+2. SSH as root (or sudo):
    ```bash
    node -v  # need ≥20.12 — install via NodeSource if older
    sudo apt install -y build-essential python3  # for better-sqlite3
-   npm ci && npm run build
-   export DB_FILE=/home/extramovies.org/private/prod.sqlite
-   npm run db:migrate   # idempotent; safe to rerun
+   npm ci
+   # Native modules are SKIPPED by default — approve + rebuild or the app
+   # crashes on first DB access:
+   npm install-scripts approve better-sqlite3 esbuild sharp
+   npm rebuild better-sqlite3
+   node -e "import('better-sqlite3').then(()=>console.log('driver OK'))"
+   npm run build
+   export DB_FILE=/home/<site>/private/prod.sqlite
+   mkdir -p /home/<site>/private
+   npm run db:migrate   # idempotent tracker; safe to rerun
+   npm run seed:reviews # admin starter rows (idempotent; --refresh to update)
    ```
-3. Run under PM2 (fixed port — the proxy below dials it):
+3. Run under PM2 via an ecosystem file OUTSIDE the docroot
+   (e.g. `/home/<site>/ecosystem.config.js`) — never inline secrets on the
+   command line (shell history), never a `.env` under the web root:
+   ```js
+   module.exports = { apps: [{
+     name: "<sitename>", cwd: "/home/<site>/public_html",
+     script: "dist/server/entry.mjs",
+     env: {
+       NODE_ENV: "production", PORT: 3100, HOST: "127.0.0.1",
+       DB_FILE: "/home/<site>/private/prod.sqlite",
+       ADMIN_EMAIL: "you@example.com",
+       ADMIN_PASSWORD_HASH: "scrypt:…",  // generate via the Step-4 command
+       TMDB_API_KEY: "…",
+       SITE_URL: "https://<your-domain>", SITE_THEME: "discovery"
+     }}]};
+   ```
    ```bash
    npm i -g pm2
-   PORT=3000 HOST=127.0.0.1 NODE_ENV=production DB_FILE=/home/extramovies.org/app/data/prod.sqlite \
-     ADMIN_EMAIL=you@example.com ADMIN_PASSWORD_HASH='scrypt:...' TMDB_API_KEY=... \
-     SITE_URL=https://your-domain SITE_THEME=discovery \
-     pm2 start dist/server/entry.mjs --name extramovies
-   pm2 startup && pm2 save   # survive reboots (run the command it prints)
+   pm2 start /home/<site>/ecosystem.config.js && sleep 5
+   curl -I http://127.0.0.1:3100/   # must be 200 with NO nghttpx headers
+   pm2 startup && pm2 save
    ```
-   Prefer env via `pm2 ecosystem` file or `/etc/environment`-style exports over
-   inline secrets in shell history.
-4. CyberPanel → Websites → List → Manage → vHost Conf, append:
+   After ANY env/file change: `pm2 delete <name> && pm2 start …` — plain
+   `pm2 restart` reuses the OLD environment and silently ignores your edit.
+4. CyberPanel → Websites → List → Manage → vHost Conf, append (name the
+   extprocessor per site — the RewriteRule target MUST be the name in THIS
+   vhost, never copy another site's block verbatim):
    ```
-   extprocessor extramovies {
+   extprocessor <sitename> {
      type                    proxy
-     address                 127.0.0.1:3000
+     address                 127.0.0.1:3100
      maxConns                100
      pcKeepAliveTimeout      60
      initTimeout             60
@@ -182,15 +206,42 @@ is the community-proven one.)
      respBuffer              0
    }
    ```
-   Then in Rewrite Rules (same Manage screen):
+   Rewrite Rules (same Manage screen; if the editor errors about a missing
+   `.htaccess`, `touch` the file first). **Syntax differs by location** —
+   vHost Conf patterns start with `/`, `.htaccess` patterns must NOT:
    ```
-   RewriteEngine On
-   RewriteRule ^/(.*)$ http://extramovies/$1 [P]
+   # vHost Conf form:
+   RewriteRule ^/(.*)$ http://<sitename>/$1 [P,L]
+   # .htaccess form (same rule):
+   RewriteRule ^(.*)$ http://<sitename>/$1 [P,L]
    ```
-   Graceful-restart OpenLiteSpeed (CyberPanel → Status, or `systemctl restart lsws`).
+   Deny sensitive paths above the proxy rule (LiteSpeed already blocks
+   `.git`, but NOT these):
+   ```
+   RewriteRule ^/(\.env|.*\.sqlite.*|.*\.db.*|node_modules) - [F,L]
+   ```
+   Then `systemctl restart lsws` — OLS ignores ALL config/.htaccess edits
+   until reloaded. Verify with a theme marker, not just status codes (two
+   same-branded apps are visually identical — confirm the RIGHT backend
+   answers): `curl -s https://<domain>/ | grep -o "discover-title\|featured-title"`.
 5. Same Step 5 smoke test as §2 (homepage, movie page, member flow, admin).
-   File ownership gotcha: `data/` must be writable by the PM2 user; if OLS
-   serves stale content, restart OLS after config edits.
+   Ownership: root-run npm/build/git leave root-owned paths that break
+   panel-side ops — finish with
+   `chown -R <siteuser>:<siteuser> /home/<site>/public_html`
+   (PM2 keeps running as root; runtime writes stay consistent).
+
+#### Triage table (symptom → cause, checked in this order)
+
+| Symptom | Meaning | Fix |
+|---|---|---|
+| `curl :PORT` → connection refused | App not listening | `pm2 list`, `pm2 logs`, port mismatch vs ecosystem file |
+| `curl :PORT` → nghttpx headers | Wrong process owns the port | Pick a free port (`ss -tlnp`), update ecosystem + vhost |
+| Browser 404 from OLS | Proxy rule not engaging | Leading-slash syntax for the location used; OLS restarted?; extprocessor name matches rule? |
+| Browser 503 | Proxy live, backend down | PM2 process crashed — logs first |
+| 431 | Proxy loop (backend IS the proxy path) | Port collision — move the app |
+| 401 on login, local curl ok | Requests reach a DIFFERENT app instance | Verify backend identity via theme marker, not status codes |
+| 429 on login | Rate limiter (5 fails / 10 min / IP) | `pm2 restart`, then one careful attempt |
+| `EADDRINUSE` in pm2 logs | Stale env or occupied port | `delete`+`start` (never bare `restart` for env changes) |
 
 ## 3. Static mode (public only)
 
