@@ -8,7 +8,7 @@
  * that maps the active BrandPreset to the shape public templates need.
  * It defines no brand data of its own.
  */
-import { getBrand as resolveBrand } from "../branding/resolve";
+import { getBrand as resolveBrand, getBrandFromSettings } from "../branding/resolve";
 import type { BrandPreset } from "../branding/resolve";
 
 export interface BrandFonts {
@@ -82,4 +82,42 @@ export function getBrand(overrides: BrandOverrides = {}): Brand {
     colors: { ...base.colors, ...overrides.colors },
     origin: (overrides.origin ?? base.origin).replace(/\/$/, ""),
   };
+}
+
+/**
+ * Dashboard-aware brand: preset switch + site.name + brand.logo overrides
+ * from settings, file/env fallbacks otherwise. Powers every public surface
+ * so /admin brand edits actually take effect. Never throws — degrades to
+ * getBrand() when the DB is unavailable.
+ */
+export async function getSiteBrand(
+  read: (key: string) => Promise<string | null>,
+  env?: Record<string, string | undefined>,
+): Promise<Brand> {
+  try {
+    const preset = await getBrandFromSettings(read, env);
+    const base = adaptPreset(preset);
+    let siteName: string | null = null;
+    let logo: string | null = null;
+    try {
+      [siteName, logo] = await Promise.all([read("site.name"), read("brand.logo")]);
+    } catch {
+      /* fall through to preset values */
+    }
+    const overrides: BrandOverrides = {};
+    if (siteName !== null && siteName.trim() !== "") overrides.name = siteName.trim();
+    if (logo !== null && logo.trim() !== "") {
+      const v = logo.trim();
+      overrides.logo = /^https?:\/\//.test(v) ? v : `${base.origin}${v.startsWith("/") ? v : `/${v}`}`;
+    }
+    return {
+      ...base,
+      ...overrides,
+      fonts: base.fonts,
+      colors: base.colors,
+      origin: base.origin,
+    };
+  } catch {
+    return getBrand();
+  }
 }

@@ -9,7 +9,8 @@
  */
 import Base from "../../layouts/Base.astro";
 import MovieTile from "../../components/discover/MovieTile.astro";
-import { getBrand } from "../../lib/seo/brand";
+import { getSiteBrand } from "../../lib/seo/brand";
+import { getDb, getSetting } from "../../lib/db/adapter";
 import { breadcrumbJsonLd } from "../../lib/seo/jsonld";
 import { siteOrigin } from "../../lib/seo/meta";
 import {
@@ -35,7 +36,7 @@ try {
   theme = "publication";
 }
 
-const brand = getBrand();
+const brand = await getSiteBrand((k) => getSetting(getDb({}), k));
 const origin = siteOrigin(Astro.url.origin);
 const filters = parseDiscoverFilters(Astro.url.searchParams);
 const region = defaultRegion();

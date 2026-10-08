@@ -5,7 +5,8 @@ import ReviewCard from "../components/public/ReviewCard.astro";
 import RatingMark from "../components/public/RatingMark.astro";
 import GenreNav from "../components/public/GenreNav.astro";
 import MagazineHome from "../components/public/MagazineHome.astro";
-import { getBrand } from "../lib/seo/brand";
+import { getSiteBrand } from "../lib/seo/brand";
+import { getDb, getSetting } from "../lib/db/adapter";
 import { getBrand as getPresetBrand, brandLayout } from "../lib/branding/resolve";
 import { websiteJsonLd, organizationJsonLd, breadcrumbJsonLd } from "../lib/seo/jsonld";
 import { siteOrigin } from "../lib/seo/meta";
@@ -29,7 +30,7 @@ import {
   listTmdbGenres,
 } from "../lib/tmdb/discover";
 
-const brand = getBrand();
+const brand = await getSiteBrand((k) => getSetting(getDb({}), k));
 // Layout family comes from the raw preset (the seo adapter drops the field).
 const layout = brandLayout(getPresetBrand());
 const origin = siteOrigin(Astro.url.origin);

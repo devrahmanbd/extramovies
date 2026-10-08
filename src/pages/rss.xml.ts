@@ -1,5 +1,6 @@
 import type { APIRoute } from "astro";
-import { getBrand } from "../lib/seo/brand";
+import { getSiteBrand } from "../lib/seo/brand";
+import { getDb, getSetting } from "../lib/db/adapter";
 import { siteOrigin } from "../lib/seo/meta";
 import { getLatestReviews } from "../lib/seo/content";
 
@@ -7,8 +8,8 @@ function escXml(s: string): string {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
-export const GET: APIRoute = ({ url }) => {
-  const brand = getBrand();
+export const GET: APIRoute = async ({ url }) => {
+  const brand = await getSiteBrand((k) => getSetting(getDb({}), k));
   const origin = siteOrigin(url.origin);
   const items = getLatestReviews(30)
     .map(

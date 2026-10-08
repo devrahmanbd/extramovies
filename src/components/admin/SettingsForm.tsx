@@ -45,6 +45,7 @@ interface DashboardSettings {
   openrouterBaseUrl: string;
   siteUrl: string;
   siteName: string;
+  siteLogo: string;
 }
 
 const EMPTY_DASHBOARD: DashboardSettings = {
@@ -56,6 +57,7 @@ const EMPTY_DASHBOARD: DashboardSettings = {
   openrouterBaseUrl: "",
   siteUrl: "",
   siteName: "",
+  siteLogo: "",
 };
 
 const BLANK_SAMPLE: Sample = { title: "", rating: "", text: "" };
@@ -139,6 +141,7 @@ export function SettingsForm({ serverDefaults, csrfToken }: { serverDefaults: Se
           openrouterBaseUrl: v["openrouter.base_url"] ?? "",
           siteUrl: v["site.url"] ?? "",
           siteName: v["site.name"] ?? "",
+          siteLogo: v["brand.logo"] ?? "",
         });
         setConfigured((json.configured ?? {}) as Record<string, boolean>);
         setTaste((t) => ({
@@ -166,6 +169,7 @@ export function SettingsForm({ serverDefaults, csrfToken }: { serverDefaults: Se
       "openrouter.base_url": dash.openrouterBaseUrl.trim(),
       "site.url": dash.siteUrl.trim(),
       "site.name": dash.siteName.trim(),
+      "brand.logo": dash.siteLogo.trim(),
       "brand.preset": taste.sitePreset,
       "region.default": taste.defaultRegion.trim(),
       "seo.title_suffix": taste.seoTitleSuffix,
@@ -309,6 +313,8 @@ export function SettingsForm({ serverDefaults, csrfToken }: { serverDefaults: Se
           <label>Site name<input value={dash.siteName} onChange={setD("siteName")} placeholder="Extramovies" /></label>
           <label>Site URL<input value={dash.siteUrl} onChange={setD("siteUrl")} placeholder="https://extramovies.org" inputMode="url" /></label>
         </div>
+        <label>Logo path<input value={dash.siteLogo} onChange={setD("siteLogo")} placeholder="/brand/noir-cinema/logo.svg" /></label>
+        <p className="muted">Upload the file via File Manager, then paste its public path here.</p>
       </section>
 
       <h1>My Taste</h1>
