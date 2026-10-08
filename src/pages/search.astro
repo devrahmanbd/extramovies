@@ -10,16 +10,24 @@ import { getSiteBrand } from "../lib/seo/brand";
 import { getDb, getSetting } from "../lib/db/adapter";
 import { searchReviews } from "../lib/seo/content";
 import { mapShowToTile, searchMoviesByTitle, searchShowsByTitle } from "../lib/tmdb/client";
-import { mapToTile } from "../lib/tmdb/discover";
+import { mapToTile, currentTheme } from "../lib/tmdb/discover";
+
+let theme: string = "publication";
+try {
+  theme = await currentTheme();
+} catch {
+  theme = "publication";
+}
+const isPublication = theme !== "discovery";
 
 const brand = await getSiteBrand((k) => getSetting(getDb({}), k));
 const origin = siteOrigin(Astro.url.origin);
 const query = (Astro.url.searchParams.get("q") ?? "").trim().slice(0, 120);
 const typeParam = (Astro.url.searchParams.get("type") ?? "all").trim().toLowerCase();
 const activeType = typeParam === "movie" || typeParam === "series" || typeParam === "review" ? typeParam : "all";
-const showMovies = activeType === "all" || activeType === "movie";
-const showSeries = activeType === "all" || activeType === "series";
-const showReviews = activeType === "all" || activeType === "review";
+const showMovies = !isPublication && (activeType === "all" || activeType === "movie");
+const showSeries = !isPublication && (activeType === "all" || activeType === "series");
+const showReviews = isPublication ? true : (activeType === "all" || activeType === "review");
 const results = query && showReviews ? searchReviews(query) : [];
 const movieTiles = query && showMovies ? (await searchMoviesByTitle(query)).slice(0, 20).map(mapToTile) : [];
 const seriesTiles = query && showSeries ? (await searchShowsByTitle(query)).slice(0, 20).map(mapShowToTile) : [];
@@ -50,16 +58,23 @@ const seriesRest = seriesTiles.slice(SERIES_SHOW);
       </div>
       <SearchForm query={query} />
       {query ? (
-        <p role="status" class="tnum">
-          {movieTiles.length} {movieTiles.length === 1 ? "movie" : "movies"} ·{" "}
-          {seriesTiles.length} series for
-          {" "}“{query}” ·{" "}
-          {results.length} {results.length === 1 ? "review" : "reviews"}.
-        </p>
+        isPublication ? (
+          <p role="status" class="tnum">
+            {results.length} {results.length === 1 ? "review" : "reviews"} for{" "}
+            “{query}”.
+          </p>
+        ) : (
+          <p role="status" class="tnum">
+            {movieTiles.length} {movieTiles.length === 1 ? "movie" : "movies"} ·{" "}
+            {seriesTiles.length} series for
+            {" "}“{query}” ·{" "}
+            {results.length} {results.length === 1 ? "review" : "reviews"}.
+          </p>
+        )
       ) : (
         <p>Try a film or show title, a genre like “Drama”, or a year like “2024”.</p>
       )}
-      {query ? (
+      {query && !isPublication ? (
         <nav class="d-search-filters" aria-label="Filter results">
           <a href={chipHref("all")} aria-current={activeType === "all" ? "page" : undefined}>All</a>
           <a href={chipHref("movie")} aria-current={activeType === "movie" ? "page" : undefined}>Movies ({movieTiles.length})</a>
