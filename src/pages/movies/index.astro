@@ -36,6 +36,10 @@ try {
   theme = "publication";
 }
 
+if (theme === "publication") {
+  return Astro.redirect("/reviews", 301);
+}
+
 const brand = await getSiteBrand((k) => getSetting(getDb({}), k));
 const origin = siteOrigin(Astro.url.origin);
 const filters = parseDiscoverFilters(Astro.url.searchParams);
