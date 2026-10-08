@@ -136,6 +136,13 @@ prod path, not the dev one.
 
 ### 2b. CyberPanel + OpenLiteSpeed variant (reverse-proxy path)
 
+> **Second (or third) site on the same server?** Everything below uses
+> `extramovies.org` paths as an example — substitute YOUR domain, user, and
+> a FREE port on every line (`3100` is taken by the first app; use `3101`,
+> `3102`…; verify with `ss -tlnp | grep <port>`). Sharing one DB file or
+> one port between sites corrupts both — each site gets its own DB path,
+> its own PM2 name, and its own OLS extprocessor.
+
 Same code and env as §2 above — only process management + front web server
 differ. (OLS native "App Server" contexts are finicky; the proxy path below
 is the community-proven one.)
