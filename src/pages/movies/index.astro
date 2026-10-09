@@ -90,8 +90,8 @@ const isLong = h1Text.length > 40;
   description={filters.q
     ? `TMDB results for “${filters.q}” with streaming availability — search films and see where to watch.`
     : filters.list && listBlurb
-      ? `${listTitle} — ${listBlurb} Streaming availability by JustWatch via TMDB.`
-      : "Browse films by genre, year, and where to watch — streaming availability by JustWatch via TMDB."}
+      ? `${listTitle} — ${listBlurb} Streaming availability via TMDB.`
+      : "Browse films by genre, year, and where to watch — streaming availability via TMDB."}
   path="/movies"
   robots={robots}
   jsonld={jsonld}
@@ -108,7 +108,7 @@ const isLong = h1Text.length > 40;
         {activeGenreLabel ? <>Genre: {activeGenreLabel}. </> : null}
         {filters.year !== null ? <>Year: {filters.year}. </> : null}
         {filters.watch ? <>Where to watch: {filters.watch}. </> : null}
-        Streaming availability by JustWatch via TMDB.
+        Streaming availability via TMDB.
       </p>
 
       <form class="d-filters d-filterbar" action="/movies" method="get" role="search" aria-label="Filter movies">

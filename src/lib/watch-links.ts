@@ -4,7 +4,7 @@
  *   - free: custom free streaming sites the editor vouches for
  *   - paid: paid watch options (affiliate / sponsor / ticket links)
  *
- * Rendered AFTER the automatic TMDB/JustWatch tiles, clearly badged
+ * Rendered AFTER the automatic TMDB tiles, clearly badged
  * "Added by the editor". Paid links always render rel="nofollow sponsored".
  */
 

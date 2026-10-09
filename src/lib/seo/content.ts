@@ -17,7 +17,7 @@
  *   - single review: same + WHERE slug = ? ; on miss, check `redirects(old_slug)` → 301 (see resolveSlug)
  *   - search: SQLite FTS5 over (title, review_title, genre, year); this file's
  *     searchReviews() already matches that field set with LIKE fallback.
- *   - watch providers: cached TMDB/JustWatch snapshot per movie+region
+ *   - watch providers: cached TMDB snapshot per movie+region
  * Keep all exported signatures stable — pages depend on them.
  */
 import fs from "node:fs";
@@ -38,7 +38,7 @@ export interface WatchProviders {
   fetchedAt: string;
   /** True when the region has no data — UI hides the section. */
   hideSection: boolean;
-  /** Deep link to TMDB/JustWatch watch page, if known. */
+  /** Deep link to TMDB watch page, if known. */
   link: string | null;
 }
 

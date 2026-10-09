@@ -231,8 +231,7 @@ describe("attribution", () => {
   it("includes timestamp and region", () => {
     const t = attributionText("US", "2026-01-01T00:00:00.000Z");
     assert.match(t, /TMDB/);
-    assert.match(t, /JustWatch/);
     assert.match(t, /US/);
-    assert.match(ATTRIBUTION_TEXT, /JustWatch/);
+    assert.match(ATTRIBUTION_TEXT, /TMDB/);
   });
 });

@@ -1,5 +1,5 @@
 /**
- * Streaming availability layer (TMDB watch/providers, JustWatch-powered).
+ * Streaming availability layer (TMDB watch/providers).
  * - Never invent availability: only what TMDB returns for the region.
  * - Normalizes to Streaming/Rent/Buy/Free categories.
  * - Filters to top useful providers per region (priority + cap).
@@ -136,7 +136,7 @@ export async function getStreamingAvailability(
 // ---------- Attribution ----------
 
 export const ATTRIBUTION_TEXT =
-  "Streaming data powered by TMDB and JustWatch. Availability varies by region and changes over time.";
+  "Streaming data powered by TMDB. Availability varies by region and changes over time.";
 
 export function attributionText(region: RegionCode, fetchedAt: string): string {
   return `${ATTRIBUTION_TEXT} Region: ${region.toUpperCase()} · Updated: ${fetchedAt}`;

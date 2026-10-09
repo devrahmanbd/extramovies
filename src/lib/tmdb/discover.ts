@@ -1,5 +1,5 @@
 /**
- * Theme 1 "discovery" data layer — JustWatch-inspired movie discovery + streaming guide.
+ * Theme 1 "discovery" data layer — streaming-guide movie discovery.
  *
  * Server-only. Every TMDB fetch is cached in-memory (1h) and fail-soft:
  * failures resolve to [] so pages render honest empty states instead of 500s.

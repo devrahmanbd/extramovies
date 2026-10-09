@@ -145,7 +145,7 @@ const showBox = groups.length > 0 && (showAuto || hasCustomWatch(customWatch));
 
     <p class="watch-note watch-footnote">
       <span class="watch-region" aria-label="Region">{region}</span>
-      {showAuto ? <>Checked {fetched}. <TmdbAttribution variant="compact" /> Streaming availability by <a href="https://www.justwatch.com/" rel="nofollow noopener">JustWatch</a> via TMDB — varies by region and changes often, confirm on the provider.</> : null}
+      {showAuto ? <>Checked {fetched}. <TmdbAttribution variant="compact" /> Streaming availability via TMDB. Varies by region and changes often. Confirm on the provider.</> : null}
       {showAuto && providers.link ? <> <a href={providers.link} rel="nofollow noopener">More options on TMDB</a>.</> : null}
       {!showAuto && hasCustomWatch(customWatch) ? <>Ways to watch picked by the editor.</> : null}
     </p>
