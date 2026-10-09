@@ -28,6 +28,14 @@ House rules derived from it (non-negotiable):
 
 ## 2. SEO structure (claude-seo canon)
 
+**Research gate (non-negotiable): no content without keyword research.**
+Before drafting, consult `docs/seo/keywords-extramovies.csv` (honor `status`
++ `new_priority`) AND run a fresh SERP check on the target query (2–3
+searches: who ranks, what angles win, what difficulty looks like TODAY).
+Semrush API tokens available to this project carry no API entitlement, so
+SERP + Search Console are the working sources; if the owner supplies a
+Semrush UI export, prefer its referral/anchor/keyword rows over estimates.
+
 Skills live under `~/.agents/skills/seo-*/SKILL.md`. Apply:
 
 - `seo-content-brief`: outline first — H2/H3 structure, verdict placement,
