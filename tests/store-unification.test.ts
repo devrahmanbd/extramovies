@@ -7,6 +7,7 @@ import {
   getReviewBySlug,
   listGenres,
 } from "../src/lib/seo/content";
+import { getTitleBadges } from "../src/lib/badges";
 
 let dir = "";
 let dbFile = "";
@@ -90,6 +91,25 @@ describe("store-unification", () => {
     expect(r?.tmdbId).toBe(12345);
     expect(r?.genres).toEqual(["Drama"]);
     expect(r?.providers).toBeNull();
+  });
+
+  it("merged rows inherit demo art, providers and verdict", async () => {
+    await writeRows([
+      storeRow({ slug: "dune-part-two", title: "Admin Dune", rating: 9 }),
+    ]);
+    const dune = getReviewBySlug("dune-part-two");
+    expect(dune?.reviewTitle).toBe("Admin Dune");
+    expect(dune?.backdropUrl).toContain("image.tmdb.org");
+    expect(dune?.providers).not.toBeNull();
+    expect(dune?.verdict.length).toBeGreaterThan(0);
+  });
+
+  it("explicit platformPick:false clears a demo flag", async () => {
+    await writeRows([
+      storeRow({ slug: "dune-part-two", platformPick: false }),
+    ]);
+    expect(getReviewBySlug("dune-part-two")?.platformPick).toBe(false);
+    expect(getTitleBadges(693134)).toEqual({ reviewed: true, platformPick: false });
   });
 
   it("genres list still works with merged rows", async () => {
