@@ -2,13 +2,15 @@
 /** Base layout — every public page flows through here and reads getBrand(). */
 import "../styles/tokens.css";
 import "../styles/global.css";
-import { getBrand } from "../lib/seo/brand";
+import { getSiteBrand } from "../lib/seo/brand";
+import { getSetting } from "../lib/db/adapter";
 import { buildPageMeta, siteOrigin } from "../lib/seo/meta";
 import type { JsonLd } from "../lib/seo/jsonld";
 import SiteHeader from "../components/public/SiteHeader.astro";
 import { getSession, getSessionToken, sessionDbFromAstro } from "../lib/auth/session";
 import { getUserById } from "../lib/users/store";
 import { getDb } from "../lib/db/adapter";
+import { currentTheme } from "../lib/tmdb/discover";
 import SiteFooter from "../components/public/SiteFooter.astro";
 import { listGenres } from "../lib/seo/content";
 
@@ -41,7 +43,13 @@ const {
   current = "",
 } = Astro.props;
 
-const brand = getBrand();
+const brand = await getSiteBrand((k) => getSetting(getDb({}), k));
+let theme: string = "publication";
+try {
+  theme = await currentTheme();
+} catch {
+  theme = "publication";
+}
 const origin = siteOrigin(Astro.url.origin);
 const path = Astro.props.path ?? Astro.url.pathname;
 const meta = buildPageMeta({
@@ -126,7 +134,7 @@ try {
     <meta name="twitter:description" content={meta.metaDesc} />
     {ogImage ? <meta name="twitter:image" content={ogImage} /> : null}
 
-    <link rel="icon" href={brand.icon} />
+    <link rel="icon" href={brand.favicon ?? brand.icon} />
     <link
       rel="alternate"
       type="application/rss+xml"
@@ -147,7 +155,7 @@ try {
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
-    <SiteHeader brand={brand} current={current} member={member} csrfToken={memberCsrf} />
+    <SiteHeader brand={brand} current={current} member={member} csrfToken={memberCsrf} theme={theme} />
     <main id="main">
       <slot />
     </main>

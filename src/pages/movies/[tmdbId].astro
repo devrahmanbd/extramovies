@@ -13,7 +13,7 @@
 import Base from "../../layouts/Base.astro";
 import MovieShowcase from "../../components/public/MovieShowcase.astro";
 import WhereToWatch from "../../components/public/WhereToWatch.astro";
-import { getBrand } from "../../lib/seo/brand";
+import { getSiteBrand } from "../../lib/seo/brand";
 import { siteOrigin } from "../../lib/seo/meta";
 import {
   breadcrumbJsonLd,
@@ -37,7 +37,7 @@ import { readingMinutes } from "../../lib/markdown";
 import MemberReviewList from "../../components/member/MemberReviewList.astro";
 import MemberReviewForm from "../../components/member/MemberReviewForm.astro";
 import { getSession, getSessionToken, sessionDbFromAstro } from "../../lib/auth/session";
-import { getDb } from "../../lib/db/adapter";
+import { getDb, getSetting } from "../../lib/db/adapter";
 import { listForMovie as listMemberReviews } from "../../lib/members/reviews";
 
 let theme: string = "publication";
@@ -57,7 +57,7 @@ if (!Number.isSafeInteger(tmdbId)) {
   return new Response("Movie not found", { status: 404 });
 }
 
-const brand = getBrand();
+const brand = await getSiteBrand((k) => getSetting(getDb({}), k));
 const origin = siteOrigin(Astro.url.origin);
 const path = `/movies/${tmdbId}`;
 const canonical = `${origin}${path}`;

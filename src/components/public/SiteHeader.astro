@@ -12,9 +12,12 @@ interface Props {
   current?: string;
   member?: { handle: string; displayName: string } | null;
   csrfToken?: string;
+  /** Publication theme is reviews-only: search hints must not promise movies. */
+  theme?: string;
 }
 
-const { brand, current = "", member = null, csrfToken = "" } = Astro.props;
+const { brand, current = "", member = null, csrfToken = "", theme = "discovery" } = Astro.props;
+const searchPlaceholder = theme === "publication" ? "Search reviews…" : "Search movies, reviews…";
 const nav = [
   { href: "/", label: "Latest", key: "home" },
   { href: "/reviews", label: "Reviews", key: "reviews" },
@@ -38,7 +41,7 @@ const nav = [
         id="site-search"
         type="search"
         name="q"
-        placeholder="Search movies, reviews…"
+        placeholder={searchPlaceholder}
         autocomplete="off"
       />
       <button type="submit">Search</button>

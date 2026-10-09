@@ -2,15 +2,19 @@ import type { APIRoute } from "astro";
 import { buildSitemapXml } from "../lib/seo/sitemap";
 import { siteOrigin } from "../lib/seo/meta";
 import { getLatestReviews } from "../lib/seo/content";
+import { currentTheme } from "../lib/tmdb/discover";
 
-export const GET: APIRoute = ({ url }) => {
+export const GET: APIRoute = async ({ url }) => {
   const origin = siteOrigin(url.origin);
   const latest = getLatestReviews(5000);
   const newest = latest[0]?.updatedAt;
+  const theme = await currentTheme();
   const xml = buildSitemapXml([
     { loc: `${origin}/`, changefreq: "daily", priority: 1.0, ...(newest ? { lastmod: newest } : {}) },
     { loc: `${origin}/reviews`, changefreq: "daily", priority: 0.8, ...(newest ? { lastmod: newest } : {}) },
-    { loc: `${origin}/movies`, changefreq: "daily", priority: 0.8, ...(newest ? { lastmod: newest } : {}) },
+    ...(theme === "publication"
+      ? []
+      : [{ loc: `${origin}/movies`, changefreq: "daily" as const, priority: 0.8, ...(newest ? { lastmod: newest } : {}) }]),
     ...latest.map((r) => ({
       loc: `${origin}/reviews/${r.slug}`,
       lastmod: r.updatedAt,

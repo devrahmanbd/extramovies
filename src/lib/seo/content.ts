@@ -165,8 +165,8 @@ export const DEMO_REVIEWS: PublicReview[] = [
       "- Patience required: some, and worth it",
       "- Skip if: you bounced off Part One's pace. This doubles down",
     ].join("\n"),
-    posterUrl: "https://image.tmdb.org/t/p/w500/6izwz7rsy95ARzTR3poZ8H6c5pp.jpg",
-    backdropUrl: "https://image.tmdb.org/t/p/w780/eZ239CUp1d6OryZEBPnO2n87gMG.jpg",
+    posterUrl: "https://image.tmdb.org/t/p/w780/6izwz7rsy95ARzTR3poZ8H6c5pp.jpg",
+    backdropUrl: "https://image.tmdb.org/t/p/w1280/eZ239CUp1d6OryZEBPnO2n87gMG.jpg",
     director: "Denis Villeneuve",
     cast: ["Timothée Chalamet", "Zendaya", "Rebecca Ferguson"],
     publishedAt: "2026-09-28T10:00:00.000Z",
@@ -200,8 +200,8 @@ export const DEMO_REVIEWS: PublicReview[] = [
       "",
       "177 minutes, and the third act has two endings too many. The film climaxes, exhales, then climaxes again. Trim twenty minutes and this sits with the best of the character. The best Batman detective story on film, docked for indulgence.",
     ].join("\n"),
-    posterUrl: "https://image.tmdb.org/t/p/w500/74xTEgt7R36Fpooo50r9T25onhq.jpg",
-    backdropUrl: "https://image.tmdb.org/t/p/w780/rvtdN5XkWAfGX6xDuPL6yYS2seK.jpg",
+    posterUrl: "https://image.tmdb.org/t/p/w780/74xTEgt7R36Fpooo50r9T25onhq.jpg",
+    backdropUrl: "https://image.tmdb.org/t/p/w1280/rvtdN5XkWAfGX6xDuPL6yYS2seK.jpg",
     director: "Matt Reeves",
     cast: ["Robert Pattinson", "Zoë Kravitz", "Jeffrey Wright"],
     publishedAt: "2026-09-20T10:00:00.000Z",
@@ -233,8 +233,8 @@ export const DEMO_REVIEWS: PublicReview[] = [
       "",
       "Worth exactly one watch, for the performance. Not the coronation it was sold as. The years since, with the discourse settled, have only made the seams show more.",
     ].join("\n"),
-    posterUrl: "https://image.tmdb.org/t/p/w500/udDclJoHjfjb8Ekgsd4FDteOkCU.jpg",
-    backdropUrl: "https://image.tmdb.org/t/p/w780/rlay2M5QYvi6igbGcFjq8jxeusY.jpg",
+    posterUrl: "https://image.tmdb.org/t/p/w780/udDclJoHjfjb8Ekgsd4FDteOkCU.jpg",
+    backdropUrl: "https://image.tmdb.org/t/p/w1280/rlay2M5QYvi6igbGcFjq8jxeusY.jpg",
     director: "Todd Phillips",
     cast: ["Joaquin Phoenix", "Robert De Niro", "Zazie Beetz"],
     publishedAt: "2026-09-12T10:00:00.000Z",
@@ -329,6 +329,52 @@ function storeToPublic(r: Review): PublicReview | null {
   };
 }
 
+/**
+ * Merge a store row over its DEMO counterpart, per field. The store wins
+ * everywhere it has a value (title, excerpt, body, rating, dates, movie
+ * metadata, platformPick incl. explicit false); the DEMO fills fields the
+ * store shape cannot carry (verdict, backdrop, providers, author, featured).
+ * Without this, admin-managed rows render visibly poorer than the demos
+ * they replaced (no backdrop art, no watch data, excerpt-as-verdict).
+ */
+function mergeDemo(demo: PublicReview, r: Review): PublicReview {
+  const movie = r.movie ?? {};
+  const str = (v: unknown): string | null =>
+    typeof v === "string" && v.trim() ? v.trim() : null;
+  const num = (v: unknown): number | null =>
+    typeof v === "number" && Number.isFinite(v) ? v : null;
+  const strs = (v: unknown): string[] | null =>
+    Array.isArray(v)
+      ? v.filter((x): x is string => typeof x === "string")
+      : null;
+  const tmdbId = toFiniteNumber(movie.movieId);
+  return {
+    ...demo,
+    reviewTitle: str(r.title) ?? demo.reviewTitle,
+    movieTitle: str(movie.title) ?? demo.movieTitle,
+    year: toFiniteNumber(movie.year) ?? demo.year,
+    genres: strs(movie.genres) ?? demo.genres,
+    rating: num(r.rating) ?? demo.rating,
+    verdict: str(r.excerpt) ? (str(r.excerpt) as string) : demo.verdict,
+    excerpt: str(r.excerpt) ?? demo.excerpt,
+    bodyMarkdown: str(r.markdown) ?? demo.bodyMarkdown,
+    posterUrl: str(movie.poster) ?? demo.posterUrl,
+    director: str(movie.director) ?? demo.director,
+    cast: strs(movie.cast) ?? demo.cast,
+    publishedAt: r.publishedAt ?? demo.publishedAt,
+    updatedAt: r.updatedAt ?? demo.updatedAt,
+    platformPick:
+      "platformPick" in r && typeof r.platformPick === "boolean"
+        ? r.platformPick
+        : (demo.platformPick ?? false),
+    ...(r.customWatch ? { customWatch: r.customWatch } : {}),
+    tmdbId:
+      tmdbId !== null && Number.isInteger(tmdbId) && tmdbId > 0
+        ? tmdbId
+        : demo.tmdbId,
+  };
+}
+
 // ---------------------------------------------------------------------------
 // Loaders (signatures stable; bodies go DB-backed later)
 // ---------------------------------------------------------------------------
@@ -337,8 +383,16 @@ function published(): PublicReview[] {
   const bySlug = new Map<string, PublicReview>();
   for (const demo of DEMO_REVIEWS) bySlug.set(demo.slug, demo);
   for (const row of readStoreRows()) {
-    const pub = storeToPublic(row);
-    if (pub) bySlug.set(pub.slug, pub);
+    if (!row || row.status !== "published") continue;
+    const slug = typeof row.slug === "string" ? row.slug.trim() : "";
+    if (!slug) continue;
+    const base = bySlug.get(slug);
+    if (base) {
+      bySlug.set(slug, mergeDemo(base, row));
+    } else {
+      const pub = storeToPublic(row);
+      if (pub) bySlug.set(pub.slug, pub);
+    }
   }
   return [...bySlug.values()].sort(
     (a, b) => +new Date(b.publishedAt) - +new Date(a.publishedAt)
