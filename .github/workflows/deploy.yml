@@ -1,13 +1,12 @@
-# Auto-deploy to CyberPanel VPS on push to main.
+# Auto-deploy to CyberPanel VPS on push to main (both sites, matrix).
 # Required repo secrets (Settings → Secrets and variables → Actions):
 #   SSH_HOST, SSH_USER, SSH_PORT, SSH_KEY (private deploy key; server holds the public half)
 #
 # Server assumptions (validated 2026-10-07 — keep this list current):
 #   - node/npm via nvm at $HOME/.nvm (non-interactive SSH skips .bashrc)
-#   - sqlite3 CLI present; PM2 installed globally; app on PORT 3100
-#   - repo at /home/extramovies.org/public_html (site user extra9617)
-#   - DB at /home/extramovies.org/private/prod.sqlite; env in
-#     /home/extramovies.org/ecosystem.config.js (both outside the repo)
+#   - sqlite3 CLI present; PM2 installed globally
+#   - env lives in each site's ecosystem.config.js OUTSIDE the repo
+#   - file ownership: captured before root-run steps, restored after
 name: Deploy to production
 
 on:
@@ -17,7 +16,24 @@ on:
 
 jobs:
   deploy:
+    name: Deploy ${{ matrix.site }}
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - site: extramovies
+            app_dir: /home/extramovies.org/public_html
+            app_port: "3100"
+            pm2_name: extramovies
+            db_file: /home/extramovies.org/private/prod.sqlite
+            ecosystem: /home/extramovies.org/ecosystem.config.js
+          - site: cinemavilla
+            app_dir: /home/cinemavilla.in/public_html
+            app_port: "3200"
+            pm2_name: cinemavilla
+            db_file: /home/cinemavilla.in/private/prod.sqlite
+            ecosystem: /home/cinemavilla.in/ecosystem.config.js
     steps:
       - name: Deploy over SSH
         run: |
@@ -28,8 +44,11 @@ jobs:
             -p "${{ secrets.SSH_PORT }}" \
             "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}" 'bash -s' <<'EOF'
           set -euo pipefail
-          APP_DIR=/home/extramovies.org/public_html
-          APP_PORT=3100
+          APP_DIR=${{ matrix.app_dir }}
+          APP_PORT=${{ matrix.app_port }}
+          PM2_NAME=${{ matrix.pm2_name }}
+          export DB_FILE=${{ matrix.db_file }}
+          ECO_FILE=${{ matrix.ecosystem }}
 
           # 1. Toolchain: CI SSH is non-interactive so nvm never loads via .bashrc
           export NVM_DIR="$HOME/.nvm"
@@ -39,6 +58,7 @@ jobs:
             command -v "$cmd" >/dev/null || { echo "FATAL: $cmd not on PATH"; exit 1; }
           done
           node --version
+          OWNER=$(stat -c '%U:%G' "$APP_DIR")
 
           # 2. Code: repo files belong to the site user, git runs as root
           cd "$APP_DIR"
@@ -51,15 +71,14 @@ jobs:
           npm run build
           test -f dist/server/entry.mjs || { echo "FATAL: build produced no entry"; exit 1; }
 
-          # 4. Data (all idempotent: IF NOT EXISTS migrations, seed skips existing)
-          export DB_FILE=/home/extramovies.org/private/prod.sqlite
+          # 4. Data (all idempotent: tracked migrations, seed skips existing)
           mkdir -p "$(dirname "$DB_FILE")"
           npx tsx scripts/migrate-sql.ts
           npm run seed:reviews
 
           # 5. Restart deterministically (delete+start: restart reuses stale env)
-          pm2 delete extramovies 2>/dev/null || true
-          pm2 start /home/extramovies.org/ecosystem.config.js
+          pm2 delete "$PM2_NAME" 2>/dev/null || true
+          pm2 start "$ECO_FILE"
           pm2 save
 
           # 6. Health check with retries (cold boots are slow on small VPS)
@@ -68,11 +87,11 @@ jobs:
             if curl -fsS -o /dev/null "http://127.0.0.1:${APP_PORT}/"; then ok=1; break; fi
             sleep 5
           done
-          test -n "$ok" || { echo "FATAL: app never answered on ${APP_PORT}"; pm2 logs extramovies --lines 20 --nostream; exit 1; }
+          test -n "$ok" || { echo "FATAL: app never answered on ${APP_PORT}"; pm2 logs "$PM2_NAME" --lines 20 --nostream; exit 1; }
 
           # 7. Hand files back to the site user (root-run steps leave
           # root-owned paths that break panel-side ops)
-          chown -R extra9617:extra9617 "$APP_DIR"
-          echo "DEPLOY OK"
+          chown -R "$OWNER" "$APP_DIR"
+          echo "DEPLOY OK ($PM2_NAME)"
           EOF
           rm -f ~/.ssh/deploy_key
