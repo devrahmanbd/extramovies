@@ -273,6 +273,19 @@ Health check after any deploy: public page renders, `/api/backup/status`
 (admin) returns counts, streaming section hides when TMDB is down,
 exported Markdown re-imports cleanly (`--dry` first).
 
+## CI automation (everything runs here — no manual SSH deploys)
+
+| Workflow | Trigger | Does |
+|---|---|---|
+| Deploy to production | push `main`, manual | Matrix: both sites (pull, install, build, migrate, seed, PM2 restart, health check, chown) |
+| Release prod branch | manual | Merges `main` → `prod-v1`, re-runs prune, pushes (clean snapshot for panel pulls) |
+| Backup production data | daily 02:30 UTC, manual | SQLite dump + reviews JSON per site → Actions artifacts, 14-day retention |
+| Site health | every 6h, manual | Public probes on both sites; fails loudly on any non-200 |
+
+Secrets needed once (repo Settings → Secrets → Actions):
+`SSH_HOST`, `SSH_USER`, `SSH_PORT`, `SSH_KEY`. The release workflow also
+needs Actions *write* permission (Settings → Actions → General).
+
 ## 4. Theme deployments (`SITE_THEME` — deploy-time only)
 
 One engine + data, two independent frontends. The theme is chosen at
