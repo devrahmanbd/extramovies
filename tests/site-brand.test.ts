@@ -1,4 +1,7 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, beforeEach, afterEach } from 'vitest';
+import fs from "node:fs/promises";
+import os from "node:os";
+import path from "node:path";
 import { getSiteBrand } from '../src/lib/seo/brand';
 
 function fakeRead(store: Record<string, string> = {}) {
@@ -6,6 +9,23 @@ function fakeRead(store: Record<string, string> = {}) {
 }
 
 const ENV = { BRAND_PRESET: 'noir-cinema' };
+
+let dir = "";
+let savedFilePath: string | undefined;
+
+beforeEach(async () => {
+  savedFilePath = process.env.SETTINGS_FILE_PATH;
+  dir = await fs.mkdtemp(path.join(os.tmpdir(), "site-brand-"));
+  // Isolate from the developer's real data/settings.json.
+  process.env.SETTINGS_FILE_PATH = path.join(dir, "settings.json");
+  await fs.writeFile(process.env.SETTINGS_FILE_PATH, "{}", "utf8");
+});
+
+afterEach(async () => {
+  if (savedFilePath === undefined) delete process.env.SETTINGS_FILE_PATH;
+  else process.env.SETTINGS_FILE_PATH = savedFilePath;
+  await fs.rm(dir, { recursive: true, force: true });
+});
 
 describe('getSiteBrand', () => {
   it('preset switch changes colors/logo vs default', async () => {
@@ -48,5 +68,19 @@ describe('getSiteBrand', () => {
     const brand = await getSiteBrand(throwing, ENV);
     expect(brand.name).toBeTruthy();
     expect(brand.logo).toBeTruthy();
+  });
+
+  it('settings file (what /admin writes) wins over the injected read', async () => {
+    await fs.writeFile(
+      process.env.SETTINGS_FILE_PATH as string,
+      JSON.stringify({ "site.name": "File Brand", "brand.logo": "/file/logo.svg" }),
+      "utf8"
+    );
+    const brand = await getSiteBrand(
+      fakeRead({ "site.name": "Read Brand", "brand.logo": "/read/logo.svg" }),
+      ENV
+    );
+    expect(brand.name).toBe("File Brand");
+    expect(brand.logo).toBe(`${brand.origin}/file/logo.svg`);
   });
 });

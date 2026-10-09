@@ -8,7 +8,9 @@
  * that maps the active BrandPreset to the shape public templates need.
  * It defines no brand data of its own.
  */
-import { getBrand as resolveBrand, getBrandFromSettings } from "../branding/resolve";
+import fs from "node:fs";
+import path from "node:path";
+import { getBrand as resolveBrand, listPresets } from "../branding/resolve";
 import type { BrandPreset } from "../branding/resolve";
 
 export interface BrandFonts {
@@ -85,30 +87,44 @@ export function getBrand(overrides: BrandOverrides = {}): Brand {
 }
 
 /**
- * Dashboard-aware brand: preset switch + site.name + brand.logo overrides
- * from settings, file/env fallbacks otherwise. Powers every public surface
- * so /admin brand edits actually take effect. Never throws — degrades to
- * getBrand() when the DB is unavailable.
+ * Dashboard-aware brand: preset switch + site.name + brand.logo overrides.
+ * Powers every public surface so /admin brand edits actually take effect.
+ *
+ * Source priority (single source of truth FIRST): data/settings.json — the
+ * file /api/admin/settings reads and writes — then the injected `read`
+ * (legacy SQLite store / D1-style backends), then env seeds, then preset
+ * defaults. Never throws — degrades to getBrand() when nothing resolves.
  */
 export async function getSiteBrand(
   read: (key: string) => Promise<string | null>,
   env?: Record<string, string | undefined>,
 ): Promise<Brand> {
   try {
-    const preset = await getBrandFromSettings(read, env);
+    const fileVals = readSettingsFile();
+    const val = async (key: string): Promise<string | null> => {
+      const f = fileVals[key]?.trim();
+      if (f) return f;
+      try {
+        const d = await read(key);
+        if (d !== null && d !== undefined && d.trim() !== "") return d.trim();
+      } catch {
+        /* fall through to env/defaults */
+      }
+      return null;
+    };
+    const [presetId, siteName, logo] = await Promise.all([
+      val("brand.preset"),
+      val("site.name"),
+      val("brand.logo"),
+    ]);
+    const preset = resolvePreset(presetId, env);
     const base = adaptPreset(preset);
-    let siteName: string | null = null;
-    let logo: string | null = null;
-    try {
-      [siteName, logo] = await Promise.all([read("site.name"), read("brand.logo")]);
-    } catch {
-      /* fall through to preset values */
-    }
     const overrides: BrandOverrides = {};
-    if (siteName !== null && siteName.trim() !== "") overrides.name = siteName.trim();
-    if (logo !== null && logo.trim() !== "") {
-      const v = logo.trim();
-      overrides.logo = /^https?:\/\//.test(v) ? v : `${base.origin}${v.startsWith("/") ? v : `/${v}`}`;
+    if (siteName !== null && siteName !== "") overrides.name = siteName;
+    if (logo !== null && logo !== "") {
+      overrides.logo = /^https?:\/\//.test(logo)
+        ? logo
+        : `${base.origin}${logo.startsWith("/") ? logo : `/${logo}`}`;
     }
     return {
       ...base,
@@ -120,4 +136,44 @@ export async function getSiteBrand(
   } catch {
     return getBrand();
   }
+}
+
+/** Resolve a preset id (settings file → env BRAND_PRESET → noir-cinema). */
+function resolvePreset(
+  presetId: string | null,
+  env?: Record<string, string | undefined>,
+): BrandPreset {
+  const all = listPresets();
+  if (presetId) {
+    const hit = all.find((p) => p.id === presetId);
+    if (hit) return hit;
+  }
+  const envId =
+    env?.BRAND_PRESET ??
+    (typeof process !== "undefined" ? process.env.BRAND_PRESET : undefined);
+  if (envId) {
+    const hit = all.find((p) => p.id === envId);
+    if (hit) return hit;
+  }
+  return all.find((p) => p.id === "noir-cinema") ?? all[0]!;
+}
+
+/** Read data/settings.json (the file /api/admin/settings owns). Never throws. */
+function readSettingsFile(): Record<string, string> {
+  try {
+    const file =
+      (typeof process !== "undefined" ? process.env.SETTINGS_FILE_PATH : undefined) ??
+      path.join(process.cwd(), "data", "settings.json");
+    const parsed: unknown = JSON.parse(fs.readFileSync(file, "utf8"));
+    if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+      const out: Record<string, string> = {};
+      for (const [k, v] of Object.entries(parsed as Record<string, unknown>)) {
+        if (typeof v === "string") out[k] = v;
+      }
+      return out;
+    }
+  } catch {
+    /* missing/unreadable → fallbacks */
+  }
+  return {};
 }
