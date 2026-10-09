@@ -1,0 +1,29 @@
+# Public health checks (no SSH, no secrets). Fails loudly → Actions notifies.
+name: Site health
+
+on:
+  schedule:
+    - cron: "17 */6 * * *"
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Probe both sites
+        run: |
+          set -euo pipefail
+          fail=0
+          for base in https://extramovies.org https://cinemavilla.in; do
+            echo "== $base =="
+            for path in "/" "/reviews" "/movies/693134" "/sitemap.xml" "/admin/login"; do
+              code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 25 "$base$path") || code="000"
+              echo "  $path -> $code"
+              case "$path" in
+                /admin/login) [ "$code" = "200" ] || fail=1 ;;
+                *) [ "$code" = "200" ] || fail=1 ;;
+              esac
+            done
+          done
+          test "$fail" = "0" || { echo "FATAL: one or more probes failed"; exit 1; }
+          echo "ALL HEALTHY"

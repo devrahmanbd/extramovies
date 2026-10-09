@@ -1,0 +1,35 @@
+# Release prod-v1 from main (manual trigger; automation-friendly).
+# Merges origin/main into prod-v1, re-runs the prune script, pushes.
+# Requires Actions write permission (repo Settings → Actions → General →
+# Workflow permissions → "Read and write permissions").
+name: Release prod branch
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Merge main into prod-v1 and prune
+        run: |
+          set -euo pipefail
+          git config user.name "devrahmanbd"
+          git config user.email "devrahmanbd@gmail.com"
+          git fetch origin
+          git checkout prod-v1 || git checkout -b prod-v1 origin/main
+          git merge --no-edit origin/main || {
+            echo "FATAL: merge conflict — resolve manually, automation stops here"
+            exit 1
+          }
+          chmod +x scripts/prune-prod.sh
+          ./scripts/prune-prod.sh
+          git add -A
+          git commit -m "Release prod-v1 from main ($(date -u +%F))" || echo "nothing to release"
+          git push origin prod-v1

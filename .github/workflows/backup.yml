@@ -1,0 +1,56 @@
+# Nightly off-site backup (SQLite + reviews JSON per site).
+# Artifacts hold credential hashes — retention is short on purpose (14 days).
+# Restore: download artifact, stop PM2 app, copy files back, start.
+name: Backup production data
+
+on:
+  schedule:
+    - cron: "30 2 * * *"
+  workflow_dispatch:
+
+jobs:
+  backup:
+    name: Backup ${{ matrix.site }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - site: extramovies
+            app_dir: /home/extramovies.org/public_html
+            db_file: /home/extramovies.org/private/prod.sqlite
+          - site: cinemavilla
+            app_dir: /home/cinemavilla.in/public_html
+            db_file: /home/cinemavilla.in/private/prod.sqlite
+    steps:
+      - name: Dump data over SSH
+        run: |
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          printf '%s\n' "${{ secrets.SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=accept-new \
+            -p "${{ secrets.SSH_PORT }}" \
+            "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}" 'bash -s' <<'EOF'
+          set -euo pipefail
+          STAMP=$(date -u +%F)
+          OUT=/tmp/${{ matrix.site }}-backup-$STAMP
+          mkdir -p "$OUT"
+          sqlite3 "${{ matrix.db_file }}" ".backup '$OUT/prod.sqlite'"
+          cp "${{ matrix.app_dir }}/data/reviews.json" "$OUT/" 2>/dev/null || echo "no reviews.json (fresh install?)"
+          tar -czf /tmp/${{ matrix.site }}-backup-$STAMP.tgz -C /tmp ${{ matrix.site }}-backup-$STAMP
+          echo "BACKUP READY /tmp/${{ matrix.site }}-backup-$STAMP.tgz"
+          EOF
+          scp -i ~/.ssh/deploy_key -P "${{ secrets.SSH_PORT }}" \
+            "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/tmp/${{ matrix.site }}-backup-*.tgz" ./ 2>/dev/null || \
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=accept-new \
+            -p "${{ secrets.SSH_PORT }}" \
+            "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}" \
+            "ls -t /tmp/${{ matrix.site }}-backup-*.tgz | head -1 | xargs -I{} cat {}" > ./${{ matrix.site }}-backup.tgz
+          ls -la ./*.tgz
+          rm -f ~/.ssh/deploy_key
+      - name: Store artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.site }}-backup
+          path: ./*.tgz
+          retention-days: 14
