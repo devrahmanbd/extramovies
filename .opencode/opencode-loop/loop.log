@@ -1,1 +1,3 @@
 {"time":"2026-10-06T10:41:11.268Z","line":"deferred","sessionID":"ses_ef3c3620cffeYxsMcd0fdI8ajV","reason":"session-busy","source":"idle","retryMs":5000}
+{"time":"2026-10-09T16:47:40.434Z","line":"status-message-idle-recovery","sessionID":"ses_ef3c3620cffeYxsMcd0fdI8ajV","staleStatus":"busy","statusSeenAt":1791564457337,"staleForMs":3087}
+{"time":"2026-10-09T18:59:29.122Z","line":"status-message-idle-recovery","sessionID":"ses_ef3c3620cffeYxsMcd0fdI8ajV","staleStatus":"busy","statusSeenAt":1791572367166,"staleForMs":1916}
