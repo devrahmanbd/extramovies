@@ -21,6 +21,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        # extramovies.org only. cinemavilla.in deploys manually (ManageGIT pull
+        # + npm ci/build/migrate + pm2 restart) until its auto-deploy is re-enabled.
+        # To re-add: append an include entry with its app_dir/app_port/pm2_name/db_file/ecosystem.
         include:
           - site: extramovies
             app_dir: /home/extramovies.org/public_html
@@ -28,12 +31,6 @@ jobs:
             pm2_name: extramovies
             db_file: /home/extramovies.org/private/prod.sqlite
             ecosystem: /home/extramovies.org/ecosystem.config.js
-          - site: cinemavilla
-            app_dir: /home/cinemavilla.in/public_html
-            app_port: "3200"
-            pm2_name: cinemavilla
-            db_file: /home/cinemavilla.in/private/prod.sqlite
-            ecosystem: /home/cinemavilla.in/ecosystem.config.js
     steps:
       - name: Deploy over SSH
         run: |
