@@ -127,7 +127,7 @@ try {
     <meta name="twitter:description" content={meta.metaDesc} />
     {ogImage ? <meta name="twitter:image" content={ogImage} /> : null}
 
-    <link rel="icon" href={brand.icon} />
+    <link rel="icon" href={brand.favicon ?? brand.icon} />
     <link
       rel="alternate"
       type="application/rss+xml"

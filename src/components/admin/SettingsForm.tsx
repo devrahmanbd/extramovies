@@ -46,6 +46,7 @@ interface DashboardSettings {
   siteUrl: string;
   siteName: string;
   siteLogo: string;
+  siteFavicon: string;
 }
 
 const EMPTY_DASHBOARD: DashboardSettings = {
@@ -58,6 +59,7 @@ const EMPTY_DASHBOARD: DashboardSettings = {
   siteUrl: "",
   siteName: "",
   siteLogo: "",
+  siteFavicon: "",
 };
 
 const BLANK_SAMPLE: Sample = { title: "", rating: "", text: "" };
@@ -120,6 +122,10 @@ export function SettingsForm({ serverDefaults, csrfToken }: { serverDefaults: Se
   const [configured, setConfigured] = React.useState<Record<string, boolean>>({});
   const [dashMsg, setDashMsg] = React.useState("");
   const [dashError, setDashError] = React.useState("");
+  const [uploadMsg, setUploadMsg] = React.useState("");
+  const [uploading, setUploading] = React.useState<"logo" | "favicon" | null>(null);
+  const logoFileRef = React.useRef<HTMLInputElement>(null);
+  const faviconFileRef = React.useRef<HTMLInputElement>(null);
 
   const setD = (k: keyof DashboardSettings) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setDash((d) => ({ ...d, [k]: e.target.value }));
@@ -142,6 +148,7 @@ export function SettingsForm({ serverDefaults, csrfToken }: { serverDefaults: Se
           siteUrl: v["site.url"] ?? "",
           siteName: v["site.name"] ?? "",
           siteLogo: v["brand.logo"] ?? "",
+          siteFavicon: v["brand.favicon"] ?? "",
         });
         setConfigured((json.configured ?? {}) as Record<string, boolean>);
         setTaste((t) => ({
@@ -170,6 +177,7 @@ export function SettingsForm({ serverDefaults, csrfToken }: { serverDefaults: Se
       "site.url": dash.siteUrl.trim(),
       "site.name": dash.siteName.trim(),
       "brand.logo": dash.siteLogo.trim(),
+      "brand.favicon": dash.siteFavicon.trim(),
       "brand.preset": taste.sitePreset,
       "region.default": taste.defaultRegion.trim(),
       "seo.title_suffix": taste.seoTitleSuffix,
@@ -202,6 +210,34 @@ export function SettingsForm({ serverDefaults, csrfToken }: { serverDefaults: Se
     } catch {
       setDashError("Could not reach the settings API.");
       return false;
+    }
+  }
+
+  async function uploadAsset(kind: "logo" | "favicon", file: File): Promise<void> {
+    setDashError("");
+    setUploadMsg("");
+    setUploading(kind);
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      fd.append("kind", kind);
+      const res = await fetch("/api/admin/upload", {
+        method: "POST",
+        headers: { "x-csrf-token": csrfToken },
+        body: fd,
+      });
+      const json = await res.json().catch(() => null);
+      if (!res.ok || !json?.ok || !json?.path) {
+        setDashError(json?.error || `Upload failed (${res.status}).`);
+        return;
+      }
+      const path = json.path as string;
+      setDash((d) => (kind === "logo" ? { ...d, siteLogo: path } : { ...d, siteFavicon: path }));
+      setUploadMsg(`Uploaded ${file.name} → ${path}. Click Save to apply.`);
+    } catch {
+      setDashError("Could not reach the upload API.");
+    } finally {
+      setUploading(null);
     }
   }
 
@@ -314,7 +350,22 @@ export function SettingsForm({ serverDefaults, csrfToken }: { serverDefaults: Se
           <label>Site URL<input value={dash.siteUrl} onChange={setD("siteUrl")} placeholder="https://extramovies.org" inputMode="url" /></label>
         </div>
         <label>Logo path<input value={dash.siteLogo} onChange={setD("siteLogo")} placeholder="/brand/noir-cinema/logo.svg" /></label>
+        <div className="row">
+          <input type="file" ref={logoFileRef} accept=".svg,.png,.jpg,.jpeg,.webp,.ico" aria-label="Choose logo file" />
+          <button type="button" className="btn ghost" disabled={uploading !== null} onClick={() => { const f = logoFileRef.current?.files?.[0]; if (f) void uploadAsset("logo", f); }}>
+            {uploading === "logo" ? "Uploading…" : "Upload logo"}
+          </button>
+        </div>
         <p className="muted">Upload the file via File Manager, then paste its public path here.</p>
+        <label>Favicon path<input value={dash.siteFavicon} onChange={setD("siteFavicon")} placeholder="/uploads/favicon.svg" /></label>
+        <div className="row">
+          <input type="file" ref={faviconFileRef} accept=".svg,.png,.jpg,.jpeg,.webp,.ico" aria-label="Choose favicon file" />
+          <button type="button" className="btn ghost" disabled={uploading !== null} onClick={() => { const f = faviconFileRef.current?.files?.[0]; if (f) void uploadAsset("favicon", f); }}>
+            {uploading === "favicon" ? "Uploading…" : "Upload favicon"}
+          </button>
+        </div>
+        <p className="muted">Upload the file via File Manager, then paste its public path here.</p>
+        {uploadMsg && <p className="ok" role="status">{uploadMsg}</p>}
       </section>
 
       <h1>My Taste</h1>

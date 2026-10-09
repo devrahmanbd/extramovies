@@ -9,6 +9,7 @@ data/*.db
 data/*.db-*
 data/settings.json
 data/reviews.json
+data/uploads/
 
 # Build output
 dist/

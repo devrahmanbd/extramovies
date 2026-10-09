@@ -31,6 +31,7 @@ export interface Brand {
   domain: string;
   origin: string;
   logo: string | null;
+  favicon: string;
   icon: string;
   fonts: BrandFonts;
   colors: BrandColors;
@@ -51,6 +52,7 @@ export function adaptPreset(p: BrandPreset): Brand {
     domain: p.domain,
     origin,
     logo: absolute(p.logo),
+    favicon: p.favicon ?? p.icon,
     icon: p.favicon ?? p.icon,
     fonts: {
       display: p.fonts.display,
@@ -90,6 +92,9 @@ export function getBrand(overrides: BrandOverrides = {}): Brand {
  * Dashboard-aware brand: preset switch + site.name + brand.logo overrides.
  * Powers every public surface so /admin brand edits actually take effect.
  *
+ * `brand.favicon` (dashboard upload) wins over the preset favicon so
+ * uploaded favicons go live without a rebuild.
+ *
  * Source priority (single source of truth FIRST): data/settings.json — the
  * file /api/admin/settings reads and writes — then the injected `read`
  * (legacy SQLite store / D1-style backends), then env seeds, then preset
@@ -112,10 +117,11 @@ export async function getSiteBrand(
       }
       return null;
     };
-    const [presetId, siteName, logo] = await Promise.all([
+    const [presetId, siteName, logo, favicon] = await Promise.all([
       val("brand.preset"),
       val("site.name"),
       val("brand.logo"),
+      val("brand.favicon"),
     ]);
     const preset = resolvePreset(presetId, env);
     const base = adaptPreset(preset);
@@ -125,6 +131,13 @@ export async function getSiteBrand(
       overrides.logo = /^https?:\/\//.test(logo)
         ? logo
         : `${base.origin}${logo.startsWith("/") ? logo : `/${logo}`}`;
+    }
+    if (favicon !== null && favicon !== "") {
+      const abs = /^https?:\/\//.test(favicon)
+        ? favicon
+        : `${base.origin}${favicon.startsWith("/") ? favicon : `/${favicon}`}`;
+      overrides.favicon = abs;
+      overrides.icon = abs;
     }
     return {
       ...base,
