@@ -6,12 +6,23 @@
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import { markdownToReview, validatePortableReview } from '../src/lib/portability.js';
+import { siteId } from '../src/lib/seo/store-merge.js';
 
 const DB = process.env.REVIEWS_DB_PATH ?? path.join(process.cwd(), 'data', 'reviews.json');
 
-async function readStore(): Promise<Record<string, unknown>[]> {
+/**
+ * Default visibility for imported rows: this deploy's site only
+ * (exclusive by default; sharing is a deliberate editor action later).
+ * Unset SITE_ID → undefined = shared starter behavior (backward compatible).
+ */
+export function defaultSites(): string[] | undefined {
+  const id = siteId();
+  return id === null ? undefined : [id];
+}
+
+async function readStore(dbFile: string = DB): Promise<Record<string, unknown>[]> {
   try {
-    const raw = await fs.readFile(DB, 'utf8');
+    const raw = await fs.readFile(dbFile, 'utf8');
     const p = JSON.parse(raw);
     return Array.isArray(p) ? p : [];
   } catch (e: unknown) {
@@ -22,7 +33,7 @@ async function readStore(): Promise<Record<string, unknown>[]> {
 
 export async function importMarkdown(
   target: string,
-  opts: { dry?: boolean } = {},
+  opts: { dry?: boolean; dbPath?: string } = {},
 ): Promise<{ imported: number; skipped: number; errors: string[] }> {
   const stat = await fs.stat(target);
   const files: string[] = [];
@@ -33,7 +44,8 @@ export async function importMarkdown(
   } else {
     files.push(target);
   }
-  const store = await readStore();
+  const dbFile = opts.dbPath ?? DB;
+  const store = await readStore(dbFile);
   let imported = 0;
   let skipped = 0;
   const errors: string[] = [];
@@ -67,15 +79,22 @@ export async function importMarkdown(
         redirects: [],
         createdAt: now,
         updatedAt: now,
+        ...(defaultSites() !== undefined ? { sites: defaultSites() } : {}),
       };
-      if (existing >= 0) store[existing] = { ...(store[existing] as object), ...record, id: (store[existing] as { id: string }).id };
-      else store.push(record);
+      if (existing >= 0) {
+        const prev = store[existing] as { id: string; sites?: string[] };
+        // Preserve an existing explicit sites tag on update; only stamp
+        // the default when the row has none.
+        const keepSites =
+          Array.isArray(prev.sites) ? { sites: prev.sites } : (defaultSites() !== undefined ? { sites: defaultSites() } : {});
+        store[existing] = { ...(store[existing] as object), ...record, id: prev.id, ...keepSites };
+      } else store.push(record);
     }
     imported++;
   }
   if (!opts.dry) {
-    await fs.mkdir(path.dirname(DB), { recursive: true });
-    await fs.writeFile(DB, JSON.stringify(store, null, 2) + '\n', 'utf8');
+    await fs.mkdir(path.dirname(dbFile), { recursive: true });
+    await fs.writeFile(dbFile, JSON.stringify(store, null, 2) + '\n', 'utf8');
   }
   return { imported, skipped, errors };
 }
