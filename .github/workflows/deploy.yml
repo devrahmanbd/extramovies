@@ -12,6 +12,11 @@ name: Deploy to production
 on:
   push:
     branches: [main]
+    # Docs/strategy-only pushes must not recycle production apps.
+    paths-ignore:
+      - "docs/**"
+      - "**/*.md"
+      - ".superpowers/**"
   workflow_dispatch:
 
 jobs:
