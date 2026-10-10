@@ -57,10 +57,16 @@ jobs:
           node --version
           OWNER=$(stat -c '%U:%G' "$APP_DIR")
 
-          # 2. Code: repo files belong to the site user, git runs as root
+          # 2. Code: pin the branch explicitly. A past incident had this box
+          # sitting on stale prod-v1 while CI green-deployed it for weeks —
+          # `git pull` follows the CURRENT branch, so assert HEAD afterwards.
           cd "$APP_DIR"
           git config --global --add safe.directory "$APP_DIR"
+          git fetch origin
+          git checkout main
           git pull --ff-only
+          # $GITHUB_SHA does not cross SSH — interpolate at build time instead.
+          test "$(git rev-parse HEAD)" = "${{ github.sha }}" || { echo "FATAL: HEAD $(git rev-parse HEAD) != pushed ${{ github.sha }}"; exit 1; }
           test -f package.json || { echo "FATAL: not a repo checkout"; exit 1; }
 
           # 3. Build
