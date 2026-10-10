@@ -43,15 +43,17 @@ export interface Brand {
 
 export function adaptPreset(p: BrandPreset): Brand {
   const origin = `https://${p.domain}`;
-  // Schema.org + Open Graph require absolute URLs — presets store root paths.
-  const absolute = (u: string | null | undefined): string | null =>
-    !u ? null : /^https?:\/\//.test(u) ? u : `${origin}${u.startsWith("/") ? u : `/${u}`}`;
   return {
     name: p.siteName,
     tagline: p.tagline,
     domain: p.domain,
     origin,
-    logo: absolute(p.logo),
+    // Asset paths stay root-relative on purpose: every preset hardcodes one
+    // domain, so absolutizing here would point brand B at brand A's host
+    // (logo 404s for per-site uploads that exist only on B's disk). Relative
+    // URLs resolve against the requesting domain; emission points that need
+    // absolute URLs (og:image, JSON-LD) prefix the request origin instead.
+    logo: asRootPath(p.logo),
     favicon: p.favicon ?? p.icon,
     icon: p.favicon ?? p.icon,
     fonts: {
@@ -66,9 +68,22 @@ export function adaptPreset(p: BrandPreset): Brand {
     },
     locale: "en_US",
     description: p.tagline,
-    defaultOgImage: absolute(p.seo.defaultOgImage),
+    defaultOgImage: asRootPath(p.seo.defaultOgImage),
     themeColor: p.seo.themeColor,
   };
+}
+
+/**
+ * Normalize a brand asset path: absolute http(s) URLs pass through,
+ * root paths stay as-is, bare paths gain a leading slash. Never prefixes a
+ * preset domain (see adaptPreset).
+ */
+export function asRootPath(u: string | null | undefined): string | null {
+  if (!u) return null;
+  const t = u.trim();
+  if (!t) return null;
+  if (/^https?:\/\//i.test(t)) return t;
+  return t.startsWith("/") ? t : `/${t}`;
 }
 
 export interface BrandOverrides extends Partial<Omit<Brand, "fonts" | "colors">> {
@@ -127,17 +142,18 @@ export async function getSiteBrand(
     const base = adaptPreset(preset);
     const overrides: BrandOverrides = {};
     if (siteName !== null && siteName !== "") overrides.name = siteName;
+    // Dashboard uploads are stored as root paths (/uploads/…) and must stay
+    // root-relative so they resolve on THIS domain (see adaptPreset).
     if (logo !== null && logo !== "") {
-      overrides.logo = /^https?:\/\//.test(logo)
-        ? logo
-        : `${base.origin}${logo.startsWith("/") ? logo : `/${logo}`}`;
+      const rel = asRootPath(logo);
+      if (rel) overrides.logo = rel;
     }
     if (favicon !== null && favicon !== "") {
-      const abs = /^https?:\/\//.test(favicon)
-        ? favicon
-        : `${base.origin}${favicon.startsWith("/") ? favicon : `/${favicon}`}`;
-      overrides.favicon = abs;
-      overrides.icon = abs;
+      const rel = asRootPath(favicon);
+      if (rel) {
+        overrides.favicon = rel;
+        overrides.icon = rel;
+      }
     }
     return {
       ...base,

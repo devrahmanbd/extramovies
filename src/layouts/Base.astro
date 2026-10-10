@@ -60,7 +60,13 @@ const meta = buildPageMeta({
   path,
   origin,
 });
-const ogImage = image ?? brand.defaultOgImage ?? null;
+const rawOgImage = image ?? brand.defaultOgImage ?? null;
+// og:image must be absolute for scrapers; brand art is root-relative
+// (multi-site safe), so prefix the request origin when needed.
+const ogImage =
+  rawOgImage && !/^https?:\/\//i.test(rawOgImage)
+    ? `${origin.replace(/\/$/, "")}${rawOgImage.startsWith("/") ? rawOgImage : `/${rawOgImage}`}`
+    : rawOgImage;
 const brandVars = [
   `--brand-accent:${brand.colors.accent}`,
   `--brand-accent-ink:${brand.colors.accentInk}`,

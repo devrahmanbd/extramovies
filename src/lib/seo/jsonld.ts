@@ -11,6 +11,12 @@ import { displayAuthor } from "../site-author";
 
 export type JsonLd = Record<string, unknown>;
 
+/** Prefix root-relative asset paths with the (request) origin; pass through absolute URLs. */
+function absolutize(origin: string, p: string): string {
+  if (/^https?:\/\//i.test(p)) return p;
+  return `${origin.replace(/\/$/, "")}${p.startsWith("/") ? p : `/${p}`}`;
+}
+
 export function websiteJsonLd(brand: Brand): JsonLd {
   return {
     "@context": "https://schema.org",
@@ -37,7 +43,9 @@ export function organizationJsonLd(brand: Brand): JsonLd {
     name: brand.name,
     url: `${brand.origin}/`,
     description: brand.description,
-    ...(brand.logo ? { logo: brand.logo } : {}),
+    // Brand logos are root-relative (multi-site safe); schema.org wants
+    // absolute, so prefix the request origin (callers override brand.origin).
+    ...(brand.logo ? { logo: absolutize(brand.origin, brand.logo) } : {}),
   };
 }
 
@@ -88,7 +96,7 @@ export function articleJsonLd(
     publisher: {
       "@type": "Organization",
       name: brand.name,
-      ...(brand.logo ? { logo: { "@type": "ImageObject", url: brand.logo } } : {}),
+      ...(brand.logo ? { logo: { "@type": "ImageObject", url: absolutize(brand.origin, brand.logo) } } : {}),
     },
     mainEntityOfPage: { "@type": "WebPage", "@id": canonical },
     inLanguage: brand.locale.replace("_", "-"),

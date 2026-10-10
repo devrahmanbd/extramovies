@@ -43,9 +43,14 @@ describe('getSiteBrand', () => {
     expect(renamed.fonts).toEqual(def.fonts);
   });
 
-  it('relative brand.logo is absolutized against origin', async () => {
-    const brand = await getSiteBrand(fakeRead({ 'brand.logo': '/custom/logo.svg' }), ENV);
-    expect(brand.logo).toBe(`${brand.origin}/custom/logo.svg`);
+  it('dashboard logo stays root-relative (resolves per requesting domain)', async () => {
+    const brand = await getSiteBrand(fakeRead({ 'brand.logo': '/uploads/logo.svg' }), ENV);
+    expect(brand.logo).toBe('/uploads/logo.svg');
+  });
+
+  it('bare dashboard logo path gains a leading slash, stays relative', async () => {
+    const brand = await getSiteBrand(fakeRead({ 'brand.logo': 'uploads/logo.svg' }), ENV);
+    expect(brand.logo).toBe('/uploads/logo.svg');
   });
 
   it('absolute brand.logo URL passes through', async () => {
@@ -81,6 +86,12 @@ describe('getSiteBrand', () => {
       ENV
     );
     expect(brand.name).toBe("File Brand");
-    expect(brand.logo).toBe(`${brand.origin}/file/logo.svg`);
+    expect(brand.logo).toBe("/file/logo.svg");
+  });
+
+  it('preset logo is root-relative (no hardcoded host leak across brands)', async () => {
+    const brand = await getSiteBrand(fakeRead(), ENV);
+    expect(brand.logo).toMatch(/^\//);
+    expect(brand.logo).not.toContain('extramovies.org');
   });
 });
