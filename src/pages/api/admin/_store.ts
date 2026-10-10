@@ -39,6 +39,11 @@ export interface Review {
   platformPick?: boolean;
   /** Manual watch links (custom free sites + paid options), edited in the dashboard. */
   customWatch?: CustomWatch;
+  /**
+   * Site namespaces allowed to display this review (SITE_ID values).
+   * Missing/empty = shared starter content shown everywhere.
+   */
+  sites?: string[];
   seo?: ReviewSeo;
   redirects?: string[]; // old slugs that should 308 to current slug
   createdAt: string;

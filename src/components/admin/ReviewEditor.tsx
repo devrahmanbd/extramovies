@@ -77,6 +77,9 @@ export function ReviewEditor({ csrfToken, initial = null, defaultRegion = "US" }
   const [rating, setRating] = React.useState<number>(initial?.rating ?? 0);
   const [region, setRegion] = React.useState(initial?.region ?? defaultRegion);
   const [platformPick, setPlatformPick] = React.useState(initial?.platformPick ?? false);
+  const [shared, setShared] = React.useState(
+    initial?.sites !== undefined && initial.sites.length === 0
+  );
   const [notes, setNotes] = React.useState("");
   const [title, setTitle] = React.useState(initial?.title ?? "");
   const [slug, setSlug] = React.useState(initial?.slug ?? "");
@@ -115,6 +118,7 @@ export function ReviewEditor({ csrfToken, initial = null, defaultRegion = "US" }
       rating: rating || undefined,
       region: region.trim(),
       platformPick: platformPick || undefined,
+      ...(shared ? { sites: [] as string[] } : {}),
       movie: movie ?? undefined,
       customWatch: {
         free: customWatch.free.filter((l) => l.label.trim() && l.url.trim()),
@@ -274,6 +278,10 @@ export function ReviewEditor({ csrfToken, initial = null, defaultRegion = "US" }
         <label className="check-row" style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginTop: "0.75rem" }}>
           <input type="checkbox" checked={platformPick} onChange={(e) => setPlatformPick(e.target.checked)} />
           <span>Platform Pick — show badge on title cards</span>
+        </label>
+        <label className="check-row" style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginTop: "0.75rem" }}>
+          <input type="checkbox" checked={shared} onChange={(e) => setShared(e.target.checked)} />
+          <span>Show on every site — otherwise this site only</span>
         </label>
       </section>
 

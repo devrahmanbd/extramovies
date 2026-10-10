@@ -20,9 +20,6 @@
  *   - watch providers: cached TMDB snapshot per movie+region
  * Keep all exported signatures stable — pages depend on them.
  */
-import fs from "node:fs";
-import path from "node:path";
-import type { Review } from "../../pages/api/admin/_store";
 
 export interface ProviderEntry {
   name: string;
@@ -43,6 +40,7 @@ export interface WatchProviders {
 }
 
 import type { CustomWatch } from "../watch-links";
+import { mergeStoreReviews } from "./store-merge";
 
 export interface PublicReview {
   slug: string;
@@ -72,6 +70,12 @@ export interface PublicReview {
   /** Manual editor links (custom free sites + paid watch). Null when none. */
   customWatch?: CustomWatch | null;
   tmdbId: number | null;
+  /**
+   * Site namespaces that may display this review. Missing/empty = shared
+   * starter content shown everywhere. Filtered by SITE_ID at load time, so
+   * the same slug can hold different reviews per brand with no conflict.
+   */
+  sites?: string[];
 }
 
 // ---------------------------------------------------------------------------
@@ -250,147 +254,13 @@ export const DEMO_REDIRECTS: Record<string, string> = {
   "harbor-of-small-hours": "joker",
 };
 
-// ---------------------------------------------------------------------------
-// Store-unification: published admin rows override DEMO rows by slug.
-// Sync file read (server-only module); missing/corrupt file → DEMO only.
-// ---------------------------------------------------------------------------
-
-function storeDbPath(): string {
-  return (
-    process.env.REVIEWS_DB_PATH ?? path.join(process.cwd(), "data", "reviews.json")
-  );
-}
-
-interface StoreCache {
-  file: string;
-  mtimeMs: number;
-  rows: Review[];
-}
-
-let storeCache: StoreCache | null = null;
-
-function readStoreRows(): Review[] {
-  const file = storeDbPath();
-  try {
-    const stat = fs.statSync(file);
-    if (storeCache && storeCache.file === file && storeCache.mtimeMs === stat.mtimeMs) {
-      return storeCache.rows;
-    }
-    const parsed: unknown = JSON.parse(fs.readFileSync(file, "utf8"));
-    const rows = Array.isArray(parsed) ? (parsed as Review[]) : [];
-    storeCache = { file, mtimeMs: stat.mtimeMs, rows };
-    return rows;
-  } catch {
-    return [];
-  }
-}
-
-function toFiniteNumber(value: unknown): number | null {
-  const n = typeof value === "string" ? Number(value) : value;
-  return typeof n === "number" && Number.isFinite(n) ? n : null;
-}
-
-/** Map an admin-store row onto the public contract. Null when unusable. */
-function storeToPublic(r: Review): PublicReview | null {
-  if (!r || r.status !== "published") return null;
-  const slug = typeof r.slug === "string" ? r.slug.trim() : "";
-  const title = typeof r.title === "string" ? r.title.trim() : "";
-  const markdown = typeof r.markdown === "string" ? r.markdown : "";
-  const excerpt = typeof r.excerpt === "string" && r.excerpt.trim() ? r.excerpt.trim() : "";
-  if (!slug || !title || !markdown || !excerpt) return null;
-  const movie = r.movie ?? {};
-  const tmdbId = toFiniteNumber(movie.movieId);
-  return {
-    slug,
-    reviewTitle: title,
-    movieTitle: typeof movie.title === "string" && movie.title.trim() ? movie.title.trim() : title,
-    year: toFiniteNumber(movie.year),
-    genres: Array.isArray(movie.genres) ? movie.genres.filter((g): g is string => typeof g === "string") : [],
-    runtimeMinutes: null,
-    rating: typeof r.rating === "number" && Number.isFinite(r.rating) ? r.rating : 0,
-    verdict: excerpt,
-    excerpt,
-    bodyMarkdown: markdown,
-    posterUrl: typeof movie.poster === "string" ? movie.poster : null,
-    backdropUrl: null,
-    director: typeof movie.director === "string" ? movie.director : null,
-    cast: Array.isArray(movie.cast) ? movie.cast.filter((c): c is string => typeof c === "string") : [],
-    publishedAt: r.publishedAt ?? r.updatedAt,
-    updatedAt: r.updatedAt,
-    authorName: "The Editor",
-    ...(r.platformPick === true ? { platformPick: true as const } : {}),
-    providers: null,
-    ...(r.customWatch ? { customWatch: r.customWatch } : {}),
-    tmdbId: tmdbId !== null && Number.isInteger(tmdbId) && tmdbId > 0 ? tmdbId : null,
-  };
-}
-
-/**
- * Merge a store row over its DEMO counterpart, per field. The store wins
- * everywhere it has a value (title, excerpt, body, rating, dates, movie
- * metadata, platformPick incl. explicit false); the DEMO fills fields the
- * store shape cannot carry (verdict, backdrop, providers, author, featured).
- * Without this, admin-managed rows render visibly poorer than the demos
- * they replaced (no backdrop art, no watch data, excerpt-as-verdict).
- */
-function mergeDemo(demo: PublicReview, r: Review): PublicReview {
-  const movie = r.movie ?? {};
-  const str = (v: unknown): string | null =>
-    typeof v === "string" && v.trim() ? v.trim() : null;
-  const num = (v: unknown): number | null =>
-    typeof v === "number" && Number.isFinite(v) ? v : null;
-  const strs = (v: unknown): string[] | null =>
-    Array.isArray(v)
-      ? v.filter((x): x is string => typeof x === "string")
-      : null;
-  const tmdbId = toFiniteNumber(movie.movieId);
-  return {
-    ...demo,
-    reviewTitle: str(r.title) ?? demo.reviewTitle,
-    movieTitle: str(movie.title) ?? demo.movieTitle,
-    year: toFiniteNumber(movie.year) ?? demo.year,
-    genres: strs(movie.genres) ?? demo.genres,
-    rating: num(r.rating) ?? demo.rating,
-    verdict: str(r.excerpt) ? (str(r.excerpt) as string) : demo.verdict,
-    excerpt: str(r.excerpt) ?? demo.excerpt,
-    bodyMarkdown: str(r.markdown) ?? demo.bodyMarkdown,
-    posterUrl: str(movie.poster) ?? demo.posterUrl,
-    director: str(movie.director) ?? demo.director,
-    cast: strs(movie.cast) ?? demo.cast,
-    publishedAt: r.publishedAt ?? demo.publishedAt,
-    updatedAt: r.updatedAt ?? demo.updatedAt,
-    platformPick:
-      "platformPick" in r && typeof r.platformPick === "boolean"
-        ? r.platformPick
-        : (demo.platformPick ?? false),
-    ...(r.customWatch ? { customWatch: r.customWatch } : {}),
-    tmdbId:
-      tmdbId !== null && Number.isInteger(tmdbId) && tmdbId > 0
-        ? tmdbId
-        : demo.tmdbId,
-  };
-}
 
 // ---------------------------------------------------------------------------
 // Loaders (signatures stable; bodies go DB-backed later)
 // ---------------------------------------------------------------------------
 
 function published(): PublicReview[] {
-  const bySlug = new Map<string, PublicReview>();
-  for (const demo of DEMO_REVIEWS) bySlug.set(demo.slug, demo);
-  for (const row of readStoreRows()) {
-    if (!row || row.status !== "published") continue;
-    const slug = typeof row.slug === "string" ? row.slug.trim() : "";
-    if (!slug) continue;
-    const base = bySlug.get(slug);
-    if (base) {
-      bySlug.set(slug, mergeDemo(base, row));
-    } else {
-      const pub = storeToPublic(row);
-      if (pub) bySlug.set(pub.slug, pub);
-    }
-  }
-  return [...bySlug.values()].sort(
+  return mergeStoreReviews(DEMO_REVIEWS).sort(
     (a, b) => +new Date(b.publishedAt) - +new Date(a.publishedAt)
   );
 }

@@ -2,11 +2,21 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import type { APIRoute } from "astro";
 import { normalizeCustomWatch } from "../../../lib/watch-links";
 import { requireAdminApi } from "../../../lib/auth/guard";
+import { siteId } from "../../../lib/seo/store-merge";
 import { getReviewById, newId, slugify, upsertReview } from "./_store";
 import type { Review } from "./_store";
 import { wrapLegacy } from "../../../lib/api-adapter";
 
 export const prerender = false;
+
+/**
+ * Default visibility for new/untouched rows: this deploy's site only
+ * (exclusive by default; "all sites" is an explicit editor choice).
+ * Unset SITE_ID (dev) → undefined = shared starter behavior.
+ */
+export function defaultSites(): string[] | undefined {  const id = siteId();
+  return id === null ? undefined : [id];
+}
 
 /**
  * Save a draft. NEVER publishes — status is always forced to "draft".
@@ -47,6 +57,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       rating: typeof body.rating === "number" ? body.rating : existing.rating,
       region: (body.region ?? existing.region ?? "").toString(),
       platformPick: body.platformPick === true ? true : undefined,
+      sites: Array.isArray(body.sites)
+        ? body.sites.filter((s): s is string => typeof s === "string")
+        : (existing.sites ?? defaultSites()),
       customWatch: body.customWatch !== undefined
         ? normalizeCustomWatch(body.customWatch)
         : existing.customWatch,
@@ -68,6 +81,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       rating: typeof body.rating === "number" ? body.rating : undefined,
       region: (body.region ?? "").toString(),
       platformPick: body.platformPick === true ? true : undefined,
+      sites: Array.isArray(body.sites)
+        ? body.sites.filter((s): s is string => typeof s === "string")
+        : defaultSites(),
       customWatch: body.customWatch !== undefined
         ? normalizeCustomWatch(body.customWatch)
         : undefined,

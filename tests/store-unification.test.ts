@@ -8,6 +8,7 @@ import {
   listGenres,
 } from "../src/lib/seo/content";
 import { getTitleBadges } from "../src/lib/badges";
+import { defaultSites } from "../src/pages/api/admin/save-draft";
 
 let dir = "";
 let dbFile = "";
@@ -115,5 +116,64 @@ describe("store-unification", () => {
   it("genres list still works with merged rows", async () => {
     await writeRows([storeRow({ movie: { title: "Store Film", genres: ["Western"] } })]);
     expect(listGenres()).toContain("Western");
+  });
+});
+
+describe("site namespaces", () => {
+  let savedSiteId: string | undefined;
+
+  beforeEach(() => {
+    savedSiteId = process.env.SITE_ID;
+  });
+
+  afterEach(() => {
+    if (savedSiteId === undefined) delete process.env.SITE_ID;
+    else process.env.SITE_ID = savedSiteId;
+  });
+
+  it("hides rows tagged for other sites, shows untagged rows", async () => {
+    process.env.SITE_ID = "extramovies";
+    await writeRows([
+      storeRow({ id: "o", slug: "other-site-film", movie: { title: "Other" }, sites: ["cinemavilla"] }),
+      storeRow({ id: "s", slug: "shared-film", movie: { title: "Shared" } }),
+    ]);
+    const slugs = getLatestReviews(1000).map((r) => r.slug);
+    expect(slugs).not.toContain("other-site-film");
+    expect(slugs).toContain("shared-film");
+    expect(getReviewBySlug("other-site-film")).toBeNull();
+  });
+
+  it("a draft store row suppresses its demo twin on that site only", async () => {
+    process.env.SITE_ID = "extramovies";
+    await writeRows([
+      {
+        id: "hide-dune",
+        title: "Hidden",
+        slug: "dune-part-two",
+        excerpt: "x",
+        markdown: "x",
+        status: "draft",
+        createdAt: "2026-10-01T00:00:00.000Z",
+        updatedAt: "2026-10-01T00:00:00.000Z",
+      },
+    ]);
+    expect(getReviewBySlug("dune-part-two")).toBeNull();
+    expect(getLatestReviews(1000).some((r) => r.slug === "dune-part-two")).toBe(false);
+  });
+
+  it("without SITE_ID everything stays visible (backward compatible)", async () => {
+    delete process.env.SITE_ID;
+    await writeRows([
+      storeRow({ id: "o", slug: "other-site-film", sites: ["cinemavilla"] }),
+    ]);
+    expect(getLatestReviews(1000).some((r) => r.slug === "other-site-film")).toBe(true);
+    expect(getReviewBySlug("dune-part-two")?.reviewTitle).toContain("Dune");
+  });
+
+  it("save defaults scope new rows to the current site only", () => {
+    process.env.SITE_ID = "extramovies";
+    expect(defaultSites()).toEqual(["extramovies"]);
+    delete process.env.SITE_ID;
+    expect(defaultSites()).toBeUndefined();
   });
 });
