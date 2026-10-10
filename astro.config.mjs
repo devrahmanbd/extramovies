@@ -15,6 +15,14 @@ export default defineConfig({
   output: 'server',
   integrations: [react()],
   adapter: node({ mode: 'standalone' }),
+  // Astro's built-in origin check breaks multipart/form uploads behind the
+  // TLS-terminating panel proxy (Node sees http://host while the browser
+  // sends Origin: https://host, and Astro also drops non-default ports when
+  // building the comparison origin) — while letting JSON POSTs straight
+  // through, so only /api/admin/upload 403s. Disabled because every mutating
+  // route already enforces its own synchronizer CSRF token, timing-safe
+  // compared against the server session (src/lib/auth/guard.ts).
+  security: { checkOrigin: false },
   vite: {
     // Keep client JS near zero: only hydrate islands explicitly.
     build: { cssMinify: 'lightningcss' }
