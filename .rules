@@ -1,0 +1,14 @@
+# .rules — hard constraints (details: AGENTS.md)
+
+1. Pushing `main` deploys ALL production sites. Never push casually.
+2. No `--force` on shared branches. No per-site/per-content branches or forks.
+3. Never commit secrets, `.env`, `data/*.db`, `data/reviews.json`, `dist/`.
+4. Never print secrets/keys/hashes/passwords anywhere.
+5. Never copy DB/data files between brands. Shared content moves only via export/import.
+6. Never edit code on servers; change locally, verify, push, let CI deploy.
+7. `npm test` + `npm run build` green before every push. No exceptions.
+8. PM2 env changes need `delete` + `start`, never bare `restart`.
+9. No content without keyword research (CSV status + fresh SERP first).
+10. No FAQPage/HowTo schema. No hidden markup. No invented facts/ratings/quotes.
+11. Excerpts ≤160 chars. Zero em-dashes in review prose.
+12. Subagents: briefed scope only, never push, reports with file:line evidence.
