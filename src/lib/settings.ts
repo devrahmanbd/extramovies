@@ -33,6 +33,14 @@ export const SETTING_KEYS = [
   'seo.author',
   'seo.desc_template',
   'taste.profile',
+  'homepage.meta_title',
+  'homepage.meta_description',
+  'homepage.meta_extra',
+  'homepage.latest_heading',
+  'homepage.latest_dek',
+  'homepage.shelf_heading',
+  'homepage.shelf_dek',
+  'homepage.genre_heading',
 ] as const;
 
 export type SettingKey = (typeof SETTING_KEYS)[number];
@@ -56,6 +64,14 @@ const ENV_SEED: Record<SettingKey, string> = {
   'seo.author': 'SEO_AUTHOR',
   'seo.desc_template': '',
   'taste.profile': '',
+  'homepage.meta_title': '',
+  'homepage.meta_description': '',
+  'homepage.meta_extra': '',
+  'homepage.latest_heading': '',
+  'homepage.latest_dek': '',
+  'homepage.shelf_heading': '',
+  'homepage.shelf_dek': '',
+  'homepage.genre_heading': '',
 };
 
 const DEFAULTS: Record<SettingKey, string> = {
@@ -76,6 +92,15 @@ const DEFAULTS: Record<SettingKey, string> = {
   'seo.author': '',
   'seo.desc_template': '{title} ({year}) review: verdict, performances, and where to watch.',
   'taste.profile': '',
+  'homepage.meta_title': 'Movie reviews: honest, personal film criticism',
+  'homepage.meta_description':
+    'Honest movie reviews and slow, personal film criticism — every review argued from a real viewing, newest first.',
+  'homepage.meta_extra': 'New reviews weekly. No hype without evidence, no spoilers without warning.',
+  'homepage.latest_heading': 'Latest reviews',
+  'homepage.latest_dek': 'New writing, in the order it was published. No algorithm, no filler.',
+  'homepage.shelf_heading': 'My ratings — the current shelf',
+  'homepage.shelf_dek': 'The highest-scored films in the journal right now.',
+  'homepage.genre_heading': 'Browse by genre',
 };
 
 /** Keys treated as secrets — never returned in full by the admin GET API. */
@@ -173,6 +198,22 @@ export function validateSettingsPayload(input: Record<string, unknown>): string 
     theme.trim() !== 'publication'
   ) {
     return "site.theme must be 'discovery' or 'publication'";
+  }
+  // Homepage copy: per-site words (H1-adjacent meta + section heads are SEO
+  // events — keep them tight; loader falls back to coded defaults on empty).
+  const homepageCaps: Record<string, number> = {
+    'homepage.meta_title': 80,
+    'homepage.meta_description': 200,
+    'homepage.meta_extra': 200,
+    'homepage.latest_heading': 80,
+    'homepage.latest_dek': 200,
+    'homepage.shelf_heading': 80,
+    'homepage.shelf_dek': 200,
+    'homepage.genre_heading': 80,
+  };
+  for (const [k, max] of Object.entries(homepageCaps)) {
+    const v = input[k];
+    if (typeof v === 'string' && v.length > max) return `${k} is too long (max ${max} chars)`;
   }
   return null;
 }

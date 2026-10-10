@@ -164,7 +164,10 @@ describe('publication: experience unchanged (current behavior = publication)', (
   it('homepage keeps journal + magazine branches', () => {
     const index = read('src/pages/index.astro');
     expect(index).toContain('MagazineHome');
-    expect(index).toContain('Latest reviews');
+    // Section words now resolve via getHomepageCopy (per-site settings) with
+    // coded defaults identical to the legacy hardcoded strings.
+    expect(index).toContain('getHomepageCopy');
+    expect(index).toContain('copy.latestHeading');
     expect(index).toContain('Browse the full archive');
     expect(index).toMatch(/layout\s*===\s*['"]magazine['"]/);
   });

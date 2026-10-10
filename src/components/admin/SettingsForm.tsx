@@ -49,6 +49,28 @@ interface DashboardSettings {
   siteFavicon: string;
 }
 
+interface HomepageState {
+  metaTitle: string;
+  metaDescription: string;
+  metaExtra: string;
+  latestHeading: string;
+  latestDek: string;
+  shelfHeading: string;
+  shelfDek: string;
+  genreHeading: string;
+}
+
+const EMPTY_HOMEPAGE: HomepageState = {
+  metaTitle: "",
+  metaDescription: "",
+  metaExtra: "",
+  latestHeading: "",
+  latestDek: "",
+  shelfHeading: "",
+  shelfDek: "",
+  genreHeading: "",
+};
+
 const EMPTY_DASHBOARD: DashboardSettings = {
   tmdbApiKey: "",
   omdbApiKey: "",
@@ -119,6 +141,7 @@ export function SettingsForm({ serverDefaults, csrfToken }: { serverDefaults: Se
   const [saved, setSaved] = React.useState("");
   const [tasteError, setTasteError] = React.useState("");
   const [dash, setDash] = React.useState<DashboardSettings>(EMPTY_DASHBOARD);
+  const [home, setHome] = React.useState<HomepageState>(EMPTY_HOMEPAGE);
   const [configured, setConfigured] = React.useState<Record<string, boolean>>({});
   const [dashMsg, setDashMsg] = React.useState("");
   const [dashError, setDashError] = React.useState("");
@@ -129,6 +152,9 @@ export function SettingsForm({ serverDefaults, csrfToken }: { serverDefaults: Se
 
   const setD = (k: keyof DashboardSettings) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setDash((d) => ({ ...d, [k]: e.target.value }));
+
+  const setH = (k: keyof HomepageState) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+    setHome((h) => ({ ...h, [k]: e.target.value }));
 
   // Dashboard-backed settings (DB/file + env fallback). Secrets arrive masked.
   React.useEffect(() => {
@@ -151,6 +177,16 @@ export function SettingsForm({ serverDefaults, csrfToken }: { serverDefaults: Se
           siteFavicon: v["brand.favicon"] ?? "",
         });
         setConfigured((json.configured ?? {}) as Record<string, boolean>);
+        setHome({
+          metaTitle: v["homepage.meta_title"] ?? "",
+          metaDescription: v["homepage.meta_description"] ?? "",
+          metaExtra: v["homepage.meta_extra"] ?? "",
+          latestHeading: v["homepage.latest_heading"] ?? "",
+          latestDek: v["homepage.latest_dek"] ?? "",
+          shelfHeading: v["homepage.shelf_heading"] ?? "",
+          shelfDek: v["homepage.shelf_dek"] ?? "",
+          genreHeading: v["homepage.genre_heading"] ?? "",
+        });
         setTaste((t) => ({
           ...t,
           sitePreset: v["brand.preset"] || t.sitePreset,
@@ -183,6 +219,14 @@ export function SettingsForm({ serverDefaults, csrfToken }: { serverDefaults: Se
       "seo.title_suffix": taste.seoTitleSuffix,
       "seo.author": taste.seoAuthor,
       "seo.desc_template": taste.seoDescTemplate,
+      "homepage.meta_title": home.metaTitle.trim(),
+      "homepage.meta_description": home.metaDescription.trim(),
+      "homepage.meta_extra": home.metaExtra.trim(),
+      "homepage.latest_heading": home.latestHeading.trim(),
+      "homepage.latest_dek": home.latestDek.trim(),
+      "homepage.shelf_heading": home.shelfHeading.trim(),
+      "homepage.shelf_dek": home.shelfDek.trim(),
+      "homepage.genre_heading": home.genreHeading.trim(),
       "taste.profile": JSON.stringify(toTasteProfile(taste)),
     };
     // Omit untouched masked secrets so the server keeps existing values.
@@ -370,6 +414,23 @@ export function SettingsForm({ serverDefaults, csrfToken }: { serverDefaults: Se
 
       <h1>My Taste</h1>
       <p className="muted">Your voice drives every generated draft. Three sample reviews matter more than any slider.</p>
+
+      <section className="card">
+        <h2>Homepage words (this site only)</h2>
+        <p className="muted">Meta title/description and section heads. Blank = coded default. Changing these is an SEO event — re-check rankings after.</p>
+        <div className="row">
+          <label>Meta title (≤80)<input value={home.metaTitle} onChange={setH("metaTitle")} maxLength={80} /></label>
+          <label>Genre heading (≤80)<input value={home.genreHeading} onChange={setH("genreHeading")} maxLength={80} /></label>
+        </div>
+        <label>Meta description (≤200)<textarea value={home.metaDescription} onChange={setH("metaDescription")} rows={2} maxLength={200} /></label>
+        <label>Meta extra line (≤200)<textarea value={home.metaExtra} onChange={setH("metaExtra")} rows={2} maxLength={200} /></label>
+        <div className="row">
+          <label>Latest heading (≤80)<input value={home.latestHeading} onChange={setH("latestHeading")} maxLength={80} /></label>
+          <label>Shelf heading (≤80)<input value={home.shelfHeading} onChange={setH("shelfHeading")} maxLength={80} /></label>
+        </div>
+        <label>Latest dek (≤200)<textarea value={home.latestDek} onChange={setH("latestDek")} rows={2} maxLength={200} /></label>
+        <label>Shelf dek (≤200)<textarea value={home.shelfDek} onChange={setH("shelfDek")} rows={2} maxLength={200} /></label>
+      </section>
 
       <section className="card">
         <h2>Values & dislikes</h2>

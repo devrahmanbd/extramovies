@@ -6,6 +6,7 @@ import RatingMark from "../components/public/RatingMark.astro";
 import GenreNav from "../components/public/GenreNav.astro";
 import MagazineHome from "../components/public/MagazineHome.astro";
 import { getSiteBrand } from "../lib/seo/brand";
+import { getHomepageCopy } from "../lib/homepage";
 import { getDb, getSetting } from "../lib/db/adapter";
 import { getBrand as getPresetBrand, brandLayout } from "../lib/branding/resolve";
 import { websiteJsonLd, organizationJsonLd, breadcrumbJsonLd } from "../lib/seo/jsonld";
@@ -31,6 +32,7 @@ import {
 } from "../lib/tmdb/discover";
 
 const brand = await getSiteBrand((k) => getSetting(getDb({}), k));
+const copy = await getHomepageCopy((k) => getSetting(getDb({}), k));
 // Layout family comes from the raw preset (the seo adapter drops the field).
 const layout = brandLayout(getPresetBrand());
 const origin = siteOrigin(Astro.url.origin);
@@ -83,9 +85,9 @@ const publishedDate = featured
   : "";
 ---
 <Base
-  title="Movie reviews: honest, personal film criticism"
-  description="Honest movie reviews and slow, personal film criticism — every review argued from a real viewing, newest first."
-  descriptionExtra="New reviews weekly. No hype without evidence, no spoilers without warning."
+  title={copy.metaTitle}
+  description={copy.metaDescription}
+  descriptionExtra={copy.metaExtra}
   path="/"
   image={featured?.backdropUrl ?? featured?.posterUrl ?? null}
   imageAlt={featured ? `${featured.movieTitle} artwork` : undefined}
@@ -213,8 +215,8 @@ const publishedDate = featured
       <section aria-labelledby="latest-heading" class="band section--md glam-latest">
         <div class="wrap">
           <div class="section-head">
-            <h2 id="latest-heading">Latest reviews</h2>
-            <p>New writing, in the order it was published. No algorithm, no filler.</p>
+            <h2 id="latest-heading">{copy.latestHeading}</h2>
+            <p>{copy.latestDek}</p>
           </div>
           {latest.length > 0 ? (
             <ol class="glam-mosaic glam-latest-diptychs">
@@ -237,8 +239,8 @@ const publishedDate = featured
         <section aria-labelledby="shelf-heading" class="band--alt section--sm glam-shelf">
           <div class="wrap">
             <div class="section-head">
-              <h2 id="shelf-heading">My ratings — the current shelf</h2>
-              <p>The highest-scored films in the journal right now.</p>
+              <h2 id="shelf-heading">{copy.shelfHeading}</h2>
+              <p>{copy.shelfDek}</p>
             </div>
             <ol class="glam-shelf-list">
               {shelf.map((r, i) => <ReviewCard review={r} index={i} variant="shelf" />)}
@@ -251,7 +253,7 @@ const publishedDate = featured
         <section aria-labelledby="genres-heading" class="band section--sm glam-genres-band">
           <div class="wrap">
             <div class="section-head">
-              <h2 id="genres-heading">Browse by genre</h2>
+              <h2 id="genres-heading">{copy.genreHeading}</h2>
             </div>
             <GenreNav genres={genres} limit={8} />
           </div>
