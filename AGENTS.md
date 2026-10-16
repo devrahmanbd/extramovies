@@ -6,12 +6,14 @@ planned. Read this whole file before acting. Short hard-rules version: `.rules`.
 
 ## 1. Branches & deployment (read twice — history of silent breakage here)
 
-- `main` = development. Pushing code auto-deploys ALL sites via
-  `.github/workflows/deploy.yml` (matrix extramovies + cinemavilla).
-  A code push IS a production deploy.
-- Docs-only pushes (`docs/**`, `**/*.md`, `.superpowers/**`) skip deploys
-  via `paths-ignore`. NOTE: `.rules` is NOT covered by that ignore — touching
-  it triggers a deploy. Batch `.rules` edits with code or avoid them.
+- `main` = development. It NEVER deploys. `prod` = release; pushing `prod`
+  auto-deploys ALL sites via `.github/workflows/deploy.yml` (matrix
+  extramovies + cinemavilla). Release flow: finish on `main`, verify green,
+  `git checkout prod && git merge main && git push origin prod`.
+  Merging to `prod` IS the production deploy — do it deliberately.
+  Recommended: protect `prod` (require PR + green checks) so merge = approval.
+- Docs-only pushes (`docs/**`, `**/*.md`, `.rules`, `.superpowers/**`) skip
+  deploys via `paths-ignore`.
 - `prod-v1` = pruned release snapshots for panel-side manual pulls. Refresh
   only via `scripts/prune-prod.sh` flow; never develop on it.
 - No per-site/per-content branches, no forks — ever. Content variants live

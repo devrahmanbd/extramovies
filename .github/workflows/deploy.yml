@@ -1,4 +1,7 @@
-# Auto-deploy to CyberPanel VPS on push to main (both sites, matrix).
+# Auto-deploy to CyberPanel VPS on push to PROD (both sites, matrix).
+# main = development (never deploys). Release flow: merge main -> prod,
+# push prod = production deploy. Recommended: protect `prod` in repo
+# Settings → Branches (require PR + green checks) so merge IS the approval.
 # Required repo secrets (Settings → Secrets and variables → Actions):
 #   SSH_HOST, SSH_USER, SSH_PORT, SSH_KEY (private deploy key; server holds the public half)
 #
@@ -11,11 +14,12 @@ name: Deploy to production
 
 on:
   push:
-    branches: [main]
+    branches: [prod]
     # Docs/strategy-only pushes must not recycle production apps.
     paths-ignore:
       - "docs/**"
       - "**/*.md"
+      - ".rules"
       - ".superpowers/**"
   workflow_dispatch:
 
@@ -65,13 +69,13 @@ jobs:
           node --version
           OWNER=$(stat -c '%U:%G' "$APP_DIR")
 
-          # 2. Code: pin the branch explicitly. A past incident had this box
-          # sitting on stale prod-v1 while CI green-deployed it for weeks —
-          # `git pull` follows the CURRENT branch, so assert HEAD afterwards.
+          # 2. Code: pin the deploy branch explicitly. A past incident had this box
+          # sitting on a stale branch while CI green-deployed it for weeks —
+          # `git pull` follows the CURRENT branch, so checkout + assert HEAD afterwards.
           cd "$APP_DIR"
           git config --global --add safe.directory "$APP_DIR"
           git fetch origin
-          git checkout main
+          git checkout prod
           git pull --ff-only
           # $GITHUB_SHA does not cross SSH — interpolate at build time instead.
           test "$(git rev-parse HEAD)" = "${{ github.sha }}" || { echo "FATAL: HEAD $(git rev-parse HEAD) != pushed ${{ github.sha }}"; exit 1; }
