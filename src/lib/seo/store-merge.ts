@@ -32,6 +32,23 @@ export function visibleHere(sites: string[] | undefined): boolean {
   return sites.includes(id);
 }
 
+/**
+ * Default visibility for new/untouched rows: this deploy's site only
+ * (exclusive by default; "all sites" is an explicit editor choice).
+ * Unset SITE_ID (dev) → undefined = shared starter behavior.
+ * Single definition — save-draft and import share it so the rule
+ * cannot drift between entry points.
+ */
+export function defaultSites(): string[] | undefined {
+  const id = siteId();
+  return id === null ? undefined : [id];
+}
+
+/** Site tag list of a store row, if explicitly set. */
+export function rowSites(row: { sites?: unknown }): string[] | undefined {
+  return Array.isArray(row.sites) ? (row.sites as string[]) : undefined;
+}
+
 function storeDbPath(): string {
   return (
     process.env.REVIEWS_DB_PATH ?? path.join(process.cwd(), "data", "reviews.json")
@@ -161,6 +178,9 @@ export function mergeStoreReviews(demos: PublicReview[]): PublicReview[] {
   const suppressed = new Set<string>();
   for (const row of rows) {
     if (!row || row.status === "published") continue;
+    // A draft suppresses its DEMO twin only where the draft itself is
+    // visible: a foreign-tagged draft must not unpublish another site's page.
+    if (!visibleHere(rowSites(row))) continue;
     const slug = typeof row.slug === "string" ? row.slug.trim() : "";
     if (slug) suppressed.add(slug);
   }
@@ -174,10 +194,7 @@ export function mergeStoreReviews(demos: PublicReview[]): PublicReview[] {
     if (!row || row.status !== "published") continue;
     const slug = typeof row.slug === "string" ? row.slug.trim() : "";
     if (!slug) continue;
-    const rowSites = Array.isArray((row as { sites?: unknown }).sites)
-      ? (row.sites as string[])
-      : undefined;
-    if (!visibleHere(rowSites)) continue;
+    if (!visibleHere(rowSites(row))) continue;
     const base = bySlug.get(slug);
     if (base) {
       bySlug.set(slug, mergeDemo(base, row));

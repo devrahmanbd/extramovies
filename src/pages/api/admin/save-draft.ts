@@ -2,21 +2,12 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import type { APIRoute } from "astro";
 import { normalizeCustomWatch } from "../../../lib/watch-links";
 import { requireAdminApi } from "../../../lib/auth/guard";
-import { siteId } from "../../../lib/seo/store-merge";
+import { defaultSites } from "../../../lib/seo/store-merge";
 import { getReviewById, newId, slugify, upsertReview } from "./_store";
 import type { Review } from "./_store";
 import { wrapLegacy } from "../../../lib/api-adapter";
 
 export const prerender = false;
-
-/**
- * Default visibility for new/untouched rows: this deploy's site only
- * (exclusive by default; "all sites" is an explicit editor choice).
- * Unset SITE_ID (dev) → undefined = shared starter behavior.
- */
-export function defaultSites(): string[] | undefined {  const id = siteId();
-  return id === null ? undefined : [id];
-}
 
 /**
  * Save a draft. NEVER publishes — status is always forced to "draft".

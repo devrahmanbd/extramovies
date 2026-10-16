@@ -6,19 +6,9 @@
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import { markdownToReview, validatePortableReview } from '../src/lib/portability.js';
-import { siteId } from '../src/lib/seo/store-merge.js';
+import { defaultSites } from '../src/lib/seo/store-merge.js';
 
 const DB = process.env.REVIEWS_DB_PATH ?? path.join(process.cwd(), 'data', 'reviews.json');
-
-/**
- * Default visibility for imported rows: this deploy's site only
- * (exclusive by default; sharing is a deliberate editor action later).
- * Unset SITE_ID → undefined = shared starter behavior (backward compatible).
- */
-export function defaultSites(): string[] | undefined {
-  const id = siteId();
-  return id === null ? undefined : [id];
-}
 
 async function readStore(dbFile: string = DB): Promise<Record<string, unknown>[]> {
   try {

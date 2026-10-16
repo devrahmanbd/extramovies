@@ -8,7 +8,7 @@ import {
   listGenres,
 } from "../src/lib/seo/content";
 import { getTitleBadges } from "../src/lib/badges";
-import { defaultSites } from "../src/pages/api/admin/save-draft";
+import { defaultSites } from "../src/lib/seo/store-merge";
 
 let dir = "";
 let dbFile = "";
@@ -159,6 +159,25 @@ describe("site namespaces", () => {
     ]);
     expect(getReviewBySlug("dune-part-two")).toBeNull();
     expect(getLatestReviews(1000).some((r) => r.slug === "dune-part-two")).toBe(false);
+  });
+
+  it("a foreign-tagged draft does NOT suppress this site's demo twin", async () => {
+    process.env.SITE_ID = "extramovies";
+    await writeRows([
+      {
+        id: "hide-dune-elsewhere",
+        title: "Hidden elsewhere",
+        slug: "dune-part-two",
+        excerpt: "x",
+        markdown: "x",
+        status: "draft",
+        sites: ["cinemavilla"],
+        createdAt: "2026-10-01T00:00:00.000Z",
+        updatedAt: "2026-10-01T00:00:00.000Z",
+      },
+    ]);
+    expect(getReviewBySlug("dune-part-two")?.reviewTitle).toContain("Dune");
+    expect(getLatestReviews(1000).some((r) => r.slug === "dune-part-two")).toBe(true);
   });
 
   it("without SITE_ID everything stays visible (backward compatible)", async () => {
