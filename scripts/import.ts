@@ -21,9 +21,63 @@ async function readStore(dbFile: string = DB): Promise<Record<string, unknown>[]
   }
 }
 
+/** String list from frontmatter: real arrays pass through, JSON strings parse, CSV splits. */
+function strArray(v: unknown): string[] | undefined {
+  if (Array.isArray(v)) {
+    const out = v.filter((x): x is string => typeof x === 'string').map((s) => s.trim()).filter(Boolean);
+    return out.length > 0 ? out : undefined;
+  }
+  if (typeof v === 'string' && v.trim()) {
+    try {
+      const parsed: unknown = JSON.parse(v);
+      if (Array.isArray(parsed)) return strArray(parsed);
+    } catch {
+      /* not JSON — fall through to CSV */
+    }
+    const out = v.split(',').map((s) => s.trim()).filter(Boolean);
+    return out.length > 0 ? out : undefined;
+  }
+  return undefined;
+}
+
+function str(v: unknown): string | undefined {
+  return typeof v === 'string' && v.trim() ? v.trim() : undefined;
+}
+
+/**
+ * Movie metadata carried in seed frontmatter (movie_title, movie_year,
+ * movie_genres, movie_runtime, movie_director, movie_cast, movie_overview,
+ * movie_poster, movie_imdb). Absent when the file carries none, so plain
+ * text imports behave exactly as before.
+ */
+function buildMovieMeta(extras: Record<string, unknown>): Record<string, unknown> | undefined {
+  const movie: Record<string, unknown> = {};
+  const title = str(extras.movie_title);
+  if (title) movie.title = title;
+  const year = str(extras.movie_year) ?? (typeof extras.movie_year === 'number' ? String(extras.movie_year) : undefined);
+  if (year) movie.year = year;
+  const genres = strArray(extras.movie_genres);
+  if (genres) movie.genres = genres;
+  const runtime = str(extras.movie_runtime);
+  if (runtime) movie.runtime = runtime;
+  const director = str(extras.movie_director);
+  if (director) movie.director = director;
+  const cast = strArray(extras.movie_cast);
+  if (cast) movie.cast = cast;
+  const overview = str(extras.movie_overview);
+  if (overview) movie.overview = overview;
+  const poster = str(extras.movie_poster);
+  if (poster) movie.poster = poster;
+  const movieId = str(extras.movie_id) ?? (typeof extras.movie_id === 'number' ? String(extras.movie_id) : undefined);
+  if (movieId) movie.movieId = movieId;
+  const imdbId = str(extras.movie_imdb) ?? str(extras.imdb_id);
+  if (imdbId) movie.imdbId = imdbId;
+  return Object.keys(movie).length > 0 ? movie : undefined;
+}
+
 export async function importMarkdown(
   target: string,
-  opts: { dry?: boolean; dbPath?: string } = {},
+  opts: { dry?: boolean; dbPath?: string; skipExisting?: boolean } = {},
 ): Promise<{ imported: number; skipped: number; errors: string[] }> {
   const stat = await fs.stat(target);
   const files: string[] = [];
@@ -54,6 +108,20 @@ export async function importMarkdown(
       const existing = store.findIndex(
         (r) => (r as { slug?: string }).slug === review.slug,
       );
+      // Safe re-runs for automation: leave present rows untouched.
+      if (existing >= 0 && opts.skipExisting) {
+        skipped++;
+        continue;
+      }
+      const extras = review as unknown as Record<string, unknown>;
+      const movie = buildMovieMeta(extras);
+      // Explicit `sites` in the file wins (cross-posted seeds); otherwise
+      // the current SITE_ID is stamped so imports stay site-exclusive.
+      const fileSites = strArray(extras.sites);
+      const sites =
+        fileSites && fileSites.length > 0
+          ? fileSites
+          : defaultSites();
       const record = {
         id: `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`,
         title: review.title,
@@ -62,6 +130,8 @@ export async function importMarkdown(
         markdown: review.body,
         status: review.published_at ? 'published' : 'draft',
         rating: review.rating,
+        ...(movie ? { movie } : {}),
+        ...(typeof extras.region === 'string' && extras.region.trim() ? { region: extras.region.trim() } : {}),
         imdbId: review.imdb_id,
         tmdbId: review.tmdb_id,
         publishedAt: review.published_at,
@@ -69,14 +139,14 @@ export async function importMarkdown(
         redirects: [],
         createdAt: now,
         updatedAt: now,
-        ...(defaultSites() !== undefined ? { sites: defaultSites() } : {}),
+        ...(sites !== undefined ? { sites } : {}),
       };
       if (existing >= 0) {
         const prev = store[existing] as { id: string; sites?: string[] };
         // Preserve an existing explicit sites tag on update; only stamp
         // the default when the row has none.
         const keepSites =
-          Array.isArray(prev.sites) ? { sites: prev.sites } : (defaultSites() !== undefined ? { sites: defaultSites() } : {});
+          Array.isArray(prev.sites) ? { sites: prev.sites } : (sites !== undefined ? { sites } : {});
         store[existing] = { ...(store[existing] as object), ...record, id: prev.id, ...keepSites };
       } else store.push(record);
     }
@@ -91,12 +161,13 @@ export async function importMarkdown(
 
 async function main() {
   const target = process.argv[2];
-  if (!target) throw new Error('usage: import.ts <inDir|file.md> [--dry]');
+  if (!target) throw new Error('usage: import.ts <inDir|file.md> [--dry] [--skip-existing]');
   const dry = process.argv.includes('--dry');
-  const r = await importMarkdown(target, { dry });
-  console.log(`[import] imported=${r.imported} skipped=${r.skipped}${dry ? ' (dry run)' : ''}`);
+  const skipExisting = process.argv.includes('--skip-existing');
+  const r = await importMarkdown(target, { dry, skipExisting });
+  console.log(`[import] imported=${r.imported} skipped=${r.skipped}${dry ? ' (dry run)' : ''}${skipExisting ? ' (skip-existing)' : ''}`);
   for (const e of r.errors) console.error(`[import] SKIP ${e}`);
-  if (r.skipped > 0) process.exitCode = 2;
+  if (r.errors.length > 0) process.exitCode = 2;
 }
 
 if ((process.argv[1] ?? '').endsWith('import.ts')) {

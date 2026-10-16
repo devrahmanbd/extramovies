@@ -59,8 +59,7 @@ describe('import: sites default matches save-draft rule', () => {
     expect(rows[0].sites).toBeUndefined();
   });
 
-  it('preserves an explicit sites tag on re-import', async () => {
-    process.env.SITE_ID = 'extramovies';
+  it('preserves an explicit sites tag on re-import', async () => {    process.env.SITE_ID = 'extramovies';
     const { importMarkdown } = await import('../scripts/import');
     const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'import-sites-'));
     const db = path.join(dir, 'reviews.json');
@@ -86,5 +85,87 @@ describe('import: sites default matches save-draft rule', () => {
     await importMarkdown(file, { dbPath: db });
     const rows = JSON.parse(await fs.readFile(db, 'utf8'));
     expect(rows[0].sites).toEqual(['cinemavilla']);
+  });
+});
+
+describe('import: seed extras + safe re-runs', () => {
+  let savedSiteId: string | undefined;
+  beforeEach(() => {
+    savedSiteId = process.env.SITE_ID;
+  });
+  afterEach(() => {
+    if (savedSiteId === undefined) delete process.env.SITE_ID;
+    else process.env.SITE_ID = savedSiteId;
+  });
+
+  async function makeSeed(dir: string, slug: string): Promise<string> {
+    const file = path.join(dir, `${slug}.md`);
+    const md = [
+      '---',
+      `title: Seed ${slug}`,
+      `slug: ${slug}`,
+      'rating: 7',
+      'excerpt: Seed excerpt here.',
+      'movie_title: Seed Film',
+      'movie_year: "2026"',
+      'movie_genres: "[\\"Action\\", \\"Comedy\\"]"',
+      'movie_director: Some Director',
+      'movie_cast: "[\\"A One\\", \\"B Two\\"]"',
+      'movie_poster: "https://image.tmdb.org/t/p/w500/seed.jpg"',
+      'movie_imdb: "tt0000001"',
+      'region: "US"',
+      'sites: "[\\"extramovies\\"]"',
+      '---',
+      '',
+      `# Seed ${slug}`,
+      '',
+      'Seed body copy.',
+      '',
+    ].join('\n');
+    await fs.writeFile(file, md, 'utf8');
+    return file;
+  }
+
+  it('carries movie metadata + explicit sites, arrives as draft', async () => {
+    process.env.SITE_ID = 'cinemavilla';
+    const { importMarkdown } = await import('../scripts/import');
+    const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'import-seed-'));
+    const db = path.join(dir, 'reviews.json');
+    const file = await makeSeed(dir, 'seed-film');
+    const r = await importMarkdown(file, { dbPath: db });
+    expect(r.imported).toBe(1);
+    const rows = JSON.parse(await fs.readFile(db, 'utf8'));
+    expect(rows[0].status).toBe('draft');
+    // Explicit file tag wins over the ambient SITE_ID.
+    expect(rows[0].sites).toEqual(['extramovies']);
+    expect(rows[0].movie.title).toBe('Seed Film');
+    expect(rows[0].movie.genres).toEqual(['Action', 'Comedy']);
+    expect(rows[0].movie.cast).toEqual(['A One', 'B Two']);
+    expect(rows[0].movie.poster).toBe('https://image.tmdb.org/t/p/w500/seed.jpg');
+    expect(rows[0].movie.director).toBe('Some Director');
+  });
+
+  it('--skip-existing leaves present rows untouched (safe re-runs)', async () => {
+    process.env.SITE_ID = 'extramovies';
+    const { importMarkdown } = await import('../scripts/import');
+    const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'import-seed-'));
+    const db = path.join(dir, 'reviews.json');
+    const file = await makeSeed(dir, 'seed-film');
+    await importMarkdown(file, { dbPath: db });
+    const before = await fs.readFile(db, 'utf8');
+    const r = await importMarkdown(file, { dbPath: db, skipExisting: true });
+    expect(r.imported).toBe(0);
+    expect(r.skipped).toBe(1);
+    expect(await fs.readFile(db, 'utf8')).toBe(before);
+  });
+
+  it('shipped extramovies seeds validate clean (dry run)', async () => {
+    const { importMarkdown } = await import('../scripts/import');
+    const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'import-seed-'));
+    const db = path.join(dir, 'reviews.json');
+    const seedDir = path.join(process.cwd(), 'seeds', 'extramovies');
+    const r = await importMarkdown(seedDir, { dbPath: db, dry: true });
+    expect(r.errors).toEqual([]);
+    expect(r.imported).toBeGreaterThanOrEqual(2);
   });
 });
