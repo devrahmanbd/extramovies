@@ -269,6 +269,23 @@ export function getLatestReviews(limit = 10): PublicReview[] {
   return published().slice(0, limit);
 }
 
+/**
+ * Display title for page <title> and RSS: "{Movie} (Year) review: {title}".
+ * Skipped when the title already carries its own review lead (seed titles
+ * ship as "Movie Review: angle"), so "Movie review: Movie Review:" never
+ * doubles up. Demo titles keep the prefix byte-identical to today.
+ */
+export function reviewDisplayTitle(
+  movieTitle: string,
+  reviewTitle: string,
+  year?: string | null
+): string {
+  const t = (reviewTitle ?? "").trim();
+  const m = (movieTitle ?? "").trim();
+  if (!t || !m || /review/i.test(t)) return t;
+  return `${m}${year ? ` (${year})` : ""} review: ${t}`;
+}
+
 export function getFeaturedReview(): PublicReview | null {
   const all = published();
   return all.find((r) => r.featured) ?? all[0] ?? null;

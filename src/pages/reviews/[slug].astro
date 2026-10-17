@@ -29,6 +29,7 @@ import {
   getLatestReviews,
   resolveSlug,
   formatRuntime,
+  reviewDisplayTitle,
 } from "../../lib/seo/content";
 import { relatedReviews } from "../../lib/related";
 import { renderMarkdown, readingMinutes } from "../../lib/markdown";
@@ -71,7 +72,7 @@ const jsonld = [
     { name: review.movieTitle, path },
   ]),
 ];
-const pageTitle = `${review.movieTitle}${review.year ? ` (${review.year})` : ""} review: ${review.reviewTitle}`;
+const pageTitle = reviewDisplayTitle(review.movieTitle, review.reviewTitle, review.year);
 ---
 <Base
   title={pageTitle}

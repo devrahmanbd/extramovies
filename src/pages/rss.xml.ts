@@ -2,7 +2,7 @@ import type { APIRoute } from "astro";
 import { getSiteBrand } from "../lib/seo/brand";
 import { getDb, getSetting } from "../lib/db/adapter";
 import { siteOrigin } from "../lib/seo/meta";
-import { getLatestReviews } from "../lib/seo/content";
+import { getLatestReviews, reviewDisplayTitle } from "../lib/seo/content";
 
 function escXml(s: string): string {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -14,7 +14,7 @@ export const GET: APIRoute = async ({ url }) => {
   const items = getLatestReviews(30)
     .map(
       (r) => `    <item>
-      <title>${escXml(`${r.movieTitle} review: ${r.reviewTitle}`)}</title>
+      <title>${escXml(reviewDisplayTitle(r.movieTitle, r.reviewTitle))}</title>
       <link>${origin}/reviews/${r.slug}</link>
       <guid isPermaLink="true">${origin}/reviews/${r.slug}</guid>
       <description>${escXml(r.excerpt)}</description>
