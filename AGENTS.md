@@ -47,10 +47,10 @@ planned. Read this whole file before acting. Short hard-rules version: `.rules`.
   (Markdown + frontmatter). Import stamps the current `SITE_ID` by default.
 - Pre-namespace rows: tag with `scripts/backfill-sites.ts --site=<id>`
   (`--dry` first; seeds stay shared unless `--include-seeds`).
-- Seeding reviews to a site: commit Markdown seeds under `seeds/<site>/`,
-  release via `prod`, then run the `Seed site content` workflow (dispatch,
-  site selector). It imports with `--skip-existing` (never overwrites,
-  never deletes); drafts arrive unpublished for the owner to adjust/publish.
+- Content seeds ship with the release: new `.md` files under `seeds/<site>/`
+  import automatically on every prod deploy (`--skip-existing`, SITE_ID
+  stamped, deploy logs show `SEED OK` per slug). Drafts arrive unpublished
+  for the owner to adjust/publish in that site's `/admin`.
 
 ## 3. Content model (core shared, content per site)
 

@@ -5,6 +5,9 @@
 # Required repo secrets (Settings → Secrets and variables → Actions):
 #   SSH_HOST, SSH_USER, SSH_PORT, SSH_KEY (private deploy key; server holds the public half)
 #
+# Content release: seed .md files under seeds/<site>/ deploy automatically
+# with the release (review imports run on every prod deploy). No separate
+# action needed — deploy logs show SEED OK lines per slug.#
 # Server assumptions (validated 2026-10-07 — keep this list current):
 #   - node/npm via nvm at $HOME/.nvm (non-interactive SSH skips .bashrc)
 #   - sqlite3 CLI present; PM2 installed globally
@@ -90,6 +93,31 @@ jobs:
           mkdir -p "$(dirname "$DB_FILE")"
           npx tsx scripts/migrate-sql.ts
           npm run seed:reviews
+
+          # 4b. Content seeds ship WITH the release (zero-click content flow):
+          # new files under seeds/<site>/ import automatically on every prod
+          # deploy. --skip-existing = idempotent, never overwrites, never
+          # deletes. SITE_ID stamps imports site-exclusive (explicit `sites`
+          # in the seed file wins). Logs prove what landed.
+          if [ -d "seeds/${{ matrix.site }}" ]; then
+            SITE_ID="${{ matrix.site }}" npm run import -- "seeds/${{ matrix.site }}" --skip-existing
+            node -e "
+              const fs = require('fs');
+              const dir = 'seeds/${{ matrix.site }}';
+              const store = JSON.parse(fs.readFileSync('data/reviews.json', 'utf8'));
+              const slugs = fs.readdirSync(dir).filter((f) => f.endsWith('.md')).map((f) => f.slice(0, -3));
+              let bad = 0;
+              for (const s of slugs) {
+                const row = store.find((r) => r.slug === s);
+                const ok = row && Array.isArray(row.sites) && row.sites.includes('${{ matrix.site }}');
+                console.log((ok ? 'SEED OK  ' : 'SEED FAIL ') + s);
+                if (!ok) bad++;
+              }
+              if (bad > 0) process.exit(1);
+            "
+          else
+            echo "SEED none for ${{ matrix.site }}"
+          fi
 
           # 5. Restart deterministically (delete+start: restart reuses stale env)
           pm2 delete "$PM2_NAME" 2>/dev/null || true
