@@ -13,6 +13,7 @@ import { getDb } from "../lib/db/adapter";
 import { currentTheme } from "../lib/tmdb/discover";
 import SiteFooter from "../components/public/SiteFooter.astro";
 import { listGenres } from "../lib/seo/content";
+import { siteId } from "../lib/seo/store-merge";
 
 interface Props {
   title: string;
@@ -52,6 +53,7 @@ try {
 }
 const origin = siteOrigin(Astro.url.origin);
 const path = Astro.props.path ?? Astro.url.pathname;
+const showUmamiTracker = import.meta.env.PROD && siteId() === "extramovies";
 const meta = buildPageMeta({
   brand,
   title,
@@ -158,7 +160,7 @@ try {
         }
       } catch (e) {}
     </script>
-    <script is:inline defer src="https://cloud.umami.is/script.js" data-website-id="11536ca4-956e-4248-b761-9e7ee5269fc0"></script>
+    {showUmamiTracker ? <script is:inline defer src="https://cloud.umami.is/script.js" data-website-id="11536ca4-956e-4248-b761-9e7ee5269fc0"></script> : null}
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
