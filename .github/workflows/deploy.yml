@@ -18,12 +18,15 @@ name: Deploy to production
 on:
   push:
     branches: [prod]
-    # Docs/strategy-only pushes must not recycle production apps.
+    # Docs/strategy-only pushes must not recycle production apps, but content
+    # seeds MUST: seed .md files live under seeds/<site>/*.md, so markdown is
+    # ignored only at the repo ROOT (*.md) and in doc/agent dirs — NOT globally.
     paths-ignore:
       - "docs/**"
-      - "**/*.md"
+      - "*.md"
       - ".rules"
       - ".superpowers/**"
+      - ".opencode/**"
   workflow_dispatch:
 
 jobs:

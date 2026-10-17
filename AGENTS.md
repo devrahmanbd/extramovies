@@ -12,8 +12,9 @@ planned. Read this whole file before acting. Short hard-rules version: `.rules`.
   `git checkout prod && git merge main && git push origin prod`.
   Merging to `prod` IS the production deploy — do it deliberately.
   Recommended: protect `prod` (require PR + green checks) so merge = approval.
-- Docs-only pushes (`docs/**`, `**/*.md`, `.rules`, `.superpowers/**`) skip
-  deploys via `paths-ignore`.
+- Docs-only pushes (`docs/**`, root `*.md`, `.rules`, `.superpowers/**`,
+  `.opencode/**`) skip deploys via `paths-ignore`. Content seeds under
+  `seeds/<site>/*.md` trigger deploys (subdir markdown is not ignored).
 - `prod-v1` = pruned release snapshots for panel-side manual pulls. Refresh
   only via `scripts/prune-prod.sh` flow; never develop on it.
 - No per-site/per-content branches, no forks — ever. Content variants live
