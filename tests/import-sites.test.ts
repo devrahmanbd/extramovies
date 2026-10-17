@@ -98,13 +98,18 @@ describe('import: seed extras + safe re-runs', () => {
     else process.env.SITE_ID = savedSiteId;
   });
 
-  async function makeSeed(dir: string, slug: string): Promise<string> {
+  async function makeSeed(
+    dir: string,
+    slug: string,
+    opts: { publishedAt?: string; rating?: number } = {},
+  ): Promise<string> {
     const file = path.join(dir, `${slug}.md`);
     const md = [
       '---',
       `title: Seed ${slug}`,
       `slug: ${slug}`,
-      'rating: 7',
+      `rating: ${opts.rating ?? 7}`,
+      ...(opts.publishedAt ? [`published_at: "${opts.publishedAt}"`] : []),
       'excerpt: Seed excerpt here.',
       'movie_title: Seed Film',
       'movie_year: "2026"',
@@ -157,6 +162,46 @@ describe('import: seed extras + safe re-runs', () => {
     expect(r.imported).toBe(0);
     expect(r.skipped).toBe(1);
     expect(await fs.readFile(db, 'utf8')).toBe(before);
+  });
+
+  it('--refresh publishes seed drafts from file state (id + sites preserved)', async () => {
+    process.env.SITE_ID = 'extramovies';
+    const { importMarkdown } = await import('../scripts/import');
+    const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'import-seed-'));
+    const db = path.join(dir, 'reviews.json');
+    const file = path.join(dir, 'seed-film.md');
+    // First run: seed arrives as a draft (no published_at in file).
+    await importMarkdown(await makeSeed(dir, 'seed-film'), { dbPath: db });
+    // Owner releases it: file gains published_at + a bumped rating.
+    await makeSeed(dir, 'seed-film', { publishedAt: '2026-10-17T09:00:00.000Z', rating: 8 });
+    const r = await importMarkdown(file, { dbPath: db, skipExisting: true, refresh: true });
+    expect(r.imported).toBe(1);
+    const rows = JSON.parse(await fs.readFile(db, 'utf8'));
+    expect(rows[0].status).toBe('published');
+    expect(rows[0].publishedAt).toBe('2026-10-17T09:00:00.000Z');
+    expect(rows[0].rating).toBe(8);
+    expect(rows[0].id).toMatch(/^[a-z0-9]+-[a-z0-9]+$/);
+    expect(rows[0].sites).toEqual(['extramovies']);
+  });
+
+  it('--refresh never touches rows the owner published from /admin', async () => {
+    process.env.SITE_ID = 'extramovies';
+    const { importMarkdown } = await import('../scripts/import');
+    const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'import-seed-'));
+    const db = path.join(dir, 'reviews.json');
+    const file = await makeSeed(dir, 'seed-film', { publishedAt: '2026-10-17T09:00:00.000Z' });
+    await importMarkdown(file, { dbPath: db });
+    // Simulate owner edits in /admin: published + a different rating.
+    let rows = JSON.parse(await fs.readFile(db, 'utf8'));
+    rows[0].status = 'published';
+    rows[0].rating = 9.5;
+    await fs.writeFile(db, JSON.stringify(rows), 'utf8');
+    const r = await importMarkdown(file, { dbPath: db, skipExisting: true, refresh: true });
+    expect(r.imported).toBe(0);
+    expect(r.skipped).toBe(1);
+    rows = JSON.parse(await fs.readFile(db, 'utf8'));
+    expect(rows[0].rating).toBe(9.5);
+    expect(rows[0].status).toBe('published');
   });
 
   it('shipped extramovies seeds validate clean (dry run)', async () => {

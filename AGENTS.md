@@ -49,9 +49,12 @@ planned. Read this whole file before acting. Short hard-rules version: `.rules`.
 - Pre-namespace rows: tag with `scripts/backfill-sites.ts --site=<id>`
   (`--dry` first; seeds stay shared unless `--include-seeds`).
 - Content seeds ship with the release: new `.md` files under `seeds/<site>/`
-  import automatically on every prod deploy (`--skip-existing`, SITE_ID
-  stamped, deploy logs show `SEED OK` per slug). Drafts arrive unpublished
-  for the owner to adjust/publish in that site's `/admin`.
+  import automatically on every prod deploy (`--skip-existing --refresh`,
+  SITE_ID stamped, deploy logs show `SEED OK` per slug). A seed carrying
+  `published_at` in frontmatter AUTO-PUBLISHES on that deploy (refresh flips
+  draft rows only; rows the owner published from /admin are never
+  overwritten). Seeds without `published_at` arrive unpublished as drafts for
+  the owner to adjust/publish in that site's `/admin`.
 
 ## 3. Content model (core shared, content per site)
 

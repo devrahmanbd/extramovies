@@ -2,6 +2,7 @@
 title: "Matchbox the Movie Review: Great Stunts, Thin Script, Blatant Toy Sale"
 slug: "matchbox-the-movie-2026-review"
 rating: 6
+published_at: "2026-10-17T09:00:00.000Z"
 tmdb_id: 1148365
 imdb_id: "tt28498219"
 seo_title: "Matchbox the Movie (2026) Review: Stream It or Skip It?"

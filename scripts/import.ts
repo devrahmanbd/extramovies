@@ -77,7 +77,7 @@ function buildMovieMeta(extras: Record<string, unknown>): Record<string, unknown
 
 export async function importMarkdown(
   target: string,
-  opts: { dry?: boolean; dbPath?: string; skipExisting?: boolean } = {},
+  opts: { dry?: boolean; dbPath?: string; skipExisting?: boolean; refresh?: boolean } = {},
 ): Promise<{ imported: number; skipped: number; errors: string[] }> {
   const stat = await fs.stat(target);
   const files: string[] = [];
@@ -107,11 +107,16 @@ export async function importMarkdown(
       const now = new Date().toISOString();
       const existing = store.findIndex(
         (r) => (r as { slug?: string }).slug === review.slug,
-      );
-      // Safe re-runs for automation: leave present rows untouched.
-      if (existing >= 0 && opts.skipExisting) {
-        skipped++;
-        continue;
+      );      // Safe re-runs for automation: leave present rows untouched.
+      // --refresh is a targeted exception: it rescues DRAFT rows only
+      // (seed files may have gained published_at / content edits), while
+      // rows the owner published from /admin are never overwritten.
+      if (existing >= 0) {
+        const prev = store[existing] as { status?: string };
+        if (opts.skipExisting && !(opts.refresh && prev.status === 'draft')) {
+          skipped++;
+          continue;
+        }
       }
       const extras = review as unknown as Record<string, unknown>;
       const movie = buildMovieMeta(extras);
@@ -161,11 +166,12 @@ export async function importMarkdown(
 
 async function main() {
   const target = process.argv[2];
-  if (!target) throw new Error('usage: import.ts <inDir|file.md> [--dry] [--skip-existing]');
+  if (!target) throw new Error('usage: import.ts <inDir|file.md> [--dry] [--skip-existing] [--refresh]');
   const dry = process.argv.includes('--dry');
   const skipExisting = process.argv.includes('--skip-existing');
-  const r = await importMarkdown(target, { dry, skipExisting });
-  console.log(`[import] imported=${r.imported} skipped=${r.skipped}${dry ? ' (dry run)' : ''}${skipExisting ? ' (skip-existing)' : ''}`);
+  const refresh = process.argv.includes('--refresh');
+  const r = await importMarkdown(target, { dry, skipExisting, refresh });
+  console.log(`[import] imported=${r.imported} skipped=${r.skipped}${dry ? ' (dry run)' : ''}${skipExisting ? ' (skip-existing)' : ''}${refresh ? ' (refresh)' : ''}`);
   for (const e of r.errors) console.error(`[import] SKIP ${e}`);
   if (r.errors.length > 0) process.exitCode = 2;
 }

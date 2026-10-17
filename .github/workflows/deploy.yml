@@ -99,11 +99,14 @@ jobs:
 
           # 4b. Content seeds ship WITH the release (zero-click content flow):
           # new files under seeds/<site>/ import automatically on every prod
-          # deploy. --skip-existing = idempotent, never overwrites, never
-          # deletes. SITE_ID stamps imports site-exclusive (explicit `sites`
-          # in the seed file wins). Logs prove what landed.
+          # deploy. --skip-existing = idempotent, never overwrites rows the
+          # owner has published or edited from /admin. --refresh (draft rows
+          # only) lets a seed file's published_at/content edits reach rows it
+          # previously imported as drafts, so a release CAN publish itself.
+          # SITE_ID stamps imports site-exclusive (explicit `sites` in the
+          # seed file wins). Logs prove what landed.
           if [ -d "seeds/${{ matrix.site }}" ]; then
-            SITE_ID="${{ matrix.site }}" npm run import -- "seeds/${{ matrix.site }}" --skip-existing
+            SITE_ID="${{ matrix.site }}" npm run import -- "seeds/${{ matrix.site }}" --skip-existing --refresh
             node -e "
               const fs = require('fs');
               const dir = 'seeds/${{ matrix.site }}';
@@ -111,9 +114,13 @@ jobs:
               const slugs = fs.readdirSync(dir).filter((f) => f.endsWith('.md')).map((f) => f.slice(0, -3));
               let bad = 0;
               for (const s of slugs) {
+                const fm = fs.readFileSync(dir + '/' + s + '.md', 'utf8');
+                const wantsPublish = /^published_at:[ \t]*\S/m.test(fm);
                 const row = store.find((r) => r.slug === s);
-                const ok = row && Array.isArray(row.sites) && row.sites.includes('${{ matrix.site }}');
-                console.log((ok ? 'SEED OK  ' : 'SEED FAIL ') + s);
+                const ok = row
+                  && Array.isArray(row.sites) && row.sites.includes('${{ matrix.site }}')
+                  && (!wantsPublish || row.status === 'published');
+                console.log((ok ? 'SEED OK  ' : 'SEED FAIL ') + s + (wantsPublish && row ? ' (status=' + row.status + ')' : ''));
                 if (!ok) bad++;
               }
               if (bad > 0) process.exit(1);

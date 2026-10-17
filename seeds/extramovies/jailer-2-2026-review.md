@@ -2,6 +2,7 @@
 title: "Jailer 2 Review: Rajini and Nelson Deliver the Mass Sequel Fans Paid For"
 slug: "jailer-2-2026-review"
 rating: 7
+published_at: "2026-10-17T09:00:00.000Z"
 tmdb_id: 1234139
 imdb_id: "tt33318732"
 seo_title: "Jailer 2 (2026) Review: Worth Watching in Theatres?"
