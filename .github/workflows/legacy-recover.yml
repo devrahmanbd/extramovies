@@ -25,7 +25,7 @@ on:
         description: "Stage to run"
         default: full
         type: choice
-        options: [full, collect, resolve, report]
+        options: [full, collect, resolve, report, activate]
       limit:
         description: "Resolve cap, 0 = all rows"
         default: "0"
@@ -61,11 +61,15 @@ jobs:
               echo "SITE_DOMAIN=extramovies.org" >> "$GITHUB_ENV"
               echo "LEGACY_DIR=/home/extramovies.org/legacy" >> "$GITHUB_ENV"
               echo "ECO_FILE=/home/extramovies.org/ecosystem.config.js" >> "$GITHUB_ENV"
+              echo "APP_PORT=3100" >> "$GITHUB_ENV"
+              echo "PM2_NAME=extramovies" >> "$GITHUB_ENV"
               ;;
             cinemavilla)
               echo "SITE_DOMAIN=cinemavilla.in" >> "$GITHUB_ENV"
               echo "LEGACY_DIR=/home/cinemavilla.in/legacy" >> "$GITHUB_ENV"
               echo "ECO_FILE=/home/cinemavilla.in/ecosystem.config.js" >> "$GITHUB_ENV"
+              echo "APP_PORT=3200" >> "$GITHUB_ENV"
+              echo "PM2_NAME=cinemavilla" >> "$GITHUB_ENV"
               ;;
           esac
           echo "STAGE=${{ inputs.stage || 'full' }}" >> "$GITHUB_ENV"
@@ -79,10 +83,21 @@ jobs:
           chmod 600 ~/.ssh/deploy_key
           ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=accept-new \
             -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" \
-            "bash -s $SITE_DOMAIN $LEGACY_DIR $ECO_FILE $STAGE $LIMIT $GITHUB_SHA $RESET" <<'EOF'
+            "bash -s $SITE_DOMAIN $LEGACY_DIR $ECO_FILE $STAGE $LIMIT $GITHUB_SHA $RESET $APP_PORT $PM2_NAME" <<'EOF'
           set -euo pipefail
           # All values arrive as positional args; runner envs never cross SSH.
-          CDX_SITE="$1" LEGACY_DIR="$2" ECO_FILE="$3" STAGE="$4" LIMIT="$5" SCRIPT_SHA="$6" RESET="$7"
+          CDX_SITE="$1" LEGACY_DIR="$2" ECO_FILE="$3" STAGE="$4" LIMIT="$5" SCRIPT_SHA="$6" RESET="$7" APP_PORT="$8" PM2_NAME="$9"
+
+          # Activate stage needs node/pm2: CI SSH is non-interactive so nvm
+          # never loads via .bashrc (same dance as deploy.yml).
+          if [ "$STAGE" = "activate" ]; then
+            export NVM_DIR="$HOME/.nvm"
+            # shellcheck disable=SC1091
+            [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+            command -v node >/dev/null || { echo "FATAL: node not on PATH"; exit 1; }
+            command -v pm2  >/dev/null || { echo "FATAL: pm2 not on PATH";  exit 1; }
+            node --version
+          fi
 
           command -v python3 >/dev/null || { echo "FATAL: python3 missing on box"; exit 1; }
           python3 --version
@@ -125,6 +140,54 @@ jobs:
             python3 "$SCRIPT" --out-dir "$LEGACY_DIR" "$@" 2>&1 | tee -a "$LOG"
           }
           case "$STAGE" in
+            activate)
+              # 1. Persist LEGACY_DATA_DIR into the eco file (backup, then
+              #    validate by requiring it under node).
+              if grep -q 'LEGACY_DATA_DIR' "$ECO_FILE"; then
+                echo "eco: LEGACY_DATA_DIR already present"
+              else
+                cp "$ECO_FILE" "$ECO_FILE.bak-legacy"
+                python3 -c "import re,sys; eco,legacy_dir=sys.argv[1],sys.argv[2]; src=open(eco).read(); new,n=re.subn(r'env\s*:\s*\{', 'env: {\n      LEGACY_DATA_DIR: \"%s\",' % legacy_dir, src, count=1); sys.exit(2) if n!=1 else None; open(eco,'w').write(new); print('eco: injected LEGACY_DATA_DIR')" "$ECO_FILE" "$LEGACY_DIR"
+                if ! node -e "const c=require('$ECO_FILE'); process.exit(c.apps[0].env.LEGACY_DATA_DIR ? 0 : 3)"; then
+                  echo "FATAL: eco invalid after edit — restoring backup"
+                  cp "$ECO_FILE.bak-legacy" "$ECO_FILE"
+                  exit 3
+                fi
+                chown --reference="$ECO_FILE.bak-legacy" "$ECO_FILE"
+                echo "eco: validated (node require + env value present)"
+              fi
+
+              # 2. Restart deterministically (delete+start: bare restart
+              #    reuses stale env) — same rule as deploy.yml.
+              pm2 delete "$PM2_NAME" 2>/dev/null || true
+              pm2 start "$ECO_FILE"
+              sleep 3
+              pm2 ls | grep -i "$PM2_NAME" || true
+
+              # 3. Verify legacy routing is live on this app.
+              ok=0
+              code=$(curl -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:$APP_PORT/") || true
+              echo "homepage: $code"
+              [ "$code" = "200" ] || ok=1
+              maprow=$(awk -F, 'NR==2 {print $1}' "$LEGACY_DIR/redirect_map.csv" 2>/dev/null || true)
+              if [ -n "$maprow" ]; then
+                code=$(curl -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:$APP_PORT$maprow") || true
+                echo "mapped: $maprow -> $code"
+                [ "$code" = "301" ] || ok=1
+              else
+                echo "mapped: no map rows found"
+              fi
+              code=$(curl -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:$APP_PORT/9xplay.php") || true
+              echo "player: $code"
+              [ "$code" = "410" ] || ok=1
+              if [ "$ok" = "0" ]; then
+                echo "ACTIVATE OK"
+              else
+                echo "ACTIVATE FAILED (did the release deploy first?)"
+                exit 4
+              fi
+              exit 0
+              ;;
             full)    run collect; run resolve $RESET_ARG; run report ;;
             collect) run collect ;;
             resolve) run resolve $RESET_ARG ;;
