@@ -17,6 +17,9 @@ planned. Read this whole file before acting. Short hard-rules version: `.rules`.
   `seeds/<site>/*.md` trigger deploys (subdir markdown is not ignored).
 - `prod-v1` = pruned release snapshots for panel-side manual pulls. Refresh
   only via `scripts/prune-prod.sh` flow; never develop on it.
+- `prod-extra` = frozen release snapshot (copied from `prod` @ d210633,
+  2026-10-18), same contract as `prod-v1`: no development, no deploy
+  (deploy.yml triggers on `prod` only). Refresh by re-copying from `prod`.
 - No per-site/per-content branches, no forks — ever. Content variants live
   in per-server data, never in git branches.
 - Never `push --force` shared branches. Never commit secrets, `.env`,
