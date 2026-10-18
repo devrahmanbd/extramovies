@@ -217,6 +217,7 @@ def collect(args: argparse.Namespace) -> int:
 
 # ---------------------------------------------------------------- resolve
 def tmdb_search(q: str, year: int, kind: str, key: str) -> list[dict]:
+    tmdb_search.auth_alerted = getattr(tmdb_search, "auth_alerted", {})
     path = "movie" if kind == "movie" else "tv"
     params = {"query": q, "include_adult": "false"}
     if year:
@@ -237,6 +238,9 @@ def tmdb_search(q: str, year: int, kind: str, key: str) -> list[dict]:
             if exc.code >= 500:
                 time.sleep(5 * (attempt + 1))
                 continue
+            if not tmdb_search.auth_alerted.get(exc.code):
+                tmdb_search.auth_alerted[exc.code] = True
+                print(f"tmdb: HTTP {exc.code} — check TMDB_API_KEY ({exc.reason})", file=sys.stderr)
             return []
         except Exception:  # noqa: BLE001
             time.sleep(3)

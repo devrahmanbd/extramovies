@@ -93,13 +93,22 @@ jobs:
 
           # TMDB key stays on the box: sourced from ecosystem.config.js,
           # exported into the tool's env only. Never echoed, never logged.
+          # Only its SHAPE is printed: none / unresolved-ref / literal(N).
           export TMDB_API_KEY=""
           if [ -f "$ECO_FILE" ]; then
             TMDB_API_KEY=$(grep -o 'TMDB_API_KEY[^,}]*' "$ECO_FILE" | head -1 \
               | sed -E 's/^TMDB_API_KEY[":= ]+//; s/["}]*$//')
           fi
+          case "$TMDB_API_KEY" in
+            "") echo "key: none" ;;
+            "process."*) echo "key: UNRESOLVED-REF (eco file holds process.env reference, not a literal)" ;;
+            [A-Za-z0-9]*) echo "key: literal (${#TMDB_API_KEY} chars)" ;;
+            *) echo "key: other-format (${#TMDB_API_KEY} chars, non-alphanumeric)" ;;
+          esac
           if [ "$STAGE" = "full" ] || [ "$STAGE" = "resolve" ]; then
-            [ -n "$TMDB_API_KEY" ] || { echo "FATAL: TMDB_API_KEY not found in $ECO_FILE"; exit 1; }
+            case "$TMDB_API_KEY" in
+              ""|"process."*) echo "FATAL: no usable TMDB key in $ECO_FILE"; exit 1 ;;
+            esac
           fi
           export TMDB_API_KEY
 
