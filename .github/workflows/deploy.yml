@@ -61,8 +61,12 @@ jobs:
           printf '%s\n' "$SSH_KEY" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
           ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=accept-new \
-            -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" 'bash -s' <<'EOF'
+            -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" \
+            "bash -s $APP_DIR $APP_PORT $PM2_NAME $DB_FILE $ECO_FILE $DEPLOY_BRANCH $SEED_SITE" <<'EOF'
           set -euo pipefail
+          # Per-site values arrive as positional args (job env does not cross SSH).
+          APP_DIR="$1" APP_PORT="$2" PM2_NAME="$3"
+          export DB_FILE="$4" ECO_FILE="$5" DEPLOY_BRANCH="$6" SEED_SITE="$7"
 
           # 1. Toolchain: CI SSH is non-interactive so nvm never loads via .bashrc
           export NVM_DIR="$HOME/.nvm"
@@ -176,8 +180,12 @@ jobs:
           printf '%s\n' "$SSH_KEY" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
           ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=accept-new \
-            -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" 'bash -s' <<'EOF'
+            -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" \
+            "bash -s $APP_DIR $APP_PORT $PM2_NAME $DB_FILE $ECO_FILE $DEPLOY_BRANCH $SEED_SITE" <<'EOF'
           set -euo pipefail
+          # Per-site values arrive as positional args (job env does not cross SSH).
+          APP_DIR="$1" APP_PORT="$2" PM2_NAME="$3"
+          export DB_FILE="$4" ECO_FILE="$5" DEPLOY_BRANCH="$6" SEED_SITE="$7"
 
           # 1. Toolchain: CI SSH is non-interactive so nvm never loads via .bashrc
           export NVM_DIR="$HOME/.nvm"
