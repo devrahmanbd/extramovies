@@ -1,13 +1,16 @@
-# Auto-deploy to CyberPanel VPS on push to PROD (both sites, matrix).
-# main = development (never deploys). Release flow: merge main -> prod,
-# push prod = production deploy. Recommended: protect `prod` in repo
-# Settings → Branches (require PR + green checks) so merge IS the approval.
+# Auto-deploy to CyberPanel VPS. Release channels (owner decision 2026-10-18):
+#   push prod-extra   → extramovies.org ONLY
+#   push prod         → cinemavilla.in ONLY ("vanilla" sync)
+#   workflow_dispatch → both sites (escape hatch)
+# main = development (never deploys). Release flow: merge main -> prod-extra
+# (extramovies) or -> prod (cinemavilla), then push. Recommended: protect
+# both release branches in repo Settings → Branches.
 # Required repo secrets (Settings → Secrets and variables → Actions):
 #   SSH_HOST, SSH_USER, SSH_PORT, SSH_KEY (private deploy key; server holds the public half)
 #
 # Content release: seed .md files under seeds/<site>/ deploy automatically
-# with the release (review imports run on every prod deploy). No separate
-# action needed — deploy logs show SEED OK lines per slug.#
+# with the release (review imports run on every deploy). No separate action
+# needed — deploy logs show SEED OK lines per slug.
 # Server assumptions (validated 2026-10-07 — keep this list current):
 #   - node/npm via nvm at $HOME/.nvm (non-interactive SSH skips .bashrc)
 #   - sqlite3 CLI present; PM2 installed globally
@@ -17,7 +20,7 @@ name: Deploy to production
 
 on:
   push:
-    branches: [prod]
+    branches: [prod, prod-extra]
     # Docs/strategy-only pushes must not recycle production apps, but content
     # seeds MUST: seed .md files live under seeds/<site>/*.md, so markdown is
     # ignored only at the repo ROOT (*.md) and in doc/agent dirs — NOT globally.
@@ -30,20 +33,39 @@ on:
   workflow_dispatch:
 
 jobs:
+  plan:
+    name: Plan deploy targets
+    runs-on: ubuntu-latest
+    outputs:
+      sites: ${{ steps.plan.outputs.sites }}
+    steps:
+      - name: Map pushed ref to deploy target(s)
+        id: plan
+        run: |
+          case "$GITHUB_REF_NAME" in
+            prod)       echo 'sites=["cinemavilla"]' >> "$GITHUB_OUTPUT" ;;
+            prod-extra) echo 'sites=["extramovies"]' >> "$GITHUB_OUTPUT" ;;
+            *)          echo 'sites=["extramovies","cinemavilla"]' >> "$GITHUB_OUTPUT" ;;
+          esac
+
   deploy:
+    needs: plan
     name: Deploy ${{ matrix.site }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
+        site: ${{ fromJson(needs.plan.outputs.sites) }}
         include:
           - site: extramovies
+            branch: prod-extra
             app_dir: /home/extramovies.org/public_html
             app_port: "3100"
             pm2_name: extramovies
             db_file: /home/extramovies.org/private/prod.sqlite
             ecosystem: /home/extramovies.org/ecosystem.config.js
           - site: cinemavilla
+            branch: prod
             app_dir: /home/cinemavilla.in/public_html
             app_port: "3200"
             pm2_name: cinemavilla
@@ -75,16 +97,19 @@ jobs:
           node --version
           OWNER=$(stat -c '%U:%G' "$APP_DIR")
 
-          # 2. Code: pin the deploy branch explicitly. A past incident had this box
-          # sitting on a stale branch while CI green-deployed it for weeks —
-          # `git pull` follows the CURRENT branch, so checkout + assert HEAD afterwards.
+          # 2. Code: pin the deploy branch explicitly (extramovies=prod-extra,
+          # cinemavilla=prod). A past incident had this box sitting on a stale
+          # branch while CI green-deployed it for weeks — checkout + assert HEAD.
           cd "$APP_DIR"
           git config --global --add safe.directory "$APP_DIR"
           git fetch origin
-          git checkout prod
+          git checkout "${{ matrix.branch }}"
           git pull --ff-only
-          # $GITHUB_SHA does not cross SSH — interpolate at build time instead.
-          test "$(git rev-parse HEAD)" = "${{ github.sha }}" || { echo "FATAL: HEAD $(git rev-parse HEAD) != pushed ${{ github.sha }}"; exit 1; }
+          deploy_sha=${{ github.sha }}
+          # workflow_dispatch from a non-release ref: a strict github.sha check
+          # would compare against the dispatch ref's head; assert branch HEAD.
+          if [ "${{ github.event_name }}" != "push" ]; then deploy_sha=$(git rev-parse HEAD); fi
+          test "$(git rev-parse HEAD)" = "$deploy_sha" || { echo "FATAL: HEAD $(git rev-parse HEAD) != deploy SHA $deploy_sha"; exit 1; }
           test -f package.json || { echo "FATAL: not a repo checkout"; exit 1; }
 
           # 3. Build
