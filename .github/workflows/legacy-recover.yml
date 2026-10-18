@@ -33,7 +33,7 @@ on:
         description: "Drop tmdb_cache.json before resolve (invalidate poisoned results)"
         default: "no"
         type: choice
-        options: [no, yes]
+        options: ["no", "yes"]
 
   schedule:
     - cron: "17 4 2 * *"
