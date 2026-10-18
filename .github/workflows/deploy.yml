@@ -32,60 +32,37 @@ on:
       - ".opencode/**"
   workflow_dispatch:
 
+# Shared deploy body. Per-site values come from job-level env; GITHUB_SHA /
+# GITHUB_EVENT_NAME are default workflow envs used for the checkout assertion.
 jobs:
-  plan:
-    name: Plan deploy targets
+  deploy-extramovies:
+    name: Deploy extramovies (prod-extra)
     runs-on: ubuntu-latest
-    outputs:
-      sites: ${{ steps.plan.outputs.sites }}
-    steps:
-      - name: Map pushed ref to deploy target(s)
-        id: plan
-        run: |
-          case "$GITHUB_REF_NAME" in
-            prod)       echo 'sites=["cinemavilla"]' >> "$GITHUB_OUTPUT" ;;
-            prod-extra) echo 'sites=["extramovies"]' >> "$GITHUB_OUTPUT" ;;
-            *)          echo 'sites=["extramovies","cinemavilla"]' >> "$GITHUB_OUTPUT" ;;
-          esac
-
-  deploy:
-    needs: plan
-    name: Deploy ${{ matrix.site }}
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        site: ${{ fromJson(needs.plan.outputs.sites) }}
-        include:
-          - site: extramovies
-            branch: prod-extra
-            app_dir: /home/extramovies.org/public_html
-            app_port: "3100"
-            pm2_name: extramovies
-            db_file: /home/extramovies.org/private/prod.sqlite
-            ecosystem: /home/extramovies.org/ecosystem.config.js
-          - site: cinemavilla
-            branch: prod
-            app_dir: /home/cinemavilla.in/public_html
-            app_port: "3200"
-            pm2_name: cinemavilla
-            db_file: /home/cinemavilla.in/private/prod.sqlite
-            ecosystem: /home/cinemavilla.in/ecosystem.config.js
+    if: github.event_name == 'workflow_dispatch' || github.ref_name == 'prod-extra'
+    concurrency:
+      group: deploy-extramovies
+      cancel-in-progress: false
+    env:
+      SEED_SITE: extramovies
+      DEPLOY_BRANCH: prod-extra
+      APP_DIR: /home/extramovies.org/public_html
+      APP_PORT: "3100"
+      PM2_NAME: extramovies
+      DB_FILE: /home/extramovies.org/private/prod.sqlite
+      ECO_FILE: /home/extramovies.org/ecosystem.config.js
+      SSH_HOST: ${{ secrets.SSH_HOST }}
+      SSH_USER: ${{ secrets.SSH_USER }}
+      SSH_PORT: ${{ secrets.SSH_PORT }}
+      SSH_KEY: ${{ secrets.SSH_KEY }}
     steps:
       - name: Deploy over SSH
         run: |
           mkdir -p ~/.ssh && chmod 700 ~/.ssh
-          printf '%s\n' "${{ secrets.SSH_KEY }}" > ~/.ssh/deploy_key
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
           ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=accept-new \
-            -p "${{ secrets.SSH_PORT }}" \
-            "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}" 'bash -s' <<'EOF'
+            -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" 'bash -s' <<'EOF'
           set -euo pipefail
-          APP_DIR=${{ matrix.app_dir }}
-          APP_PORT=${{ matrix.app_port }}
-          PM2_NAME=${{ matrix.pm2_name }}
-          export DB_FILE=${{ matrix.db_file }}
-          ECO_FILE=${{ matrix.ecosystem }}
 
           # 1. Toolchain: CI SSH is non-interactive so nvm never loads via .bashrc
           export NVM_DIR="$HOME/.nvm"
@@ -103,12 +80,12 @@ jobs:
           cd "$APP_DIR"
           git config --global --add safe.directory "$APP_DIR"
           git fetch origin
-          git checkout "${{ matrix.branch }}"
+          git checkout "$DEPLOY_BRANCH"
           git pull --ff-only
-          deploy_sha=${{ github.sha }}
-          # workflow_dispatch from a non-release ref: a strict github.sha check
+          deploy_sha="$GITHUB_SHA"
+          # workflow_dispatch from a non-release ref: a strict GITHUB_SHA check
           # would compare against the dispatch ref's head; assert branch HEAD.
-          if [ "${{ github.event_name }}" != "push" ]; then deploy_sha=$(git rev-parse HEAD); fi
+          if [ "$GITHUB_EVENT_NAME" != "push" ]; then deploy_sha=$(git rev-parse HEAD); fi
           test "$(git rev-parse HEAD)" = "$deploy_sha" || { echo "FATAL: HEAD $(git rev-parse HEAD) != deploy SHA $deploy_sha"; exit 1; }
           test -f package.json || { echo "FATAL: not a repo checkout"; exit 1; }
 
@@ -122,36 +99,150 @@ jobs:
           npx tsx scripts/migrate-sql.ts
           npm run seed:reviews
 
-          # 4b. Content seeds ship WITH the release (zero-click content flow):
-          # new files under seeds/<site>/ import automatically on every prod
-          # deploy. --skip-existing = idempotent, never overwrites rows the
-          # owner has published or edited from /admin. --refresh (draft rows
-          # only) lets a seed file's published_at/content edits reach rows it
-          # previously imported as drafts, so a release CAN publish itself.
-          # SITE_ID stamps imports site-exclusive (explicit `sites` in the
-          # seed file wins). Logs prove what landed.
-          if [ -d "seeds/${{ matrix.site }}" ]; then
-            SITE_ID="${{ matrix.site }}" npm run import -- "seeds/${{ matrix.site }}" --skip-existing --refresh
-            node -e "
-              const fs = require('fs');
-              const dir = 'seeds/${{ matrix.site }}';
-              const store = JSON.parse(fs.readFileSync('data/reviews.json', 'utf8'));
-              const slugs = fs.readdirSync(dir).filter((f) => f.endsWith('.md')).map((f) => f.slice(0, -3));
+          # 4b. Content seeds ship WITH the release: new files under
+          # seeds/$SEED_SITE/ import automatically on every deploy.
+          # --skip-existing = idempotent, never overwrites rows the owner has
+          # published/edited from /admin. --refresh (draft rows only) lets a
+          # seed file's published_at/content edits reach rows it previously
+          # imported as drafts, so a release CAN publish itself. SITE_ID
+          # stamps imports site-exclusive (explicit `sites` in the seed file
+          # wins). Logs prove what landed.
+          if [ -d "seeds/$SEED_SITE" ]; then
+            SITE_ID="$SEED_SITE" npm run import -- "seeds/$SEED_SITE" --skip-existing --refresh
+            node -e '
+              const fs = require("fs");
+              const dir = "seeds/" + process.env.SEED_SITE;
+              const site = process.env.SEED_SITE;
+              const store = JSON.parse(fs.readFileSync("data/reviews.json", "utf8"));
+              const slugs = fs.readdirSync(dir).filter((f) => f.endsWith(".md")).map((f) => f.slice(0, -3));
               let bad = 0;
               for (const s of slugs) {
-                const fm = fs.readFileSync(dir + '/' + s + '.md', 'utf8');
+                const fm = fs.readFileSync(dir + "/" + s + ".md", "utf8");
                 const wantsPublish = /^published_at:[ \t]*\S/m.test(fm);
                 const row = store.find((r) => r.slug === s);
-                const ok = row
-                  && Array.isArray(row.sites) && row.sites.includes('${{ matrix.site }}')
-                  && (!wantsPublish || row.status === 'published');
-                console.log((ok ? 'SEED OK  ' : 'SEED FAIL ') + s + (wantsPublish && row ? ' (status=' + row.status + ')' : ''));
+                const ok = row && Array.isArray(row.sites) && row.sites.includes(site) && (!wantsPublish || row.status === "published");
+                console.log((ok ? "SEED OK  " : "SEED FAIL ") + s + (wantsPublish && row ? " (status=" + row.status + ")" : ""));
                 if (!ok) bad++;
               }
               if (bad > 0) process.exit(1);
-            "
+            '
           else
-            echo "SEED none for ${{ matrix.site }}"
+            echo "SEED none for $SEED_SITE"
+          fi
+
+          # 5. Restart deterministically (delete+start: restart reuses stale env)
+          pm2 delete "$PM2_NAME" 2>/dev/null || true
+          pm2 start "$ECO_FILE"
+          pm2 save
+
+          # 6. Health check with retries (cold boots are slow on small VPS)
+          ok=""
+          for _ in 1 2 3 4 5 6; do
+            if curl -fsS -o /dev/null "http://127.0.0.1:${APP_PORT}/"; then ok=1; break; fi
+            sleep 5
+          done
+          test -n "$ok" || { echo "FATAL: app never answered on ${APP_PORT}"; pm2 logs "$PM2_NAME" --lines 20 --nostream; exit 1; }
+
+          # 7. Hand files back to the site user (root-run steps leave
+          # root-owned paths that break panel-side ops)
+          chown -R "$OWNER" "$APP_DIR"
+          echo "DEPLOY OK ($PM2_NAME)"
+          EOF
+          rm -f ~/.ssh/deploy_key
+
+  deploy-cinemavilla:
+    name: Deploy cinemavilla (prod)
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' || github.ref_name == 'prod'
+    concurrency:
+      group: deploy-cinemavilla
+      cancel-in-progress: false
+    env:
+      SEED_SITE: cinemavilla
+      DEPLOY_BRANCH: prod
+      APP_DIR: /home/cinemavilla.in/public_html
+      APP_PORT: "3200"
+      PM2_NAME: cinemavilla
+      DB_FILE: /home/cinemavilla.in/private/prod.sqlite
+      ECO_FILE: /home/cinemavilla.in/ecosystem.config.js
+      SSH_HOST: ${{ secrets.SSH_HOST }}
+      SSH_USER: ${{ secrets.SSH_USER }}
+      SSH_PORT: ${{ secrets.SSH_PORT }}
+      SSH_KEY: ${{ secrets.SSH_KEY }}
+    steps:
+      - name: Deploy over SSH
+        run: |
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=accept-new \
+            -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" 'bash -s' <<'EOF'
+          set -euo pipefail
+
+          # 1. Toolchain: CI SSH is non-interactive so nvm never loads via .bashrc
+          export NVM_DIR="$HOME/.nvm"
+          # shellcheck disable=SC1091
+          [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+          for cmd in npm node sqlite3 pm2 curl git; do
+            command -v "$cmd" >/dev/null || { echo "FATAL: $cmd not on PATH"; exit 1; }
+          done
+          node --version
+          OWNER=$(stat -c '%U:%G' "$APP_DIR")
+
+          # 2. Code: pin the deploy branch explicitly (extramovies=prod-extra,
+          # cinemavilla=prod). A past incident had this box sitting on a stale
+          # branch while CI green-deployed it for weeks — checkout + assert HEAD.
+          cd "$APP_DIR"
+          git config --global --add safe.directory "$APP_DIR"
+          git fetch origin
+          git checkout "$DEPLOY_BRANCH"
+          git pull --ff-only
+          deploy_sha="$GITHUB_SHA"
+          # workflow_dispatch from a non-release ref: a strict GITHUB_SHA check
+          # would compare against the dispatch ref's head; assert branch HEAD.
+          if [ "$GITHUB_EVENT_NAME" != "push" ]; then deploy_sha=$(git rev-parse HEAD); fi
+          test "$(git rev-parse HEAD)" = "$deploy_sha" || { echo "FATAL: HEAD $(git rev-parse HEAD) != deploy SHA $deploy_sha"; exit 1; }
+          test -f package.json || { echo "FATAL: not a repo checkout"; exit 1; }
+
+          # 3. Build
+          npm ci
+          npm run build
+          test -f dist/server/entry.mjs || { echo "FATAL: build produced no entry"; exit 1; }
+
+          # 4. Data (all idempotent: tracked migrations, seed skips existing)
+          mkdir -p "$(dirname "$DB_FILE")"
+          npx tsx scripts/migrate-sql.ts
+          npm run seed:reviews
+
+          # 4b. Content seeds ship WITH the release: new files under
+          # seeds/$SEED_SITE/ import automatically on every deploy.
+          # --skip-existing = idempotent, never overwrites rows the owner has
+          # published/edited from /admin. --refresh (draft rows only) lets a
+          # seed file's published_at/content edits reach rows it previously
+          # imported as drafts, so a release CAN publish itself. SITE_ID
+          # stamps imports site-exclusive (explicit `sites` in the seed file
+          # wins). Logs prove what landed.
+          if [ -d "seeds/$SEED_SITE" ]; then
+            SITE_ID="$SEED_SITE" npm run import -- "seeds/$SEED_SITE" --skip-existing --refresh
+            node -e '
+              const fs = require("fs");
+              const dir = "seeds/" + process.env.SEED_SITE;
+              const site = process.env.SEED_SITE;
+              const store = JSON.parse(fs.readFileSync("data/reviews.json", "utf8"));
+              const slugs = fs.readdirSync(dir).filter((f) => f.endsWith(".md")).map((f) => f.slice(0, -3));
+              let bad = 0;
+              for (const s of slugs) {
+                const fm = fs.readFileSync(dir + "/" + s + ".md", "utf8");
+                const wantsPublish = /^published_at:[ \t]*\S/m.test(fm);
+                const row = store.find((r) => r.slug === s);
+                const ok = row && Array.isArray(row.sites) && row.sites.includes(site) && (!wantsPublish || row.status === "published");
+                console.log((ok ? "SEED OK  " : "SEED FAIL ") + s + (wantsPublish && row ? " (status=" + row.status + ")" : ""));
+                if (!ok) bad++;
+              }
+              if (bad > 0) process.exit(1);
+            '
+          else
+            echo "SEED none for $SEED_SITE"
           fi
 
           # 5. Restart deterministically (delete+start: restart reuses stale env)
