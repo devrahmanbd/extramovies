@@ -35,6 +35,7 @@ import json
 import os
 import re
 import sys
+import threading
 import time
 import urllib.error
 import urllib.parse
@@ -265,6 +266,9 @@ def score(result: dict, title_tokens: list[str], year: int | None, kind: str) ->
     return score
 
 
+CACHE_LOCK = threading.Lock()
+
+
 def resolve_one(item: dict, key: str, cache: dict) -> dict:
     path = urllib.parse.urlparse(item["original"]).path
     norm_path = path.lower()
@@ -307,7 +311,8 @@ def resolve_one(item: dict, key: str, cache: dict) -> dict:
     if best is None:
         best = {"kind": "post", "target": "/410", "reason": "unresolved", "confidence": 0}
 
-    cache[ck] = best
+    with CACHE_LOCK:
+        cache[ck] = best
     return {**item, **best}
 
 
@@ -335,10 +340,14 @@ def resolve(args: argparse.Namespace) -> int:
         for i, fut in enumerate(as_completed(futs), 1):
             resolved.append(fut.result())
             if i % 50 == 0:
-                cache_file.write_text(json.dumps(cache, indent=0), encoding="utf-8")
+                with CACHE_LOCK:
+                    snapshot = dict(cache)
+                cache_file.write_text(json.dumps(snapshot, indent=0), encoding="utf-8")
                 print(f"resolve: {i}/{len(items)}")
 
-    cache_file.write_text(json.dumps(cache, indent=0), encoding="utf-8")
+    with CACHE_LOCK:
+        snapshot = dict(cache)
+    cache_file.write_text(json.dumps(snapshot, indent=0), encoding="utf-8")
 
     map_path = out_dir / "redirect_map.csv"
     unresolved_path = out_dir / "unresolved.csv"
