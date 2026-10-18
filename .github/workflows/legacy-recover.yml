@@ -29,6 +29,11 @@ on:
       limit:
         description: "Resolve cap, 0 = all rows"
         default: "0"
+      reset_cache:
+        description: "Drop tmdb_cache.json before resolve (invalidate poisoned results)"
+        default: "no"
+        type: choice
+        options: [no, yes]
 
   schedule:
     - cron: "17 4 2 * *"
@@ -65,6 +70,7 @@ jobs:
           esac
           echo "STAGE=${{ inputs.stage || 'full' }}" >> "$GITHUB_ENV"
           echo "LIMIT=${{ inputs.limit || '0' }}" >> "$GITHUB_ENV"
+          echo "RESET=${{ inputs.reset_cache || 'no' }}" >> "$GITHUB_ENV"
 
       - name: Run recovery over SSH
         run: |
@@ -73,10 +79,10 @@ jobs:
           chmod 600 ~/.ssh/deploy_key
           ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=accept-new \
             -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" \
-            "bash -s $SITE_DOMAIN $LEGACY_DIR $ECO_FILE $STAGE $LIMIT $GITHUB_SHA" <<'EOF'
+            "bash -s $SITE_DOMAIN $LEGACY_DIR $ECO_FILE $STAGE $LIMIT $GITHUB_SHA $RESET" <<'EOF'
           set -euo pipefail
           # All values arrive as positional args; runner envs never cross SSH.
-          CDX_SITE="$1" LEGACY_DIR="$2" ECO_FILE="$3" STAGE="$4" LIMIT="$5" SCRIPT_SHA="$6"
+          CDX_SITE="$1" LEGACY_DIR="$2" ECO_FILE="$3" STAGE="$4" LIMIT="$5" SCRIPT_SHA="$6" RESET="$7"
 
           command -v python3 >/dev/null || { echo "FATAL: python3 missing on box"; exit 1; }
           python3 --version
@@ -113,13 +119,15 @@ jobs:
           export TMDB_API_KEY
 
           LOG="$LEGACY_DIR/run-$(date +%Y%m%d-%H%M%S).log"
+          RESET_ARG=""
+          [ "$RESET" = "yes" ] && RESET_ARG="--reset-cache"
           run() {
             python3 "$SCRIPT" --out-dir "$LEGACY_DIR" "$@" 2>&1 | tee -a "$LOG"
           }
           case "$STAGE" in
-            full)    run collect; run resolve; run report ;;
+            full)    run collect; run resolve $RESET_ARG; run report ;;
             collect) run collect ;;
-            resolve) run resolve ;;
+            resolve) run resolve $RESET_ARG ;;
             report)  run report ;;
           esac
 

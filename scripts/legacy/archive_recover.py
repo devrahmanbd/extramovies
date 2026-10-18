@@ -220,13 +220,18 @@ def tmdb_search(q: str, year: int, kind: str, key: str) -> list[dict]:
     tmdb_search.auth_alerted = getattr(tmdb_search, "auth_alerted", {})
     path = "movie" if kind == "movie" else "tv"
     params = {"query": q, "include_adult": "false"}
+    headers = {"User-Agent": "archive-recover/1"}
+    if key.startswith("eyJ"):
+        headers["Authorization"] = f"Bearer {key}"  # v4 read token
+    else:
+        params["api_key"] = key  # v3 api_key
     if year:
         if kind == "movie":
             params["year"] = str(year)
         else:
             params["first_air_date_year"] = str(year)
     url = f"{TMDB_SEARCH}/{path}?" + urllib.parse.urlencode(params)
-    req = urllib.request.Request(url, headers={"Authorization": f"Bearer {key}", "User-Agent": "archive-recover/1"})
+    req = urllib.request.Request(url, headers=headers)
     for attempt in range(4):
         try:
             data = json.loads(urllib.request.urlopen(req, timeout=30).read().decode("utf-8"))
@@ -336,6 +341,9 @@ def resolve(args: argparse.Namespace) -> int:
     items = items[: args.limit] if args.limit else items
 
     cache_file = out_dir / "tmdb_cache.json"
+    if args.reset_cache and cache_file.exists():
+        cache_file.unlink()
+        print("resolve: cache reset (--reset-cache)")
     cache: dict = json.loads(cache_file.read_text(encoding="utf-8")) if cache_file.exists() else {}
 
     resolved: list[dict] = []
@@ -470,6 +478,8 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--tmdb-key", default=os.environ.get("TMDB_API_KEY", ""))
     p.add_argument("--limit", type=int, default=0)
     p.add_argument("--workers", type=int, default=4)
+    p.add_argument("--reset-cache", action="store_true", dest="reset_cache",
+                   help="drop tmdb_cache.json first (invalidates poisoned results)")
     p.set_defaults(fn=resolve)
 
     p = sub.add_parser("report", help="counts over the redirect map")
