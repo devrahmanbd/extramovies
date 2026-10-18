@@ -32,8 +32,10 @@ on:
       - ".opencode/**"
   workflow_dispatch:
 
-# Shared deploy body. Per-site values come from job-level env; GITHUB_SHA /
-# GITHUB_EVENT_NAME are default workflow envs used for the checkout assertion.
+# Shared deploy body (duplicated in both jobs). Per-site values plus
+# GITHUB_SHA/GITHUB_EVENT_NAME are expanded LOCALLY into the ssh command
+# and delivered to remote bash as positional args ($1..$9). Default and
+# job envs exist only in the local runner shell — they never cross SSH.
 jobs:
   deploy-extramovies:
     name: Deploy extramovies (prod-extra)
@@ -62,11 +64,13 @@ jobs:
           chmod 600 ~/.ssh/deploy_key
           ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=accept-new \
             -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" \
-            "bash -s $APP_DIR $APP_PORT $PM2_NAME $DB_FILE $ECO_FILE $DEPLOY_BRANCH $SEED_SITE" <<'EOF'
+            "bash -s $APP_DIR $APP_PORT $PM2_NAME $DB_FILE $ECO_FILE $DEPLOY_BRANCH $SEED_SITE $GITHUB_SHA $GITHUB_EVENT_NAME" <<'EOF'
           set -euo pipefail
-          # Per-site values arrive as positional args (job env does not cross SSH).
+          # Site values + GITHUB_SHA/GITHUB_EVENT_NAME arrive as positional
+          # args: job/default envs never cross SSH into the remote bash.
           APP_DIR="$1" APP_PORT="$2" PM2_NAME="$3"
           export DB_FILE="$4" ECO_FILE="$5" DEPLOY_BRANCH="$6" SEED_SITE="$7"
+          DEPLOY_SHA="$8" EVENT_NAME="$9"
 
           # 1. Toolchain: CI SSH is non-interactive so nvm never loads via .bashrc
           export NVM_DIR="$HOME/.nvm"
@@ -86,10 +90,10 @@ jobs:
           git fetch origin
           git checkout "$DEPLOY_BRANCH"
           git pull --ff-only
-          deploy_sha="$GITHUB_SHA"
-          # workflow_dispatch from a non-release ref: a strict GITHUB_SHA check
+          deploy_sha="$DEPLOY_SHA"
+          # workflow_dispatch from a non-release ref: a strict SHA check
           # would compare against the dispatch ref's head; assert branch HEAD.
-          if [ "$GITHUB_EVENT_NAME" != "push" ]; then deploy_sha=$(git rev-parse HEAD); fi
+          if [ "$EVENT_NAME" != "push" ]; then deploy_sha=$(git rev-parse HEAD); fi
           test "$(git rev-parse HEAD)" = "$deploy_sha" || { echo "FATAL: HEAD $(git rev-parse HEAD) != deploy SHA $deploy_sha"; exit 1; }
           test -f package.json || { echo "FATAL: not a repo checkout"; exit 1; }
 
@@ -181,11 +185,13 @@ jobs:
           chmod 600 ~/.ssh/deploy_key
           ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=accept-new \
             -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" \
-            "bash -s $APP_DIR $APP_PORT $PM2_NAME $DB_FILE $ECO_FILE $DEPLOY_BRANCH $SEED_SITE" <<'EOF'
+            "bash -s $APP_DIR $APP_PORT $PM2_NAME $DB_FILE $ECO_FILE $DEPLOY_BRANCH $SEED_SITE $GITHUB_SHA $GITHUB_EVENT_NAME" <<'EOF'
           set -euo pipefail
-          # Per-site values arrive as positional args (job env does not cross SSH).
+          # Site values + GITHUB_SHA/GITHUB_EVENT_NAME arrive as positional
+          # args: job/default envs never cross SSH into the remote bash.
           APP_DIR="$1" APP_PORT="$2" PM2_NAME="$3"
           export DB_FILE="$4" ECO_FILE="$5" DEPLOY_BRANCH="$6" SEED_SITE="$7"
+          DEPLOY_SHA="$8" EVENT_NAME="$9"
 
           # 1. Toolchain: CI SSH is non-interactive so nvm never loads via .bashrc
           export NVM_DIR="$HOME/.nvm"
@@ -205,10 +211,10 @@ jobs:
           git fetch origin
           git checkout "$DEPLOY_BRANCH"
           git pull --ff-only
-          deploy_sha="$GITHUB_SHA"
-          # workflow_dispatch from a non-release ref: a strict GITHUB_SHA check
+          deploy_sha="$DEPLOY_SHA"
+          # workflow_dispatch from a non-release ref: a strict SHA check
           # would compare against the dispatch ref's head; assert branch HEAD.
-          if [ "$GITHUB_EVENT_NAME" != "push" ]; then deploy_sha=$(git rev-parse HEAD); fi
+          if [ "$EVENT_NAME" != "push" ]; then deploy_sha=$(git rev-parse HEAD); fi
           test "$(git rev-parse HEAD)" = "$deploy_sha" || { echo "FATAL: HEAD $(git rev-parse HEAD) != deploy SHA $deploy_sha"; exit 1; }
           test -f package.json || { echo "FATAL: not a repo checkout"; exit 1; }
 
