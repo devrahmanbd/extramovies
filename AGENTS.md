@@ -6,25 +6,23 @@ planned. Read this whole file before acting. Short hard-rules version: `.rules`.
 
 ## 1. Branches & deployment (read twice — history of silent breakage here)
 
-- `main` = development. It NEVER deploys. `prod` = release; pushing `prod`
-  auto-deploys via `.github/workflows/deploy.yml`. Release channels (owner
-  decision 2026-10-18): `prod-extra` ships extramovies ONLY; `prod` ships
-  cinemavilla ONLY ("vanilla" syncs); `workflow_dispatch` = both sites.
-  Release flow: finish on `main`, verify green, then
-  `git checkout prod-extra && git merge main && git push origin prod-extra`
-  (extramovies) or `git checkout prod && git merge main && git push origin
-  prod` (cinemavilla). The push IS the production deploy — do it
-  deliberately. Recommended: protect both release branches (PR + green
+- Release channels (owner decision 2026-10-18, deploy.yml two if-gated
+  jobs, verified green 2026-10-18): `main` = development, NEVER deploys.
+  Pushing `prod-extra` deploys extramovies ONLY. Pushing `prod` deploys
+  cinemavilla ONLY (vanilla syncs; owner has no plans to push it again).
+  `workflow_dispatch` = ship BOTH sites. Release flow: finish on `main`,
+  verify green, then `git checkout prod-extra && git merge --ff-only main
+  && git push origin prod-extra` (extramovies) or the same into `prod`
+  (cinemavilla). The push IS the production deploy — do it deliberately.
+  One workflow run may trigger only ONE site job; anything else is a
+  deploy.yml bug. Recommended: protect both release branches (PR + green
   checks) so merge = approval.
 - Docs-only pushes (`docs/**`, root `*.md`, `.rules`, `.superpowers/**`,
   `.opencode/**`) skip deploys via `paths-ignore`. Content seeds under
   `seeds/<site>/*.md` trigger deploys (subdir markdown is not ignored).
 - `prod-v1` = pruned release snapshots for panel-side manual pulls. Refresh
-  only via `scripts/prune-prod.sh` flow; never develop on it.
-- `prod-extra` = extramovies release branch (owner decision 2026-10-18,
-  supersedes the same-day snapshot contract). Pushes deploy extramovies
-  only; cinemavilla ships from `prod` and the owner has no plans to push
-  prod/cinemavilla again. Never develop on release branches.
+  only via `.github/workflows/release.yml` (manual `workflow_dispatch`); never develop on it.
+- Never develop on release branches.
 - No per-site/per-content branches, no forks — ever. Content variants live
   in per-server data, never in git branches.
 - Never `push --force` shared branches. Never commit secrets, `.env`,
@@ -118,6 +116,17 @@ planned. Read this whole file before acting. Short hard-rules version: `.rules`.
   homepage/H1/schema changes. Homepage with no overrides must render
   byte-identical (modulo dev instrumentation).
 - AI slop policy: original criticism only; no scaled content abuse.
+- Legacy archive URLs (pre-rebrand piracy corpus, 2016–2025): recover the
+  demand offline, never 200-serve a legacy path. Tooling:
+  `scripts/legacy/archive_recover.py` (Wayback CDX → slug parse → TMDB
+  resolve → server redirect map; outputs under `data/legacy/`, never
+  committed; run by the owner via CI or on the box, `TMDB_API_KEY` env).
+  Routing rules for the server: resolvable post URLs → 301 to
+  `/movies/<tmdbId>` or `/series/<tmdbId>`; `9xplay.php`, numeric-only
+  pages, and unresolved slugs → 410; category prefixes
+  (`18-movies/`, `300mb-movies/`, …) and trailing `/feed/`/`/page/N/`
+  are normalized away before matching. Never mass-index TMDB-only pages
+  or sitemap legacy targets; sitemap stays review-driven.
 
 ## 6. Development rules (additive, fallback-first)
 

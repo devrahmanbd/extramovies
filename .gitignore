@@ -10,6 +10,7 @@ data/*.db-*
 data/settings.json
 data/reviews.json
 data/uploads/
+data/legacy/
 
 # Build output
 dist/
