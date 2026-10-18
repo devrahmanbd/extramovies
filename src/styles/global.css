@@ -1507,7 +1507,7 @@ section .section-head p {
 }
 .d-tile-title {
   font-size: var(--text-sm);
-  line-height: var(--leading-body);
+  line-height: 1.35;
   letter-spacing: var(--tracking-display);
   color: var(--color-ink);
 }
@@ -3250,7 +3250,7 @@ section .section-head p {
 .d-flow .d-tile.is-compact a { align-content: start; }
 .d-flow .d-tile.is-compact .d-tile-title {
   font-size: var(--text-sm);
-  line-height: var(--leading-body);
+  line-height: 1.35;
 }
 .d-detail-head.band { background: var(--color-paper); }
 .d-detail-head h1 {
@@ -4724,7 +4724,7 @@ input:focus-visible {
 }
 .d-guide-rail .d-tile-title {
   font-size: var(--text-sm);
-  line-height: var(--leading-body);
+  line-height: 1.35;
   letter-spacing: var(--tracking-display);
   color: var(--color-ink);
   font-weight: 700;
@@ -4745,7 +4745,7 @@ input:focus-visible {
 }
 .d-guide-grid .d-tile-title {
   font-size: var(--text-sm);
-  line-height: var(--leading-body);
+  line-height: 1.35;
   color: var(--color-ink);
 }
 .d-guide-grid .d-tile-meta {

@@ -204,7 +204,7 @@ export async function listForMovie(
           FROM member_reviews mr LEFT JOIN users u ON u.id = mr.user_id
           WHERE mr.tmdb_id = ${tmdbId} AND mr.media_type = ${media}
             AND mr.status = 'visible'
-          ORDER BY mr.created_at DESC, mr.id DESC LIMIT ${n}`,
+          ORDER BY mr.created_at DESC, mr.rowid DESC LIMIT ${n}`,
     );
   } catch (err) {
     // Pre-0005 DBs lack member_reviews.status — fall back to unfiltered list.
@@ -216,7 +216,7 @@ export async function listForMovie(
                  u.handle, u.display_name
           FROM member_reviews mr LEFT JOIN users u ON u.id = mr.user_id
           WHERE mr.tmdb_id = ${tmdbId} AND mr.media_type = ${media}
-          ORDER BY mr.created_at DESC, mr.id DESC LIMIT ${n}`,
+          ORDER BY mr.created_at DESC, mr.rowid DESC LIMIT ${n}`,
     );
   }
   return rows.map((r) => ({

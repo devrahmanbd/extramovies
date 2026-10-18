@@ -52,11 +52,20 @@ to it. Amend intentionally — the file is the rule.
 
 ## Typography (amended 2026-10-06 — DNA kept, layout/fonts improved)
 - Faces · Anton display + Lato body unchanged (studied-DNA). Roman display only, no italic headers.
-- Scale · `--text-xs: 0.75rem` · `--text-sm: 0.85rem` · `--text-base: 1.0625rem` · `--text-lg: clamp(1.1rem, 2vw, 1.35rem)` · `--text-xl: clamp(1.25rem, 2.6vw, 1.6rem)` · `--text-2xl: clamp(1.5rem, 3vw, 2.2rem)` · `--text-3xl: clamp(2rem, 4.5vw, 3rem)` · `--text-display: clamp(2.4rem, 6vw, 4.5rem)` · `--text-hero-long: clamp(1.9rem, 4.5vw, 3rem)`.
+- Weight roles (amended 2026-10-18) · Lato 400 = body, tile meta, bylines; Lato 700 = tile titles, buttons, kickers, bold link CTAs; Anton ships one weight — hierarchy comes from the scale, never from faux-bolding or italics.
+- Face roles (amended 2026-10-18) · Anton reserved for the display family: h1–h3, `.display`, ghost numerals, poster-slot fallbacks at display sizes. Everything under `--text-lg` (tile titles ~0.85–0.95rem, controls, chips) is Lato 700 with `--tracking-display`, never tiny Anton. `--font-mono` (ui-monospace) = bylines/meta-strip uppercase only.
+- Scale · `--text-xs: 0.75rem` · `--text-sm: 0.85rem` · `--text-base: 1.0625rem` · `--text-lg: clamp(1.1rem, 2vw, 1.35rem)` · `--text-xl: clamp(1.25rem, 2.6vw, 1.6rem)` · `--text-2xl: clamp(1.5rem, 3vw, 2.2rem)` · `--text-3xl: clamp(2rem, 4.5vw, 3rem)` · `--text-display: clamp(2rem, 4.5vw, 3.25rem)` · `--text-hero-long: clamp(1.75rem, 4vw, 2.5rem)` · `--text-mega: clamp(2.75rem, 7vw, 5rem)` (glamour/ghost only). tokens.css wins on any drift.
 - Display tracking · `--tracking-display: -0.02em` on h1/h2/h3/`.display` (tightened from -0.015em).
 - Leading rhythm · display `1.0` (`--leading-display`), body `1.65` (`--leading-body`), lede/dek `1.5` (`--leading-lede`).
 - Hero size-by-length · titles over ~40 chars (or `.is-long` / `.display--long`) step down to `--text-hero-long`. Template sets `.is-long` when `title.length > 40`.
 - Tabular numerals · `.tnum` + automatic on `.rating-mark`, `.rating-value`, `.index-meta`, `.showcase-year`: `font-variant-numeric: tabular-nums`.
+
+## Spacing & rhythm (amended 2026-10-18 — cadence locked to tokens.css)
+- Scale · `--space-1` .25rem · 2 .5 · 3 .75 · 4 1 · 5 1.25 · 6 1.5 · 8 2 · 10 2.5 · 12 3 · 16 4 · 24 6. Strict 4-pt grid with one deliberate exception: fixed-px touch-target heights (44px) sit above it.
+- Ladder · intra-component gaps `--space-1/2` (tile title↔meta, dots) · component internals `--space-3/4` (rail heads, grid gaps) · block/section margins `--space-5/6` · stand-alone inset `--space-8+`.
+- Page gutters · `.wrap` padding-inline `clamp(1rem, 4vw, 2rem)`; poster rails bleed outward `--gutter-rail: 3vw` (`.rail-bleed`, margin −3vw / padding +3vw) so snaps sit flush to viewport edge.
+- Section cadence · `.section--sm/md/lg` → `--section-pad-sm/md/lg` (clamps 1.75–2.5 / 2.5–3.5 / 3–4.5rem). Never equal-everywhere: alternate `.band` / `.band--alt` and vary pad per section on both themes. Carousel `padding-block: sm…md`; covers lead at lg.
+- Heading rhythm (locked) · h1 `space-8 0 space-4` · h2 `space-12 0 space-3` · h3 space-3 top. No extra margins on `.dek`/`.meta-strip` (they inherit single-gap rhythm).
 
 ## Macrostructure / Layout (amended 2026-10-06 — discovery rails + publication bands)
 - Family · 08 Photographic (publication heroes + review title blocks) + 20 Ecosystem Index (discovery surfaces). Discovery = surfaces primary; publication = photographic editorial secondary. Both share theme/nav/footer/type.
@@ -66,18 +75,33 @@ to it. Amend intentionally — the file is the rule.
 - Ranked rows · ghost numerals retained (global `.index-num`, Anton, ink-2, clamp 2.25–3.25rem). No card-ification.
 - Mobile rails · `.rail-snap` (`overflow-x: auto`, `scroll-snap-type: x proximity`) + `.rail-snap--fade` edge-fade mask under 48rem. No horizontal page scroll (`overflow-x: clip` on html/body retained).
 
+## Poster rails & carousels (amended 2026-10-18 — the "list of movies" spec)
+- Poster rail · grid `auto-flow: column`, auto-columns `minmax(9rem, 11rem)` (featured 10–13rem, guide rails 8.5–12rem, top-ten 6.5–7.5rem), gap `--space-4`, snap `start`/`x proximity`, thin scrollbar; `.d-grid` counterpart = `auto-fill minmax(9rem, 1fr)`, gap `--space-4`.
+- Tile anatomy · 2/3 poster, full-frame `contain` on `paper-2` bed (cropping reserved for backdrops), 1px `--color-line` border, `--radius-card`; title Lato 700 at `--text-sm` (line-height 1.35, display tracking); meta Lato 400 `--text-xs`, ink-2, digits tnum `space-2` gap. Hover = border/color shift only — never scale (see Notes).
+- Ranked rows · ghost numerals (`.index-num`, `--text-3xl`, ink-2) on text-ranked rows only; never on poster rails.
+- Featured per-slide carousel · 100% columns, snap `x mandatory`, slide min-height `min(68vh, 34rem)`, dual scrims (bottom 6–55% + left 8–60% paper fade), copy anchored bottom-left (label gold, title `--text-2xl` ≤20ch, verdict ≤68ch ink-2), prev/next = 44px icon pills (see Buttons), scrollbar hidden, `overscroll-behavior-x: contain`.
+- Trending hero · slide min-height 78vh, 12px dot pagination, gold-filled active dot.
+- Mobile · rails keep snap + 88% edge-fade mask; carousels keep full slides (no plain stacks); every interactive control ≥44px.
+
 ## Stream support (product rule, not just paint)
 - Automatic · TMDB watch-providers per region → Stream / Rent / Buy / Free tiles with logos, timestamp, JustWatch attribution. Never invented; section hides when empty.
 - Custom override · per-review editor links: Free sites (nofollow) + Paid watch (nofollow sponsored + commission note), badged "Added by the editor", rendered after auto tiles. Editor may suppress individual auto providers per review.
 - Tabs · All / Stream / Free / Rent / Buy / Free sites / Paid watch — CSS-only, no JS.
 
-## CTA voice
-- Primary · gold fill (#fbc500 on #060d17) · radius-card · 48px min-height
-- Secondary · ghost (white 8–16% overlay) · same radius
+## Buttons (amended 2026-10-18 — typology matches shipped control CSS)
+- Fill (primary form action) · gold `--color-accent` fill, `--color-accent-ink` text · Lato 700 `--text-base` · min-height 44px (search submit 48px) · padding `space-3 space-5` (search submit `0 space-6`) · `--radius-input` (search submit `--radius-card`) · cursor pointer.
+- Ghost chip · 1px `--color-line` border, `--radius-pill`, 44px min, `space-2 space-4` padding, Lato .95rem; hover = gold border+text; active/selected state = full gold fill (`genre-nav[aria-current]`, filter chips).
+- Icon round · 44×44px `--radius-pill`, 1px `--color-line-strong`, paper bed, 1.4rem glyph (carousel prev/next); hover = gold border+glyph only.
+- Text CTA · standalone gold Lato 700 link (carousel/footer CTAs, cover CTAs, "browse" links) — no fill from these; gold fill stays reserved for submit-type actions and selected states.
+- Focus ring · 2px `--color-focus` outline, offset 3px, on every interactive element; `focus-visible` gets `transition: none`.
+- Dots · 12px pills, rule border; current = gold fill. Size by role, not by developer mood: fill for submits, chips for filters, pills for navigation.
 
-## Motion stance
-- motion-cut · no library; CSS transitions ≤300ms ease-out only.
-- Reduced-motion fallback · ≤150 ms opacity crossfade.
+## Motion (amended 2026-10-18 — primitives, not vibes)
+- Assets · zero animation libraries, zero JS animation — CSS transitions + native scroll only; `scroll-behavior: smooth` on html.
+- Duration ladder · `--dur-fast` 180ms = color/border shifts on links, chips, buttons · `--dur-base` 240ms = scrim opacity, image opacity/border hovers · `--dur-slow` 320ms = hero title mask-reveal (`glam-mask-reveal`: clip-path + translateY `--space-4` + opacity, one-shot on load). All on `--ease-out`.
+- Allowed mechanics, exhaustively · named-property transitions (opacity / color / background-color / border-color) · the single load mask-reveal on hero titles · scrim opacity 240ms on photo hovers (~0.55 max) · art-hover opacity dip to 0.86 + gold border · link color 180ms · native carousel snap. Nothing else moves.
+- Never · hover-scale on tiles/buttons, opacity-dip press states, `transition: all`, autoplay, parallax, staggered reveals.
+- Reduced motion · non-essential fades/masks `transition: none !important`; hero title fallback ≤150ms opacity crossfade; carousel drops to free scroll (`scroll-snap-type: none`); `html` smooth-scroll off; focus-visible never animates.
 
 ## Variants
 - Magazine preset (`reel-magazine`) · editorial system, journal rhythm (cover + grid). Showcase/buybox DNA does not apply.
