@@ -1,0 +1,121 @@
+# Legacy archive recovery (AGENTS.md §5) — runs scripts/legacy/archive_recover.py
+# ON the VPS over SSH (CI already holds SSH_* secrets for deploy.yml).
+# Why on the box: outputs (redirect map) and resume state live server-side
+# where they are consumed, and the TMDB_API_KEY stays in the box's
+# ecosystem.config.js — it never leaves the server or enters GitHub secrets.
+# Logs: every run writes a tee'd log file into LEGACY_DIR.
+#
+# Triggers: workflow_dispatch (site/stage/limit inputs) + monthly schedule
+# (full run, resumable: collect dedupes by URL, resolve caches TMDB hits).
+#
+# Repo is PUBLIC so the box curls the script pinned to the dispatch SHA.
+# If the repo ever goes private, the curl step fails loudly by design.
+# NOTE: scheduled runs default site=extramovies, stage=full.
+name: Legacy archive recovery
+
+on:
+  workflow_dispatch:
+    inputs:
+      site:
+        description: "Brand whose legacy corpus is recovered"
+        default: extramovies
+        type: choice
+        options: [extramovies, cinemavilla]
+      stage:
+        description: "Stage to run"
+        default: full
+        type: choice
+        options: [full, collect, resolve, report]
+      limit:
+        description: "Resolve cap, 0 = all rows"
+        default: "0"
+
+  schedule:
+    - cron: "17 4 2 * *"
+
+concurrency:
+  group: legacy-recover
+  cancel-in-progress: false
+
+jobs:
+  recover:
+    name: Recover legacy URLs (on box via SSH)
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    env:
+      SSH_HOST: ${{ secrets.SSH_HOST }}
+      SSH_USER: ${{ secrets.SSH_USER }}
+      SSH_PORT: ${{ secrets.SSH_PORT }}
+      SSH_KEY: ${{ secrets.SSH_KEY }}
+    steps:
+      - name: Resolve per-site paths
+        run: |
+          site="${{ inputs.site || 'extramovies' }}"
+          case "$site" in
+            extramovies)
+              echo "SITE_DOMAIN=extramovies.org" >> "$GITHUB_ENV"
+              echo "LEGACY_DIR=/home/extramovies.org/legacy" >> "$GITHUB_ENV"
+              echo "ECO_FILE=/home/extramovies.org/ecosystem.config.js" >> "$GITHUB_ENV"
+              ;;
+            cinemavilla)
+              echo "SITE_DOMAIN=cinemavilla.in" >> "$GITHUB_ENV"
+              echo "LEGACY_DIR=/home/cinemavilla.in/legacy" >> "$GITHUB_ENV"
+              echo "ECO_FILE=/home/cinemavilla.in/ecosystem.config.js" >> "$GITHUB_ENV"
+              ;;
+          esac
+          echo "STAGE=${{ inputs.stage || 'full' }}" >> "$GITHUB_ENV"
+          echo "LIMIT=${{ inputs.limit || '0' }}" >> "$GITHUB_ENV"
+
+      - name: Run recovery over SSH
+        run: |
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=accept-new \
+            -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" \
+            "bash -s $SITE_DOMAIN $LEGACY_DIR $ECO_FILE $STAGE $LIMIT $GITHUB_SHA" <<'EOF'
+          set -euo pipefail
+          # All values arrive as positional args; runner envs never cross SSH.
+          CDX_SITE="$1" LEGACY_DIR="$2" ECO_FILE="$3" STAGE="$4" LIMIT="$5" SCRIPT_SHA="$6"
+
+          command -v python3 >/dev/null || { echo "FATAL: python3 missing on box"; exit 1; }
+          python3 --version
+
+          mkdir -p "$LEGACY_DIR"
+
+          # Script pinned to the dispatch SHA (repo is public; curl 404s loudly
+          # if that ever changes — do not silently run a stale copy).
+          SCRIPT="$LEGACY_DIR/archive_recover.py"
+          curl -fsSL \
+            "https://raw.githubusercontent.com/devrahmanbd/extramovies/$SCRIPT_SHA/scripts/legacy/archive_recover.py" \
+            -o "$SCRIPT"
+          echo "script: $(wc -l < "$SCRIPT") lines from SHA ${SCRIPT_SHA:0:7}"
+
+          # TMDB key stays on the box: sourced from ecosystem.config.js,
+          # exported into the tool's env only. Never echoed, never logged.
+          export TMDB_API_KEY=""
+          if [ -f "$ECO_FILE" ]; then
+            TMDB_API_KEY=$(grep -o 'TMDB_API_KEY[^,}]*' "$ECO_FILE" | head -1 \
+              | sed -E 's/^TMDB_API_KEY[":= ]+//; s/["}]*$//')
+          fi
+          if [ "$STAGE" = "full" ] || [ "$STAGE" = "resolve" ]; then
+            [ -n "$TMDB_API_KEY" ] || { echo "FATAL: TMDB_API_KEY not found in $ECO_FILE"; exit 1; }
+          fi
+          export TMDB_API_KEY
+
+          LOG="$LEGACY_DIR/run-$(date +%Y%m%d-%H%M%S).log"
+          run() {
+            python3 "$SCRIPT" --out-dir "$LEGACY_DIR" "$@" 2>&1 | tee -a "$LOG"
+          }
+          case "$STAGE" in
+            full)    run collect; run resolve; run report ;;
+            collect) run collect ;;
+            resolve) run resolve ;;
+            report)  run report ;;
+          esac
+
+          echo "log: $LOG"
+          echo "--- tail ---"
+          tail -n 15 "$LOG"
+          EOF
+          rm -f ~/.ssh/deploy_key
