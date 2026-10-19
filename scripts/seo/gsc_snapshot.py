@@ -313,6 +313,50 @@ def site_origin(site: str) -> str:
     return "https://" + value.strip("/")
 
 
+def canonical_origin(site: str) -> str:
+    """The property's canonical scheme://host (lowercased, no path).
+
+    A domain property (sc-domain:host) is canonical on https://host; a
+    url-prefix property is canonical on the exact scheme://host it was added
+    with. Every page key Search Console reports is compared against this to
+    decide whether it is a host variant (an http:// copy of an https://
+    property, a www. copy of a bare domain).
+    """
+    value = (site or "").strip().lower()
+    if value.startswith("sc-domain:"):
+        return "https://" + value[len("sc-domain:") :].strip("/")
+    match = re.match(r"^(https?://[^/]+)", value)
+    if match:
+        return match.group(1)
+    return "https://" + value.strip("/")
+
+
+def key_origin(raw: str) -> str:
+    """scheme://host of a page key (lowercased), or "" when it carries none."""
+    value = (raw or "").strip()
+    if "://" not in value:
+        return ""
+    parsed = urllib.parse.urlparse(value)
+    if not parsed.netloc:
+        return ""
+    return f"{parsed.scheme.lower()}://{parsed.netloc.lower()}"
+
+
+def page_host(raw: str, site: str) -> tuple[str, bool]:
+    """(host, noncanonical_host) for one raw page key.
+
+    `host` is the netloc of the key, lowercased. A relative key ("/reviews")
+    carries no host of its own: it belongs to the property's canonical host
+    and is never a variant. `noncanonical_host` is true when the key's
+    scheme+host differ from the property's canonical scheme+host.
+    """
+    canonical = canonical_origin(site)
+    origin = key_origin(raw)
+    if not origin:
+        return urllib.parse.urlparse(canonical).netloc, False
+    return urllib.parse.urlparse(origin).netloc, origin != canonical
+
+
 def property_host(site: str) -> str:
     """Comparable HOST for a property ('sc-domain:' / scheme / www / path off).
 
@@ -432,15 +476,28 @@ def search_analytics(
 def page_rows(
     site: str, routes: list[tuple[re.Pattern, str]], start: str, end: str, row_limit: int
 ) -> list[dict]:
-    """Page-dimension rows, classified and sorted by impressions desc."""
-    origin = site_origin(site)
+    """Page-dimension rows, classified and sorted by impressions desc.
+
+    The `url` is the RAW key Search Console returned, character for character.
+    It is never rebuilt from the property: GSC reports the same page once per
+    host variant (http:// vs https://, www. vs bare), and rebuilding the URL
+    merges those rows and hides the split. The raw key's PATH still drives
+    the legacy/modern classification.
+    """
     rows = []
     for raw in search_analytics(site, ["page"], start, end, row_limit):
         keys = raw.get("keys") or []
-        path = normalize_path(str(keys[0]) if keys else "/")
+        key = str(keys[0]) if keys else ""
+        path = normalize_path(key)
         metrics = _metrics(raw)
         classification, reason = classify_path(path, routes)
-        row = {"path": path, "url": origin + path}
+        host, noncanonical = page_host(key, site)
+        row = {
+            "path": path,
+            "url": key,
+            "host": host,
+            "noncanonical_host": noncanonical,
+        }
         row.update(metrics)
         row["classification"] = classification
         row["reason"] = reason
@@ -507,6 +564,53 @@ def window(days: int, today: date) -> tuple[str, str]:
     return start.isoformat(), end.isoformat()
 
 
+def host_variants(pages: list[dict]) -> dict:
+    """Row counts per host class: {"canonical": n, "noncanonical": n}."""
+    canonical = 0
+    noncanonical = 0
+    for row in pages:
+        if row.get("noncanonical_host"):
+            noncanonical += 1
+        else:
+            canonical += 1
+    return {"canonical": canonical, "noncanonical": noncanonical}
+
+
+def host_variant_warning(snapshot: dict) -> str:
+    """One warning line for the console summary, "" when there is no variant.
+
+    Names the offending host variants and the impression share they hold.
+    """
+    variants = snapshot.get("host_variants") or {}
+    noncanonical = int(variants.get("noncanonical") or 0)
+    if noncanonical <= 0:
+        return ""
+    totals = snapshot.get("totals") or {}
+    total_impressions = int(totals.get("impressions") or 0)
+    per_origin: dict[str, dict] = {}
+    for row in snapshot.get("pages") or []:
+        if not row.get("noncanonical_host"):
+            continue
+        origin = key_origin(str(row.get("url") or "")) or str(row.get("host") or "?")
+        entry = per_origin.setdefault(origin, {"rows": 0, "impressions": 0})
+        entry["rows"] += 1
+        entry["impressions"] += int(row.get("impressions") or 0)
+    if not per_origin:
+        return ""
+    parts = []
+    for origin in sorted(per_origin, key=lambda o: (-per_origin[o]["impressions"], o)):
+        entry = per_origin[origin]
+        share = (entry["impressions"] / total_impressions * 100) if total_impressions else 0.0
+        parts.append(
+            f"{origin} ({entry['rows']} row(s), {entry['impressions']} impressions,"
+            f" {share:.1f}% of total)"
+        )
+    return (
+        f"  WARNING: {noncanonical} page row(s) on a noncanonical host:"
+        f" {', '.join(parts)} - redirect the variant to the canonical host"
+    )
+
+
 def skipped_snapshot(site: str, days: int, reason: str) -> dict:
     """A snapshot that records WHY there is no data (never a crash)."""
     return {
@@ -518,6 +622,7 @@ def skipped_snapshot(site: str, days: int, reason: str) -> dict:
         "days": days,
         "sitemaps": [],
         "totals": {"clicks": 0, "impressions": 0},
+        "host_variants": {"canonical": 0, "noncanonical": 0},
         "pages": [],
         "queries": [],
         "byDate": [],
@@ -621,6 +726,7 @@ def capture(
         "days": days,
         "sitemaps": sitemaps,
         "totals": totals,
+        "host_variants": host_variants(pages),
         "pages": pages,
         "queries": queries,
         "byDate": by_date,
@@ -689,6 +795,15 @@ def _drop_pct(before: int, after: int) -> float:
     if before <= 0:
         return 0.0
     return (before - after) / before
+
+
+def page_key(row: dict) -> str:
+    """The raw key a page row was recorded under (never a rebuilt URL).
+
+    The diff compares RAW keys, so http://host/ and https://host/ are two
+    separate rows and a host split stays visible instead of being merged.
+    """
+    return str(row.get("url") or row.get("path") or "")
 
 
 def diff_snapshots(baseline: dict, current: dict) -> dict:
@@ -761,27 +876,27 @@ def diff_snapshots(baseline: dict, current: dict) -> dict:
         f" ({_delta(base_impressions, cur_impressions)}, -{impressions_drop * 100:.1f}%)"
     )
 
-    base_pages = {row["path"]: row for row in (baseline.get("pages") or [])}
-    cur_pages = {row["path"]: row for row in (current.get("pages") or [])}
+    base_pages = {page_key(row): row for row in (baseline.get("pages") or [])}
+    cur_pages = {page_key(row): row for row in (current.get("pages") or [])}
     lines.append(f"  pages ({len(cur_pages)} in this run):")
-    for path in sorted(cur_pages, key=lambda p: (-cur_pages[p]["impressions"], p)):
-        row = cur_pages[path]
-        before = base_pages.get(path)
+    for key in sorted(cur_pages, key=lambda k: (-cur_pages[k]["impressions"], k)):
+        row = cur_pages[key]
+        before = base_pages.get(key)
         if before is None:
             lines.append(
-                f"    {path}  clicks +{row['clicks']}  impressions +{row['impressions']}  (new)"
+                f"    {key}  clicks +{row['clicks']}  impressions +{row['impressions']}  (new)"
             )
             continue
         lines.append(
-            f"    {path}  clicks {before['clicks']} -> {row['clicks']}"
+            f"    {key}  clicks {before['clicks']} -> {row['clicks']}"
             f" ({_delta(before['clicks'], row['clicks'])})"
             f"  impressions {before['impressions']} -> {row['impressions']}"
             f" ({_delta(before['impressions'], row['impressions'])})"
         )
-    for path in sorted(set(base_pages) - set(cur_pages)):
-        before = base_pages[path]
+    for key in sorted(set(base_pages) - set(cur_pages)):
+        before = base_pages[key]
         lines.append(
-            f"    {path}  clicks {before['clicks']} -> 0"
+            f"    {key}  clicks {before['clicks']} -> 0"
             f" ({_delta(before['clicks'], 0)})"
             f"  impressions {before['impressions']} -> 0"
             f" ({_delta(before['impressions'], 0)})  (gone)"
@@ -1032,6 +1147,9 @@ def main(argv: list[str] | None = None, queue_path: Path | None = None) -> int:
         f"  totals: {totals['clicks']} clicks, {totals['impressions']} impressions"
         f" over {len(snapshot['pages'])} page row(s)"
     )
+    variant_warning = host_variant_warning(snapshot)
+    if variant_warning:
+        log(variant_warning)
     log(
         f"  sitemaps: {len(snapshot['sitemaps'])}  queries: {len(snapshot['queries'])}"
         f"  dates: {len(snapshot['byDate'])}"
@@ -1086,8 +1204,11 @@ STUB_SITEMAPS = [
 ]
 
 # (keys, clicks, impressions, ctr, position)
+# The homepage appears twice on purpose: Search Console reports one row per
+# host variant, and the raw key is what the snapshot must keep.
 STUB_PAGES = [
-    (["/"], 120, 3000, 0.04, 8.2),
+    (["https://extramovies.org/"], 120, 3000, 0.04, 8.2),
+    (["http://extramovies.org/"], 3, 59, 0.0508, 42.2),
     (["/reviews/dune-part-two"], 60, 1500, 0.04, 12.4),
     (["/reviews"], 40, 900, 0.0444, 15.1),
     (["/movies/693134"], 25, 600, 0.0417, 9.9),
@@ -1114,6 +1235,7 @@ STUB_PAGES_LONG = [
     ),
     (["/web-series/some-show"], 20, 300, 0.0667, 26.5),
     (["/reviews/dune-part-two"], 70, 1800, 0.0389, 12.0),
+    (["http://extramovies.org/"], 3, 90, 0.0333, 42.0),
 ]
 
 STUB_QUERIES = [
@@ -1204,7 +1326,10 @@ class _StubHandler(BaseHTTPRequestHandler):
         if path == "/webmasters/v3/sites":
             self._send({"siteEntry": STUB_SITES})
             return
-        if path.startswith("/webmasters/v3/sitemaps/"):
+        # The sitemaps list lives under the site resource:
+        # /webmasters/v3/sites/<site>/sitemaps (the old /sitemaps/<site> form
+        # is the deprecated one).
+        if path.endswith("/sitemaps"):
             self._send({"sitemap": STUB_SITEMAPS})
             return
         self._send({"error": "not found", "path": path}, 404)
@@ -1471,14 +1596,14 @@ def selftest() -> int:
             check("snapshot site", snapshot["site"], "sc-domain:extramovies.org")
             check("snapshot days", snapshot["days"], 28)
             check("snapshot date", snapshot["date"], "2026-10-20")
-            check("totals clicks", snapshot["totals"]["clicks"], 297)
-            check("totals impressions", snapshot["totals"]["impressions"], 7500)
+            check("totals clicks", snapshot["totals"]["clicks"], 300)
+            check("totals impressions", snapshot["totals"]["impressions"], 7559)
             check("sitemaps recorded", len(snapshot["sitemaps"]), 1)
             check("sitemaps keep the fields", sorted(snapshot["sitemaps"][0]),
                   ["errors", "isPending", "lastSubmitted", "path", "warnings"])
             check("queries recorded", len(snapshot["queries"]), 3)
             check("byDate recorded", len(snapshot["byDate"]), 3)
-            check("long window captured", len(snapshot["pagesLongWindow"]), 3)
+            check("long window captured", len(snapshot["pagesLongWindow"]), 4)
 
             by_path = {row["path"]: row for row in snapshot["pages"]}
             check("18-movies is legacy in the snapshot", by_path["/18-movies/18-the-evil-dead-1981-hindi-dubbed-480p-full-movie-download"]["classification"], "legacy")
@@ -1486,6 +1611,100 @@ def selftest() -> int:
             check("review slug is modern in the snapshot", by_path["/reviews/dune-part-two"]["classification"], "modern")
             check("movie id is modern in the snapshot", by_path["/movies/693134"]["classification"], "modern")
             check("legacy count", snapshot["legacy"]["count"], 5)
+
+            # --- the raw GSC key must survive into the snapshot --------------
+            by_url = {row["url"]: row for row in snapshot["pages"]}
+            check(
+                "the raw GSC key is kept character for character",
+                by_url["http://extramovies.org/"]["url"],
+                "http://extramovies.org/",
+            )
+            check(
+                "the raw key is never rebuilt from the property",
+                by_url["https://extramovies.org/"]["url"],
+                "https://extramovies.org/",
+            )
+            check(
+                "host is the netloc of the raw key",
+                by_url["http://extramovies.org/"]["host"],
+                "extramovies.org",
+            )
+            check(
+                "an http key on an https property is a noncanonical host",
+                by_url["http://extramovies.org/"]["noncanonical_host"],
+                True,
+            )
+            check(
+                "an https key is the canonical host",
+                by_url["https://extramovies.org/"]["noncanonical_host"],
+                False,
+            )
+            check(
+                "the raw key keeps its path for classification",
+                by_url["http://extramovies.org/"]["path"],
+                "/",
+            )
+            check(
+                "a relative key belongs to the property's canonical host",
+                by_path["/reviews"]["host"],
+                "extramovies.org",
+            )
+            check(
+                "a relative key is never a host variant",
+                by_path["/reviews"]["noncanonical_host"],
+                False,
+            )
+            check(
+                "host_variants counts the canonical rows",
+                snapshot["host_variants"]["canonical"],
+                9,
+            )
+            check(
+                "host_variants counts the noncanonical rows",
+                snapshot["host_variants"]["noncanonical"],
+                1,
+            )
+            check(
+                "the long window keeps the raw key too",
+                [
+                    row["url"]
+                    for row in snapshot["pagesLongWindow"]
+                    if row.get("noncanonical_host")
+                ],
+                ["http://extramovies.org/"],
+            )
+            check(
+                "the long window row keeps its raw url",
+                [
+                    row["url"]
+                    for row in snapshot["pagesLongWindow"]
+                    if row["url"] == "http://extramovies.org/"
+                ],
+                ["http://extramovies.org/"],
+            )
+
+            warning = host_variant_warning(snapshot)
+            check(
+                "the summary warns about a noncanonical host",
+                "http://extramovies.org" in warning,
+                True,
+            )
+            check(
+                "the warning names the impression share",
+                "%" in warning,
+                True,
+            )
+            check(
+                "no host variant means no warning",
+                host_variant_warning(
+                    {
+                        **snapshot,
+                        "pages": [],
+                        "host_variants": {"canonical": 0, "noncanonical": 0},
+                    }
+                ),
+                "",
+            )
 
             universe = legacy_universe(snapshot["pages"], snapshot["pagesLongWindow"])
             queue = build_queue(universe)
@@ -1569,6 +1788,13 @@ def selftest() -> int:
                     """Run the CLI quietly (the selftest asserts on exit codes)."""
                     with contextlib.redirect_stdout(io.StringIO()):
                         return main(list(cli_args), queue_path=selftest_queue)
+
+                def run_cli_capture(*cli_args: str) -> tuple[int, str]:
+                    """Run the CLI and keep what it printed (summary checks)."""
+                    buffer = io.StringIO()
+                    with contextlib.redirect_stdout(buffer):
+                        code = main(list(cli_args), queue_path=selftest_queue)
+                    return code, buffer.getvalue()
 
                 code = run_cli(
                     "--site", "sc-domain:extramovies.org",
@@ -1654,6 +1880,61 @@ def selftest() -> int:
                     "diff no longer says GONE",
                     "GONE" in diff_text,
                     False,
+                )
+
+                # --- a host split must stay visible in the diff --------------
+                https_only = {
+                    **base,
+                    "pages": [
+                        row for row in base["pages"] if row["url"] != "http://extramovies.org/"
+                    ],
+                }
+                host_diff = diff_snapshots(https_only, base)
+                host_lines = host_diff["lines"]
+                http_lines = [
+                    line for line in host_lines if "http://extramovies.org/" in line
+                ]
+                check(
+                    "the http row shows up in the diff",
+                    bool(http_lines),
+                    True,
+                )
+                check(
+                    "the http row shows as NEW, not merged away",
+                    bool(http_lines) and "(new)" in http_lines[0],
+                    True,
+                )
+                check(
+                    "the https row is not shown as new",
+                    any(
+                        line.strip().startswith("https://extramovies.org/")
+                        and "(new)" not in line
+                        for line in host_lines
+                    ),
+                    True,
+                )
+                check(
+                    "the diff counts both host rows",
+                    any("pages (10 in this run)" in line for line in host_lines),
+                    True,
+                )
+
+                # --- the console summary warns about a noncanonical host ----
+                _, cli_output = run_cli_capture(
+                    "--site", "sc-domain:extramovies.org",
+                    "--days", "28",
+                    "--out", str(out_file),
+                    "--no-inspect",
+                )
+                check(
+                    "the console summary prints the host warning",
+                    "WARNING" in cli_output and "noncanonical host" in cli_output,
+                    True,
+                )
+                check(
+                    "the console summary names the offending host",
+                    "http://extramovies.org" in cli_output,
+                    True,
                 )
 
                 # --- the "not a member" path --------------------------------
