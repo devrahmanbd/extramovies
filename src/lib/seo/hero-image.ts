@@ -1,22 +1,31 @@
 /**
  * Hero image intrinsic-size + preload helpers (CWV task 2).
  *
- * TMDB encodes the delivered image variant in the path
- * (`/t/p/<variant>/<file>`), so the intrinsic pixel size of the artwork we
- * actually request is knowable at render time — for the variants we know.
+ * The intrinsic size is derived from the IMAGE URL — never from a
+ * caller-asserted shape. TMDB encodes the delivered variant in the path
+ * (`/t/p/<variant>/<file>`), and in this repo one shape owns each variant:
  *
- * Rule (never guess): a variant we cannot map yields NO size pair. The
- * caller then omits `width`/`height` (an unknown ratio is worse than none)
- * and still emits the preload, which is size-agnostic.
+ *   w1280 → backdrop path (16:9)  every public hero backdrop uses this width
+ *                                   (the DEMO rows in src/lib/seo/content.ts);
+ *                                   TMDB serves no poster at w1280.
+ *   w780  → poster path   (2:3)   the DEMO poster URLs.
+ *   w500  → poster path   (2:3)   TMDB client / seed poster URLs
+ *                                   (src/lib/tmdb/client.ts, seeds/*).
+ *   w300  → poster path   (2:3)   poster variant.
  *
- * Backdrops are 16:9, posters are 2:3. The same numeric width exists in
- * both namespaces (TMDB serves w780 for backdrops and for posters), so the
- * caller states the shape instead of the URL guessing it.
+ * A poster URL therefore never picks up a 16:9 pair: the URL alone decides.
+ *
+ * The store cannot carry a backdrop URL (the admin review shape has no
+ * backdrop field — src/lib/seo/store-merge.ts pins `backdropUrl: null`), so
+ * no w780 backdrop ever reaches a public page; the only w780 URLs in public
+ * content are posters.
+ *
+ * Rule (never guess): a variant we cannot map yields NO size pair. The caller
+ * omits width/height (an unknown ratio is worse than none) and still emits the
+ * preload, which is size-agnostic.
  *
  * Pure module: no DB, no network, no framework — safe to unit test.
  */
-
-export type HeroImageKind = "backdrop" | "poster";
 
 export interface HeroImageSize {
   width: number;
@@ -29,14 +38,21 @@ export interface HeroImagePreload {
   height?: number;
 }
 
-/** 16:9 backdrops. */
-const BACKDROP_SIZES: Record<string, HeroImageSize> = {
-  w1280: { width: 1280, height: 720 },
-  w780: { width: 780, height: 439 },
-};
+/** Attributes of the head preload link (spread onto <link> by the layout). */
+export interface HeroPreloadLinkAttrs {
+  rel: "preload";
+  as: "image";
+  href: string;
+  width?: number;
+  height?: number;
+  fetchpriority: "high";
+}
 
-/** 2:3 posters. */
-const POSTER_SIZES: Record<string, HeroImageSize> = {
+/** TMDB variant → intrinsic pixel size of the artwork we request. */
+const IMAGE_SIZES: Record<string, HeroImageSize> = {
+  w1280: { width: 1280, height: 720 },
+  w780: { width: 780, height: 1170 },
+  w500: { width: 500, height: 750 },
   w300: { width: 300, height: 450 },
 };
 
@@ -58,12 +74,10 @@ export function heroImageVariant(url: string | null | undefined): string | null 
  */
 export function heroImageSize(
   url: string | null | undefined,
-  kind: HeroImageKind,
 ): HeroImageSize | null {
   const variant = heroImageVariant(url);
   if (!variant) return null;
-  const table = kind === "poster" ? POSTER_SIZES : BACKDROP_SIZES;
-  return table[variant] ?? null;
+  return IMAGE_SIZES[variant] ?? null;
 }
 
 /**
@@ -73,11 +87,29 @@ export function heroImageSize(
  */
 export function heroImagePreload(
   url: string | null | undefined,
-  kind: HeroImageKind,
 ): HeroImagePreload | null {
   if (typeof url !== "string") return null;
   const href = url.trim();
   if (!href) return null;
-  const size = heroImageSize(href, kind);
+  const size = heroImageSize(href);
   return size ? { href, width: size.width, height: size.height } : { href };
+}
+
+/**
+ * Attribute bag for the head preload link. Kept here (not inline in the
+ * layout) so the exact emitted attribute set is unit-testable, and so the
+ * layout has a single call site that cannot be bypassed by a hardcoded link.
+ */
+export function heroPreloadLinkAttrs(
+  preload: HeroImagePreload | null,
+): HeroPreloadLinkAttrs | null {
+  if (!preload) return null;
+  return {
+    rel: "preload",
+    as: "image",
+    href: preload.href,
+    width: preload.width,
+    height: preload.height,
+    fetchpriority: "high",
+  };
 }

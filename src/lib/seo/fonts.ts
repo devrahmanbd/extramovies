@@ -9,6 +9,10 @@
  *
  * Only Google Fonts URLs are touched: a self-hosted or signed stylesheet
  * must not receive a foreign query parameter.
+ *
+ * A URL that already carries ANY `display` parameter keeps it (a
+ * `display=block` URL must not grow a second display parameter); only a URL
+ * with no display parameter at all gets `display=swap` appended.
  */
 
 export function withFontDisplaySwap(url: string | null | undefined): string | null {
@@ -16,6 +20,6 @@ export function withFontDisplaySwap(url: string | null | undefined): string | nu
   const trimmed = url.trim();
   if (!trimmed) return null;
   if (!/fonts\.googleapis\.com/i.test(trimmed)) return trimmed;
-  if (/[?&]display=swap\b/i.test(trimmed)) return trimmed;
+  if (/[?&]display=/i.test(trimmed)) return trimmed;
   return `${trimmed}${trimmed.includes("?") ? "&" : "?"}display=swap`;
 }

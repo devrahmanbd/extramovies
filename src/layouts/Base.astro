@@ -7,6 +7,7 @@ import { getSetting } from "../lib/db/adapter";
 import { buildPageMeta, siteOrigin } from "../lib/seo/meta";
 import type { JsonLd } from "../lib/seo/jsonld";
 import type { HeroImagePreload } from "../lib/seo/hero-image";
+import { heroPreloadLinkAttrs } from "../lib/seo/hero-image";
 import { withFontDisplaySwap } from "../lib/seo/fonts";
 import SiteHeader from "../components/public/SiteHeader.astro";
 import { getSession, getSessionToken, sessionDbFromAstro } from "../lib/auth/session";
@@ -117,19 +118,11 @@ try {
     <meta name="robots" content={robots} />
     <meta name="theme-color" content={brand.themeColor} />
     {preloadImage ? (
-      <link
-        {...{
-          rel: "preload",
-          as: "image",
-          href: preloadImage.href,
-          // width/height on a preload link let the browser reserve the box
-          // before the bytes land; Astro's link typing omits them, hence the
-          // attribute spread.
-          width: preloadImage.width,
-          height: preloadImage.height,
-          fetchpriority: "high",
-        }}
-      />
+      /* Single call site: the attribute bag (rel/as/href/width/height/
+         fetchpriority) lives in src/lib/seo/hero-image.ts so the exact
+         emitted link is unit-testable. Astro's link typing omits
+         width/height, hence the attribute spread. */
+      <link {...heroPreloadLinkAttrs(preloadImage)} />
     ) : null}
     {brand.fonts.fontUrl ? (
       <>
