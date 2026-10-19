@@ -124,14 +124,30 @@ jobs:
               const store = JSON.parse(fs.readFileSync("data/reviews.json", "utf8"));
               const slugs = fs.readdirSync(dir).filter((f) => f.endsWith(".md")).map((f) => f.slice(0, -3));
               let bad = 0;
+              let warned = 0;
               for (const s of slugs) {
                 const fm = fs.readFileSync(dir + "/" + s + ".md", "utf8");
                 const wantsPublish = /^published_at:[ \t]*\S/m.test(fm);
+                // A seed that asks to publish WITHOUT a rating is NOT a deploy
+                // failure: the import refuses to publish it and leaves it as a
+                // draft on purpose (the owner scores it later, then publishes).
+                // Report it, never fail the release on it.
+                const rm = fm.match(/^rating:[ \t]*"?(-?\d+(?:\.\d+)?)"?/m);
+                const rating = rm ? Number(rm[1]) : NaN;
+                const unrated = !Number.isFinite(rating) || rating <= 0 || rating > 10;
                 const row = store.find((r) => r.slug === s);
-                const ok = row && Array.isArray(row.sites) && row.sites.includes(site) && (!wantsPublish || row.status === "published");
-                console.log((ok ? "SEED OK  " : "SEED FAIL ") + s + (wantsPublish && row ? " (status=" + row.status + ")" : ""));
-                if (!ok) bad++;
+                const tagged = row && Array.isArray(row.sites) && row.sites.includes(site);
+                if (tagged && (!wantsPublish || row.status === "published")) {
+                  console.log("SEED OK   " + s + (wantsPublish ? " (status=" + row.status + ")" : ""));
+                } else if (tagged && wantsPublish && unrated && row.status === "draft") {
+                  console.log("SEED WARN " + s + " (asked to publish without a rating: left as a draft; set a rating, then publish)");
+                  warned++;
+                } else {
+                  console.log("SEED FAIL " + s + (row ? " (status=" + row.status + ")" : " (missing)"));
+                  bad++;
+                }
               }
+              if (warned > 0) console.log("SEED WARN " + warned + " seed(s) need a rating before they can publish (left as drafts)");
               if (bad > 0) process.exit(1);
             '
           else
@@ -245,14 +261,30 @@ jobs:
               const store = JSON.parse(fs.readFileSync("data/reviews.json", "utf8"));
               const slugs = fs.readdirSync(dir).filter((f) => f.endsWith(".md")).map((f) => f.slice(0, -3));
               let bad = 0;
+              let warned = 0;
               for (const s of slugs) {
                 const fm = fs.readFileSync(dir + "/" + s + ".md", "utf8");
                 const wantsPublish = /^published_at:[ \t]*\S/m.test(fm);
+                // A seed that asks to publish WITHOUT a rating is NOT a deploy
+                // failure: the import refuses to publish it and leaves it as a
+                // draft on purpose (the owner scores it later, then publishes).
+                // Report it, never fail the release on it.
+                const rm = fm.match(/^rating:[ \t]*"?(-?\d+(?:\.\d+)?)"?/m);
+                const rating = rm ? Number(rm[1]) : NaN;
+                const unrated = !Number.isFinite(rating) || rating <= 0 || rating > 10;
                 const row = store.find((r) => r.slug === s);
-                const ok = row && Array.isArray(row.sites) && row.sites.includes(site) && (!wantsPublish || row.status === "published");
-                console.log((ok ? "SEED OK  " : "SEED FAIL ") + s + (wantsPublish && row ? " (status=" + row.status + ")" : ""));
-                if (!ok) bad++;
+                const tagged = row && Array.isArray(row.sites) && row.sites.includes(site);
+                if (tagged && (!wantsPublish || row.status === "published")) {
+                  console.log("SEED OK   " + s + (wantsPublish ? " (status=" + row.status + ")" : ""));
+                } else if (tagged && wantsPublish && unrated && row.status === "draft") {
+                  console.log("SEED WARN " + s + " (asked to publish without a rating: left as a draft; set a rating, then publish)");
+                  warned++;
+                } else {
+                  console.log("SEED FAIL " + s + (row ? " (status=" + row.status + ")" : " (missing)"));
+                  bad++;
+                }
               }
+              if (warned > 0) console.log("SEED WARN " + warned + " seed(s) need a rating before they can publish (left as drafts)");
               if (bad > 0) process.exit(1);
             '
           else

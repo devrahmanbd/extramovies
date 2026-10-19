@@ -76,6 +76,17 @@ function buildMovieMeta(extras: Record<string, unknown>): Record<string, unknown
   return Object.keys(movie).length > 0 ? movie : undefined;
 }
 
+/**
+ * Loud warning for a seed that asked to publish itself without a rating.
+ * Names the slug (what the owner sees in /admin) and the action needed.
+ */
+function unratedPublishWarning(slug: string, suffix: string): string {
+  return (
+    `[import] WARN slug "${slug}" asked to publish without a rating: NOT published. ` +
+    `Set a rating for "${slug}", then publish it from /admin.${suffix}`
+  );
+}
+
 export async function importMarkdown(
   target: string,
   opts: { dry?: boolean; dbPath?: string; skipExisting?: boolean; refresh?: boolean } = {},
@@ -108,14 +119,15 @@ export async function importMarkdown(
     // A seed may publish itself (published_at in frontmatter), but an
     // UNRATED review must never go live: it would ship a public
     // "rated 0/10" claim (meta description + JSON-LD reviewRating).
-    // The rating is the owner's call, so the row still lands — as a DRAFT.
+    // The rating is the owner's call, so the row still lands — as a DRAFT,
+    // with a loud warning. One unrated seed never fails the whole run.
     const wantsPublish = Boolean(review.published_at);
     const gate = wantsPublish ? checkPublishRating(review.rating) : { ok: true as const };
     const publish = wantsPublish && gate.ok;
     const refusal = wantsPublish && !gate.ok ? gate.error : null;
     if (opts.dry && refusal) {
-      refused.push(`${f}: ${refusal}`);
-      console.error(`[import] REFUSED PUBLISH ${f}: ${refusal} (dry run — would import as draft)`);
+      refused.push(`${review.slug}: ${refusal}`);
+      console.error(unratedPublishWarning(review.slug, ' (dry run: nothing written)'));
     }
     if (!opts.dry) {
       const now = new Date().toISOString();
@@ -135,8 +147,8 @@ export async function importMarkdown(
       const extras = review as unknown as Record<string, unknown>;
       const movie = buildMovieMeta(extras);
       if (refusal) {
-        refused.push(`${f}: ${refusal}`);
-        console.error(`[import] REFUSED PUBLISH ${f}: ${refusal} (row imported as draft)`);
+        refused.push(`${review.slug}: ${refusal}`);
+        console.error(unratedPublishWarning(review.slug, ' (kept as a draft)'));
       }
       // Explicit `sites` in the file wins (cross-posted seeds); otherwise
       // the current SITE_ID is stamped so imports stay site-exclusive.
@@ -184,23 +196,43 @@ export async function importMarkdown(
   return { imported, skipped, errors, refused };
 }
 
+/**
+ * CLI run — prints the summary + warnings and returns the process exit code.
+ *
+ * An unrated-publish refusal is NOT an error: the seed lands as a draft
+ * (the owner scores it later) and the run continues with the remaining
+ * seeds, exit 0. A content mistake in one seed must never block a
+ * release. Only a malformed/unimportable seed (validation errors) is
+ * fatal, as before.
+ */
+export async function runImport(
+  target: string,
+  opts: { dry?: boolean; skipExisting?: boolean; refresh?: boolean; dbPath?: string } = {},
+): Promise<number> {
+  const r = await importMarkdown(target, opts);
+  console.log(
+    `[import] imported=${r.imported} skipped=${r.skipped}` +
+      `${opts.dry ? ' (dry run)' : ''}` +
+      `${opts.skipExisting ? ' (skip-existing)' : ''}` +
+      `${opts.refresh ? ' (refresh)' : ''}`,
+  );
+  for (const e of r.errors) console.error(`[import] SKIP ${e}`);
+  if (r.refused.length > 0) {
+    console.error(
+      `[import] ${r.refused.length} seed(s) asked to publish without a rating: ` +
+        `left as drafts. Set a rating, then publish from /admin.`,
+    );
+  }
+  return r.errors.length > 0 ? 2 : 0;
+}
+
 async function main() {
   const target = process.argv[2];
   if (!target) throw new Error('usage: import.ts <inDir|file.md> [--dry] [--skip-existing] [--refresh]');
   const dry = process.argv.includes('--dry');
   const skipExisting = process.argv.includes('--skip-existing');
   const refresh = process.argv.includes('--refresh');
-  const r = await importMarkdown(target, { dry, skipExisting, refresh });
-  console.log(`[import] imported=${r.imported} skipped=${r.skipped}${dry ? ' (dry run)' : ''}${skipExisting ? ' (skip-existing)' : ''}${refresh ? ' (refresh)' : ''}`);
-  for (const e of r.errors) console.error(`[import] SKIP ${e}`);
-  // A refused publish is a content mistake, not a crash: the row landed as
-  // a draft (the owner still has to score it), but the release must not
-  // claim it published. Exit non-zero so CI stops before shipping it.
-  if (r.refused.length > 0) {
-    console.error(`[import] ${r.refused.length} seed(s) asked to publish without a rating — left as drafts.`);
-    process.exitCode = 2;
-  }
-  if (r.errors.length > 0) process.exitCode = 2;
+  process.exitCode = await runImport(target, { dry, skipExisting, refresh });
 }
 
 if ((process.argv[1] ?? '').endsWith('import.ts')) {

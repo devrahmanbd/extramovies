@@ -319,4 +319,51 @@ describe('seed import: refuses to publish an unrated seed', () => {
     expect(rows[0].status).toBe('draft');
     expect(rows[0].rating).toBe(0);
   });
+
+  it('a batch run with one unrated publish seed exits 0, warns, and imports the rest', async () => {
+    const { runImport } = await import('../scripts/import');
+    const db = path.join(dir, 'reviews.json');
+    await makeSeed('unrated-seed', { publishedAt: '2026-10-17T09:00:00.000Z', rating: 0 });
+    await makeSeed('scored-seed', { publishedAt: '2026-10-17T09:00:00.000Z', rating: 7 });
+    await makeSeed('plain-draft-seed', { rating: 0 });
+
+    const warnings: string[] = [];
+    const spy = vi
+      .spyOn(console, 'error')
+      .mockImplementation((...args: unknown[]) => {
+        warnings.push(args.map((a) => String(a)).join(' '));
+      });
+
+    let exitCode: number;
+    try {
+      exitCode = await runImport(dir, { dbPath: db });
+    } finally {
+      spy.mockRestore();
+    }
+
+    // One content mistake must never block the run (or the release).
+    expect(exitCode).toBe(0);
+
+    // Loud warning: names the slug + tells the owner what to do.
+    const warning = warnings.find((w) => w.includes('unrated-seed'));
+    expect(warning).toBeTruthy();
+    expect(warning).toContain('unrated-seed');
+    expect(warning).toContain('Set a rating');
+    expect(warning).toContain('/admin');
+
+    // The unrated seed is a draft (never published with rating 0)...
+    const rows = JSON.parse(await fs.readFile(db, 'utf8'));
+    const unrated = rows.find((r: { slug: string }) => r.slug === 'unrated-seed');
+    expect(unrated.status).toBe('draft');
+    expect(unrated.publishedAt ?? null).toBeNull();
+    expect(unrated.rating).toBe(0);
+
+    // ...and the remaining seeds still imported (and published) normally.
+    const scored = rows.find((r: { slug: string }) => r.slug === 'scored-seed');
+    expect(scored.status).toBe('published');
+    expect(scored.publishedAt).toBe('2026-10-17T09:00:00.000Z');
+    const plain = rows.find((r: { slug: string }) => r.slug === 'plain-draft-seed');
+    expect(plain.status).toBe('draft');
+    expect(rows).toHaveLength(3);
+  });
 });
