@@ -25,3 +25,6 @@ node_modules/
 
 scripts/legacy/__pycache__/
 scripts/seo/__pycache__/
+
+# GSC service-account key safety net (never commit a key)
+*.gsc-sa*.json
