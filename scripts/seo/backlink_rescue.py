@@ -38,6 +38,9 @@ Usage:
     python3 scripts/seo/backlink_rescue.py --links gsc.csv --map redirect_map.csv \
         --out data/legacy/outreach.csv [--draft]
 
+The output path is confined to the repo's data/legacy/ directory: any --out
+outside it is refused (exit 2) before a single byte is written.
+
 This script NEVER contacts anyone: it sends one HEAD request per referrer to
 classify it, prints a draft note, and writes a CSV. No mail, no posting — the
 owner sends the messages by hand.
@@ -64,6 +67,10 @@ from pathlib import Path
 DEFAULT_OUT = "data/legacy/outreach.csv"
 DEFAULT_TIMEOUT = 5.0
 USER_AGENT = "Mozilla/5.0 (compatible; BacklinkRescue/1.0)"
+
+# Generated legacy-corpus output belongs in data/legacy/ (gitignored) and
+# nowhere else — a stray --out must never drop a generated file into the repo.
+LEGACY_OUT_DIR = Path("data") / "legacy"
 
 # Redirect map contract (archive_recover.py `resolve`).
 MAP_COLUMNS = [
@@ -147,6 +154,30 @@ def norm_path(value: str) -> str:
     if len(raw) > 1:
         raw = raw.rstrip("/")
     return raw.lower()
+
+
+def repo_root() -> Path:
+    """Repo root — this script lives two levels down (scripts/seo/<file>)."""
+    return Path(__file__).resolve().parents[2]
+
+
+def out_path_allowed(raw: str) -> bool:
+    """True when an --out target stays inside the repo's data/legacy/ directory.
+
+    Relative paths resolve against the current working directory (the repo
+    root, as the relative --links/--map inputs require); absolute paths are
+    taken as given. The comparison runs on resolved paths, so `..` segments
+    and symlinks cannot smuggle the output out of data/legacy/.
+    """
+    allowed = (repo_root() / LEGACY_OUT_DIR).resolve()
+    candidate = Path(raw)
+    if not candidate.is_absolute():
+        candidate = Path.cwd() / candidate
+    try:
+        candidate.resolve().relative_to(allowed)
+    except ValueError:
+        return False
+    return True
 
 
 def legacy_path_of(value: str) -> str:
@@ -604,6 +635,29 @@ def selftest() -> int:
     check("legacy_path_of path", legacy_path_of("/a/b/?x=1"), "/a/b/")
     check("legacy_path_of empty", legacy_path_of(""), "")
 
+    # The --out path is confined to the repo's data/legacy/ directory.
+    root = repo_root()
+    check(
+        "out path inside data/legacy is allowed",
+        out_path_allowed(str(root / "data" / "legacy" / "outreach.csv")),
+        True,
+    )
+    check(
+        "out path outside data/legacy is refused",
+        out_path_allowed(str(root / "src" / "outreach.csv")),
+        False,
+    )
+    check(
+        "out path escaping data/legacy via .. is refused",
+        out_path_allowed(str(root / "data" / "legacy" / ".." / ".." / "outreach.csv")),
+        False,
+    )
+    check(
+        "default out path lives in data/legacy",
+        Path(DEFAULT_OUT).parent,
+        LEGACY_OUT_DIR,
+    )
+
     target, referrer, matched = detect_columns(
         ["Top linked pages", "Target URL", "Referring page"]
     )
@@ -747,7 +801,10 @@ def main(argv: list[str] | None = None) -> int:
         "--out",
         dest="out_path",
         default=DEFAULT_OUT,
-        help=f"output CSV (default {DEFAULT_OUT})",
+        help=(
+            f"output CSV (default {DEFAULT_OUT}); must stay inside the repo's"
+            " data/legacy/ directory"
+        ),
     )
     ap.add_argument(
         "--draft",
@@ -789,6 +846,14 @@ def main(argv: list[str] | None = None) -> int:
     links_path = Path(args.links_path)
     map_path = Path(args.map_path)
     out_path = Path(args.out_path)
+
+    if not out_path_allowed(args.out_path):
+        print(
+            f"backlink_rescue: refusing to write {args.out_path!r} — the output must"
+            " stay inside the repo's data/legacy/ directory",
+            file=sys.stderr,
+        )
+        return 2
 
     missing = [p for p in (links_path, map_path) if not p.exists()]
     if missing:

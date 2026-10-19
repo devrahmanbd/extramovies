@@ -88,6 +88,23 @@ describe('SEO meta + JSON-LD + sitemap + RSS', () => {
     expect(node.isBasedOn).toBe(`https://www.themoviedb.org/movie/${dune.tmdbId}`);
   });
 
+  it('review JSON-LD keeps isBasedOn on the Review node only', async () => {
+    const { myReviewJsonLd } = await import('../src/lib/seo/jsonld');
+    const { DEMO_REVIEWS } = await import('../src/lib/seo/content');
+    const dune = DEMO_REVIEWS[0]!;
+    const node = myReviewJsonLd(
+      { ...dune, tmdbId: 693134 },
+      {} as never,
+      'https://reviews.example.com/reviews/dune-part-two',
+    );
+    const movie = node.itemReviewed as Record<string, unknown>;
+    // (a) The source claim belongs to the Review node...
+    expect(node.isBasedOn).toBe('https://www.themoviedb.org/movie/693134');
+    // (b) ...and never to the reviewed Movie: `isBasedOn` there would claim the
+    // film is based on itself (the TMDB page for the same film).
+    expect('isBasedOn' in movie).toBe(false);
+  });
+
   it('review JSON-LD omits isBasedOn without a valid TMDB id', async () => {
     const { myReviewJsonLd } = await import('../src/lib/seo/jsonld');
     const { DEMO_REVIEWS } = await import('../src/lib/seo/content');

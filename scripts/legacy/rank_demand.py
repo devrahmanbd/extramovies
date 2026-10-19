@@ -27,6 +27,9 @@ Usage:
     python3 scripts/legacy/rank_demand.py --map redirect_map.csv --cdx cdx.jsonl \
         --out data/legacy/demand_top.csv
 
+The output path is confined to the repo's data/legacy/ directory: any --out
+outside it is refused (exit 2) before a single byte is written.
+
 Stdlib only (csv, json, argparse, urllib.parse, pathlib) — no network calls, no
 pip installs. Malformed rows are skipped with a loud log line; the run never
 crashes. A missing input file still writes the output file (header row only)
@@ -44,6 +47,10 @@ import urllib.parse
 from pathlib import Path
 
 DEFAULT_OUT = "data/legacy/demand_top.csv"
+
+# Generated legacy-corpus output belongs in data/legacy/ (gitignored) and
+# nowhere else — a stray --out must never drop a generated file into the repo.
+LEGACY_OUT_DIR = Path("data") / "legacy"
 
 # Redirect map contract (archive_recover.py `resolve`).
 MAP_COLUMNS = [
@@ -111,6 +118,30 @@ def norm_path(value: str) -> str:
     if len(raw) > 1:
         raw = raw.rstrip("/")
     return raw.lower()
+
+
+def repo_root() -> Path:
+    """Repo root — this script lives two levels down (scripts/legacy/<file>)."""
+    return Path(__file__).resolve().parents[2]
+
+
+def out_path_allowed(raw: str) -> bool:
+    """True when an --out target stays inside the repo's data/legacy/ directory.
+
+    Relative paths resolve against the current working directory (the repo
+    root, as the relative --map/--cdx inputs require); absolute paths are
+    taken as given. The comparison runs on resolved paths, so `..` segments
+    and symlinks cannot smuggle the output out of data/legacy/.
+    """
+    allowed = (repo_root() / LEGACY_OUT_DIR).resolve()
+    candidate = Path(raw)
+    if not candidate.is_absolute():
+        candidate = Path.cwd() / candidate
+    try:
+        candidate.resolve().relative_to(allowed)
+    except ValueError:
+        return False
+    return True
 
 
 def parse_map_rows(rows) -> tuple[list[dict], int]:
@@ -375,6 +406,29 @@ def selftest() -> int:
     check("norm_path keeps root", norm_path("/"), "/")
     check("norm_path of empty", norm_path(""), "")
 
+    # The --out path is confined to the repo's data/legacy/ directory.
+    root = repo_root()
+    check(
+        "out path inside data/legacy is allowed",
+        out_path_allowed(str(root / "data" / "legacy" / "demand_top.csv")),
+        True,
+    )
+    check(
+        "out path outside data/legacy is refused",
+        out_path_allowed(str(root / "src" / "demand_top.csv")),
+        False,
+    )
+    check(
+        "out path escaping data/legacy via .. is refused",
+        out_path_allowed(str(root / "data" / "legacy" / ".." / ".." / "demand_top.csv")),
+        False,
+    )
+    check(
+        "default out path lives in data/legacy",
+        Path(DEFAULT_OUT).parent,
+        LEGACY_OUT_DIR,
+    )
+
     rows, skipped = parse_map_rows(
         [
             ["legacy_path", "target_path", "tmdb_type", "tmdb_id", "confidence", "title", "year"],
@@ -462,7 +516,10 @@ def main(argv: list[str] | None = None) -> int:
         "--out",
         dest="out_path",
         default=DEFAULT_OUT,
-        help=f"output CSV (default {DEFAULT_OUT})",
+        help=(
+            f"output CSV (default {DEFAULT_OUT}); must stay inside the repo's"
+            " data/legacy/ directory"
+        ),
     )
     ap.add_argument(
         "--selftest",
@@ -478,6 +535,14 @@ def main(argv: list[str] | None = None) -> int:
     map_path = Path(args.map_path)
     cdx_path = Path(args.cdx_path)
     out_path = Path(args.out_path)
+
+    if not out_path_allowed(args.out_path):
+        print(
+            f"rank_demand: refusing to write {args.out_path!r} — the output must stay"
+            " inside the repo's data/legacy/ directory",
+            file=sys.stderr,
+        )
+        return 2
 
     missing = [p for p in (map_path, cdx_path) if not p.exists()]
     if missing:
