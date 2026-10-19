@@ -38,6 +38,14 @@ longer know they exist. The claim is a loop, not a one-shot:
    Note: the v1 GSC external-links API is deprecated, so the external-link
    inventory is a UI export; the automatable API surfaces are sitemaps,
    Search Analytics, and URL Inspection (service-account access, see below).
+   Those three are automated by `scripts/seo/gsc_snapshot.py` (monthly
+   snapshot `docs/seo/baseline-gsc-<date>.json` + the gitignored legacy
+   inspect queue `data/legacy/gsc_inspect_queue.csv`, plus a `--against`
+   diff that gates a >20 percent clicks/impressions drop). The service
+   account is `extramovies-gsc-reader@hsc2025.iam.gserviceaccount.com`;
+   its key lives at `~/.config/gsc-sa/` (outside the repo). Until that
+   account is a member of the property the tool exits 3 and writes
+   nothing.
 3. **Rescue live backlinks (highest-value action)**: for each live source
    page still linking a legacy path, update that link directly to
    `/reviews/<slug>` or `/movies/<tmdbId>`. A direct link beats a redirect
