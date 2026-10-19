@@ -15,6 +15,7 @@ import type { DiscoverTile, SiteTheme } from "../../lib/tmdb/discover";
 import { COLLECTIONS, buildListHref } from "../../lib/tmdb/discover";
 import type { Genre } from "../../lib/tmdb/types";
 import type { PublicReview } from "../../lib/seo/content";
+import { heroImagePreload, heroPreloadLinkAttrs } from "../../lib/seo/hero-image";
 
 interface Props {
   trending: DiscoverTile[];
@@ -81,9 +82,26 @@ const heroSlides = (() => {
     .filter((t) => (seen.has(t.tmdbId) ? false : (seen.add(t.tmdbId), true)))
     .slice(0, 10);
 })();
+/**
+ * LCP element: slide 0 is the only eager / fetchpriority=high image in the
+ * markup. The preload must point at that exact URL, so it is read from the
+ * same source as the <img src> (heroFirstUrl) — never a second guess.
+ * The size pair rides along only when the TMDB variant is known (shared
+ * helper rule, identical to the publication branch): an unknown variant
+ * yields no pair, and no hero image yields no preload at all.
+ */
+const heroFirstUrl = heroSlides[0]?.backdropUrl ?? null;
+const heroPreload = heroImagePreload(heroFirstUrl, "backdrop");
 const countText = (n: number, singular: string, plural: string) =>
   n === 1 ? `1 ${singular}` : `${n} ${plural}`;
 ---
+{heroPreload ? (
+  /* Exactly one preload, for the one eager hero image (the LCP element).
+     The attribute bag (rel/as/href/width/height/fetchpriority) lives in
+     src/lib/seo/hero-image.ts so the emitted link is unit-testable — the
+     same call site the publication branch uses in src/layouts/Base.astro. */
+  <link {...heroPreloadLinkAttrs(heroPreload)} />
+) : null}
 {heroSlides.length > 0 ? (
   <section class="d-hero-slider" aria-label="Trending titles">
     <div class="d-hero-head">
@@ -100,11 +118,14 @@ const countText = (n: number, singular: string, plural: string) =>
       {heroSlides.map((t, i) => {
         const prev = (i - 1 + heroSlides.length) % heroSlides.length;
         const next = (i + 1) % heroSlides.length;
+        /* Slide 0 is the eager/high-priority image: its src is the very same
+           variable the preload was built from, so the two can never drift. */
+        const slideUrl = i === 0 ? heroFirstUrl : t.backdropUrl;
         return (
           <article class="d-hero-slide" id={`hero-slide-${i}`} aria-roledescription="slide" aria-label={`${i + 1} of ${heroSlides.length}`}>
             <img
               class="d-hero-bg"
-              src={t.backdropUrl!}
+              src={slideUrl!}
               alt=""
               width="1280"
               height="720"
