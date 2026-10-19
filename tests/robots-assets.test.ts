@@ -26,13 +26,20 @@ describe('GET /robots.txt', () => {
     expect(res.headers.get('Content-Type')).toContain('text/plain');
   });
 
-  it('emits the allow-only policy and a sitemap line from the request origin', async () => {
+  it('emits the crawler policy and a sitemap line from the request origin', async () => {
     delete process.env.SITE_URL;
     const body = await (await call('https://brand-one.test/robots.txt')).text();
     expect(body).toContain('User-agent: *');
     expect(body).toContain('Allow: /');
     expect(body).toMatch(/^Sitemap: https:\/\/brand-one\.test\/sitemap\.xml$/m);
-    expect(body).not.toMatch(/^Disallow:/m);
+  });
+
+  it('trims crawl waste (/api/, /search) but never disallows /admin', async () => {
+    delete process.env.SITE_URL;
+    const body = await (await call('https://brand-one.test/robots.txt')).text();
+    expect(body).toMatch(/^Disallow: \/api\/$/m);
+    expect(body).toMatch(/^Disallow: \/search$/m);
+    expect(body).not.toMatch(/^Disallow: \/admin/m);
   });
 
   it('uses the request origin, not a hardcoded host', async () => {

@@ -23,15 +23,46 @@ const ASSET_EXTENSIONS = new Set([
 ]);
 
 /**
- * True when the path's last segment ends with a static-asset extension.
- * Case-insensitive; query string and fragment are ignored.
+ * First path segments that hold live site assets — anything under them is
+ * exempt regardless of extension (uploads, brand logos, built assets).
+ */
+const ASSET_NAMESPACES = new Set([
+  "brand", "uploads", "assets", "images", "img", "media",
+  "css", "js", "fonts", "static", "_astro", "vendor",
+]);
+
+/**
+ * Exemption test on an ALREADY NORMALIZED path (see normalizeLegacyPath).
+ * Only two shapes are exempt:
+ *   (a) a root-level file with a static-asset extension (/robots.txt,
+ *       /favicon.ico, /sitemap.xml);
+ *   (b) any path whose FIRST segment is a known asset namespace
+ *       (/brand/<preset>/logo.svg, /uploads/hero.png, /_astro/x.js).
+ * Everything else stays in legacy scope: the WordPress-era corpus holds
+ * uploaded images under dated paths (e.g. /2017/05/12/film.jpg) and those
+ * must still 410 (or 301 when mapped), not pass through to a 404.
+ */
+function isAssetExempt(norm: string): boolean {
+  const parts = norm.split("/").filter(Boolean);
+  if (!parts.length) return false;
+  if (parts.length === 1) {
+    // (a) root-level file with an allowlisted extension
+    const dot = parts[0].lastIndexOf(".");
+    if (dot <= 0) return false;
+    return ASSET_EXTENSIONS.has(parts[0].slice(dot + 1));
+  }
+  // (b) known asset namespace — any file under it, any extension
+  return ASSET_NAMESPACES.has(parts[0]);
+}
+
+/**
+ * True when the path is a live site asset the legacy archive must not answer.
+ * The input is normalized first, so the exemption is always evaluated on the
+ * same string the map/unresolved lookups use: /robots.txt and /robots.txt/
+ * behave identically, and a percent-encoded dot (%2E) cannot slip past.
  */
 export function isStaticAssetPath(input: string): boolean {
-  const clean = input.split("?")[0].split("#")[0];
-  const segment = clean.slice(clean.lastIndexOf("/") + 1).toLowerCase();
-  const dot = segment.lastIndexOf(".");
-  if (dot <= 0) return false;
-  return ASSET_EXTENSIONS.has(segment.slice(dot + 1));
+  return isAssetExempt(normalizeLegacyPath(input));
 }
 
 export function normalizeLegacyPath(input: string): string {
@@ -160,14 +191,15 @@ export function createLegacyRouter(dir?: string) {
 
   return {
     check(pathname: string): Response | null {
-      // Live assets bypass the legacy archive entirely — no 301, no 410.
-      // Checked before ANY map/unresolved lookup so an archived robots.txt or
-      // favicon.ico can never be answered from the legacy corpus.
-      if (isStaticAssetPath(pathname)) return null;
-      load();
-      if (!state) return null;
       const norm = normalizeLegacyPath(pathname);
       if (!norm) return null;
+      // Live assets bypass the legacy archive entirely — no 301, no 410.
+      // Evaluated on the NORMALIZED path (the same string the map/unresolved
+      // lookups use), so /robots.txt and /robots.txt/ behave identically and
+      // a percent-encoded dot cannot slip past.
+      if (isAssetExempt(norm)) return null;
+      load();
+      if (!state) return null;
       const target = state.map.get(norm);
       if (target) return new Response(null, { status: 301, headers: { Location: target } });
       if (state.unresolved.has(norm)) return new Response(null, { status: 410 });

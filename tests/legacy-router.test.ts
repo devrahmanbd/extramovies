@@ -88,35 +88,52 @@ describe('createLegacyRouter (IO, fail-soft, hot reload)', () => {
 });
 
 describe('isStaticAssetPath', () => {
-  it('accepts the static-asset extensions on the last segment', () => {
+  it('exempts root-level files with a static-asset extension', () => {
     for (const p of [
       '/robots.txt',
       '/favicon.ico',
       '/sitemap.xml',
-      '/brand/noir-cinema/logo.svg',
-      '/uploads/hero.png',
-      '/uploads/poster.jpg',
-      '/uploads/poster.jpeg',
-      '/uploads/still.webp',
-      '/uploads/still.avif',
-      '/uploads/loop.gif',
-      '/assets/site.css',
-      '/assets/app.js',
-      '/assets/data.json',
-      '/fonts/inter.woff',
-      '/fonts/inter.woff2',
-      '/docs/press-kit.pdf',
-      '/media/clip.mp4',
-      '/media/clip.webm',
+      '/rss.xml',
+      '/style.css',
+      '/app.js',
+      '/data.json',
+      '/font.woff2',
     ]) {
       expect(isStaticAssetPath(p)).toBe(true);
     }
   });
-  it('is case-insensitive and ignores the query string / fragment', () => {
-    expect(isStaticAssetPath('/ROBOTS.TXT')).toBe(true);
-    expect(isStaticAssetPath('/Favicon.ICO')).toBe(true);
-    expect(isStaticAssetPath('/robots.txt?x=1')).toBe(true);
-    expect(isStaticAssetPath('/robots.txt#top')).toBe(true);
+  it('exempts any file under a known asset namespace, whatever the extension', () => {
+    for (const p of [
+      '/brand/noir-cinema/logo.svg',
+      '/brand/noir-cinema/favicon.ico',
+      '/uploads/hero.png',
+      '/uploads/poster.jpg',
+      '/uploads/still.webp',
+      '/uploads/loop.gif',
+      '/assets/site.css',
+      '/assets/app.js',
+      '/images/cover.jpeg',
+      '/img/thumb.avif',
+      '/media/clip.mp4',
+      '/media/clip.webm',
+      '/css/main.css',
+      '/js/app.js',
+      '/fonts/inter.woff',
+      '/static/logo.svg',
+      '/_astro/index.hash.js',
+      '/vendor/lib.min.js',
+      '/uploads/nested/deep/file.bin',
+    ]) {
+      expect(isStaticAssetPath(p)).toBe(true);
+    }
+  });
+  it('keeps dated legacy image paths in legacy scope (not root, not a namespace)', () => {
+    // The WordPress-era corpus holds uploaded images under dated paths.
+    // Those must keep their legacy answer (410 / 301), not 404.
+    expect(isStaticAssetPath('/2017/05/12/film.jpg')).toBe(false);
+    expect(isStaticAssetPath('/2017/05/12/film.png')).toBe(false);
+    expect(isStaticAssetPath('/2018/03/04/poster.webp')).toBe(false);
+    expect(isStaticAssetPath('/wp-content/uploads/2017/05/12/film.jpg')).toBe(false);
   });
   it('keeps php and content paths out of the allowlist', () => {
     expect(isStaticAssetPath('/9xplay.php')).toBe(false);
@@ -126,6 +143,19 @@ describe('isStaticAssetPath', () => {
     expect(isStaticAssetPath('/reviews/dune-part-two')).toBe(false);
     expect(isStaticAssetPath('/')).toBe(false);
     expect(isStaticAssetPath('/some.movie.2020/')).toBe(false);
+    expect(isStaticAssetPath('/robots.php')).toBe(false);
+  });
+  it('is case-insensitive and ignores the query string / fragment', () => {
+    expect(isStaticAssetPath('/ROBOTS.TXT')).toBe(true);
+    expect(isStaticAssetPath('/Favicon.ICO')).toBe(true);
+    expect(isStaticAssetPath('/BRAND/noir-cinema/logo.svg')).toBe(true);
+    expect(isStaticAssetPath('/robots.txt?x=1')).toBe(true);
+    expect(isStaticAssetPath('/robots.txt#top')).toBe(true);
+  });
+  it('normalizes before the check: trailing slash and percent-encoded dot match', () => {
+    expect(isStaticAssetPath('/robots.txt/')).toBe(true);
+    expect(isStaticAssetPath('/robots%2Etxt')).toBe(true);
+    expect(isStaticAssetPath('/FAVICON%2EICO')).toBe(true);
   });
 });
 
@@ -136,7 +166,11 @@ describe('createLegacyRouter (live assets are never legacy-scoped)', () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'legacy-assets-'));
   fs.writeFileSync(
     path.join(dir, 'redirect_map.csv'),
-    'legacy_path,target_path,tmdb_type,tmdb_id,confidence,title,year\n/old-movie-2019-full-movie-download/,/movies/123,movie,123,1.0,Foo,2019\n',
+    [
+      'legacy_path,target_path,tmdb_type,tmdb_id,confidence,title,year',
+      '/old-movie-2019-full-movie-download/,/movies/123,movie,123,1.0,Foo,2019',
+      '/2018/03/04/poster.png,/movies/456,movie,456,1.0,Poster,2018',
+    ].join('\n'),
   );
   fs.writeFileSync(
     path.join(dir, 'unresolved.csv'),
@@ -146,6 +180,7 @@ describe('createLegacyRouter (live assets are never legacy-scoped)', () => {
       'http://ww7.extramovies.org:80/favicon.ico,archived',
       'http://ww7.extramovies.org:80/9xplay.php?url=abc,player',
       'http://ww7.extramovies.org:80/2016/he-said-she-said-1991-720p/,unresolved',
+      'http://ww7.extramovies.org:80/2017/05/12/film.jpg,uploaded image',
     ].join('\n'),
   );
   const r = createLegacyRouter(dir);
@@ -162,9 +197,23 @@ describe('createLegacyRouter (live assets are never legacy-scoped)', () => {
       expect(r.check(p)).toBeNull();
     }
   });
-  it('exempts asset extensions case-insensitively', () => {
+  it('exempts asset paths case-insensitively', () => {
     expect(r.check('/ROBOTS.TXT')).toBeNull();
     expect(r.check('/Favicon.ICO')).toBeNull();
+    expect(r.check('/BRAND/noir-cinema/logo.svg')).toBeNull();
+  });
+  it('answers the trailing-slash and percent-encoded variants of /robots.txt the same', () => {
+    expect(r.check('/robots.txt/')).toBeNull();
+    expect(r.check('/robots%2Etxt')).toBeNull();
+    expect(r.check('/FAVICON%2EICO')).toBeNull();
+  });
+  it('keeps dated legacy image paths in legacy scope (410 / 301)', () => {
+    // Not a root-level file and not under an asset namespace: the legacy
+    // answer must stand, it must not fall through to a 404.
+    expect(r.check('/2017/05/12/film.jpg')?.status).toBe(410);
+    const mapped = r.check('/2018/03/04/poster.png');
+    expect(mapped?.status).toBe(301);
+    expect(mapped?.headers.get('Location')).toBe('/movies/456');
   });
   it('keeps .php in legacy scope (410)', () => {
     expect(r.check('/9xplay.php?url=abc')?.status).toBe(410);

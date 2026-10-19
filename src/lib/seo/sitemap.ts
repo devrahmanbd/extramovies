@@ -31,11 +31,14 @@ export function buildSitemapXml(entries: SitemapEntry[]): string {
 
 export function buildRobotsTxt(origin: string): string {
   const base = origin.replace(/\/$/, "");
-  // Allow-only policy: no Disallow rules. Admin/login/search pages carry a
-  // `noindex` meta, and Google can only read that meta if it can crawl them.
+  // Allow-all with a crawl-waste trim: /api/ and /search are not worth
+  // crawling. /admin is NOT disallowed — Google must be able to crawl it to
+  // read the noindex meta the admin pages carry.
   return (
     `User-agent: *\n` +
     `Allow: /\n` +
+    `Disallow: /search\n` +
+    `Disallow: /api/\n` +
     `\n` +
     `Sitemap: ${base}/sitemap.xml\n`
   );
