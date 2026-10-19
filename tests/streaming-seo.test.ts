@@ -88,6 +88,23 @@ describe('SEO meta + JSON-LD + sitemap + RSS', () => {
     expect(node.isBasedOn).toBe(`https://www.themoviedb.org/movie/${dune.tmdbId}`);
   });
 
+  it('review JSON-LD omits isBasedOn without a valid TMDB id', async () => {
+    const { myReviewJsonLd } = await import('../src/lib/seo/jsonld');
+    const { DEMO_REVIEWS } = await import('../src/lib/seo/content');
+    const dune = DEMO_REVIEWS[0]!;
+    const canonical = 'https://reviews.example.com/reviews/dune-part-two';
+    const missing = myReviewJsonLd({ ...dune, tmdbId: null }, {} as never, canonical);
+    const invalid = myReviewJsonLd({ ...dune, tmdbId: 0 }, {} as never, canonical);
+    const item = missing.itemReviewed as Record<string, unknown>;
+    // No source claim without a valid TMDB id, and the reviewed Movie node
+    // never carries isBasedOn (it would claim the film is based on itself).
+    expect([missing.isBasedOn, invalid.isBasedOn, item.isBasedOn]).toEqual([
+      undefined,
+      undefined,
+      undefined,
+    ]);
+  });
+
   it('sitemap escapes + includes lastmod', async () => {
     const { buildSitemapXml } = await import('../src/lib/portability');
     const xml = buildSitemapXml(

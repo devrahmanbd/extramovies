@@ -21,6 +21,10 @@ function absolutize(origin: string, p: string): string {
  * Canonical TMDB page for a title — the source record a review is based on.
  * Same URL the visible "View on TMDB" link points at, so the schema matches
  * the page. Null when the id is missing/invalid: no invented source links.
+ *
+ * Review node only. A Movie node carrying `isBasedOn` would claim the film is
+ * based on itself (the TMDB page for the same film) — a self-referential
+ * false claim to a crawler.
  */
 function tmdbSourceUrl(tmdbId: number | null | undefined): string | null {
   if (typeof tmdbId !== "number" || !Number.isSafeInteger(tmdbId) || tmdbId <= 0) {
@@ -125,8 +129,9 @@ export function myReviewJsonLd(
   canonical: string
 ): JsonLd {
   void brand;
-  // Authority claim: the review (and the film entry it reviews) is grounded
-  // in the film's TMDB record. Emitted only when a valid TMDB id exists.
+  // Authority claim: the review is grounded in the film's TMDB record.
+  // Review node only (never the itemReviewed Movie — see tmdbSourceUrl).
+  // Emitted only when a valid TMDB id exists.
   const source = tmdbSourceUrl(review.tmdbId);
   return {
     "@context": "https://schema.org",
@@ -148,7 +153,6 @@ export function myReviewJsonLd(
       ...(review.genres.length > 0 ? { genre: review.genres } : {}),
       ...(review.director ? { director: { "@type": "Person", name: review.director } } : {}),
       ...(review.posterUrl ? { image: review.posterUrl } : {}),
-      ...(source ? { isBasedOn: source } : {}),
     },
     mainEntityOfPage: { "@type": "WebPage", "@id": canonical },
     inLanguage: "en",
