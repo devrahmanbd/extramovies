@@ -132,6 +132,13 @@ is already an INP asset; the spec must not add client JS to public pages.
    If the variant is unknown at render time, omit the size pair and keep
    the preload — never guess dimensions.
 2. `src/components/public/MagazineHome.astro:36-42`: same treatment.
+2b. **Discovery branch (the live extramovies theme)**: `src/pages/index.astro`
+   derives the first slide's backdrop URL and feeds Base's `preloadImage`
+   channel so the preload renders in the HEAD; the same URL string is passed
+   into `src/components/discover/DiscoverHome.astro` for slide 0's `src`, so
+   href and src cannot drift. A preload inside the component body renders too
+   late to help the LCP element and is not body-ok markup. The component must
+   not emit a link itself.
 3. `src/layouts/Base.astro:110-118`: append `display=swap` to the Google
    Fonts URL (removes invisible-text pop; the print-to-all trick stays).
 4. Rule: NO new infrastructure — no image CDN, no `astro:assets` adoption,
