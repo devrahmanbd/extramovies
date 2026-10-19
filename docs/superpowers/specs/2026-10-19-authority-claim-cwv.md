@@ -22,6 +22,22 @@ longer know they exist. The claim is a loop, not a one-shot:
 2. **Collect the link inventory (after verification)**: GSC → Links →
    "Top linked pages". Export monthly. This is the real backlink graph the
    Wayback project never had — Wayback gave us demand, not links.
+   Concretely, from the GSC UI (the account is `elsinnombre3301@gmail.com`):
+   - External links → "Top linked pages" → Download CSV → save as
+     `data/legacy/gsc_links.csv` (gitignored). This is the direct input for
+     `scripts/seo/backlink_rescue.py` (it matches the export's
+     "Top linked pages" / "Referring page" headers).
+   - External links → "Top linking sites" → Download CSV → save as
+     `data/legacy/gsc_linking_sites.csv` (scale + quality triage: which
+     referring domains deserve a personal outreach).
+   - Indexing → Pages → Download CSV → save as `data/legacy/gsc_pages.csv`
+     (the legacy URLs Google still knows about; drives the "validate fix"
+     batch order in step 4).
+   - Performance → Queries → Download CSV → save as
+     `data/legacy/gsc_queries.csv` (brand-query baseline for A3).
+   Note: the v1 GSC external-links API is deprecated, so the external-link
+   inventory is a UI export; the automatable API surfaces are sitemaps,
+   Search Analytics, and URL Inspection (service-account access, see below).
 3. **Rescue live backlinks (highest-value action)**: for each live source
    page still linking a legacy path, update that link directly to
    `/reviews/<slug>` or `/movies/<tmdbId>`. A direct link beats a redirect
