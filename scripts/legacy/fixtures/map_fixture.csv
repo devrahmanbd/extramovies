@@ -1,0 +1,9 @@
+legacy_path,target_path,tmdb_type,tmdb_id,confidence,title,year
+/2016/he-said-she-said-1991-720p,/movies/10530,movie,10530,1.02,"He Said, She Said",1991
+/2016/he-said-she-said-1991-720p-alt/,/movies/10530,movie,10530,0.91,"He Said, She Said",1991
+/2017/dune-part-two-2021,/movies/438631,movie,438631,0.94,Dune: Part Two,2021
+/2018/legacy-series-2015,/series/1399,tv,1399,0.88,Some Series,2015
+/2018/player-endpoint.php,/410,movie,,0.0,,2018
+/2016/no-demand-anywhere,/movies/111,movie,111,0.8,No Demand,2019
+/2016/truncated
+/2016/bad-tmdb-id,/movies/222,movie,not-a-number,0.7,Bad Id,2020
