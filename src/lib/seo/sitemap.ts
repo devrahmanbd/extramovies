@@ -31,11 +31,11 @@ export function buildSitemapXml(entries: SitemapEntry[]): string {
 
 export function buildRobotsTxt(origin: string): string {
   const base = origin.replace(/\/$/, "");
+  // Allow-only policy: no Disallow rules. Admin/login/search pages carry a
+  // `noindex` meta, and Google can only read that meta if it can crawl them.
   return (
     `User-agent: *\n` +
     `Allow: /\n` +
-    `Disallow: /search\n` +
-    `Disallow: /api/\n` +
     `\n` +
     `Sitemap: ${base}/sitemap.xml\n`
   );

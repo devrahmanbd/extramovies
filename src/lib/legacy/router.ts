@@ -9,6 +9,31 @@ import path from "node:path";
 const CATEGORY_RE = /^(?:\d+(?:mb)?-movies|movies|movie|web-series|webseries|tv-shows|tv|series|dual-audio-movies|hindi-dubbed-movies|south-movies|punjabi-movies|hindi-movies|bollywood-movies|hollywood-movies|adult-movies)$/;
 const PAGINATION_RE = /^page\/(\d+)$/;
 
+/**
+ * Static-asset extensions that must never be answered by the legacy archive.
+ * The Wayback corpus archived a robots.txt and a favicon.ico, so the legacy
+ * "unresolved" set can contain live asset paths; a 410 there blocks the crawl
+ * (GSC: "robots.txt — Not Fetched") and kills the favicon.
+ * `php` is deliberately NOT in the list: legacy player paths (e.g. /9xplay.php)
+ * must stay in legacy scope and still 410.
+ */
+const ASSET_EXTENSIONS = new Set([
+  "txt", "xml", "ico", "svg", "png", "jpg", "jpeg", "webp", "avif", "gif",
+  "css", "js", "json", "woff", "woff2", "pdf", "mp4", "webm",
+]);
+
+/**
+ * True when the path's last segment ends with a static-asset extension.
+ * Case-insensitive; query string and fragment are ignored.
+ */
+export function isStaticAssetPath(input: string): boolean {
+  const clean = input.split("?")[0].split("#")[0];
+  const segment = clean.slice(clean.lastIndexOf("/") + 1).toLowerCase();
+  const dot = segment.lastIndexOf(".");
+  if (dot <= 0) return false;
+  return ASSET_EXTENSIONS.has(segment.slice(dot + 1));
+}
+
 export function normalizeLegacyPath(input: string): string {
   let p = input;
   try {
@@ -135,6 +160,10 @@ export function createLegacyRouter(dir?: string) {
 
   return {
     check(pathname: string): Response | null {
+      // Live assets bypass the legacy archive entirely — no 301, no 410.
+      // Checked before ANY map/unresolved lookup so an archived robots.txt or
+      // favicon.ico can never be answered from the legacy corpus.
+      if (isStaticAssetPath(pathname)) return null;
       load();
       if (!state) return null;
       const norm = normalizeLegacyPath(pathname);

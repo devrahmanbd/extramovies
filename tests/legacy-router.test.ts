@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { normalizeLegacyPath, parseCsv, buildTables, createLegacyRouter } from '../src/lib/legacy/router';
+import { normalizeLegacyPath, parseCsv, buildTables, createLegacyRouter, isStaticAssetPath } from '../src/lib/legacy/router';
 
 describe('normalizeLegacyPath', () => {
   it('lowercases, strips trailing slash and query', () => {
@@ -84,5 +84,99 @@ describe('createLegacyRouter (IO, fail-soft, hot reload)', () => {
     fs.writeFileSync(path.join(dir, 'redirect_map.csv'), 'legacy_path,target_path,tmdb_type,tmdb_id,confidence,title,year\n/old-movie-2019-full-movie-download/,/movies/999,movie,999,1.0,Foo,2019\n');
     const moved2 = r.check('/old-movie-2019-full-movie-download/');
     expect(moved2?.headers.get('Location')).toBe('/movies/999');
+  });
+});
+
+describe('isStaticAssetPath', () => {
+  it('accepts the static-asset extensions on the last segment', () => {
+    for (const p of [
+      '/robots.txt',
+      '/favicon.ico',
+      '/sitemap.xml',
+      '/brand/noir-cinema/logo.svg',
+      '/uploads/hero.png',
+      '/uploads/poster.jpg',
+      '/uploads/poster.jpeg',
+      '/uploads/still.webp',
+      '/uploads/still.avif',
+      '/uploads/loop.gif',
+      '/assets/site.css',
+      '/assets/app.js',
+      '/assets/data.json',
+      '/fonts/inter.woff',
+      '/fonts/inter.woff2',
+      '/docs/press-kit.pdf',
+      '/media/clip.mp4',
+      '/media/clip.webm',
+    ]) {
+      expect(isStaticAssetPath(p)).toBe(true);
+    }
+  });
+  it('is case-insensitive and ignores the query string / fragment', () => {
+    expect(isStaticAssetPath('/ROBOTS.TXT')).toBe(true);
+    expect(isStaticAssetPath('/Favicon.ICO')).toBe(true);
+    expect(isStaticAssetPath('/robots.txt?x=1')).toBe(true);
+    expect(isStaticAssetPath('/robots.txt#top')).toBe(true);
+  });
+  it('keeps php and content paths out of the allowlist', () => {
+    expect(isStaticAssetPath('/9xplay.php')).toBe(false);
+    expect(isStaticAssetPath('/9xplay.php?url=abc')).toBe(false);
+    expect(isStaticAssetPath('/2016/he-said-she-said-1991-720p/')).toBe(false);
+    expect(isStaticAssetPath('/movies/123')).toBe(false);
+    expect(isStaticAssetPath('/reviews/dune-part-two')).toBe(false);
+    expect(isStaticAssetPath('/')).toBe(false);
+    expect(isStaticAssetPath('/some.movie.2020/')).toBe(false);
+  });
+});
+
+describe('createLegacyRouter (live assets are never legacy-scoped)', () => {
+  // The Wayback corpus archived a robots.txt and a favicon.ico, so the live
+  // asset paths sit in the legacy "unresolved" set and used to be answered
+  // 410 Gone — which blocked the crawl and killed the favicon.
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'legacy-assets-'));
+  fs.writeFileSync(
+    path.join(dir, 'redirect_map.csv'),
+    'legacy_path,target_path,tmdb_type,tmdb_id,confidence,title,year\n/old-movie-2019-full-movie-download/,/movies/123,movie,123,1.0,Foo,2019\n',
+  );
+  fs.writeFileSync(
+    path.join(dir, 'unresolved.csv'),
+    [
+      'legacy_url,reason',
+      'http://ww7.extramovies.org:80/robots.txt,archived',
+      'http://ww7.extramovies.org:80/favicon.ico,archived',
+      'http://ww7.extramovies.org:80/9xplay.php?url=abc,player',
+      'http://ww7.extramovies.org:80/2016/he-said-she-said-1991-720p/,unresolved',
+    ].join('\n'),
+  );
+  const r = createLegacyRouter(dir);
+
+  it('passes live asset paths through (never 301, never 410)', () => {
+    for (const p of [
+      '/robots.txt',
+      '/favicon.ico',
+      '/brand/noir-cinema/logo.svg',
+      '/uploads/hero.png',
+      '/sitemap.xml',
+      '/assets/site.css',
+    ]) {
+      expect(r.check(p)).toBeNull();
+    }
+  });
+  it('exempts asset extensions case-insensitively', () => {
+    expect(r.check('/ROBOTS.TXT')).toBeNull();
+    expect(r.check('/Favicon.ICO')).toBeNull();
+  });
+  it('keeps .php in legacy scope (410)', () => {
+    expect(r.check('/9xplay.php?url=abc')?.status).toBe(410);
+  });
+  it('keeps mapped legacy paths at 301 and unresolved legacy paths at 410', () => {
+    const moved = r.check('/18-movies/old-movie-2019-full-movie-download/');
+    expect(moved?.status).toBe(301);
+    expect(moved?.headers.get('Location')).toBe('/movies/123');
+    expect(r.check('/2016/he-said-she-said-1991-720p/')?.status).toBe(410);
+  });
+  it('leaves the normalisation of content paths untouched', () => {
+    expect(normalizeLegacyPath('/18-Movies/The-Evil-Dead-1981-Hindi-Dubbed-480P-Full-Movie-Download/')).toBe('/the-evil-dead-1981-hindi-dubbed-480p-full-movie-download');
+    expect(normalizeLegacyPath('/9xplay.php?url=abc')).toBe('/9xplay.php');
   });
 });
