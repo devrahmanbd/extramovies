@@ -380,7 +380,9 @@ def resolve_property(site: str) -> tuple[str | None, list[dict]]:
 
 
 def fetch_sitemaps(site: str) -> list[dict]:
-    data = gsc_api.api_request(f"{gsc_api.API}/sitemaps/{_quote(site)}")
+    # The list lives under the site resource; /webmasters/v3/sitemaps/{site}
+    # 404s for a domain property.
+    data = gsc_api.api_request(f"{gsc_api.API}/sites/{_quote(site)}/sitemaps")
     rows = []
     for row in (data or {}).get("sitemap") or []:
         rows.append(

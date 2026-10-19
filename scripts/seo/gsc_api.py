@@ -209,7 +209,9 @@ def cmd_sites(_args: argparse.Namespace) -> None:
 
 
 def cmd_sitemaps(args: argparse.Namespace) -> None:
-    data = api_request(f"{API}/sitemaps/{urllib.parse.quote(args.site, safe='')}")
+    # The list lives under the site resource; /webmasters/v3/sitemaps/{site}
+    # 404s for a domain property.
+    data = api_request(f"{API}/sites/{urllib.parse.quote(args.site, safe='')}/sitemaps")
     for row in data.get("sitemap", []):
         errors = row.get("errors") or ""
         warnings = row.get("warnings") or ""
@@ -261,7 +263,10 @@ def cmd_inspect(args: argparse.Namespace) -> None:
         )
         print(f"{url}\n  verdict={verdict} coverage={coverage} robots={robots}\n  canonical={canonical}")
         for err in index.get("crawledAs", []) or []:
-            print(f"  crawledAs={err.get('responseCode')} {err.get('url')}")
+            if isinstance(err, dict):
+                print(f"  crawledAs={err.get('responseCode')} {err.get('url')}")
+            else:
+                print(f"  crawledAs={err}")
         for issue in (index.get("indexingState"), index.get("lastCrawlTime")):
             if issue:
                 print(f"  {issue}")
