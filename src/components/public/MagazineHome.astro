@@ -7,6 +7,7 @@ import RatingMark from "./RatingMark.astro";
 import GenreNav from "./GenreNav.astro";
 import type { PublicReview } from "../../lib/seo/content";
 import { formatRuntime } from "../../lib/seo/content";
+import { heroImageSize } from "../../lib/seo/hero-image";
 
 interface Props {
   featured: PublicReview | null;
@@ -17,6 +18,8 @@ interface Props {
 }
 const { featured, latest, shelf, genres, publishedDate } = Astro.props;
 const featuredIsLong = (featured?.reviewTitle?.length ?? 0) > 40;
+/** Intrinsic pair from the TMDB variant; unknown variant -> no pair (no guess). */
+const coverSize = heroImageSize(featured?.backdropUrl ?? null, "backdrop");
 ---
 {featured ? (
   <section class="mag-cover band section--lg pub-cover" aria-labelledby="cover-title">
@@ -36,8 +39,8 @@ const featuredIsLong = (featured?.reviewTitle?.length ?? 0) > 40;
         <img
           src={featured.backdropUrl}
           alt={`Still from ${featured.movieTitle}`}
-          width="1280"
-          height="960"
+          width={coverSize?.width}
+          height={coverSize?.height}
           fetchpriority="high"
           decoding="async"
         />

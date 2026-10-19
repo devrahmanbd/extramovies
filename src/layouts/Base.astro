@@ -6,6 +6,8 @@ import { getSiteBrand } from "../lib/seo/brand";
 import { getSetting } from "../lib/db/adapter";
 import { buildPageMeta, siteOrigin } from "../lib/seo/meta";
 import type { JsonLd } from "../lib/seo/jsonld";
+import type { HeroImagePreload } from "../lib/seo/hero-image";
+import { withFontDisplaySwap } from "../lib/seo/fonts";
 import SiteHeader from "../components/public/SiteHeader.astro";
 import { getSession, getSessionToken, sessionDbFromAstro } from "../lib/auth/session";
 import { getUserById } from "../lib/users/store";
@@ -28,6 +30,8 @@ interface Props {
   modifiedTime?: string;
   jsonld?: JsonLd[];
   current?: string;
+  /** Hero artwork to preload (LCP). Size pair included only when known. */
+  preloadImage?: HeroImagePreload | null;
 }
 
 const {
@@ -42,6 +46,7 @@ const {
   modifiedTime,
   jsonld = [],
   current = "",
+  preloadImage = null,
 } = Astro.props;
 
 const brand = await getSiteBrand((k) => getSetting(getDb({}), k));
@@ -76,6 +81,12 @@ const brandVars = [
   `--font-display:${brand.fonts.display}`,
   `--font-body:${brand.fonts.body}`,
 ].join(";");
+const FALLBACK_FONT_URL =
+  "https://fonts.googleapis.com/css2?family=Anton&family=Lato:wght@400;700;900&display=swap";
+// The stylesheet is loaded print-to-all (never render-blocking); display=swap
+// keeps the text painted with fallback type while the font is in flight.
+const fontHref = withFontDisplaySwap(brand.fonts.fontUrl) ?? FALLBACK_FONT_URL;
+const fallbackFontHref = withFontDisplaySwap(FALLBACK_FONT_URL) ?? FALLBACK_FONT_URL;
 const genres = listGenres();
 // Member state for the nav (best-effort; pages render identically anonymous).
 let member: { handle: string; displayName: string } | null = null;
@@ -105,17 +116,32 @@ try {
     <link rel="canonical" href={meta.canonical} />
     <meta name="robots" content={robots} />
     <meta name="theme-color" content={brand.themeColor} />
+    {preloadImage ? (
+      <link
+        {...{
+          rel: "preload",
+          as: "image",
+          href: preloadImage.href,
+          // width/height on a preload link let the browser reserve the box
+          // before the bytes land; Astro's link typing omits them, hence the
+          // attribute spread.
+          width: preloadImage.width,
+          height: preloadImage.height,
+          fetchpriority: "high",
+        }}
+      />
+    ) : null}
     {brand.fonts.fontUrl ? (
       <>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-        <link rel="stylesheet" href={brand.fonts.fontUrl} media="print" onload="this.media='all'" />
+        <link rel="stylesheet" href={fontHref} media="print" onload="this.media='all'" />
       </>
     ) : (
       <>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Lato:wght@400;700;900&display=swap" media="print" onload="this.media='all'" />
+        <link rel="stylesheet" href={fallbackFontHref} media="print" onload="this.media='all'" />
       </>
     )}
 

@@ -20,6 +20,7 @@ import {
 } from "../lib/seo/content";
 import DiscoverHome from "../components/discover/DiscoverHome.astro";
 import { displayAuthor } from "../lib/site-author";
+import { heroImagePreload, heroImageSize } from "../lib/seo/hero-image";
 import {
   currentTheme,
   discoverBy,
@@ -49,6 +50,13 @@ try {
 }
 const isDiscovery = theme === "discovery";
 const discoveryKey = isDiscovery ? hasTmdbKey() : false;
+// Hero artwork (publication covers). The intrinsic pair comes from the TMDB
+// variant in the URL; an unknown variant yields no pair (never a guess).
+// The discovery theme renders its own slider hero, so it preloads nothing.
+const coverSize = heroImageSize(featured?.backdropUrl ?? null, "backdrop");
+const coverPreload = isDiscovery
+  ? null
+  : heroImagePreload(featured?.backdropUrl ?? null, "backdrop");
 // Discovery branch only — publication variables above stay untouched.
 const trending = isDiscovery ? await getTrending().catch(() => []) : [];
 const popular = isDiscovery ? await getPopular().catch(() => []) : [];
@@ -93,6 +101,7 @@ const publishedDate = featured
   imageAlt={featured ? `${featured.movieTitle} artwork` : undefined}
   jsonld={jsonld}
   current="home"
+  preloadImage={coverPreload}
 >
   {isDiscovery ? (
     <div class="wrap d-guide-wrap">
@@ -130,6 +139,8 @@ const publishedDate = featured
         class="glam-cover-bg"
         src={featured.backdropUrl}
         alt={`Still from ${featured.movieTitle}`}
+        width={coverSize?.width}
+        height={coverSize?.height}
         fetchpriority="high"
         decoding="async"
       />
