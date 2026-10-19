@@ -17,6 +17,18 @@ function absolutize(origin: string, p: string): string {
   return `${origin.replace(/\/$/, "")}${p.startsWith("/") ? p : `/${p}`}`;
 }
 
+/**
+ * Canonical TMDB page for a title — the source record a review is based on.
+ * Same URL the visible "View on TMDB" link points at, so the schema matches
+ * the page. Null when the id is missing/invalid: no invented source links.
+ */
+function tmdbSourceUrl(tmdbId: number | null | undefined): string | null {
+  if (typeof tmdbId !== "number" || !Number.isSafeInteger(tmdbId) || tmdbId <= 0) {
+    return null;
+  }
+  return `https://www.themoviedb.org/movie/${tmdbId}`;
+}
+
 export function websiteJsonLd(brand: Brand): JsonLd {
   return {
     "@context": "https://schema.org",
@@ -113,6 +125,9 @@ export function myReviewJsonLd(
   canonical: string
 ): JsonLd {
   void brand;
+  // Authority claim: the review (and the film entry it reviews) is grounded
+  // in the film's TMDB record. Emitted only when a valid TMDB id exists.
+  const source = tmdbSourceUrl(review.tmdbId);
   return {
     "@context": "https://schema.org",
     "@type": "Review",
@@ -125,6 +140,7 @@ export function myReviewJsonLd(
       bestRating: 10,
       worstRating: 0,
     },
+    ...(source ? { isBasedOn: source } : {}),
     itemReviewed: {
       "@type": "Movie",
       name: review.movieTitle,
@@ -132,6 +148,7 @@ export function myReviewJsonLd(
       ...(review.genres.length > 0 ? { genre: review.genres } : {}),
       ...(review.director ? { director: { "@type": "Person", name: review.director } } : {}),
       ...(review.posterUrl ? { image: review.posterUrl } : {}),
+      ...(source ? { isBasedOn: source } : {}),
     },
     mainEntityOfPage: { "@type": "WebPage", "@id": canonical },
     inLanguage: "en",

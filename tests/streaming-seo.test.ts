@@ -76,6 +76,18 @@ describe('SEO meta + JSON-LD + sitemap + RSS', () => {
     ).toBe(9);
   });
 
+  it('review JSON-LD emits isBasedOn from the TMDB id', async () => {
+    const { myReviewJsonLd } = await import('../src/lib/seo/jsonld');
+    const { DEMO_REVIEWS } = await import('../src/lib/seo/content');
+    const dune = DEMO_REVIEWS[0]!;
+    const node = myReviewJsonLd(
+      dune,
+      {} as never,
+      'https://reviews.example.com/reviews/dune-part-two',
+    );
+    expect(node.isBasedOn).toBe(`https://www.themoviedb.org/movie/${dune.tmdbId}`);
+  });
+
   it('sitemap escapes + includes lastmod', async () => {
     const { buildSitemapXml } = await import('../src/lib/portability');
     const xml = buildSitemapXml(
