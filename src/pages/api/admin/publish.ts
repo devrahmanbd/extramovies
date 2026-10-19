@@ -1,12 +1,16 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import type { APIRoute } from "astro";
 import { requireAdminApi } from "../../../lib/auth/guard";
+import { checkPublishRating } from "../../../lib/publish-guard";
 import { getReviewById, upsertReview } from "./_store";
 import { wrapLegacy } from "../../../lib/api-adapter";
 
 export const prerender = false;
 
-/** Explicit publish. Requires title + markdown + slug; only runs on user click. */
+/**
+ * Explicit publish. Requires title + markdown + slug AND a real rating;
+ * only runs on user click.
+ */
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
@@ -21,6 +25,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (!review) return res.status(404).json({ ok: false, error: "review not found" });
   if (!review.title?.trim() || !review.markdown?.trim() || !review.slug?.trim()) {
     return res.status(400).json({ ok: false, error: "title, slug and markdown required before publish" });
+  }
+  // The rating is the owner's call: a draft may sit at 0 until it is
+  // scored, but publishing an unrated review would ship a public
+  // "rated 0/10" claim (meta description + JSON-LD reviewRating).
+  const rating = checkPublishRating(review.rating);
+  if (!rating.ok) {
+    return res.status(400).json({ ok: false, error: rating.error });
   }
 
   const now = new Date().toISOString();

@@ -7,6 +7,7 @@ import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import { markdownToReview, validatePortableReview } from '../src/lib/portability.js';
 import { defaultSites } from '../src/lib/seo/store-merge.js';
+import { checkPublishRating } from '../src/lib/publish-guard.js';
 
 const DB = process.env.REVIEWS_DB_PATH ?? path.join(process.cwd(), 'data', 'reviews.json');
 
@@ -78,7 +79,7 @@ function buildMovieMeta(extras: Record<string, unknown>): Record<string, unknown
 export async function importMarkdown(
   target: string,
   opts: { dry?: boolean; dbPath?: string; skipExisting?: boolean; refresh?: boolean } = {},
-): Promise<{ imported: number; skipped: number; errors: string[] }> {
+): Promise<{ imported: number; skipped: number; errors: string[]; refused: string[] }> {
   const stat = await fs.stat(target);
   const files: string[] = [];
   if (stat.isDirectory()) {
@@ -93,6 +94,7 @@ export async function importMarkdown(
   let imported = 0;
   let skipped = 0;
   const errors: string[] = [];
+  const refused: string[] = [];
   for (const f of files) {
     const raw = await fs.readFile(f, 'utf8');
     const { review, warnings } = markdownToReview(raw, path.basename(f, '.md'));
@@ -103,6 +105,18 @@ export async function importMarkdown(
       continue;
     }
     for (const w of warnings) console.warn(`[import] ${f}: ${w}`);
+    // A seed may publish itself (published_at in frontmatter), but an
+    // UNRATED review must never go live: it would ship a public
+    // "rated 0/10" claim (meta description + JSON-LD reviewRating).
+    // The rating is the owner's call, so the row still lands — as a DRAFT.
+    const wantsPublish = Boolean(review.published_at);
+    const gate = wantsPublish ? checkPublishRating(review.rating) : { ok: true as const };
+    const publish = wantsPublish && gate.ok;
+    const refusal = wantsPublish && !gate.ok ? gate.error : null;
+    if (opts.dry && refusal) {
+      refused.push(`${f}: ${refusal}`);
+      console.error(`[import] REFUSED PUBLISH ${f}: ${refusal} (dry run — would import as draft)`);
+    }
     if (!opts.dry) {
       const now = new Date().toISOString();
       const existing = store.findIndex(
@@ -120,6 +134,10 @@ export async function importMarkdown(
       }
       const extras = review as unknown as Record<string, unknown>;
       const movie = buildMovieMeta(extras);
+      if (refusal) {
+        refused.push(`${f}: ${refusal}`);
+        console.error(`[import] REFUSED PUBLISH ${f}: ${refusal} (row imported as draft)`);
+      }
       // Explicit `sites` in the file wins (cross-posted seeds); otherwise
       // the current SITE_ID is stamped so imports stay site-exclusive.
       const fileSites = strArray(extras.sites);
@@ -133,13 +151,15 @@ export async function importMarkdown(
         slug: review.slug,
         excerpt: (review.excerpt as string) ?? '',
         markdown: review.body,
-        status: review.published_at ? 'published' : 'draft',
+        status: publish ? 'published' : 'draft',
         rating: review.rating,
         ...(movie ? { movie } : {}),
         ...(typeof extras.region === 'string' && extras.region.trim() ? { region: extras.region.trim() } : {}),
         imdbId: review.imdb_id,
         tmdbId: review.tmdb_id,
-        publishedAt: review.published_at,
+        ...(publish || !review.published_at
+          ? { publishedAt: review.published_at }
+          : {}),
         seo: { seoTitle: review.seo_title, metaDesc: review.seo_description },
         redirects: [],
         createdAt: now,
@@ -161,7 +181,7 @@ export async function importMarkdown(
     await fs.mkdir(path.dirname(dbFile), { recursive: true });
     await fs.writeFile(dbFile, JSON.stringify(store, null, 2) + '\n', 'utf8');
   }
-  return { imported, skipped, errors };
+  return { imported, skipped, errors, refused };
 }
 
 async function main() {
@@ -173,6 +193,13 @@ async function main() {
   const r = await importMarkdown(target, { dry, skipExisting, refresh });
   console.log(`[import] imported=${r.imported} skipped=${r.skipped}${dry ? ' (dry run)' : ''}${skipExisting ? ' (skip-existing)' : ''}${refresh ? ' (refresh)' : ''}`);
   for (const e of r.errors) console.error(`[import] SKIP ${e}`);
+  // A refused publish is a content mistake, not a crash: the row landed as
+  // a draft (the owner still has to score it), but the release must not
+  // claim it published. Exit non-zero so CI stops before shipping it.
+  if (r.refused.length > 0) {
+    console.error(`[import] ${r.refused.length} seed(s) asked to publish without a rating — left as drafts.`);
+    process.exitCode = 2;
+  }
   if (r.errors.length > 0) process.exitCode = 2;
 }
 
