@@ -17,7 +17,11 @@ Output:
         tmdb_id,tmdb_type,legacy_hits,mapped_count,confidence,title,year,queue
     sorted by legacy_hits desc; `queue` is the 1-based work order (1 = most
     archived demand). `confidence` is the best confidence among the joined
-    map rows, `title`/`year` come from that same row.
+    map rows, `title`/`year` come from that same row. Only map rows with a
+    real landing page take part: an empty or dead target, a missing/non-numeric
+    tmdb_id or a non-numeric confidence is skipped loudly, and a repeated
+    legacy path is deduped (the first row wins) so one path cannot be counted
+    twice.
 
 Usage:
     python3 scripts/legacy/rank_demand.py --map redirect_map.csv --cdx cdx.jsonl \
@@ -25,7 +29,8 @@ Usage:
 
 Stdlib only (csv, json, argparse, urllib.parse, pathlib) — no network calls, no
 pip installs. Malformed rows are skipped with a loud log line; the run never
-crashes. A missing input file yields an empty output file and exit code 0.
+crashes. A missing input file still writes the output file (header row only)
+and exits 0.
 """
 
 from __future__ import annotations
@@ -111,10 +116,15 @@ def norm_path(value: str) -> str:
 def parse_map_rows(rows) -> tuple[list[dict], int]:
     """Parse redirect-map rows. Returns (rows, skipped).
 
-    Malformed rows are skipped loudly, never fatal.
+    Malformed rows are skipped loudly, never fatal. A row is rejected when it
+    has no landing page (empty/dead target), no tmdb_id, or a non-numeric
+    tmdb_id/confidence. Rows whose normalised legacy path repeats are deduped:
+    the first row wins, so one legacy path can never contribute its archived
+    demand twice.
     """
     parsed: list[dict] = []
     skipped = 0
+    seen_keys: set[str] = set()
     first = True
     for lineno, raw in enumerate(rows, start=1):
         if not raw or all(not (c or "").strip() for c in raw):
@@ -141,11 +151,26 @@ def parse_map_rows(rows) -> tuple[list[dict], int]:
             skipped += 1
             log(f"SKIP map row {lineno}: empty legacy_path")
             continue
+        key = norm_path(legacy)
+        if key in seen_keys:
+            skipped += 1
+            log(
+                f"SKIP map row {lineno}: duplicate legacy path {key!r}"
+                f" (legacy {legacy}) — deduped, the first row wins"
+            )
+            continue
         if DEAD_TARGET_RE.match(target):
             skipped += 1
             log(
                 f"SKIP map row {lineno}: dead target {target} (legacy {legacy})"
                 " — not a hub, falls out of the queue"
+            )
+            continue
+        if not target:
+            skipped += 1
+            log(
+                f"SKIP map row {lineno}: empty target_path (legacy {legacy})"
+                " — no landing page, not a hub"
             )
             continue
         if not tmdb_id:
@@ -174,10 +199,11 @@ def parse_map_rows(rows) -> tuple[list[dict], int]:
                     f" (legacy {legacy})"
                 )
                 continue
+        seen_keys.add(key)
         parsed.append(
             {
                 "legacy_path": legacy,
-                "key": norm_path(legacy),
+                "key": key,
                 "target_path": target,
                 "tmdb_type": tmdb_type,
                 "tmdb_id": tmdb_id,
@@ -362,6 +388,30 @@ def selftest() -> int:
     check("map rows skipped", skipped, 2)
     check("comma title survives", rows[0]["title"], "T, with comma")
 
+    # Fix round 1: an empty target has no landing page, so it is not a hub.
+    empty_target_rows, empty_target_skipped = parse_map_rows(
+        [
+            ["legacy_path", "target_path", "tmdb_type", "tmdb_id", "confidence", "title", "year"],
+            ["/a", "", "movie", "1", "0.9", "No Landing Page", "2020"],
+        ]
+    )
+    check("empty target rejected", len(empty_target_rows), 0)
+    check("empty target skipped loudly", empty_target_skipped, 1)
+
+    # Fix round 1: a repeated legacy path is deduped, so demand is not doubled.
+    dupe_rows, dupe_skipped = parse_map_rows(
+        [
+            ["legacy_path", "target_path", "tmdb_type", "tmdb_id", "confidence", "title", "year"],
+            ["/a", "/movies/1", "movie", "1", "0.9", "One", "2020"],
+            ["/A/", "/movies/1", "movie", "1", "0.9", "One again", "2020"],
+        ]
+    )
+    check("duplicate key deduped", len(dupe_rows), 1)
+    check("duplicate key skipped loudly", dupe_skipped, 1)
+    dupe_queue, _, _, _ = build_queue(dupe_rows, {"/a": 5})
+    check("duplicate key not double counted", dupe_queue[0]["legacy_hits"], 5)
+    check("duplicate key mapped_count", dupe_queue[0]["mapped_count"], 1)
+
     hits, cdx_skipped = parse_cdx_lines(
         [
             '{"original": "https://x.test/a/", "statuscode": "200"}',
@@ -433,9 +483,8 @@ def main(argv: list[str] | None = None) -> int:
     if missing:
         for path in missing:
             log(f"input not found: {path} — nothing to rank")
-        out_path.parent.mkdir(parents=True, exist_ok=True)
-        out_path.write_text("", encoding="utf-8")
-        print(f"rank_demand: no input — wrote empty {out_path}")
+        write_output(out_path, [])
+        print(f"rank_demand: no input — wrote an empty {out_path} (header only)")
         return 0
 
     map_rows, map_skipped = load_map(map_path)

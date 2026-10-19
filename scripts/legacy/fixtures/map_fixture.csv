@@ -7,3 +7,5 @@ legacy_path,target_path,tmdb_type,tmdb_id,confidence,title,year
 /2016/no-demand-anywhere,/movies/111,movie,111,0.8,No Demand,2019
 /2016/truncated
 /2016/bad-tmdb-id,/movies/222,movie,not-a-number,0.7,Bad Id,2020
+/2016/HE-SAID-SHE-SAID-1991-720P,/movies/10530,movie,10530,0.5,"He Said, She Said",1991
+/2016/empty-target,,movie,333,0.6,Empty Target,2019

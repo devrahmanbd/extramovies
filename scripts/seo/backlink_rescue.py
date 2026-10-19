@@ -17,13 +17,20 @@ Inputs (read-only; this script never mutates them):
 
 Output:
     --out   data/legacy/outreach.csv, columns
-                referrer,target_url,source_status,note
-            source_status is one of 200 | 404 | DNS_FAIL | SKIP_BOT:
+                referrer,target_url,source_status,map_status,note
+            source_status describes the LINKING PAGE only:
                 200        the linking page is live — worth an outreach note
                 404        the linking page is gone
                 DNS_FAIL   the linking host could not be reached
-                SKIP_BOT   the page refused us (403/429/5xx) or the row has no
-                           usable target (missing/stale map row)
+                SKIP_BOT   the page refused us (403/429/5xx) or could not be
+                           checked at all
+            map_status describes the REDIRECT MAP lookup, separately:
+                ok         the legacy path resolves to a live target
+                missing    the legacy path is not in the map
+                stale      the map row exists but has no usable target
+            An unmapped or stale legacy path is reported through map_status
+            (and the note) — it never borrows the SKIP_BOT label, so filtering
+            SKIP_BOT still means "the source host blocked us" and nothing else.
             `note` carries the reason plus the legacy path and the referring
             domain, so every row is traceable back to the export.
 
@@ -37,7 +44,8 @@ owner sends the messages by hand.
 
 Stdlib only (csv, argparse, urllib.request, socket) — no pip installs.
 Malformed rows are skipped with a loud log line; the run never crashes.
-A missing input file yields an empty output file and exit code 0.
+A missing input file still writes the output file (header row only) and
+exits 0.
 """
 
 from __future__ import annotations
@@ -67,7 +75,7 @@ MAP_COLUMNS = [
     "title",
     "year",
 ]
-OUT_COLUMNS = ["referrer", "target_url", "source_status", "note"]
+OUT_COLUMNS = ["referrer", "target_url", "source_status", "map_status", "note"]
 
 # A deliberately dead legacy URL — it never becomes a target.
 DEAD_TARGET_RE = re.compile(r"^/(410|404)$")
@@ -187,9 +195,16 @@ def detect_columns(header: list[str]) -> tuple[int | None, int | None, bool]:
 
 
 def load_map(path: Path) -> tuple[dict[str, dict], int]:
-    """Read the redirect map into {join key: entry}. Malformed rows are skipped loudly."""
+    """Read the redirect map into {join key: entry}. Malformed rows are skipped loudly.
+
+    A repeated legacy path is deduped (the first row wins) and announced, so a
+    duplicated map row can never silently replace a good target. A row without
+    a usable landing page is kept and marked stale: it is reported through
+    `map_status`, never silently mapped somewhere else.
+    """
     entries: dict[str, dict] = {}
     skipped = 0
+    seen_keys: set[str] = set()
     first = True
     with path.open(newline="", encoding="utf-8") as fh:
         for lineno, raw in enumerate(csv.reader(fh), start=1):
@@ -215,34 +230,73 @@ def load_map(path: Path) -> tuple[dict[str, dict], int]:
                 skipped += 1
                 log(f"SKIP map row {lineno}: empty legacy_path")
                 continue
+            key = norm_path(legacy)
+            if key in seen_keys:
+                skipped += 1
+                log(
+                    f"SKIP map row {lineno}: duplicate legacy path {key!r}"
+                    f" (legacy {legacy}) — deduped, the first row wins"
+                )
+                continue
+            seen_keys.add(key)
             if DEAD_TARGET_RE.match(target):
                 # Stale row: the legacy URL is deliberately dead. It is kept and
                 # labelled, never silently mapped to another target.
-                entries[norm_path(legacy)] = {
+                entries[key] = {
                     "target_path": target,
                     "tmdb_id": tmdb_id,
                     "title": title,
                     "year": year,
                     "stale": True,
-                    "stale_reason": f"stale:{target}",
+                    "stale_reason": f"dead-target:{target}",
                 }
                 continue
-            if not target or not tmdb_id:
+            if not target:
                 skipped += 1
                 log(
-                    f"SKIP map row {lineno}: no target/tmdb_id (legacy {legacy})"
-                    " — stale row, labelled SKIP_BOT"
+                    f"SKIP map row {lineno}: empty target_path (legacy {legacy})"
+                    " — no landing page, labelled stale"
                 )
-                entries[norm_path(legacy)] = {
+                entries[key] = {
                     "target_path": target,
                     "tmdb_id": tmdb_id,
                     "title": title,
                     "year": year,
                     "stale": True,
-                    "stale_reason": "stale:no-tmdb-id",
+                    "stale_reason": "no-landing-page",
                 }
                 continue
-            entries[norm_path(legacy)] = {
+            if not tmdb_id:
+                skipped += 1
+                log(
+                    f"SKIP map row {lineno}: no tmdb_id (legacy {legacy})"
+                    " — labelled stale"
+                )
+                entries[key] = {
+                    "target_path": target,
+                    "tmdb_id": tmdb_id,
+                    "title": title,
+                    "year": year,
+                    "stale": True,
+                    "stale_reason": "no-tmdb-id",
+                }
+                continue
+            if not tmdb_id.isdigit():
+                skipped += 1
+                log(
+                    f"SKIP map row {lineno}: non-numeric tmdb_id {tmdb_id!r}"
+                    f" (legacy {legacy}) — labelled stale"
+                )
+                entries[key] = {
+                    "target_path": target,
+                    "tmdb_id": tmdb_id,
+                    "title": title,
+                    "year": year,
+                    "stale": True,
+                    "stale_reason": "bad-tmdb-id",
+                }
+                continue
+            entries[key] = {
                 "target_path": target,
                 "tmdb_id": tmdb_id,
                 "title": title,
@@ -263,14 +317,19 @@ def classify_code(code: int) -> tuple[str, str]:
 
 
 def classify_exception(reason) -> tuple[str, str]:
-    """Transport error -> (source_status, detail)."""
+    """Transport error -> (source_status, detail).
+
+    `source_status` stays inside the closed enum, so a transport failure is
+    DNS_FAIL — but the note names the exception class, so the operator can
+    tell a name-resolution failure from a refused connection or a TLS error.
+    """
     if isinstance(reason, socket.gaierror):
-        return "DNS_FAIL", f"dns-failure: {reason}"
+        return "DNS_FAIL", f"dns-failure: socket.gaierror: {reason}"
     if isinstance(reason, (socket.timeout, TimeoutError)):
-        return "DNS_FAIL", "dns-failure: timeout"
+        return "DNS_FAIL", "dns-failure: TimeoutError: timed out"
     if isinstance(reason, OSError):
-        return "DNS_FAIL", f"dns-failure: {reason}"
-    return "SKIP_BOT", f"skipped: {type(reason).__name__}"
+        return "DNS_FAIL", f"dns-failure: {type(reason).__name__}: {reason}"
+    return "SKIP_BOT", f"skipped: {type(reason).__name__}: {reason}"
 
 
 class HeadRedirectHandler(urllib.request.HTTPRedirectHandler):
@@ -421,34 +480,48 @@ def build_rows(
     timeout: float,
     probe_base: str,
 ) -> list[dict]:
-    """Classify every link row into an outreach row."""
+    """Classify every link row into an outreach row.
+
+    `source_status` describes the LINKING PAGE only (200 | 404 | DNS_FAIL |
+    SKIP_BOT). The redirect map is reported separately through `map_status`
+    (ok | missing | stale) — an unmapped or stale legacy path never borrows
+    the SKIP_BOT label, so filtering SKIP_BOT still means "the source host
+    blocked us" and nothing else. A row without a usable target keeps an empty
+    `target_url`: it is never mapped to a wrong target.
+    """
     out: list[dict] = []
     for row in links:
         status, detail = probe(row["referrer"], timeout, probe_base)
         entry = map_entries.get(row["key"])
         if entry is None:
-            source_status = "SKIP_BOT"
+            map_status = "missing"
+            map_detail = "no-entry"
             target_url = ""
-            map_state = "missing"
         elif entry["stale"]:
-            source_status = "SKIP_BOT"
+            map_status = "stale"
+            map_detail = entry["stale_reason"]
             target_url = ""
-            map_state = entry["stale_reason"]
         else:
-            source_status = status
+            map_status = "ok"
+            map_detail = ""
             target_url = join_url(origin, entry["target_path"])
-            map_state = "ok"
-        note = (
-            f"legacy={row['legacy_path']}; domain={row['domain'] or '?'};"
-            f" map={map_state}; src={detail}"
-        )
+        note_parts = [
+            f"legacy={row['legacy_path']}",
+            f"domain={row['domain'] or '?'}",
+            f"map={map_status}",
+        ]
+        if map_detail:
+            note_parts.append(f"map_detail={map_detail}")
+        note_parts.append(f"src={detail}")
+        note = "; ".join(note_parts)
         if probe_base:
             note += f"; probe-base={probe_base}"
         out.append(
             {
                 "referrer": row["referrer"],
                 "target_url": target_url,
-                "source_status": source_status,
+                "source_status": status,
+                "map_status": map_status,
                 "note": note,
                 "title": entry["title"] if entry else "",
                 "year": entry["year"] if entry else "",
@@ -472,25 +545,44 @@ def write_output(out_path: Path, rows: list[dict]) -> None:
         writer.writerow(OUT_COLUMNS)
         for row in rows:
             writer.writerow(
-                [row["referrer"], row["target_url"], row["source_status"], row["note"]]
+                [
+                    row["referrer"],
+                    row["target_url"],
+                    row["source_status"],
+                    row["map_status"],
+                    row["note"],
+                ]
             )
 
 
 def print_drafts(rows: list[dict]) -> int:
-    """Print a 3-line outreach note per live source row. Nothing is sent."""
+    """Print a 3-line outreach note per live source row. Nothing is sent.
+
+    A live source is only actionable when the map resolved a target
+    (`map_status == "ok"`); a live source with a missing or stale map row has
+    no new URL to offer, so it is reported loudly instead of getting a broken
+    draft.
+    """
     live = [row for row in rows if row["source_status"] == "200"]
-    if not live:
-        print("backlink_rescue: no live source rows — no drafts to write")
+    actionable = [row for row in live if row["map_status"] == "ok"]
+    for row in live:
+        if row["map_status"] != "ok":
+            log(
+                f"live source {row['referrer']} has no usable target"
+                f" (map={row['map_status']}) — no draft written"
+            )
+    if not actionable:
+        print("backlink_rescue: no live source row with a usable target — no drafts to write")
         return 0
-    for index, row in enumerate(live, start=1):
+    for index, row in enumerate(actionable, start=1):
         label = f"{row['title']} ({row['year']})" if row["title"] else "our page"
-        print(f"[draft {index}/{len(live)}] {row['referrer']}")
+        print(f"[draft {index}/{len(actionable)}] {row['referrer']}")
         print(f"  our page moved to {row['target_url']} — {label}")
         print(
             "  ask the site owner to point the link at the new URL;"
             " the old path is retired"
         )
-    return len(live)
+    return len(actionable)
 
 
 def selftest() -> int:
@@ -543,8 +635,73 @@ def selftest() -> int:
         socket.gaierror(-2, "Name or service not known")
     )
     check("classify dns status", dns_status, "DNS_FAIL")
-    check("classify dns detail", dns_detail.startswith("dns-failure:"), True)
-    check("classify timeout", classify_exception(TimeoutError())[0], "DNS_FAIL")
+    check("classify dns names the class", "socket.gaierror" in dns_detail, True)
+    timeout_status, timeout_detail = classify_exception(TimeoutError())
+    check("classify timeout status", timeout_status, "DNS_FAIL")
+    check("classify timeout names the class", "TimeoutError" in timeout_detail, True)
+    refused_status, refused_detail = classify_exception(
+        ConnectionRefusedError(61, "Connection refused")
+    )
+    check("classify refused status", refused_status, "DNS_FAIL")
+    check("classify refused names the class", "ConnectionRefusedError" in refused_detail, True)
+
+    # Fix round 1: a missing or stale map row is reported through map_status and
+    # never borrows the SKIP_BOT label.
+    check(
+        "output columns",
+        OUT_COLUMNS,
+        ["referrer", "target_url", "source_status", "map_status", "note"],
+    )
+    probe_calls: list[str] = []
+
+    def fake_probe(url, timeout, probe_base=""):  # noqa: ANN001 - test double
+        probe_calls.append(url)
+        return "200", "HTTP 200"
+
+    original_probe = probe
+    globals()["probe"] = fake_probe
+    try:
+        rows = build_rows(
+            [
+                {"legacy_path": "/a/", "key": "/a", "domain": "x.test", "referrer": "https://x.test/a"},
+                {"legacy_path": "/b/", "key": "/b", "domain": "y.test", "referrer": "https://y.test/b"},
+                {"legacy_path": "/c/", "key": "/c", "domain": "z.test", "referrer": "https://z.test/c"},
+            ],
+            {
+                "/a": {"target_path": "/movies/1", "tmdb_id": "1", "title": "One", "year": "2020", "stale": False, "stale_reason": ""},
+                "/b": {"target_path": "/410", "tmdb_id": "", "title": "", "year": "", "stale": True, "stale_reason": "dead-target:/410"},
+            },
+            "https://site.test",
+            5.0,
+            "",
+        )
+    finally:
+        globals()["probe"] = original_probe
+    check("map ok row status", rows[0]["source_status"], "200")
+    check("map ok row map_status", rows[0]["map_status"], "ok")
+    check("map ok row target", rows[0]["target_url"], "https://site.test/movies/1")
+    check("stale row keeps its source status", rows[1]["source_status"], "200")
+    check("stale row map_status", rows[1]["map_status"], "stale")
+    check("stale row has no target", rows[1]["target_url"], "")
+    check("stale row note names the reason", "map_detail=dead-target:/410" in rows[1]["note"], True)
+    check("missing row keeps its source status", rows[2]["source_status"], "200")
+    check("missing row map_status", rows[2]["map_status"], "missing")
+    check("missing row has no target", rows[2]["target_url"], "")
+
+    # Fix round 1: a repeated legacy path in the map is skipped, not overwritten.
+    import tempfile
+
+    with tempfile.TemporaryDirectory() as tmp:
+        map_file = Path(tmp) / "map.csv"
+        map_file.write_text(
+            "legacy_path,target_path,tmdb_type,tmdb_id,confidence,title,year\n"
+            "/a,/movies/1,movie,1,0.9,One,2020\n"
+            "/A/,/movies/2,movie,2,0.5,One again,2020\n",
+            encoding="utf-8",
+        )
+        entries, map_skipped = load_map(map_file)
+    check("duplicate map row skipped", map_skipped, 1)
+    check("duplicate map row keeps the first target", entries["/a"]["target_path"], "/movies/1")
 
     # A comma-bearing row survives the csv round trip.
     import io
@@ -637,9 +794,8 @@ def main(argv: list[str] | None = None) -> int:
     if missing:
         for path in missing:
             log(f"input not found: {path} — nothing to rescue")
-        out_path.parent.mkdir(parents=True, exist_ok=True)
-        out_path.write_text("", encoding="utf-8")
-        print(f"backlink_rescue: no input — wrote empty {out_path}")
+        write_output(out_path, [])
+        print(f"backlink_rescue: no input — wrote an empty {out_path} (header only)")
         return 0
 
     if args.probe_base:
@@ -658,11 +814,15 @@ def main(argv: list[str] | None = None) -> int:
     write_output(out_path, rows)
 
     counts: dict[str, int] = {}
+    map_counts: dict[str, int] = {}
     for row in rows:
         counts[row["source_status"]] = counts.get(row["source_status"], 0) + 1
+        map_counts[row["map_status"]] = map_counts.get(row["map_status"], 0) + 1
+    source_summary = ", ".join(f"{k}={v}" for k, v in sorted(counts.items())) or "no rows"
+    map_summary = ", ".join(f"{k}={v}" for k, v in sorted(map_counts.items())) or "no rows"
     print(
         f"backlink_rescue: {len(rows)} row(s) written"
-        f" ({', '.join(f'{k}={v}' for k, v in sorted(counts.items())) or 'no rows'});"
+        f" (source: {source_summary}; map: {map_summary});"
         f" {links_skipped} link row(s) + {map_skipped} map row(s) skipped;"
         f" {dropped} duplicate(s) dropped"
     )
