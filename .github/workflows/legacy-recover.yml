@@ -25,7 +25,7 @@ on:
         description: "Stage to run"
         default: full
         type: choice
-        options: [full, collect, resolve, report, activate]
+        options: [full, collect, resolve, report, activate, queue]
       limit:
         description: "Resolve cap, 0 = all rows"
         default: "0"
@@ -188,6 +188,79 @@ jobs:
               fi
               exit 0
               ;;
+            queue)
+              # Demand-ranked hub queue — a read-only analysis of the archive.
+              # Nothing here touches the app, the eco file, PM2 or the sitemap:
+              # it reads the two archive files and writes one new CSV.
+              #
+              # rank_demand.py refuses an --out outside <repo_root>/data/legacy/,
+              # so on the box the script sits in $LEGACY_DIR/data/legacy/ and
+              # the legacy workspace plays the role of the repo root. The CSV is
+              # moved up to $LEGACY_DIR/demand_top.csv afterwards (the path the
+              # workflow copies out as an artifact).
+              QDIR="$LEGACY_DIR/data/legacy"
+              mkdir -p "$QDIR"
+              QSCRIPT="$QDIR/rank_demand.py"
+              QURL="https://raw.githubusercontent.com/devrahmanbd/extramovies/$SCRIPT_SHA/scripts/legacy/rank_demand.py"
+              code=$(curl -sSL -o "$QSCRIPT" -w '%{http_code}' "$QURL") || code="000"
+              if [ "$code" != "200" ]; then
+                echo "FATAL: rank_demand.py fetch returned HTTP $code (expected 200)"
+                rm -f "$QSCRIPT"
+                exit 1
+              fi
+              echo "script: $(wc -l < "$QSCRIPT") lines from SHA ${SCRIPT_SHA:0:7}"
+
+              python3 "$QSCRIPT" \
+                --map "$LEGACY_DIR/redirect_map.csv" \
+                --cdx "$LEGACY_DIR/cdx.jsonl" \
+                --out "$QDIR/demand_top.csv" 2>&1 | tee -a "$LOG"
+
+              # Written where the script is allowed to write it; move it to the
+              # canonical path the workflow copies out.
+              mv "$QDIR/demand_top.csv" "$LEGACY_DIR/demand_top.csv"
+              echo "queue csv: $LEGACY_DIR/demand_top.csv"
+
+              # Queue report: the header, the top 40 rows, the total row count
+              # and the skipped counts. The python body is flush-left on
+              # purpose — the SSH heredoc is passed verbatim to the box and
+              # python rejects an indented top-level block.
+              python3 - "$LEGACY_DIR/demand_top.csv" "$LOG" <<'PY'
+          import csv
+          import re
+          import sys
+
+          csv_path, log_path = sys.argv[1], sys.argv[2]
+          with open(csv_path, newline="", encoding="utf-8") as fh:
+              rows = list(csv.reader(fh))
+          header = rows[0] if rows else []
+          body = rows[1:] if rows else []
+
+          print("header: " + ",".join(header))
+          print("%5s  %8s  %-7s  %6s  %-6s  %s" % ("rank", "tmdb_id", "type", "hits", "year", "title"))
+          for row in body[:40]:
+              if len(row) < 8:
+                  continue
+              print("%5s  %8s  %-7s  %6s  %-6s  %s" % (row[7], row[0], row[1], row[2], row[6], row[5]))
+          print("total rows: %d" % len(body))
+
+          try:
+              with open(log_path, encoding="utf-8", errors="replace") as fh:
+                  text = fh.read()
+          except OSError:
+              text = ""
+          malformed = re.search(r"(\d+) map row\(s\) \+ (\d+) cdx line\(s\) skipped", text)
+          print("skipped (malformed map rows): %s" % (malformed.group(1) if malformed else "0"))
+          print("skipped (malformed cdx lines): %s" % (malformed.group(2) if malformed else "0"))
+          nodemand = re.search(r"(\d+) map row\(s\) without demand", text)
+          print("skipped (no archived demand): %s" % (nodemand.group(1) if nodemand else "0"))
+          print("skipped (log lines printed): %d" % len(re.findall(r"SKIP ", text)))
+          print("note: the script prints the first 20 skip lines then summarises - the counts above are exact")
+          if not body:
+              print("QUEUE EMPTY: no redirect_map.csv/cdx.jsonl on the box - run the collect/resolve stages first")
+          PY
+              echo "log: $LOG"
+              exit 0
+              ;;
             full)    run collect; run resolve $RESET_ARG; run report ;;
             collect) run collect ;;
             resolve) run resolve $RESET_ARG ;;
@@ -199,3 +272,25 @@ jobs:
           tail -n 15 "$LOG"
           EOF
           rm -f ~/.ssh/deploy_key
+
+      - name: Copy demand queue CSV off the box (queue stage)
+        if: ${{ inputs.stage == 'queue' }}
+        run: |
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          mkdir -p "$RUNNER_TEMP/demand"
+          scp -i ~/.ssh/deploy_key -o StrictHostKeyChecking=accept-new \
+            -P "$SSH_PORT" "$SSH_USER@$SSH_HOST:$LEGACY_DIR/demand_top.csv" \
+            "$RUNNER_TEMP/demand/demand_top.csv"
+          rm -f ~/.ssh/deploy_key
+          ls -l "$RUNNER_TEMP/demand/demand_top.csv"
+          head -n 3 "$RUNNER_TEMP/demand/demand_top.csv"
+
+      - name: Store demand queue artifact
+        if: ${{ inputs.stage == 'queue' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: demand-top-${{ inputs.site || 'extramovies' }}
+          path: ${{ runner.temp }}/demand/demand_top.csv
+          retention-days: 7
