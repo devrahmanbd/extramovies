@@ -1,24 +1,17 @@
 /**
  * Hero image intrinsic-size + preload helpers (CWV task 2).
  *
- * The intrinsic size is derived from the IMAGE URL — never from a
- * caller-asserted shape. TMDB encodes the delivered variant in the path
- * (`/t/p/<variant>/<file>`), and in this repo one shape owns each variant:
+ * The intrinsic size has two independent sources, because the URL alone
+ * cannot disambiguate a TMDB variant: w780 is used for BOTH posters and
+ * backdrops in this repo (posters `w780`/`w500`, backdrops `w780`/`w1280`).
  *
- *   w1280 → backdrop path (16:9)  every public hero backdrop uses this width
- *                                   (the DEMO rows in src/lib/seo/content.ts);
- *                                   TMDB serves no poster at w1280.
- *   w780  → poster path   (2:3)   the DEMO poster URLs.
- *   w500  → poster path   (2:3)   TMDB client / seed poster URLs
- *                                   (src/lib/tmdb/client.ts, seeds/*).
- *   w300  → poster path   (2:3)   poster variant.
+ *   WIDTH  ← the URL variant  (w1280→1280, w780→780, w500→500, w300→300)
+ *   HEIGHT ← the field kind    (backdrop → 16:9, poster → 2:3)
  *
- * A poster URL therefore never picks up a 16:9 pair: the URL alone decides.
- *
- * The store cannot carry a backdrop URL (the admin review shape has no
- * backdrop field — src/lib/seo/store-merge.ts pins `backdropUrl: null`), so
- * no w780 backdrop ever reaches a public page; the only w780 URLs in public
- * content are posters.
+ * The kind is therefore an ASPECT selector only, never the size source: a
+ * caller may not widen a poster by asserting a backdrop. Each call site
+ * passes the kind of the field it renders (backdrop field → "backdrop",
+ * poster field → "poster").
  *
  * Rule (never guess): a variant we cannot map yields NO size pair. The caller
  * omits width/height (an unknown ratio is worse than none) and still emits the
@@ -26,6 +19,9 @@
  *
  * Pure module: no DB, no network, no framework — safe to unit test.
  */
+
+/** Which field the artwork came from — decides the aspect, not the width. */
+export type HeroImageKind = "backdrop" | "poster";
 
 export interface HeroImageSize {
   width: number;
@@ -48,12 +44,18 @@ export interface HeroPreloadLinkAttrs {
   fetchpriority: "high";
 }
 
-/** TMDB variant → intrinsic pixel size of the artwork we request. */
-const IMAGE_SIZES: Record<string, HeroImageSize> = {
-  w1280: { width: 1280, height: 720 },
-  w780: { width: 780, height: 1170 },
-  w500: { width: 500, height: 750 },
-  w300: { width: 300, height: 450 },
+/** TMDB variant → delivered width in pixels. */
+const VARIANT_WIDTHS: Record<string, number> = {
+  w1280: 1280,
+  w780: 780,
+  w500: 500,
+  w300: 300,
+};
+
+/** Aspect ratio per field kind: backdrops are 16:9, posters are 2:3. */
+const KIND_ASPECTS: Record<HeroImageKind, number> = {
+  backdrop: 9 / 16,
+  poster: 3 / 2,
 };
 
 /**
@@ -71,13 +73,17 @@ export function heroImageVariant(url: string | null | undefined): string | null 
 /**
  * Intrinsic size of the requested artwork, or null when the variant is
  * unknown — the caller then omits the width/height pair entirely.
+ * Width comes from the URL variant; height from the kind's aspect.
  */
 export function heroImageSize(
   url: string | null | undefined,
+  kind: HeroImageKind,
 ): HeroImageSize | null {
   const variant = heroImageVariant(url);
   if (!variant) return null;
-  return IMAGE_SIZES[variant] ?? null;
+  const width = VARIANT_WIDTHS[variant];
+  if (width === undefined) return null;
+  return { width, height: Math.round(width * KIND_ASPECTS[kind]) };
 }
 
 /**
@@ -87,11 +93,12 @@ export function heroImageSize(
  */
 export function heroImagePreload(
   url: string | null | undefined,
+  kind: HeroImageKind,
 ): HeroImagePreload | null {
   if (typeof url !== "string") return null;
   const href = url.trim();
   if (!href) return null;
-  const size = heroImageSize(href);
+  const size = heroImageSize(href, kind);
   return size ? { href, width: size.width, height: size.height } : { href };
 }
 

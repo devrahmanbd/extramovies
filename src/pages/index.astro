@@ -50,14 +50,14 @@ try {
 }
 const isDiscovery = theme === "discovery";
 const discoveryKey = isDiscovery ? hasTmdbKey() : false;
-// Hero artwork (publication covers). The intrinsic pair is derived from the
-// image URL alone (the TMDB variant owns the shape) — an unknown variant
-// yields no pair (never a guess). The discovery theme renders its own slider
-// hero, so it preloads nothing.
-const coverSize = heroImageSize(featured?.backdropUrl ?? null);
+// Hero artwork (publication covers). The width comes from the image URL
+// (the TMDB variant), the aspect from the field it came from — the backdrop
+// field is 16:9. An unknown variant yields no pair (never a guess). The
+// discovery theme renders its own slider hero, so it preloads nothing.
+const coverSize = heroImageSize(featured?.backdropUrl ?? null, "backdrop");
 const coverPreload = isDiscovery
   ? null
-  : heroImagePreload(featured?.backdropUrl ?? null);
+  : heroImagePreload(featured?.backdropUrl ?? null, "backdrop");
 // Discovery branch only — publication variables above stay untouched.
 const trending = isDiscovery ? await getTrending().catch(() => []) : [];
 const popular = isDiscovery ? await getPopular().catch(() => []) : [];

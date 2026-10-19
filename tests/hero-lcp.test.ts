@@ -21,9 +21,11 @@ import { withFontDisplaySwap } from '../src/lib/seo/fonts';
  *      box before the bytes land (CLS);
  *   2. a `<link rel="preload" as="image">` in the head for the same URL (LCP).
  *
- * The size pair is derived from the IMAGE URL (the TMDB variant owns the
- * shape) — never from a caller-asserted kind, so a poster URL can never pick
- * up a 16:9 pair. An unknown variant yields NO pair (never a guessed ratio)
+ * Intrinsic size has two sources: the WIDTH comes from the TMDB variant in
+ * the URL (w780 serves both posters and backdrops in this repo, so the URL
+ * alone cannot disambiguate), the HEIGHT comes from the field kind
+ * (backdrop 16:9, poster 2:3). The kind is an aspect selector only — never
+ * the size source. An unknown variant yields NO pair (never a guessed ratio)
  * while the preload is still emitted — the preload is size-agnostic.
  *
  * Assertion levels (no Astro render harness exists in this repo — vitest runs
@@ -43,6 +45,14 @@ const PUBLICATION_FIXTURE = {
   posterUrl: 'https://image.tmdb.org/t/p/w780/6izwz7rsy95ARzTR3poZ8H6c5pp.jpg',
 };
 
+/** The width the TMDB client asks for backdrops (src/lib/tmdb/client.ts:94). */
+const CLIENT_BACKDROP_URL =
+  'https://image.tmdb.org/t/p/w780/rvtdN5XkWAfGX6xDuPL6yYS2seK.jpg';
+
+/** The width the TMDB client asks for posters (src/lib/tmdb/client.ts:92). */
+const CLIENT_POSTER_URL =
+  'https://image.tmdb.org/t/p/w500/upwdEyhhYZ7pT2hD535fr2MGfpx.jpg';
+
 /** Same fixture with a variant we cannot map (TMDB `original`). */
 const UNKNOWN_VARIANT_FIXTURE = {
   backdropUrl: 'https://image.tmdb.org/t/p/original/eZ239CUp1d6OryZEBPnO2n87gMG.jpg',
@@ -52,61 +62,71 @@ const UNKNOWN_VARIANT_FIXTURE = {
 const UPLOAD_FIXTURE = { backdropUrl: '/uploads/cover-backdrop.jpg' };
 
 describe('hero image intrinsic size (CWV task 2)', () => {
-  it('w1280 backdrop path resolves to 1280x720', () => {
-    expect(heroImageSize(PUBLICATION_FIXTURE.backdropUrl)).toEqual({
+  it('w1280 backdrop resolves to 1280x720', () => {
+    expect(heroImageSize(PUBLICATION_FIXTURE.backdropUrl, 'backdrop')).toEqual({
       width: 1280,
       height: 720,
     });
   });
 
-  it('w780 poster path resolves to 780x1170 — never a 16:9 pair', () => {
-    expect(heroImageSize(PUBLICATION_FIXTURE.posterUrl)).toEqual({
+  it('w780 backdrop resolves to 780x439', () => {
+    expect(heroImageSize(CLIENT_BACKDROP_URL, 'backdrop')).toEqual({
+      width: 780,
+      height: 439,
+    });
+  });
+
+  it('w780 poster resolves to 780x1170', () => {
+    expect(heroImageSize(PUBLICATION_FIXTURE.posterUrl, 'poster')).toEqual({
       width: 780,
       height: 1170,
     });
   });
 
-  it('w500 poster path resolves to 500x750', () => {
-    expect(
-      heroImageSize('https://image.tmdb.org/t/p/w500/upwdEyhhYZ7pT2hD535fr2MGfpx.jpg'),
-    ).toEqual({ width: 500, height: 750 });
+  it('w500 poster resolves to 500x750', () => {
+    expect(heroImageSize(CLIENT_POSTER_URL, 'poster')).toEqual({
+      width: 500,
+      height: 750,
+    });
   });
 
-  it('w300 poster path resolves to 300x450', () => {
+  it('w300 poster resolves to 300x450', () => {
     expect(
-      heroImageSize('https://image.tmdb.org/t/p/w300/6izwz7rsy95ARzTR3poZ8H6c5pp.jpg'),
+      heroImageSize('https://image.tmdb.org/t/p/w300/6izwz7rsy95ARzTR3poZ8H6c5pp.jpg', 'poster'),
     ).toEqual({ width: 300, height: 450 });
   });
 
-  it('a poster URL never receives a 16:9 pair', () => {
-    // The regression this guards: a w780 poster URL handed the backdrop ratio.
-    for (const posterUrl of [
-      'https://image.tmdb.org/t/p/w780/6izwz7rsy95ARzTR3poZ8H6c5pp.jpg',
-      'https://image.tmdb.org/t/p/w500/upwdEyhhYZ7pT2hD535fr2MGfpx.jpg',
-      'https://image.tmdb.org/t/p/w300/6izwz7rsy95ARzTR3poZ8H6c5pp.jpg',
-    ]) {
-      const size = heroImageSize(posterUrl);
-      expect(size).not.toBeNull();
-      // 2:3 poster ratio — not 16:9.
-      expect(size!.width / size!.height).toBeCloseTo(2 / 3, 5);
-    }
-  });
-
-  it('the size is derived from the URL alone (no caller-asserted kind)', () => {
-    // One required argument: the URL. A shape/kind parameter would let a
-    // caller hand a poster URL to the backdrop table.
-    expect(heroImageSize.length).toBe(1);
-    expect(heroImagePreload.length).toBe(1);
-  });
-
   it('unknown variant (original) resolves to no size pair', () => {
-    expect(heroImageSize(UNKNOWN_VARIANT_FIXTURE.backdropUrl)).toBeNull();
+    expect(heroImageSize(UNKNOWN_VARIANT_FIXTURE.backdropUrl, 'backdrop')).toBeNull();
+    expect(heroImageSize(UNKNOWN_VARIANT_FIXTURE.backdropUrl, 'poster')).toBeNull();
   });
 
   it('non-TMDB URL resolves to no size pair', () => {
-    expect(heroImageSize(UPLOAD_FIXTURE.backdropUrl)).toBeNull();
-    expect(heroImageSize(null)).toBeNull();
-    expect(heroImageSize(undefined)).toBeNull();
+    expect(heroImageSize(UPLOAD_FIXTURE.backdropUrl, 'backdrop')).toBeNull();
+    expect(heroImageSize(null, 'backdrop')).toBeNull();
+    expect(heroImageSize(undefined, 'poster')).toBeNull();
+  });
+
+  it('the width always comes from the URL variant; the kind only picks the aspect', () => {
+    // w780 is used for posters AND backdrops in this repo: the kind decides
+    // 16:9 vs 2:3, never the width.
+    expect(heroImageSize(CLIENT_BACKDROP_URL, 'backdrop')!.width).toBe(780);
+    expect(heroImageSize(CLIENT_BACKDROP_URL, 'poster')!.width).toBe(780);
+    expect(heroImageSize(CLIENT_BACKDROP_URL, 'backdrop')!.height).toBe(439);
+    expect(heroImageSize(CLIENT_BACKDROP_URL, 'poster')!.height).toBe(1170);
+  });
+
+  it('a backdrop field never receives a portrait pair, a poster field never a 16:9 one', () => {
+    // Integer height rounding (780 -> 439) shifts the ratio slightly, so the
+    // assertion is on the ratio within that rounding tolerance.
+    for (const url of [PUBLICATION_FIXTURE.backdropUrl, CLIENT_BACKDROP_URL]) {
+      const size = heroImageSize(url, 'backdrop')!;
+      expect(Math.abs(size.width / size.height - 16 / 9)).toBeLessThan(0.005);
+    }
+    for (const url of [PUBLICATION_FIXTURE.posterUrl, CLIENT_POSTER_URL]) {
+      const size = heroImageSize(url, 'poster')!;
+      expect(Math.abs(size.width / size.height - 2 / 3)).toBeLessThan(0.005);
+    }
   });
 
   it('variant extraction reads the TMDB path segment', () => {
@@ -120,7 +140,7 @@ describe('hero image intrinsic size (CWV task 2)', () => {
 
 describe('hero image preload (CWV task 2)', () => {
   it('known variant: preload carries the href and the intrinsic pair', () => {
-    expect(heroImagePreload(PUBLICATION_FIXTURE.backdropUrl)).toEqual({
+    expect(heroImagePreload(PUBLICATION_FIXTURE.backdropUrl, 'backdrop')).toEqual({
       href: 'https://image.tmdb.org/t/p/w1280/eZ239CUp1d6OryZEBPnO2n87gMG.jpg',
       width: 1280,
       height: 720,
@@ -128,18 +148,18 @@ describe('hero image preload (CWV task 2)', () => {
   });
 
   it('unknown variant: preload kept, size pair omitted', () => {
-    expect(heroImagePreload(UNKNOWN_VARIANT_FIXTURE.backdropUrl)).toEqual({
+    expect(heroImagePreload(UNKNOWN_VARIANT_FIXTURE.backdropUrl, 'backdrop')).toEqual({
       href: 'https://image.tmdb.org/t/p/original/eZ239CUp1d6OryZEBPnO2n87gMG.jpg',
     });
-    expect(heroImagePreload(UPLOAD_FIXTURE.backdropUrl)).toEqual({
+    expect(heroImagePreload(UPLOAD_FIXTURE.backdropUrl, 'backdrop')).toEqual({
       href: '/uploads/cover-backdrop.jpg',
     });
   });
 
   it('no hero URL: no preload at all', () => {
-    expect(heroImagePreload(null)).toBeNull();
-    expect(heroImagePreload('')).toBeNull();
-    expect(heroImagePreload('   ')).toBeNull();
+    expect(heroImagePreload(null, 'backdrop')).toBeNull();
+    expect(heroImagePreload('', 'backdrop')).toBeNull();
+    expect(heroImagePreload('   ', 'backdrop')).toBeNull();
   });
 
   it('the preload link carries exactly rel/as/href/width/height/fetchpriority', () => {
@@ -181,28 +201,41 @@ describe('hero image preload (CWV task 2)', () => {
 describe('hero markup wiring: publication home + magazine (CWV task 2)', () => {
   it('publication home binds the URL-derived pair onto the hero <img>', () => {
     const index = read('src/pages/index.astro');
-    // The pair must come from the helper, bound to the hero img itself.
-    expect(index).toContain('const coverSize = heroImageSize(featured?.backdropUrl ?? null);');
+    // The pair must come from the helper, bound to the hero img itself, and
+    // the kind must match the field rendered there (backdrop field).
+    expect(index).toContain(
+      'const coverSize = heroImageSize(featured?.backdropUrl ?? null, "backdrop");',
+    );
     expect(index).toMatch(
       /<img\s+class="glam-cover-bg"[\s\S]{0,400}?width=\{coverSize\?\.width\}[\s\S]{0,120}?height=\{coverSize\?\.height\}/,
     );
-    // ...and never from a caller-asserted shape.
-    expect(index).not.toContain('heroImageSize(featured?.backdropUrl ?? null,');
   });
 
   it('the magazine cover binds the URL-derived pair onto its <img>', () => {
     const magazine = read('src/components/public/MagazineHome.astro');
-    expect(magazine).toContain('const coverSize = heroImageSize(featured?.backdropUrl ?? null);');
+    expect(magazine).toContain(
+      'const coverSize = heroImageSize(featured?.backdropUrl ?? null, "backdrop");',
+    );
     expect(magazine).toMatch(
       /<img\s+src=\{featured\.backdropUrl\}[\s\S]{0,400}?width=\{coverSize\?\.width\}[\s\S]{0,120}?height=\{coverSize\?\.height\}/,
     );
-    expect(magazine).not.toContain('heroImageSize(featured?.backdropUrl ?? null,');
+  });
+
+  it('no call site asserts a kind that does not match the field it renders', () => {
+    const index = read('src/pages/index.astro');
+    const magazine = read('src/components/public/MagazineHome.astro');
+    for (const source of [index, magazine]) {
+      // A poster URL must never be measured with the backdrop aspect.
+      expect(source).not.toMatch(/heroImageSize\([^)]*posterUrl[^)]*"backdrop"/);
+      // ...and a backdrop URL must never be measured with the poster aspect.
+      expect(source).not.toMatch(/heroImageSize\([^)]*backdropUrl[^)]*"poster"/);
+    }
   });
 
   it('the homepage passes the hero preload to the layout', () => {
     const index = read('src/pages/index.astro');
     expect(index).toContain(
-      'const coverPreload = isDiscovery\n  ? null\n  : heroImagePreload(featured?.backdropUrl ?? null);',
+      'const coverPreload = isDiscovery\n  ? null\n  : heroImagePreload(featured?.backdropUrl ?? null, "backdrop");',
     );
     expect(index).toContain('preloadImage={coverPreload}');
   });

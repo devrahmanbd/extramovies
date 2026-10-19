@@ -18,8 +18,8 @@ interface Props {
 }
 const { featured, latest, shelf, genres, publishedDate } = Astro.props;
 const featuredIsLong = (featured?.reviewTitle?.length ?? 0) > 40;
-/** Intrinsic pair from the image URL; unknown variant -> no pair (no guess). */
-const coverSize = heroImageSize(featured?.backdropUrl ?? null);
+/** Intrinsic pair: width from the URL variant, 16:9 aspect (backdrop field). */
+const coverSize = heroImageSize(featured?.backdropUrl ?? null, "backdrop");
 ---
 {featured ? (
   <section class="mag-cover band section--lg pub-cover" aria-labelledby="cover-title">
