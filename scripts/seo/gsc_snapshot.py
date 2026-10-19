@@ -11,20 +11,19 @@ Part A) runs from a single command instead of five manual exports:
 Auth is delegated to scripts/seo/gsc_api.py (key loading, JWT signing, scope
 escalation, api_request). Everything below is stdlib-only logic of our own.
 
-Every `page` row is classified MODERN or LEGACY. The LEGACY rules run FIRST,
-so a legacy shape stays legacy even under a modern prefix (/movies/9xplay.php
-and /reviews/18-movies/x are legacy):
+Every `page` row is classified MODERN or LEGACY, in this fixed order:
 
-  LEGACY  a *.php segment, a legacy category prefix (18-movies/,
-          web-series/, 300mb-movies/), pagination (page/N/), feeds, dated
-          paths, numeric pages, and a non-numeric id under /movies/ or
-          /series/ (the live routes are tmdb ids).
-  MODERN  everything else that is part of the site's own route set
-          (src/pages) or one of the known public routes (/, /reviews,
-          /movies, /reviews/<slug>, /movies/<id>, /series/<id>).
-
-Legacy rows always carry a reason: an ambiguous path is LEGACY-with-reason,
-never silently modern.
+  1. `^/(movies|series)/[0-9]+$` is MODERN - an unambiguous numeric id on a real
+     route (/movies/2016, /series/2000 are tmdb ids, not dates).
+  2. A LEGACY rule wins over everything else: a `*.php` file, a legacy
+     category prefix (18-movies/, web-series/, 300mb-movies/), `feed/`,
+     `page/N/`, a LEADING year segment (/2016/05/12/...,
+     /2016/he-said-she-said-1991-720p/), a numeric page, or a non-numeric id
+     under /movies/ or /series/. The dated rule matches a leading year
+     segment only, so a year inside a slug or a tmdb id is never a date.
+  3. The site's own route set (src/pages) is MODERN: /, /reviews, /movies,
+     /reviews/<slug>, /series/<id>, and the rest of the live routes.
+  4. Anything else is LEGACY with a reason - never silently modern.
 
 The service account (extramovies-gsc-reader@hsc2025.iam.gserviceaccount.com)
 is not yet a member of the GSC property, so every live call currently sees an
@@ -136,6 +135,8 @@ NUMERIC_RE = re.compile(r"^\d+$")
 # The live routes are /movies/<tmdbId> and /series/<tmdbId>: the id is a
 # number. Anything else under those prefixes is a legacy URL.
 ID_ROUTE_RE = re.compile(r"^/(movies|series)/([^/]+)$")
+# ASCII digits only (str.isdigit() also accepts unicode digits).
+NUMERIC_ID_RE = re.compile(r"^[0-9]+$")
 
 # Routes that exist but must never be indexed (still MODERN, but flagged).
 NON_INDEXABLE_NOTES = {
@@ -204,7 +205,11 @@ def legacy_reason(path: str) -> str:
     """Why a path is legacy, or "" when no legacy rule matches it.
 
     These rules take precedence over the modern route set: a legacy shape
-    stays legacy even under /movies/ or /reviews/.
+    stays legacy even when it sits under a modern prefix (/movies/9xplay.php,
+    /reviews/18-movies/x). The dated rule matches a LEADING year segment
+    only - that is how the legacy corpus is shaped (/2016/05/12/...,
+    /2016/he-said-she-said-1991-720p/) - so a later year segment (a year
+    inside a slug, a year inside a tmdb id) is never mistaken for a date.
     """
     parts = [p for p in path.split("/") if p]
     if not parts:
@@ -223,7 +228,10 @@ def legacy_reason(path: str) -> str:
         "comments",
     ):
         return "feed"
-    if any(YEAR_RE.match(p) for p in parts):
+    id_match = ID_ROUTE_RE.match(path)
+    if id_match and not NUMERIC_ID_RE.match(id_match.group(2)):
+        return "non-numeric-id"
+    if YEAR_RE.match(parts[0]):
         return "dated-path"
     if len(parts) == 1 and NUMERIC_RE.match(parts[0]):
         return "numeric-page"
@@ -246,22 +254,34 @@ def normalize_path(raw: str) -> str:
 def classify_path(raw: str, routes: list[tuple[re.Pattern, str]]) -> tuple[str, str]:
     """Return (classification, reason) for one page key.
 
-    Legacy rules run FIRST: a legacy shape stays legacy even when it sits
-    under a modern prefix (/movies/9xplay.php, /reviews/18-movies/x). Only
-    then is the modern route set consulted, and /movies/<id> and /series/<id>
-    count as modern only for a numeric id (the live routes are tmdb ids).
+    The order is fixed:
+
+    1. ``^/(movies|series)/[0-9]+$`` is MODERN - an unambiguous numeric id on a
+       real route (/movies/2016, /series/2000 are tmdb ids, not dates).
+    2. A LEGACY rule wins over everything else: a ``.php`` file, a category
+       prefix, ``feed/``, ``page/N/``, a leading year segment, or a
+       non-numeric id under /movies/ or /series/.
+    3. The site's own route set (/, /reviews, /movies, /reviews/<slug>, ...)
+       is MODERN.
+    4. Anything else is LEGACY with a reason - never silently modern.
     """
     clean = normalize_path(raw).split("#", 1)[0].split("?", 1)[0]
     if not clean:
         clean = "/"
     if len(clean) > 1:
         clean = clean.rstrip("/")
+
+    # 1. an unambiguous numeric id on a real route
+    id_match = ID_ROUTE_RE.match(clean)
+    if id_match and NUMERIC_ID_RE.match(id_match.group(2)):
+        return "modern", ""
+
+    # 2. legacy shapes win over the modern route set
     reason = legacy_reason(clean)
     if reason:
         return "legacy", reason
-    id_match = ID_ROUTE_RE.match(clean)
-    if id_match and not id_match.group(2).isdigit():
-        return "legacy", "non-numeric-id"
+
+    # 3. the site's own route set
     for pattern, note in routes:
         if pattern.match(clean):
             return "modern", note
@@ -270,6 +290,8 @@ def classify_path(raw: str, routes: list[tuple[re.Pattern, str]]) -> tuple[str, 
     for pattern in MODERN_PATTERNS:
         if pattern.match(clean):
             return "modern", ""
+
+    # 4. unknown -> legacy, never silently modern
     return "legacy", "not-in-route-set"
 
 
@@ -1290,8 +1312,13 @@ def selftest() -> int:
     )
     check(
         "classify /movies/2016/x is legacy",
+        classify_path("/movies/2016/x", routes)[0],
+        "legacy",
+    )
+    check(
+        "classify /movies/2016/x is not a dated path",
         classify_path("/movies/2016/x", routes)[1],
-        "dated-path",
+        "not-in-route-set",
     )
     check(
         "classify /movies/<non-numeric> is legacy",
@@ -1316,6 +1343,63 @@ def selftest() -> int:
     check(
         "classify /reviews/<slug> is modern",
         classify_path("/reviews/dune-part-two", routes)[0],
+        "modern",
+    )
+
+    # --- fix round 2: a numeric tmdb id is never a dated path --------------
+    check(
+        "classify /movies/2016 is modern",
+        classify_path("/movies/2016", routes)[0],
+        "modern",
+    )
+    check(
+        "classify /series/2000 is modern",
+        classify_path("/series/2000", routes)[0],
+        "modern",
+    )
+    check(
+        "classify /movies/2016 is not legacy",
+        classify_path("/movies/2016", routes)[1],
+        "",
+    )
+    check(
+        "classify /2016/05/12/some-movie is legacy",
+        classify_path("/2016/05/12/some-movie/", routes)[0],
+        "legacy",
+    )
+    check(
+        "classify /2016/05/12/some-movie reason",
+        classify_path("/2016/05/12/some-movie/", routes)[1],
+        "dated-path",
+    )
+    check(
+        "classify /2016/he-said-she-said-1991-720p is legacy",
+        classify_path("/2016/he-said-she-said-1991-720p/", routes)[0],
+        "legacy",
+    )
+    check(
+        "classify /2016/he-said-she-said-1991-720p reason",
+        classify_path("/2016/he-said-she-said-1991-720p/", routes)[1],
+        "dated-path",
+    )
+    check(
+        "classify /reviews/my-review-slug is modern",
+        classify_path("/reviews/my-review-slug", routes)[0],
+        "modern",
+    )
+    check(
+        "classify /18-movies/anything is legacy",
+        classify_path("/18-movies/anything/", routes)[0],
+        "legacy",
+    )
+    check(
+        "classify /18-movies/anything reason",
+        classify_path("/18-movies/anything/", routes)[1],
+        "category-prefix",
+    )
+    check(
+        "a year inside a slug is not a dated path",
+        classify_path("/reviews/he-said-she-said-1991", routes)[0],
         "modern",
     )
 
