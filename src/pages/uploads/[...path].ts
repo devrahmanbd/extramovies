@@ -1,5 +1,6 @@
 import type { APIRoute } from "astro";
-import { createReadStream, promises as fs } from "node:fs";
+import { promises as fs } from "node:fs";
+import type { FileHandle } from "node:fs/promises";
 import path from "node:path";
 import { Readable } from "node:stream";
 
@@ -13,10 +14,18 @@ export const prerender = false;
  *
  * Traversal-proof (resolved path must stay under the uploads dir),
  * extension-gated content types, `Cache-Control: public, max-age=604800`
- * with a size+mtime ETag: a repeat GET carrying If-None-Match short-circuits
- * to a bodyless 304 (zero-byte revalidation). Bodies are streamed via
- * createReadStream. 404 otherwise. ETag/stream-derive failures never 500 —
- * fall back to plain 200 serving (fallback-first).
+ * with a WEAK size+mtime ETag (`W/"<size>-<mtimeMs>"`): size+mtime is not
+ * byte-identity, so the validator stays weak. A repeat GET carrying
+ * If-None-Match short-circuits to a bodyless 304 (zero-byte revalidation);
+ * matching is RFC 7232 weak comparison, so a list of validators and the
+ * strong form of the same opaque tag both revalidate.
+ *
+ * Bodies are streamed from an ALREADY-OPEN file handle: `createReadStream`
+ * reports ENOENT asynchronously, so a file deleted between stat and open
+ * would otherwise answer with a truncated 200. Opening first puts the open
+ * error in the await path → 404, and the live fd keeps the body complete
+ * even if the path is unlinked mid-flight. Any open/stream failure is a
+ * 404, never a 500 (a public image request must never 500).
  */
 
 const CONTENT_TYPES: Record<string, string> = {
@@ -37,20 +46,37 @@ function uploadDir(): string {
   return path.join(process.cwd(), "data", "uploads");
 }
 
-/** Strong validator from size + mtime (ms), nginx-style; quotes included. */
+/**
+ * WEAK validator from size + mtime (ms), nginx-style; quotes included.
+ * Weak because size+mtime is NOT byte-identity: two different payloads can
+ * share a size and an mtime, so the validator must not be used for range
+ * or byte-equality reasoning.
+ */
 function deriveEtag(stat: { size: number; mtimeMs: number }): string {
-  return `"${stat.size}-${Math.round(stat.mtimeMs)}"`;
+  return `W/"${stat.size}-${Math.round(stat.mtimeMs)}"`;
 }
 
-/** RFC 7232 If-None-Match: `*` or list membership (weak-prefixed tolerated). */
+/** Drop the `W/` weakness prefix so two tags can be compared opaquely. */
+function stripWeak(tag: string): string {
+  return tag.trim().replace(/^W\//i, "");
+}
+
+/**
+ * RFC 7232 If-None-Match: `*` or list membership, WEAK comparison
+ * (RFC 7232 §3.2 — `W/"x"` and `"x"` are the same validator for
+ * If-None-Match), so both the weak ETag we emit and the strong form of the
+ * same opaque tag revalidate.
+ */
 function ifNoneMatchMatches(request: Request, etag: string): boolean {
   const inm = request.headers.get("If-None-Match");
   if (!inm) return false;
   const trimmed = inm.trim();
   if (trimmed === "*") return true;
-  return trimmed
-    .split(",")
-    .some((c) => c.trim() === etag || c.trim() === `W/${etag}`);
+  const target = stripWeak(etag);
+  return trimmed.split(",").some((candidate) => {
+    const value = candidate.trim();
+    return value !== "" && stripWeak(value) === target;
+  });
 }
 
 export const GET: APIRoute = async ({ params, request }) => {
@@ -90,17 +116,39 @@ export const GET: APIRoute = async ({ params, request }) => {
     });
   }
 
-  // Stream the file (no whole-file buffer). If stream setup throws, fall
-  // back to the original buffered read so the response is still 200.
+  // Open the handle BEFORE streaming. `createReadStream` surfaces ENOENT
+  // asynchronously (the sync throw never fires), so a file deleted between
+  // stat and open used to answer with a truncated 200. Opening here makes
+  // the failure observable in the await path → 404. The open fd also pins
+  // the inode, so the streamed body stays complete if the path is unlinked
+  // mid-flight.
+  let handle: FileHandle;
+  try {
+    handle = await fs.open(resolved, "r");
+  } catch {
+    // ENOENT / ENOTDIR (deleted or renamed) — and any unexpected open
+    // error — is a 404. Never a 500: a public image request must not 500.
+    return new Response("not found", { status: 404 });
+  }
+
+  // Stream from the OPEN handle (no whole-file buffer). The handle owns the
+  // fd, so the stream closes it on end/close (autoClose) without leaving a
+  // raw fd behind a FileHandle — a hand-rolled `createReadStream(path, {fd,
+  // autoClose:true})` closes the fd behind the handle's back and makes
+  // Node's GC finalizer throw on the FileHandle.
   let body: BodyInit;
   try {
-    body = Readable.toWeb(createReadStream(resolved)) as unknown as BodyInit;
+    body = Readable.toWeb(
+      handle.createReadStream({ autoClose: true })
+    ) as unknown as BodyInit;
   } catch {
+    // Unexpected stream-setup failure: release the handle, answer 404.
     try {
-      body = await fs.readFile(resolved);
+      await handle.close();
     } catch {
-      return new Response("not found", { status: 404 });
+      /* already closed */
     }
+    return new Response("not found", { status: 404 });
   }
   const headers: Record<string, string> = {
     "Content-Type": contentType,

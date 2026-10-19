@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeEach, afterAll } from 'vitest';
+import { describe, expect, it, beforeEach, afterAll, vi } from 'vitest';
 import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
@@ -7,6 +7,13 @@ import path from 'node:path';
 // short-circuit repeated GETs to a bodyless 304 (If-None-Match), keep the
 // traversal guard a 404 (even when the escaped file actually exists outside
 // the uploads root), and never 500 on ETag/stream-derive failures.
+//
+// Review fix (weak ETag + open-first): the validator is WEAK
+// (`W/"<size>-<mtimeMs>"`) because size+mtime is not byte-identity, and
+// If-None-Match matching is RFC 7232 weak comparison (a list of validators
+// and the strong form of the same tag both revalidate). The route opens the
+// file handle BEFORE streaming, so an open failure (file removed between
+// stat and open) is a 404, never a truncated 200.
 // Temp dirs only (never data/uploads); the [...path] route module is invoked
 // with a params/request-shaped context like the Astro runtime provides.
 
@@ -77,6 +84,64 @@ describe('uploads route headers (CWV task 1)', () => {
     const res = (await GET(ctx(['logo.svg'], { 'If-None-Match': '*' }))) as Response;
     expect(res.status).toBe(304);
     expect(await res.text()).toBe('');
+  });
+
+  it('ETag is a WEAK validator: W/"<size>-<mtimeMs>"', async () => {
+    const { GET } = await route();
+    const res = (await GET(ctx(['logo.svg']))) as Response;
+    const etag = res.headers.get('ETag');
+    expect(etag).toBeTruthy();
+    // Weak prefix + opaque-tag shape (size-mtimeMs), quotes included.
+    expect(etag!.startsWith('W/')).toBe(true);
+    expect(etag).toMatch(/^W\/"\d+-\d+"$/);
+    const st = await fs.stat(path.join(uploadsDir, 'logo.svg'));
+    expect(etag).toBe(`W/"${st.size}-${Math.round(st.mtimeMs)}"`);
+  });
+
+  it('If-None-Match list containing the weak ETag → 304', async () => {
+    const { GET } = await route();
+    const first = (await GET(ctx(['logo.svg']))) as Response;
+    const etag = first.headers.get('ETag')!;
+    expect(etag).toBeTruthy();
+    // A list of validators, our weak ETag in the middle.
+    const res = (await GET(
+      ctx(['logo.svg'], { 'If-None-Match': `"stale-a", ${etag}, "stale-b"` })
+    )) as Response;
+    expect(res.status).toBe(304);
+    expect(await res.text()).toBe('');
+    expect(res.headers.get('ETag')).toBe(etag);
+  });
+
+  it('If-None-Match with the strong form of the same tag → 304 (weak comparison)', async () => {
+    const { GET } = await route();
+    const first = (await GET(ctx(['logo.svg']))) as Response;
+    const etag = first.headers.get('ETag')!;
+    const strong = etag.replace(/^W\//, '');
+    expect(strong).not.toBe(etag);
+    const res = (await GET(ctx(['logo.svg'], { 'If-None-Match': strong }))) as Response;
+    expect(res.status).toBe(304);
+    expect(await res.text()).toBe('');
+  });
+
+  it('open failure after a successful stat → 404, never a truncated 200', async () => {
+    const { GET } = await route();
+    // Deterministic: the file EXISTS (stat succeeds) but the open fails —
+    // exactly the stat/open race that used to answer with a truncated 200.
+    // createReadStream reports ENOENT asynchronously, so the route must
+    // open the handle first and turn the failure into a 404.
+    const enoent = Object.assign(
+      new Error('ENOENT: no such file or directory, open'),
+      { code: 'ENOENT' },
+    );
+    const spy = vi.spyOn(fs, 'open').mockRejectedValueOnce(enoent as never);
+    try {
+      const res = (await GET(ctx(['logo.svg']))) as Response;
+      expect(res.status).toBe(404);
+      expect(await res.text()).toBe('not found');
+      expect(res.headers.get('Cache-Control')).toBeNull();
+    } finally {
+      spy.mockRestore();
+    }
   });
 
   it('stale validator after mtime change → 200 again with a new ETag', async () => {
