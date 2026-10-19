@@ -123,6 +123,8 @@ describe('isStaticAssetPath', () => {
       '/_astro/index.hash.js',
       '/vendor/lib.min.js',
       '/uploads/nested/deep/file.bin',
+      '/.well-known/security.txt',
+      '/.well-known/apple-app-site-association',
     ]) {
       expect(isStaticAssetPath(p)).toBe(true);
     }
@@ -181,6 +183,7 @@ describe('createLegacyRouter (live assets are never legacy-scoped)', () => {
       'http://ww7.extramovies.org:80/9xplay.php?url=abc,player',
       'http://ww7.extramovies.org:80/2016/he-said-she-said-1991-720p/,unresolved',
       'http://ww7.extramovies.org:80/2017/05/12/film.jpg,uploaded image',
+      'http://ww7.extramovies.org:80/.well-known/security.txt,archived',
     ].join('\n'),
   );
   const r = createLegacyRouter(dir);
@@ -196,6 +199,12 @@ describe('createLegacyRouter (live assets are never legacy-scoped)', () => {
     ]) {
       expect(r.check(p)).toBeNull();
     }
+  });
+  it('passes /.well-known/ files through instead of 410', () => {
+    // The legacy corpus can hold an archived /.well-known/security.txt;
+    // the standard location for legitimate files must never be legacy-scoped.
+    expect(r.check('/.well-known/security.txt')).toBeNull();
+    expect(r.check('/.well-known/apple-app-site-association')).toBeNull();
   });
   it('exempts asset paths case-insensitively', () => {
     expect(r.check('/ROBOTS.TXT')).toBeNull();

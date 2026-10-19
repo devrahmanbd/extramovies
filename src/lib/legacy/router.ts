@@ -25,10 +25,13 @@ const ASSET_EXTENSIONS = new Set([
 /**
  * First path segments that hold live site assets — anything under them is
  * exempt regardless of extension (uploads, brand logos, built assets).
+ * `.well-known` is here too: it is the standard location for legitimate
+ * files (security.txt, apple-app-site-association, mta-sts.txt), and the
+ * legacy corpus can hold an archived /.well-known/ path that must not 410.
  */
 const ASSET_NAMESPACES = new Set([
   "brand", "uploads", "assets", "images", "img", "media",
-  "css", "js", "fonts", "static", "_astro", "vendor",
+  "css", "js", "fonts", "static", "_astro", "vendor", ".well-known",
 ]);
 
 /**
@@ -37,7 +40,8 @@ const ASSET_NAMESPACES = new Set([
  *   (a) a root-level file with a static-asset extension (/robots.txt,
  *       /favicon.ico, /sitemap.xml);
  *   (b) any path whose FIRST segment is a known asset namespace
- *       (/brand/<preset>/logo.svg, /uploads/hero.png, /_astro/x.js).
+ *       (/brand/<preset>/logo.svg, /uploads/hero.png, /_astro/x.js,
+ *       /.well-known/security.txt).
  * Everything else stays in legacy scope: the WordPress-era corpus holds
  * uploaded images under dated paths (e.g. /2017/05/12/film.jpg) and those
  * must still 410 (or 301 when mapped), not pass through to a 404.
