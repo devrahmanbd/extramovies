@@ -11,21 +11,27 @@ Part A) runs from a single command instead of five manual exports:
 Auth is delegated to scripts/seo/gsc_api.py (key loading, JWT signing, scope
 escalation, api_request). Everything below is stdlib-only logic of our own.
 
-Every `page` row is classified MODERN or LEGACY:
+Every `page` row is classified MODERN or LEGACY. The LEGACY rules run FIRST,
+so a legacy shape stays legacy even under a modern prefix (/movies/9xplay.php
+and /reviews/18-movies/x are legacy):
 
-  MODERN  the path is part of the site's own route set (src/pages) or one of
-          the known public routes (/, /reviews, /movies, /reviews/<slug>,
-          /movies/<id>, /series/<id>).
-  LEGACY  everything else — category prefixes (18-movies/, web-series/,
-          300mb-movies/), pagination (page/N/), feeds, *.php endpoints, dated
-          paths, numeric pages. Legacy rows always carry a reason: an
-          ambiguous path is LEGACY-with-reason, never silently modern.
+  LEGACY  a *.php segment, a legacy category prefix (18-movies/,
+          web-series/, 300mb-movies/), pagination (page/N/), feeds, dated
+          paths, numeric pages, and a non-numeric id under /movies/ or
+          /series/ (the live routes are tmdb ids).
+  MODERN  everything else that is part of the site's own route set
+          (src/pages) or one of the known public routes (/, /reviews,
+          /movies, /reviews/<slug>, /movies/<id>, /series/<id>).
+
+Legacy rows always carry a reason: an ambiguous path is LEGACY-with-reason,
+never silently modern.
 
 The service account (extramovies-gsc-reader@hsc2025.iam.gserviceaccount.com)
 is not yet a member of the GSC property, so every live call currently sees an
 empty site list. Until it is added, the tool prints the exact UI steps to add
-the account, writes a `skipped` snapshot and exits 0 — never a crash, never a
-non-zero exit for an auth state.
+the account, writes NO snapshot (an empty baseline would be a trap for the
+next --against) and exits 3 — never a crash, never a green "0" while
+collecting nothing.
 
 Usage:
   python3 scripts/seo/gsc_snapshot.py [--site sc-domain:extramovies.org] \\
@@ -33,7 +39,8 @@ Usage:
       [--inspect-top N] [--no-inspect] [--selftest]
 
 Exit codes: 0 ok | 1 regression (clicks/impressions down > 20%) | 2 usage error
-             | 3 property mismatch (nothing compared).
+             | 3 nothing compared (skipped run, property mismatch, window
+             mismatch).
 """
 
 from __future__ import annotations
@@ -103,17 +110,32 @@ MODERN_PATTERNS = (
     re.compile(r"^/series/[^/]+$"),
 )
 
-# Mirrors scripts/legacy/archive_recover.py and src/lib/legacy/router.ts so the
-# three tools agree on what a legacy path looks like.
-CATEGORY_RE = re.compile(
-    r"^(?:\d+(?:mb)?-movies|movies|movie|web-series|webseries|tv-shows|"
-    r"tv|series|dual-audio-movies|hindi-dubbed-movies|south-movies|"
-    r"punjabi-movies|hindi-movies|bollywood-movies|hollywood-movies|"
-    r"adult-movies)$"
-)
+# Legacy category prefixes seen in the corpus (18-movies/, 300mb-movies/,
+# web-series/, ...). The bare "movies" / "movie" / "tv" / "series" names are
+# deliberately NOT here: they collide with the site's own modern routes
+# (/movies, /series/<id>), and a non-numeric id under those is caught by the
+# numeric-id rule below instead.
+LEGACY_CATEGORY_RE = re.compile(r"^\d+(?:mb)?-movies$")
+LEGACY_CATEGORY_SEGMENTS = {
+    "web-series",
+    "webseries",
+    "tv-shows",
+    "dual-audio-movies",
+    "hindi-dubbed-movies",
+    "south-movies",
+    "punjabi-movies",
+    "hindi-movies",
+    "bollywood-movies",
+    "hollywood-movies",
+    "adult-movies",
+}
 PAGINATION_RE = re.compile(r"^page/(\d+)$")
 YEAR_RE = re.compile(r"^(19|20)\d{2}$")
 NUMERIC_RE = re.compile(r"^\d+$")
+
+# The live routes are /movies/<tmdbId> and /series/<tmdbId>: the id is a
+# number. Anything else under those prefixes is a legacy URL.
+ID_ROUTE_RE = re.compile(r"^/(movies|series)/([^/]+)$")
 
 # Routes that exist but must never be indexed (still MODERN, but flagged).
 NON_INDEXABLE_NOTES = {
@@ -172,27 +194,40 @@ def route_set(root: Path | None = None) -> list[tuple[re.Pattern, str]]:
     return found
 
 
+def is_legacy_category(segment: str) -> bool:
+    """True for a legacy WordPress category segment (18-movies, web-series...)."""
+    value = segment.lower()
+    return bool(LEGACY_CATEGORY_RE.match(value)) or value in LEGACY_CATEGORY_SEGMENTS
+
+
 def legacy_reason(path: str) -> str:
-    """Why a path that is not in the route set is legacy."""
+    """Why a path is legacy, or "" when no legacy rule matches it.
+
+    These rules take precedence over the modern route set: a legacy shape
+    stays legacy even under /movies/ or /reviews/.
+    """
     parts = [p for p in path.split("/") if p]
     if not parts:
-        return "not-in-route-set"
+        return ""
     lowered = [p.lower() for p in parts]
     if any(p.endswith(".php") for p in lowered):
         return "php-endpoint"
-    if CATEGORY_RE.match(lowered[0]):
+    if any(is_legacy_category(p) for p in lowered):
         return "category-prefix"
-    if PAGINATION_RE.match("/".join(lowered[:2])):
-        return "pagination"
-    if lowered[-1] in ("feed", "comment", "comments"):
+    for index in range(len(lowered) - 1):
+        if PAGINATION_RE.match(f"{lowered[index]}/{lowered[index + 1]}"):
+            return "pagination"
+    if lowered[0] in ("feed", "comment", "comments") or lowered[-1] in (
+        "feed",
+        "comment",
+        "comments",
+    ):
         return "feed"
-    if YEAR_RE.match(lowered[0]):
+    if any(YEAR_RE.match(p) for p in parts):
         return "dated-path"
     if len(parts) == 1 and NUMERIC_RE.match(parts[0]):
         return "numeric-page"
-    if any(YEAR_RE.match(p) for p in parts):
-        return "dated-path"
-    return "not-in-route-set"
+    return ""
 
 
 def normalize_path(raw: str) -> str:
@@ -209,12 +244,24 @@ def normalize_path(raw: str) -> str:
 
 
 def classify_path(raw: str, routes: list[tuple[re.Pattern, str]]) -> tuple[str, str]:
-    """Return (classification, reason) for one page key."""
+    """Return (classification, reason) for one page key.
+
+    Legacy rules run FIRST: a legacy shape stays legacy even when it sits
+    under a modern prefix (/movies/9xplay.php, /reviews/18-movies/x). Only
+    then is the modern route set consulted, and /movies/<id> and /series/<id>
+    count as modern only for a numeric id (the live routes are tmdb ids).
+    """
     clean = normalize_path(raw).split("#", 1)[0].split("?", 1)[0]
     if not clean:
         clean = "/"
     if len(clean) > 1:
         clean = clean.rstrip("/")
+    reason = legacy_reason(clean)
+    if reason:
+        return "legacy", reason
+    id_match = ID_ROUTE_RE.match(clean)
+    if id_match and not id_match.group(2).isdigit():
+        return "legacy", "non-numeric-id"
     for pattern, note in routes:
         if pattern.match(clean):
             return "modern", note
@@ -223,7 +270,7 @@ def classify_path(raw: str, routes: list[tuple[re.Pattern, str]]) -> tuple[str, 
     for pattern in MODERN_PATTERNS:
         if pattern.match(clean):
             return "modern", ""
-    return "legacy", legacy_reason(clean)
+    return "legacy", "not-in-route-set"
 
 
 # --- api layer --------------------------------------------------------------
@@ -244,8 +291,12 @@ def site_origin(site: str) -> str:
     return "https://" + value.strip("/")
 
 
-def property_key(site: str) -> str:
-    """Comparable host for a property ('sc-domain:' / scheme / www / path off)."""
+def property_host(site: str) -> str:
+    """Comparable HOST for a property ('sc-domain:' / scheme / www / path off).
+
+    Used only to find the property in the visible site list: the operator may
+    type either form. It is NOT the identity used to compare two snapshots.
+    """
     value = (site or "").strip().lower()
     if value.startswith("sc-domain:"):
         value = value[len("sc-domain:") :]
@@ -254,6 +305,34 @@ def property_key(site: str) -> str:
     if value.startswith("www."):
         value = value[4:]
     return value
+
+
+def property_identity(site: str) -> str:
+    """Strict identity of a GSC property.
+
+    A domain property and a URL-prefix property are DIFFERENT properties, even
+    on the same host: sc-domain:extramovies.org and https://extramovies.org/
+    must never be compared against each other.
+    """
+    value = (site or "").strip().lower()
+    if value.startswith("sc-domain:"):
+        return "domain:" + value[len("sc-domain:") :].strip("/")
+    if "://" in value:
+        parsed = urllib.parse.urlparse(value)
+        path = parsed.path.rstrip("/")
+        return f"prefix:{parsed.scheme}://{parsed.netloc}{path}"
+    return "domain:" + value.strip("/")
+
+
+def site_label(site: str) -> str:
+    """A human label for a property (used in messages)."""
+    value = (site or "").strip()
+    if value.startswith("sc-domain:"):
+        return value[len("sc-domain:") :].strip("/")
+    match = re.match(r"^https?://([^/]+)", value)
+    if match:
+        return match.group(1)
+    return value.strip("/")
 
 
 def list_sites() -> list[dict]:
@@ -270,10 +349,10 @@ def resolve_property(site: str) -> tuple[str | None, list[dict]]:
     credential cannot see the property (the current real state).
     """
     entries = list_sites()
-    target = property_key(site)
+    target = property_host(site)
     for entry in entries:
         url = str(entry.get("siteUrl") or "")
-        if property_key(url) == target:
+        if property_host(url) == target:
             return url, entries
     return None, entries
 
@@ -593,8 +672,11 @@ def diff_snapshots(baseline: dict, current: dict) -> dict:
 
     Returns {"lines": [...], "regressed": bool, "summary": str,
              "mismatch": bool}. `regressed` is True when total clicks or total
-    impressions dropped by more than REGRESSION_THRESHOLD; `mismatch` is True
-    when the two snapshots describe different properties (nothing compared).
+    impressions dropped by more than REGRESSION_THRESHOLD. `mismatch` is True
+    when the two snapshots are not like-for-like (different property identity,
+    different window length, or a side with no data) — then nothing is
+    compared at all, so a 90-day baseline can never fire a false regression
+    against a 28-day run.
     """
     lines: list[str] = []
 
@@ -608,20 +690,33 @@ def diff_snapshots(baseline: dict, current: dict) -> dict:
             "lines": lines,
             "regressed": False,
             "summary": "nothing to compare (one side has no data)",
-            "mismatch": False,
+            "mismatch": True,
         }
 
-    if property_key(str(baseline.get("site") or "")) != property_key(
-        str(current.get("site") or "")
-    ):
+    base_identity = property_identity(str(baseline.get("site") or ""))
+    cur_identity = property_identity(str(current.get("site") or ""))
+    if base_identity != cur_identity:
         lines.append(
-            f"  property mismatch: baseline {baseline.get('site')} vs current"
-            f" {current.get('site')} - nothing compared"
+            f"  property mismatch: baseline {baseline.get('site')}"
+            f" [{base_identity}] vs current {current.get('site')}"
+            f" [{cur_identity}] - nothing compared"
         )
         return {
             "lines": lines,
             "regressed": False,
             "summary": "property mismatch",
+            "mismatch": True,
+        }
+
+    if baseline.get("days") != current.get("days"):
+        lines.append(
+            f"  window mismatch: baseline {baseline.get('days')}d vs current"
+            f" {current.get('days')}d - nothing compared"
+        )
+        return {
+            "lines": lines,
+            "regressed": False,
+            "summary": "window mismatch",
             "mismatch": True,
         }
 
@@ -641,11 +736,6 @@ def diff_snapshots(baseline: dict, current: dict) -> dict:
         f"   impressions {base_impressions} -> {cur_impressions}"
         f" ({_delta(base_impressions, cur_impressions)}, -{impressions_drop * 100:.1f}%)"
     )
-    if baseline.get("days") != current.get("days"):
-        lines.append(
-            f"  note: different window sizes (baseline {baseline.get('days')}d,"
-            f" current {current.get('days')}d)"
-        )
 
     base_pages = {row["path"]: row for row in (baseline.get("pages") or [])}
     cur_pages = {row["path"]: row for row in (current.get("pages") or [])}
@@ -706,7 +796,8 @@ def diff_snapshots(baseline: dict, current: dict) -> dict:
     for path in gone_paths[:50]:
         row = base_map[path]
         lines.append(
-            f"    GONE {path}  was clicks {row['clicks']}  impressions {row['impressions']}"
+            f"    DISAPPEARED {path}  was clicks {row['clicks']}"
+            f"  impressions {row['impressions']}"
         )
     if len(gone_paths) > 50:
         lines.append(f"    ... {len(gone_paths) - 50} more disappeared legacy path(s)")
@@ -747,11 +838,37 @@ def is_default_api_base() -> bool:
     return str(gsc_api.API).rstrip("/") == DEFAULT_API_BASE
 
 
+def docs_seo_dir() -> Path:
+    return repo_root() / "docs" / "seo"
+
+
+def is_inside_docs_seo(path: Path) -> bool:
+    """True when a path lives in the committed baseline directory."""
+    try:
+        path.resolve().relative_to(docs_seo_dir().resolve())
+        return True
+    except (ValueError, OSError):
+        return False
+
+
+def snapshot_out_allowed(path: Path, snapshot: dict) -> bool:
+    """A snapshot with no data may never be written into docs/seo/.
+
+    The committed baseline directory holds real captures only: an empty
+    "skipped" file there would become the next --against target and could fake
+    a regression.
+    """
+    if snapshot.get("status") == "ok":
+        return True
+    return not is_inside_docs_seo(path)
+
+
 # --- the "not a member" path ------------------------------------------------
 
 
 def print_not_a_member(site: str, entries: list[dict]) -> None:
     visible = ", ".join(str(entry.get("siteUrl")) for entry in entries) or "(none)"
+    label = site_label(site)
     log("")
     log("service account not a member of the property")
     log("  the credential authenticates, but the GSC property exposes no sites to it")
@@ -760,7 +877,7 @@ def print_not_a_member(site: str, entries: list[dict]) -> None:
     log("")
     log("  add the service account once, by hand:")
     log(f"    1. open {GSC_SETTINGS_URL}")
-    log("    2. pick the property (extramovies.org) -> Users and permissions")
+    log(f"    2. pick the property ({label}) -> Users and permissions")
     log(f"    3. 'Add user' -> paste {SA_EMAIL}")
     log("    4. permission: Full")
     log("    5. Save")
@@ -823,41 +940,34 @@ def main(argv: list[str] | None = None, queue_path: Path | None = None) -> int:
 
     routes = route_set()
 
+    # A skipped run collects nothing: it must never write a file (an empty
+    # "skipped" baseline would be the next --against target and could fake a
+    # regression), and it must never look green. Exit 3 = nothing compared.
     try:
         visible, entries = resolve_property(site)
     except SystemExit as exc:
-        reason = f"cannot read the property list ({exc})"
-        snapshot = skipped_snapshot(site, args.days, reason)
-        write_snapshot(out_path, snapshot)
-        warn(f"gsc_snapshot: {reason}")
+        warn(f"gsc_snapshot: cannot read the property list ({exc})")
         print_not_a_member(site, [])
-        log(f"gsc_snapshot: wrote skipped snapshot {out_path}")
-        return 0
+        log("gsc_snapshot: nothing captured - no snapshot written")
+        return 3
 
     if visible is None:
-        snapshot = skipped_snapshot(
-            site, args.days, "service account is not a member of the property"
-        )
-        write_snapshot(out_path, snapshot)
         print_not_a_member(site, entries)
-        log(f"gsc_snapshot: wrote skipped snapshot {out_path}")
+        log("gsc_snapshot: nothing captured - no snapshot written")
         if queue_path.exists():
             warn(
                 f"gsc_snapshot: {queue_path} is from an earlier run and is now"
                 " stale - this run captured nothing"
             )
-        return 0
+        return 3
 
     site = visible
     try:
         snapshot, _ = capture(site, args.days, routes, today)
     except SystemExit as exc:
-        reason = f"the API call failed ({exc})"
-        snapshot = skipped_snapshot(site, args.days, reason)
-        write_snapshot(out_path, snapshot)
-        warn(f"gsc_snapshot: {reason}")
-        log(f"gsc_snapshot: wrote skipped snapshot {out_path}")
-        return 0
+        warn(f"gsc_snapshot: the API call failed ({exc})")
+        log("gsc_snapshot: nothing captured - no snapshot written")
+        return 3
 
     universe = legacy_universe(
         snapshot.get("pages") or [], snapshot.get("pagesLongWindow") or []
@@ -880,6 +990,14 @@ def main(argv: list[str] | None = None, queue_path: Path | None = None) -> int:
         "capped": dropped > 0,
         "path": str(queue_path),
     }
+
+    if not snapshot_out_allowed(out_path, snapshot):
+        warn(
+            f"gsc_snapshot: refusing to write a snapshot with no data into"
+            f" {out_path} - the committed baseline directory holds real"
+            " captures only"
+        )
+        return 3
 
     write_snapshot(out_path, snapshot)
 
@@ -1127,6 +1245,7 @@ def selftest() -> int:
     check("classify / is modern", classify_path("/", routes)[0], "modern")
     check("classify /reviews/<slug> is modern", classify_path("/reviews/dune-part-two", routes)[0], "modern")
     check("classify /movies/<id> is modern", classify_path("/movies/693134", routes)[0], "modern")
+    check("classify /movies/<numeric id> is modern", classify_path("/movies/12345", routes)[0], "modern")
     check("classify /series/<id> is modern", classify_path("/series/1399", routes)[0], "modern")
     check("classify /reviews is modern", classify_path("/reviews", routes)[0], "modern")
     check("classify 18-movies/ is legacy", classify_path("/18-movies/18-the-evil-dead-1981", routes)[0], "legacy")
@@ -1137,6 +1256,93 @@ def selftest() -> int:
     check("classify /page/2/ is legacy", classify_path("/page/2/", routes)[1], "pagination")
     check("classify /2016/foo is legacy", classify_path("/2016/foo", routes)[1], "dated-path")
     check("classify /random/unknown is legacy", classify_path("/random/unknown", routes)[0], "legacy")
+
+    # --- fix round 1: legacy rules win over the modern route set -----------
+    check(
+        "classify /movies/9xplay.php is legacy",
+        classify_path("/movies/9xplay.php", routes)[0],
+        "legacy",
+    )
+    check(
+        "classify /movies/9xplay.php reason",
+        classify_path("/movies/9xplay.php", routes)[1],
+        "php-endpoint",
+    )
+    check(
+        "classify /reviews/x.php is legacy",
+        classify_path("/reviews/x.php", routes)[0],
+        "legacy",
+    )
+    check(
+        "classify /reviews/18-movies/x is legacy",
+        classify_path("/reviews/18-movies/x", routes)[1],
+        "category-prefix",
+    )
+    check(
+        "classify /movies/page/2 is legacy",
+        classify_path("/movies/page/2", routes)[1],
+        "pagination",
+    )
+    check(
+        "classify /reviews/feed is legacy",
+        classify_path("/reviews/feed", routes)[1],
+        "feed",
+    )
+    check(
+        "classify /movies/2016/x is legacy",
+        classify_path("/movies/2016/x", routes)[1],
+        "dated-path",
+    )
+    check(
+        "classify /movies/<non-numeric> is legacy",
+        classify_path("/movies/dune-part-two", routes)[0],
+        "legacy",
+    )
+    check(
+        "classify /movies/<non-numeric> reason",
+        classify_path("/movies/dune-part-two", routes)[1],
+        "non-numeric-id",
+    )
+    check(
+        "classify /series/<non-numeric> is legacy",
+        classify_path("/series/some-show", routes)[0],
+        "legacy",
+    )
+    check(
+        "classify /movies/<numeric> is modern",
+        classify_path("/movies/12345", routes)[0],
+        "modern",
+    )
+    check(
+        "classify /reviews/<slug> is modern",
+        classify_path("/reviews/dune-part-two", routes)[0],
+        "modern",
+    )
+
+    # --- fix round 1: property identity ------------------------------------
+    check(
+        "domain and url-prefix properties are different",
+        property_identity("sc-domain:extramovies.org")
+        == property_identity("https://extramovies.org/"),
+        False,
+    )
+    check(
+        "same domain property keeps its identity",
+        property_identity("sc-domain:extramovies.org")
+        == property_identity("sc-domain:extramovies.org"),
+        True,
+    )
+    check(
+        "url-prefix paths are different properties",
+        property_identity("https://extramovies.org/")
+        == property_identity("https://extramovies.org/blog"),
+        False,
+    )
+    check(
+        "property label drops the property type",
+        site_label("sc-domain:extramovies.org"),
+        "extramovies.org",
+    )
 
     with stub_server() as origin:
         with patched_api(origin):
@@ -1310,15 +1516,71 @@ def selftest() -> int:
                 )
                 check("property mismatch exits 3", code, 3)
 
+                # A domain property and a url-prefix property are not like-for-like.
+                prefix_base = json.loads(json.dumps(base))
+                prefix_base["site"] = "https://extramovies.org/"
+                prefix_file = tmp_path / "prefix.json"
+                write_snapshot(prefix_file, prefix_base)
+                code = run_cli(
+                    "--site", "sc-domain:extramovies.org",
+                    "--days", "28",
+                    "--out", str(out_file),
+                    "--against", str(prefix_file),
+                    "--no-inspect",
+                )
+                check("domain vs url-prefix exits 3", code, 3)
+
+                # A different window length is not like-for-like either: a
+                # 90-day baseline must never fire a regression against a
+                # 28-day run.
+                window_base = json.loads(json.dumps(base))
+                window_base["days"] = 90
+                window_base["totals"] = {
+                    "clicks": base["totals"]["clicks"] * 4,
+                    "impressions": base["totals"]["impressions"] * 4,
+                }
+                window_file = tmp_path / "window.json"
+                write_snapshot(window_file, window_base)
+                code = run_cli(
+                    "--site", "sc-domain:extramovies.org",
+                    "--days", "28",
+                    "--out", str(out_file),
+                    "--against", str(window_file),
+                    "--no-inspect",
+                )
+                check("window mismatch exits 3", code, 3)
+
+                # The diff calls removed legacy paths DISAPPEARED.
+                diff_result = diff_snapshots(
+                    base,
+                    {
+                        **base,
+                        "pages": [row for row in base["pages"] if row["path"] != "/feed/"],
+                    },
+                )
+                diff_text = "\n".join(diff_result["lines"])
+                check(
+                    "diff labels removed legacy paths DISAPPEARED",
+                    "DISAPPEARED /feed/" in diff_text,
+                    True,
+                )
+                check(
+                    "diff no longer says GONE",
+                    "GONE" in diff_text,
+                    False,
+                )
+
                 # --- the "not a member" path --------------------------------
+                skipped_file = tmp_path / "skipped.json"
+                docs_seo_before = sorted(p.name for p in docs_seo_dir().glob("*"))
                 buffer = io.StringIO()
                 with contextlib.redirect_stdout(buffer):
                     code = main([
                         "--site", "sc-domain:not-a-member.test",
-                        "--out", str(tmp_path / "skipped.json"),
+                        "--out", str(skipped_file),
                     ])
                 output = buffer.getvalue()
-                check("not a member exits 0", code, 0)
+                check("not a member exits 3", code, 3)
                 check(
                     "not a member says so",
                     "service account not a member of the property" in output,
@@ -1329,11 +1591,36 @@ def selftest() -> int:
                     GSC_SETTINGS_URL in output and SA_EMAIL in output,
                     True,
                 )
-                skipped = json.loads(
-                    (tmp_path / "skipped.json").read_text(encoding="utf-8")
+                check(
+                    "not a member names the requested site",
+                    "sc-domain:not-a-member.test" in output,
+                    True,
                 )
-                check("skipped snapshot status", skipped.get("status"), "skipped")
-                check("skipped snapshot has a reason", bool(skipped.get("reason")), True)
+                check(
+                    "not a member writes no snapshot",
+                    skipped_file.exists(),
+                    False,
+                )
+                check(
+                    "not a member writes nothing into docs/seo",
+                    sorted(p.name for p in docs_seo_dir().glob("*")),
+                    docs_seo_before,
+                )
+                check(
+                    "a snapshot with no data may not be written into docs/seo",
+                    snapshot_out_allowed(
+                        docs_seo_dir() / "baseline-gsc-2026-10-20.json",
+                        skipped_snapshot("sc-domain:x", 28, "no data"),
+                    ),
+                    False,
+                )
+                check(
+                    "a real snapshot may be written into docs/seo",
+                    snapshot_out_allowed(
+                        docs_seo_dir() / "baseline-gsc-2026-10-20.json", base
+                    ),
+                    True,
+                )
 
     if failures:
         print(f"selftest: {len(failures)} FAILURE(S): {failures}")
