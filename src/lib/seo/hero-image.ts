@@ -1,6 +1,10 @@
 /**
  * Hero image intrinsic-size + preload helpers (CWV task 2).
  *
+ * Also owns the hero SLIDE selection (which tile is the first/eager one), so
+ * the page (head preload) and the component (rendered <img src>) derive the
+ * LCP image from one place and can never drift apart.
+ *
  * The intrinsic size has two independent sources, because the URL alone
  * cannot disambiguate a TMDB variant: w780 is used for BOTH posters and
  * backdrops in this repo (posters `w780`/`w500`, backdrops `w780`/`w1280`).
@@ -119,4 +123,53 @@ export function heroPreloadLinkAttrs(
     height: preload.height,
     fetchpriority: "high",
   };
+}
+
+// ---------------------------------------------------------------------------
+// Hero slide selection (discovery theme)
+//
+// The hero slider's slides are the tiles that carry backdrop art, in pool
+// order, each title once. The pool order is the caller's business (the
+// discovery homepage: trending, then popular) — the same pool always yields
+// the same slides, and therefore the same FIRST slide.
+//
+// The first slide is the LCP element of the discovery homepage. The page
+// derives its URL with `selectHeroFirstUrl` to build the head preload and
+// hands the SAME URL to the component for slide 0's <img src>, so the
+// preload href and the rendered src can never drift.
+// ---------------------------------------------------------------------------
+
+/** Cap on the number of hero slides (the slider length). */
+const HERO_SLIDE_LIMIT = 10;
+
+/** The minimal shape a hero slide must have (structural — no domain import). */
+export interface HeroSlideTile {
+  tmdbId: number;
+  backdropUrl: string | null;
+}
+
+/**
+ * The hero slides: tiles with backdrop art, first occurrence wins (a title
+ * never appears twice), capped at HERO_SLIDE_LIMIT. Tiles without artwork
+ * are skipped — they are not slides.
+ */
+export function selectHeroSlides<T extends HeroSlideTile>(tiles: T[]): T[] {
+  const seen = new Set<number>();
+  const slides: T[] = [];
+  for (const tile of tiles) {
+    if (!tile.backdropUrl) continue;
+    if (seen.has(tile.tmdbId)) continue;
+    seen.add(tile.tmdbId);
+    slides.push(tile);
+    if (slides.length >= HERO_SLIDE_LIMIT) break;
+  }
+  return slides;
+}
+
+/**
+ * The FIRST hero slide's backdrop URL — the LCP image — or null when the
+ * pool carries no hero artwork (no preload, no empty href, ever).
+ */
+export function selectHeroFirstUrl(tiles: HeroSlideTile[]): string | null {
+  return selectHeroSlides(tiles)[0]?.backdropUrl ?? null;
 }

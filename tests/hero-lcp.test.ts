@@ -6,6 +6,8 @@ import {
   heroImageSize,
   heroImageVariant,
   heroPreloadLinkAttrs,
+  selectHeroFirstUrl,
+  selectHeroSlides,
 } from '../src/lib/seo/hero-image';
 import { withFontDisplaySwap } from '../src/lib/seo/fonts';
 
@@ -68,6 +70,17 @@ const UPLOAD_FIXTURE = { backdropUrl: '/uploads/cover-backdrop.jpg' };
  */
 const DISCOVERY_HERO_FIXTURE =
   'https://image.tmdb.org/t/p/w1280/9PFonBhy4cQy7Jz20NpMygczOkv.jpg';
+
+/**
+ * Discovery pool fixture (trending, then popular): a tile without artwork is
+ * not a slide, a repeated title is one slide, order is pool order.
+ */
+const DISCOVER_POOL = [
+  { tmdbId: 1, backdropUrl: 'https://image.tmdb.org/t/p/w1280/a.jpg' },
+  { tmdbId: 2, backdropUrl: null },
+  { tmdbId: 1, backdropUrl: 'https://image.tmdb.org/t/p/w1280/a.jpg' },
+  { tmdbId: 3, backdropUrl: 'https://image.tmdb.org/t/p/w1280/c.jpg' },
+];
 
 describe('hero image intrinsic size (CWV task 2)', () => {
   it('w1280 backdrop resolves to 1280x720', () => {
@@ -242,8 +255,9 @@ describe('hero markup wiring: publication home + magazine (CWV task 2)', () => {
 
   it('the homepage passes the hero preload to the layout', () => {
     const index = read('src/pages/index.astro');
+    // Publication: the featured cover. Discovery: the first hero slide.
     expect(index).toContain(
-      'const coverPreload = isDiscovery\n  ? null\n  : heroImagePreload(featured?.backdropUrl ?? null, "backdrop");',
+      'const coverPreload = isDiscovery\n  ? heroImagePreload(discoveryHeroFirstUrl, "backdrop")\n  : heroImagePreload(featured?.backdropUrl ?? null, "backdrop");',
     );
     expect(index).toContain('preloadImage={coverPreload}');
   });
@@ -267,27 +281,47 @@ describe('hero markup wiring: publication home + magazine (CWV task 2)', () => {
   });
 });
 
-describe('hero markup wiring: discovery home (CWV follow-up)', () => {
-  const discover = () => read('src/components/discover/DiscoverHome.astro');
-
-  it('the discovery hero preload href is the first (eager) slide image URL', () => {
-    const src = discover();
-    // The preload URL is read from the same source as the eager <img src>.
-    expect(src).toContain('const heroFirstUrl = heroSlides[0]?.backdropUrl ?? null;');
-    expect(src).toContain('const heroPreload = heroImagePreload(heroFirstUrl, "backdrop");');
-    // Slide 0 is the only eager / fetchpriority=high image in the markup.
-    expect(src).toMatch(/loading=\{i === 0 \? "eager" : "lazy"\}/);
-    expect(src).toMatch(/fetchpriority=\{i === 0 \? "high" : undefined\}/);
-    // ...and the eager image's src is that very variable, so href === src.
-    expect(src).toContain('const slideUrl = i === 0 ? heroFirstUrl : t.backdropUrl;');
-    expect(src).toMatch(/<img\s+class="d-hero-bg"\s+src=\{slideUrl!\}/);
+describe('hero slide selection: the shared derivation (CWV fix round 1)', () => {
+  it('only tiles with backdrop art become slides, each title once, in pool order', () => {
+    expect(selectHeroSlides(DISCOVER_POOL).map((t) => t.tmdbId)).toEqual([1, 3]);
   });
 
-  it('the discovery preload is emitted through the shared attribute bag', () => {
-    const src = discover();
-    expect(src).toContain('heroPreloadLinkAttrs');
-    expect(src).toMatch(/<link \{\.\.\.heroPreloadLinkAttrs\(heroPreload\)\} \/>/);
-    // The exact attribute set the discovery preload carries (known variant).
+  it('the first slide URL is the LCP image; null when the pool has no artwork', () => {
+    expect(selectHeroFirstUrl(DISCOVER_POOL)).toBe(
+      'https://image.tmdb.org/t/p/w1280/a.jpg',
+    );
+    expect(selectHeroFirstUrl([])).toBeNull();
+    expect(selectHeroFirstUrl([{ tmdbId: 9, backdropUrl: null }])).toBeNull();
+  });
+
+  it('the slide list is capped', () => {
+    const many = Array.from({ length: 14 }, (_, i) => ({
+      tmdbId: i + 1,
+      backdropUrl: `https://image.tmdb.org/t/p/w1280/${i + 1}.jpg`,
+    }));
+    expect(selectHeroSlides(many)).toHaveLength(10);
+    expect(selectHeroFirstUrl(many)).toBe('https://image.tmdb.org/t/p/w1280/1.jpg');
+  });
+
+  it('the preload of the selected URL: size pair only for a known variant', () => {
+    expect(heroImagePreload(selectHeroFirstUrl(DISCOVER_POOL), 'backdrop')).toEqual({
+      href: 'https://image.tmdb.org/t/p/w1280/a.jpg',
+      width: 1280,
+      height: 720,
+    });
+    // Unknown variant: preload kept, size pair omitted.
+    expect(
+      heroImagePreload(
+        selectHeroFirstUrl([{ tmdbId: 1, backdropUrl: '/uploads/x.jpg' }]),
+        'backdrop',
+      ),
+    ).toEqual({ href: '/uploads/x.jpg' });
+    // No hero image -> no descriptor -> no link -> no empty href.
+    expect(heroImagePreload(selectHeroFirstUrl([]), 'backdrop')).toBeNull();
+    expect(
+      heroPreloadLinkAttrs(heroImagePreload(selectHeroFirstUrl([]), 'backdrop')),
+    ).toBeNull();
+    // The exact attribute set the head link carries.
     expect(
       heroPreloadLinkAttrs(heroImagePreload(DISCOVERY_HERO_FIXTURE, 'backdrop')),
     ).toEqual({
@@ -299,50 +333,71 @@ describe('hero markup wiring: discovery home (CWV follow-up)', () => {
       fetchpriority: 'high',
     });
   });
+});
 
-  it('no hero image: no preload link at all', () => {
-    // Helper level: no URL -> no descriptor -> no link attributes.
-    expect(heroImagePreload(null, 'backdrop')).toBeNull();
-    expect(heroPreloadLinkAttrs(heroImagePreload(null, 'backdrop'))).toBeNull();
+describe('discovery home hero preload: head emission + single source (CWV fix round 1)', () => {
+  const index = () => read('src/pages/index.astro');
+  const discover = () => read('src/components/discover/DiscoverHome.astro');
+  const base = () => read('src/layouts/Base.astro');
+
+  it('the page derives the discovery hero URL with the shared selection', () => {
+    expect(index()).toContain(
+      'const discoveryHeroFirstUrl = selectHeroFirstUrl([...trending, ...popular]);',
+    );
+  });
+
+  it('the preload rides the layout head channel, not the body', () => {
+    // The page hands the descriptor to the layout ...
+    expect(index()).toContain('preloadImage={coverPreload}');
+    expect(index()).toContain('? heroImagePreload(discoveryHeroFirstUrl, "backdrop")');
+    // ... and the layout emits the ONE link, inside <head>.
+    expect(base()).toMatch(/<link\s+\{\.\.\.heroPreloadLinkAttrs\(preloadImage\)\}\s*\/>/);
+    const head = base().slice(0, base().indexOf('</head>'));
+    expect(head).toContain('heroPreloadLinkAttrs(preloadImage)');
+    // The component emits no link of its own: a body preload is discovered
+    // no earlier than the img it precedes.
+    expect(discover()).not.toContain('heroPreloadLinkAttrs');
+    expect(discover()).not.toContain('<link');
+  });
+
+  it('the same URL variable feeds the preload and slide 0 src', () => {
+    // One derivation, one variable, two consumers.
+    expect(index()).toContain('heroFirstUrl={discoveryHeroFirstUrl}');
+    expect(discover()).toContain(
+      'const heroImageUrl = heroFirstUrl ?? heroSlides[0]?.backdropUrl ?? null;',
+    );
+    expect(discover()).toContain(
+      'const slideUrl = i === 0 ? heroImageUrl : t.backdropUrl;',
+    );
+    expect(discover()).toMatch(/<img\s+class="d-hero-bg"\s+src=\{slideUrl!\}/);
+    // The component picks its slides with the same shared derivation.
+    expect(discover()).toContain(
+      'const heroSlides = selectHeroSlides([...trendingTiles, ...popularTiles]);',
+    );
+  });
+
+  it('only slide 0 is eager; every other hero slide stays lazy', () => {
     const src = discover();
-    // The component guards the emission on the descriptor, so an empty href
-    // can never reach the markup.
+    // The hero slide image itself (class d-hero-bg) — NOT the carousel img.
     expect(src).toMatch(
-      /\{heroPreload \? \([\s\S]{0,400}?<link \{\.\.\.heroPreloadLinkAttrs\(heroPreload\)\} \/>/,
+      /<img\s+class="d-hero-bg"[\s\S]{0,400}?loading=\{i === 0 \? "eager" : "lazy"\}/,
     );
-    expect(src).not.toMatch(/<link[^>]*href=\{""\}/);
+    expect(src).toMatch(
+      /<img\s+class="d-hero-bg"[\s\S]{0,400}?fetchpriority=\{i === 0 \? "high" : undefined\}/,
+    );
+    // Every other <img> in the component is lazy.
+    const imgs = src.match(/<img[\s\S]*?\/>/g) ?? [];
+    expect(imgs).toHaveLength(3);
+    expect(imgs.filter((b) => b.includes('class="d-hero-bg"'))).toHaveLength(1);
+    expect(imgs.filter((b) => b.includes('loading="lazy"'))).toHaveLength(2);
+    expect(imgs.filter((b) => b.includes('loading="eager"'))).toHaveLength(0);
   });
 
-  it('exactly one hero preload, not one per card', () => {
-    const src = discover();
-    expect(src.match(/heroPreloadLinkAttrs\(/g) ?? []).toHaveLength(1);
-    expect(src.match(/<link/g) ?? []).toHaveLength(1);
-    // Every other image in the component stays lazy.
-    expect(src).toContain('loading="lazy"');
-    expect(src).not.toContain('loading="eager"');
-    // The discovery branch of the page passes no head preload, so the
-    // component link is the only one on the page.
-    const index = read('src/pages/index.astro');
-    expect(index).toContain(
-      'const coverPreload = isDiscovery\n  ? null\n  : heroImagePreload(featured?.backdropUrl ?? null, "backdrop");',
-    );
-  });
-
-  it('the discovery preload carries the size pair only for a known variant', () => {
-    expect(heroImagePreload(DISCOVERY_HERO_FIXTURE, 'backdrop')).toEqual({
-      href: DISCOVERY_HERO_FIXTURE,
-      width: 1280,
-      height: 720,
-    });
-    // Unknown variant: preload kept, size pair omitted.
-    expect(heroImagePreload(UNKNOWN_VARIANT_FIXTURE.backdropUrl, 'backdrop')).toEqual({
-      href: UNKNOWN_VARIANT_FIXTURE.backdropUrl,
-    });
-    // The backdrop field is measured with the backdrop aspect, never the
-    // poster one.
-    const src = discover();
-    expect(src).not.toMatch(/heroImagePreload\([^)]*posterUrl[^)]*"backdrop"/);
-    expect(src).not.toMatch(/heroImagePreload\([^)]*backdropUrl[^)]*"poster"/);
+  it('no call site measures a backdrop field with the poster aspect', () => {
+    for (const source of [index(), discover()]) {
+      expect(source).not.toMatch(/heroImagePreload\([^)]*posterUrl[^)]*"backdrop"/);
+      expect(source).not.toMatch(/heroImagePreload\([^)]*backdropUrl[^)]*"poster"/);
+    }
   });
 });
 

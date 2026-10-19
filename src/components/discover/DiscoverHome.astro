@@ -15,7 +15,7 @@ import type { DiscoverTile, SiteTheme } from "../../lib/tmdb/discover";
 import { COLLECTIONS, buildListHref } from "../../lib/tmdb/discover";
 import type { Genre } from "../../lib/tmdb/types";
 import type { PublicReview } from "../../lib/seo/content";
-import { heroImagePreload, heroPreloadLinkAttrs } from "../../lib/seo/hero-image";
+import { selectHeroSlides } from "../../lib/seo/hero-image";
 
 interface Props {
   trending: DiscoverTile[];
@@ -32,6 +32,12 @@ interface Props {
   featured: PublicReview | null;
   hasTmdbKey: boolean;
   theme?: SiteTheme;
+  /**
+   * The first hero slide's backdrop URL — the LCP image. The page derives
+   * it with the same shared selection it used for the head preload, so the
+   * preload href and slide 0's <img src> are the same string.
+   */
+  heroFirstUrl?: string | null;
 }
 const {
   trending,
@@ -47,6 +53,7 @@ const {
   topRated,
   featured,
   hasTmdbKey,
+  heroFirstUrl,
 } = Astro.props;
 const safe = <T,>(v: T | undefined | null, fallback: T): T =>
   Array.isArray(v) ? (v as T) : (v ?? fallback);
@@ -74,34 +81,18 @@ const showFeatured = featuredPick !== null;
 const carousel = [featuredPick, ...latest].filter(
   (r, i, arr): r is PublicReview => r !== null && arr.findIndex((x) => x?.slug === r.slug) === i
 );
-/** Hero slider: trending (then popular) titles carrying backdrop art, max 6. */
-const heroSlides = (() => {
-  const pool = [...trendingTiles, ...popularTiles].filter((t) => t.backdropUrl);
-  const seen = new Set<number>();
-  return pool
-    .filter((t) => (seen.has(t.tmdbId) ? false : (seen.add(t.tmdbId), true)))
-    .slice(0, 10);
-})();
+/** Hero slider: trending (then popular) titles carrying backdrop art, max 10. */
+const heroSlides = selectHeroSlides([...trendingTiles, ...popularTiles]);
 /**
  * LCP element: slide 0 is the only eager / fetchpriority=high image in the
- * markup. The preload must point at that exact URL, so it is read from the
- * same source as the <img src> (heroFirstUrl) — never a second guess.
- * The size pair rides along only when the TMDB variant is known (shared
- * helper rule, identical to the publication branch): an unknown variant
- * yields no pair, and no hero image yields no preload at all.
+ * markup. Its URL comes from the page (the same one the head preload was
+ * built from), so the preload href and this <img src> are one string; the
+ * slide's own artwork is the fail-soft fallback.
  */
-const heroFirstUrl = heroSlides[0]?.backdropUrl ?? null;
-const heroPreload = heroImagePreload(heroFirstUrl, "backdrop");
+const heroImageUrl = heroFirstUrl ?? heroSlides[0]?.backdropUrl ?? null;
 const countText = (n: number, singular: string, plural: string) =>
   n === 1 ? `1 ${singular}` : `${n} ${plural}`;
 ---
-{heroPreload ? (
-  /* Exactly one preload, for the one eager hero image (the LCP element).
-     The attribute bag (rel/as/href/width/height/fetchpriority) lives in
-     src/lib/seo/hero-image.ts so the emitted link is unit-testable — the
-     same call site the publication branch uses in src/layouts/Base.astro. */
-  <link {...heroPreloadLinkAttrs(heroPreload)} />
-) : null}
 {heroSlides.length > 0 ? (
   <section class="d-hero-slider" aria-label="Trending titles">
     <div class="d-hero-head">
@@ -118,9 +109,9 @@ const countText = (n: number, singular: string, plural: string) =>
       {heroSlides.map((t, i) => {
         const prev = (i - 1 + heroSlides.length) % heroSlides.length;
         const next = (i + 1) % heroSlides.length;
-        /* Slide 0 is the eager/high-priority image: its src is the very same
-           variable the preload was built from, so the two can never drift. */
-        const slideUrl = i === 0 ? heroFirstUrl : t.backdropUrl;
+        /* Slide 0 is the eager/high-priority image (the LCP element): its src
+           is the very same URL the page preloaded in the head. */
+        const slideUrl = i === 0 ? heroImageUrl : t.backdropUrl;
         return (
           <article class="d-hero-slide" id={`hero-slide-${i}`} aria-roledescription="slide" aria-label={`${i + 1} of ${heroSlides.length}`}>
             <img

@@ -20,7 +20,7 @@ import {
 } from "../lib/seo/content";
 import DiscoverHome from "../components/discover/DiscoverHome.astro";
 import { displayAuthor } from "../lib/site-author";
-import { heroImagePreload, heroImageSize } from "../lib/seo/hero-image";
+import { heroImagePreload, heroImageSize, selectHeroFirstUrl } from "../lib/seo/hero-image";
 import {
   currentTheme,
   discoverBy,
@@ -50,15 +50,7 @@ try {
 }
 const isDiscovery = theme === "discovery";
 const discoveryKey = isDiscovery ? hasTmdbKey() : false;
-// Hero artwork (publication covers). The width comes from the image URL
-// (the TMDB variant), the aspect from the field it came from — the backdrop
-// field is 16:9. An unknown variant yields no pair (never a guess). The
-// discovery theme renders its own slider hero, so it preloads nothing.
-const coverSize = heroImageSize(featured?.backdropUrl ?? null, "backdrop");
-const coverPreload = isDiscovery
-  ? null
-  : heroImagePreload(featured?.backdropUrl ?? null, "backdrop");
-// Discovery branch only — publication variables above stay untouched.
+// Discovery branch only — publication variables below stay untouched.
 const trending = isDiscovery ? await getTrending().catch(() => []) : [];
 const popular = isDiscovery ? await getPopular().catch(() => []) : [];
 const nowPlaying = isDiscovery ? await getNowPlaying().catch(() => []) : [];
@@ -71,6 +63,22 @@ const discoveryTop = isDiscovery ? getTopRated(5) : [];
 const discoveryFeatured = isDiscovery
   ? (getTopRated(1)[0] ?? getFeaturedReview())
   : null;
+/**
+ * Hero artwork. The width comes from the image URL (the TMDB variant), the
+ * aspect from the field it came from — the backdrop field is 16:9. An
+ * unknown variant yields no pair (never a guess).
+ *
+ * Publication home: the featured cover. Discovery home: the FIRST slide of
+ * the hero slider — the LCP element. The slide is picked by the shared
+ * derivation (src/lib/seo/hero-image.ts) that DiscoverHome uses too, and the
+ * very same URL is handed to the component for slide 0's <img src>, so the
+ * preload href and the rendered src cannot drift.
+ */
+const discoveryHeroFirstUrl = selectHeroFirstUrl([...trending, ...popular]);
+const coverSize = heroImageSize(featured?.backdropUrl ?? null, "backdrop");
+const coverPreload = isDiscovery
+  ? heroImagePreload(discoveryHeroFirstUrl, "backdrop")
+  : heroImagePreload(featured?.backdropUrl ?? null, "backdrop");
 const featuredRuntime = featured ? formatRuntime(featured.runtimeMinutes) : null;
 const featuredMeta = featured
   ? [
@@ -121,6 +129,7 @@ const publishedDate = featured
         topRated={discoveryTop}
         featured={discoveryFeatured}
         hasTmdbKey={discoveryKey}
+        heroFirstUrl={discoveryHeroFirstUrl}
       />
     </div>
   ) : (
