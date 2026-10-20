@@ -35,6 +35,12 @@ export interface Review {
   movie?: ReviewMovie;
   rating?: number;
   region?: string;
+  /**
+   * TMDB id carried on the row itself (seed imports put it here: the
+   * frontmatter key is `tmdb_id`, not the movie record's `movie_id`).
+   * Used as the fallback when the linked movie record has no id.
+   */
+  tmdbId?: number | string | null;
   /** Owner-curated "Platform Pick" badge shown on public title/review cards. */
   platformPick?: boolean;
   /** Manual watch links (custom free sites + paid options), edited in the dashboard. */

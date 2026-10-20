@@ -119,6 +119,63 @@ describe("store-unification", () => {
   });
 });
 
+describe("store tmdb id fallback", () => {
+  it("uses the row's own tmdbId when the movie record carries none", async () => {
+    await writeRows([
+      storeRow({ tmdbId: 336203, movie: { title: "Masaan", year: "2015" } }),
+    ]);
+    expect(getReviewBySlug("store-only-film")?.tmdbId).toBe(336203);
+  });
+
+  it("the movie record's movieId still wins over the row's own tmdbId", async () => {
+    await writeRows([
+      storeRow({ tmdbId: 336203, movie: { title: "Store Film", movieId: "12345" } }),
+    ]);
+    expect(getReviewBySlug("store-only-film")?.tmdbId).toBe(12345);
+  });
+
+  it("accepts a numeric string id, but garbage/zero/negative/missing stay null", async () => {
+    await writeRows([
+      storeRow({ id: "s", slug: "string-id", tmdbId: "77889", movie: { title: "X" } }),
+      storeRow({ id: "t", slug: "text-id", tmdbId: "not-a-number", movie: { title: "X" } }),
+      storeRow({ id: "z", slug: "zero-id", tmdbId: 0, movie: { title: "X" } }),
+      storeRow({ id: "n", slug: "negative-id", tmdbId: -5, movie: { title: "X" } }),
+      storeRow({ id: "m", slug: "missing-id", movie: { title: "X" } }),
+    ]);
+    expect(getReviewBySlug("string-id")?.tmdbId).toBe(77889);
+    for (const slug of ["text-id", "zero-id", "negative-id", "missing-id"]) {
+      expect(getReviewBySlug(slug)?.tmdbId).toBeNull();
+    }
+  });
+
+  it("a merged row takes the store's own tmdbId over the demo twin's", async () => {
+    await writeRows([storeRow({ slug: "dune-part-two", tmdbId: 111222 })]);
+    expect(getReviewBySlug("dune-part-two")?.tmdbId).toBe(111222);
+  });
+
+  it("review JSON-LD emits isBasedOn from the store row's own tmdbId", async () => {
+    await writeRows([
+      storeRow({ tmdbId: 336203, movie: { title: "Masaan", year: "2015" } }),
+    ]);
+    const { myReviewJsonLd } = await import("../src/lib/seo/jsonld");
+    const r = getReviewBySlug("store-only-film");
+    const node = myReviewJsonLd(r!, {} as never, "https://example.com/reviews/store-only-film");
+    expect(node.isBasedOn).toBe("https://www.themoviedb.org/movie/336203");
+  });
+
+  it("sitemap lists the /movies hub for a store-backed review with a tmdbId", async () => {
+    await writeRows([
+      storeRow({ tmdbId: 336203, movie: { title: "Masaan", year: "2015" } }),
+    ]);
+    const { GET } = await import("../src/pages/sitemap.xml");
+    const res = (await GET({
+      url: new URL("https://example.com/sitemap.xml"),
+    } as never)) as Response;
+    const xml = await res.text();
+    expect(xml).toContain("<loc>https://example.com/movies/336203</loc>");
+  });
+});
+
 describe("site namespaces", () => {
   let savedSiteId: string | undefined;
 

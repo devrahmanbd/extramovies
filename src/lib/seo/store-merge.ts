@@ -84,6 +84,20 @@ function toFiniteNumber(value: unknown): number | null {
   return typeof n === "number" && Number.isFinite(n) ? n : null;
 }
 
+/**
+ * Public TMDB id from the first usable candidate: the linked movie record
+ * first, then the store row's own `tmdbId` (seed imports carry the id there
+ * because the frontmatter key is `tmdb_id`, not the movie record's
+ * `movie_id`). Only a positive integer survives; anything else is null.
+ */
+function positiveTmdbId(...candidates: unknown[]): number | null {
+  for (const candidate of candidates) {
+    const n = toFiniteNumber(candidate);
+    if (n !== null && Number.isInteger(n) && n > 0) return n;
+  }
+  return null;
+}
+
 /** Map an admin-store row onto the public contract. Null when unusable. */
 function storeToPublic(r: Review): PublicReview | null {
   if (!r || r.status !== "published") return null;
@@ -93,7 +107,7 @@ function storeToPublic(r: Review): PublicReview | null {
   const excerpt = typeof r.excerpt === "string" && r.excerpt.trim() ? r.excerpt.trim() : "";
   if (!slug || !title || !markdown || !excerpt) return null;
   const movie = r.movie ?? {};
-  const tmdbId = toFiniteNumber(movie.movieId);
+  const tmdbId = positiveTmdbId(movie.movieId, r.tmdbId);
   return {
     slug,
     reviewTitle: title,
@@ -118,7 +132,7 @@ function storeToPublic(r: Review): PublicReview | null {
     ...("sites" in r && Array.isArray(r.sites)
       ? { sites: r.sites.filter((s): s is string => typeof s === "string") }
       : {}),
-    tmdbId: tmdbId !== null && Number.isInteger(tmdbId) && tmdbId > 0 ? tmdbId : null,
+    tmdbId,
   };
 }
 
@@ -137,7 +151,7 @@ function mergeDemo(demo: PublicReview, r: Review): PublicReview {
     Array.isArray(v)
       ? v.filter((x): x is string => typeof x === "string")
       : null;
-  const tmdbId = toFiniteNumber(movie.movieId);
+  const tmdbId = positiveTmdbId(movie.movieId, r.tmdbId);
   return {
     ...demo,
     reviewTitle: str(r.title) ?? demo.reviewTitle,
@@ -161,10 +175,7 @@ function mergeDemo(demo: PublicReview, r: Review): PublicReview {
     ...("sites" in r && Array.isArray(r.sites)
       ? { sites: r.sites.filter((s): s is string => typeof s === "string") }
       : {}),
-    tmdbId:
-      tmdbId !== null && Number.isInteger(tmdbId) && tmdbId > 0
-        ? tmdbId
-        : demo.tmdbId,
+    tmdbId: tmdbId !== null ? tmdbId : demo.tmdbId,
   };
 }
 
