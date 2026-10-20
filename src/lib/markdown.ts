@@ -1,9 +1,16 @@
 /**
  * Minimal server-side Markdown renderer (no client JS, no dependencies).
  * Supports: headings (##/###), paragraphs, bold, italic, inline code,
- * links (http/https/relative only), blockquotes, ul/ol lists, hr.
+ * links (http/https/relative only), blockquotes, ul/ol lists, hr, and
+ * `::: spoiler` blocks (a collapsed <details> gate around a passage).
  * All raw HTML is escaped first — safe to render untrusted drafts.
  */
+
+import {
+  findSpoilerClose,
+  matchSpoilerOpen,
+  resolveSpoilerSummary,
+} from "./spoiler";
 
 function escapeHtml(s: string): string {
   return s
@@ -43,9 +50,12 @@ function renderInline(s: string): string {
   return out;
 }
 
-/** Render Markdown to an HTML string (server only). */
-export function renderMarkdown(md: string): string {
-  const lines = md.replace(/\r\n/g, "\n").split("\n");
+/**
+ * Render markdown lines to HTML blocks.
+ * `inSpoiler` marks lines that live inside an open spoiler block: there a
+ * `::: spoiler` line is literal text (the gate is one level only).
+ */
+function renderBlocks(lines: string[], inSpoiler: boolean): string[] {
   const html: string[] = [];
   let para: string[] = [];
   let list: { type: "ul" | "ol"; items: string[] } | null = null;
@@ -71,7 +81,8 @@ export function renderMarkdown(md: string): string {
     }
   };
 
-  for (const raw of lines) {
+  for (let i = 0; i < lines.length; i++) {
+    const raw = lines[i] ?? "";
     const line = raw.trimEnd();
     if (/^\s*$/.test(line)) {
       flushPara();
@@ -79,6 +90,26 @@ export function renderMarkdown(md: string): string {
       flushQuote();
       continue;
     }
+
+    // Spoiler gate. One level only: inside an open block a `::: spoiler`
+    // line stays literal text.
+    const open = inSpoiler ? null : matchSpoilerOpen(line);
+    if (open) {
+      flushPara(); flushList(); flushQuote();
+      const closeAt = findSpoilerClose(lines, i + 1);
+      if (closeAt === -1) {
+        // FAIL SOFT: an unclosed fence must never swallow the document.
+        // The fence line degrades to literal text, the rest keeps rendering.
+        html.push(`<p>${renderInline(line.trim())}</p>`);
+        continue;
+      }
+      const { summary, body } = resolveSpoilerSummary(open.hint, lines.slice(i + 1, closeAt));
+      const bodyHtml = renderBlocks(body, true).join("\n");
+      html.push(`<details><summary>${renderInline(summary)}</summary>\n${bodyHtml}\n</details>`);
+      i = closeAt;
+      continue;
+    }
+
     const h2 = line.match(/^##\s+(.+)/);
     if (h2) {
       flushPara(); flushList(); flushQuote();
@@ -121,7 +152,13 @@ export function renderMarkdown(md: string): string {
     para.push(line.trim());
   }
   flushPara(); flushList(); flushQuote();
-  return html.join("\n");
+  return html;
+}
+
+/** Render Markdown to an HTML string (server only). */
+export function renderMarkdown(md: string): string {
+  const lines = md.replace(/\r\n/g, "\n").split("\n");
+  return renderBlocks(lines, false).join("\n");
 }
 
 /** Rough reading-time estimate for article meta. */

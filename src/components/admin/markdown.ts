@@ -1,7 +1,14 @@
 /** Minimal dependency-free Markdown renderer for the admin editor.
- * Supports: headings, bold, italic, links, images, lists, blockquotes, hr.
+ * Supports: headings, bold, italic, links, images, lists, blockquotes, hr,
+ * and `::: spoiler` blocks (the same gate the public site renders).
  * HTML is escaped first, so raw HTML in the draft never executes.
  */
+
+import {
+  findSpoilerClose,
+  matchSpoilerOpen,
+  resolveSpoilerSummary,
+} from "../../lib/spoiler";
 
 export function escapeHtml(s: string): string {
   return s
@@ -25,8 +32,12 @@ function inline(md: string): string {
   return s;
 }
 
-export function renderMarkdown(md: string): string {
-  const lines = md.replace(/\r\n?/g, "\n").split("\n");
+/**
+ * Render markdown lines to HTML blocks.
+ * `inSpoiler` marks lines inside an open spoiler block: there a
+ * `::: spoiler` line is literal text (the gate is one level only).
+ */
+function renderBlocks(lines: string[], inSpoiler: boolean): string[] {
   const out: string[] = [];
   let listOpen: "ul" | "ol" | null = null;
   let quote: string[] = [];
@@ -44,8 +55,27 @@ export function renderMarkdown(md: string): string {
     }
   };
 
-  for (const line of lines) {
-    const t = line.trim();
+  for (let i = 0; i < lines.length; i++) {
+    const t = (lines[i] ?? "").trim();
+
+    // Spoiler gate. One level only: inside an open block a `::: spoiler`
+    // line stays literal text.
+    const open = inSpoiler ? null : matchSpoilerOpen(t);
+    if (open) {
+      closeList(); flushQuote();
+      const closeAt = findSpoilerClose(lines, i + 1);
+      if (closeAt === -1) {
+        // FAIL SOFT: an unclosed fence never swallows the document.
+        out.push(`<p>${inline(t)}</p>`);
+        continue;
+      }
+      const { summary, body } = resolveSpoilerSummary(open.hint, lines.slice(i + 1, closeAt));
+      const bodyHtml = renderBlocks(body, true).join("\n");
+      out.push(`<details><summary>${inline(summary)}</summary>\n${bodyHtml}\n</details>`);
+      i = closeAt;
+      continue;
+    }
+
     if (/^---+$/.test(t) || /^\*\*\*+$/.test(t)) {
       closeList(); flushQuote();
       out.push("<hr />");
@@ -82,5 +112,10 @@ export function renderMarkdown(md: string): string {
     out.push(`<p>${inline(t)}</p>`);
   }
   closeList(); flushQuote();
-  return out.join("\n");
+  return out;
+}
+
+export function renderMarkdown(md: string): string {
+  const lines = md.replace(/\r\n?/g, "\n").split("\n");
+  return renderBlocks(lines, false).join("\n");
 }

@@ -634,6 +634,29 @@ textarea:focus-visible,
 
 .prose th, .prose td { overflow-wrap: anywhere; min-width: 0; }
 
+/* Spoiler gate — a `::: spoiler` block collapses into a native <details>.
+   No JS, no hidden attribute: the browser gives it keyboard operation. */
+.prose details {
+  margin-top: var(--space-6);
+  margin-bottom: var(--space-6);
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-card);
+  background: var(--color-paper-2);
+}
+.prose details > summary {
+  cursor: pointer;
+  font-weight: 700;
+  color: var(--color-ink);
+}
+.prose details > summary:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+}
+.prose details > summary::marker { color: var(--color-accent); }
+.prose details > *:first-child { margin-top: 0; }
+.prose details > *:last-child { margin-bottom: 0; }
+
 .card {
   border: 1px solid var(--color-rule);
   border-radius: var(--radius-card);
