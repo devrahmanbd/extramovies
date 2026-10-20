@@ -60,14 +60,15 @@ Current availability, cast details and member reviews sit on our [Masaan streami
 
 Is Masaan worth watching? Yes. It is a patient, carefully built film about what a society does to the people it has already decided about, and it earns the sadness at the end without a cheap shot at it. The middle runs long and the screenplay carries more than a first feature should, but Variety's Jay Weissberg left Cannes calling the result a disappointing drama. He was half right. What he missed was the ghats at night.
 
+::: spoiler
 ## Spoiler warning: the ending of Masaan
-
-**Spoilers:** Everything below this line gives away what happens to Piyush, to Shaalu, and to the two people in the boat.
 
 Piyush does not survive the night the police take Devi and him, and the recording Mishra holds turns Vidyadhar's savings into the inspector's fee. Shaalu dies in a bus crash on the way back from a pilgrimage, and Deepak, working the ghat where she is brought, puts her ring in the Ganges.
 
 Deepak graduates and takes an engineering job with the Indian Railways in Allahabad. Devi visits Piyush's grieving father and is violently turned away, then walks to the Ganges to immerse a gift Piyush had given her. Deepak, waiting at the same bank to leave for his new life, sees her crying and quietly offers her a bottle of water.
 
 Then they get on a boat together. As a boatman calls out, they head for the Sangam at Allahabad and start talking. Two people who never met, in the same boat, moving downstream. Ghaywan lets the river carry them and trusts you to decide how to feel about it.
+
+:::
 
 **Owner note, delete this line before publishing:** the rating in this file's frontmatter is still 0, and the site will not publish a review with a 0 rating. Set the score in the frontmatter and in /admin, then delete this line.
