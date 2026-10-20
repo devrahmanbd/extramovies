@@ -4,8 +4,41 @@ import { requireAdminApi } from "../../../lib/auth/guard";
 import { checkPublishRating } from "../../../lib/publish-guard";
 import { getReviewById, upsertReview } from "./_store";
 import { wrapLegacy } from "../../../lib/api-adapter";
+import {
+  indexNowOrigin,
+  notifyIndexNowSoon,
+  originFromHeaders,
+  reviewUrl,
+} from "../../../lib/seo/indexnow";
 
 export const prerender = false;
+
+/**
+ * Announce the published review to the IndexNow participants (Bing first)
+ * so the engine looks at the URL now instead of at the next crawl.
+ *
+ * Fire-and-forget with a deadline: a slow or failing endpoint can never
+ * delay the publish response, and a ping failure never changes the
+ * publish result.
+ */
+async function announcePublish(
+  req: NextApiRequest,
+  slug: string,
+): Promise<void> {
+  try {
+    const origin = indexNowOrigin(
+      originFromHeaders(req.headers as Record<string, string | string[] | undefined>),
+    );
+    if (!origin) return;
+    const url = reviewUrl(origin, slug);
+    const result = await notifyIndexNowSoon([url], { origin });
+    if (result.pinged > 0) console.log(`[indexnow] announced ${url}`);
+  } catch (err) {
+    console.warn(
+      `[indexnow] publish ping skipped: ${err instanceof Error ? err.message : err}`,
+    );
+  }
+}
 
 /**
  * Explicit publish. Requires title + markdown + slug AND a real rating;
@@ -39,6 +72,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   review.publishedAt = review.publishedAt ?? now;
   review.updatedAt = now;
   await upsertReview(review);
+  await announcePublish(req, review.slug);
   return res.status(200).json({ ok: true, id: review.id, slug: review.slug });
 }
 

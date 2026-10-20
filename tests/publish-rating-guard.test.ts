@@ -63,6 +63,12 @@ describe('admin publish: rating gate', () => {
   beforeEach(async () => {
     dir = await fs.mkdtemp(path.join(os.tmpdir(), 'publish-rating-'));
     process.env.REVIEWS_DB_PATH = path.join(dir, 'reviews.json');
+    // The publish path announces the new URL to IndexNow — stub the
+    // network so a test run never touches the real endpoint.
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => new Response('{}', { status: 200 })),
+    );
     vi.resetModules();
     ({ db } = await makeSessionDb());
     const session = await import('../src/lib/auth/session');
@@ -71,6 +77,7 @@ describe('admin publish: rating gate', () => {
 
   afterEach(() => {
     delete process.env.REVIEWS_DB_PATH;
+    vi.unstubAllGlobals();
   });
 
   function adminReq(body: Record<string, unknown>) {

@@ -8,6 +8,11 @@ import path from 'node:path';
 import { markdownToReview, validatePortableReview } from '../src/lib/portability.js';
 import { defaultSites } from '../src/lib/seo/store-merge.js';
 import { checkPublishRating } from '../src/lib/publish-guard.js';
+import {
+  indexNowOrigin,
+  notifyIndexNowSoon,
+  reviewUrl,
+} from '../src/lib/seo/indexnow.js';
 
 const DB = process.env.REVIEWS_DB_PATH ?? path.join(process.cwd(), 'data', 'reviews.json');
 
@@ -106,6 +111,8 @@ export async function importMarkdown(
   let skipped = 0;
   const errors: string[] = [];
   const refused: string[] = [];
+  /** Slugs this run published (announced to IndexNow once, at the end). */
+  const publishedSlugs: string[] = [];
   for (const f of files) {
     const raw = await fs.readFile(f, 'utf8');
     const { review, warnings } = markdownToReview(raw, path.basename(f, '.md'));
@@ -186,14 +193,49 @@ export async function importMarkdown(
           Array.isArray(prev.sites) ? { sites: prev.sites } : (sites !== undefined ? { sites } : {});
         store[existing] = { ...(store[existing] as object), ...record, id: prev.id, ...keepSites };
       } else store.push(record);
+      // This seed landed as a LIVE review -> its URL is announced to
+      // IndexNow below (batched, one request per run).
+      if (publish) publishedSlugs.push(review.slug);
     }
     imported++;
   }
   if (!opts.dry) {
     await fs.mkdir(path.dirname(dbFile), { recursive: true });
     await fs.writeFile(dbFile, JSON.stringify(store, null, 2) + '\n', 'utf8');
+    if (publishedSlugs.length > 0) await announcePublished(publishedSlugs);
   }
   return { imported, skipped, errors, refused };
+}
+
+/**
+ * Announce freshly published seeds to the IndexNow participants (Bing
+ * first) so the engine looks at the new URLs now, not at the next crawl.
+ *
+ * Batched into ONE request (the protocol allows 10,000 URLs per call) and
+ * never fatal: a ping problem is a warning, never an import failure.
+ */
+async function announcePublished(slugs: string[]): Promise<void> {
+  try {
+    const origin = indexNowOrigin();
+    if (!origin) {
+      console.warn(
+        `[import] ${slugs.length} seed(s) published but IndexNow skipped ` +
+          `(site origin unknown — set SITE_URL or the site.url setting)`,
+      );
+      return;
+    }
+    const urls = slugs.map((slug) => reviewUrl(origin, slug));
+    const result = await notifyIndexNowSoon(urls, { origin });
+    if (result.pinged > 0) {
+      console.log(`[import] indexnow: announced ${result.pinged} published URL(s)`);
+    } else if (result.failed > 0) {
+      console.warn(`[import] indexnow: ${result.failed} published URL(s) not announced`);
+    }
+  } catch (err) {
+    console.warn(
+      `[import] indexnow: ping failed: ${err instanceof Error ? err.message : err}`,
+    );
+  }
 }
 
 /**

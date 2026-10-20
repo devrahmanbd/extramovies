@@ -101,6 +101,30 @@ asset files and asset namespaces from the legacy map, and a real
 Also live: 0 legacy paths with impressions, and `/9xplay.php` still
 returns 410, so the redirect policy is intact.
 
+## Finding F — Bing says "Blocked — URL cannot appear on Bing" (IndexNow added 2026-10-21)
+
+Bing Webmaster Tools holds legacy state for this domain (2016-2025, the
+piracy corpus), so a URL inspection returns *"Blocked — URL cannot
+appear on Bing. The inspected URL is known to Bing but has some issues
+which are preventing us from serving it"*. That block is **not** a
+crawl-scheduling problem and no amount of new content fixes it — it is
+legacy account state only the owner can clear.
+
+What the code side can do (done, 2026-10-21): announce every publish to
+the **IndexNow** endpoint (<https://www.indexnow.org>), the open
+protocol shared by Bing and other participants, so a new URL is looked
+at immediately instead of at the next crawl. Implementation:
+`src/lib/seo/indexnow.ts` (pinger + public key), called from the admin
+publish action and from the seed importer; the key file lives at the
+site root (`public/<key>.txt`) because the protocol requires it to be
+public. Full notes: `docs/seo/indexnow.md`.
+
+IndexNow is an **instant notification, not a ranking request** — it never
+asks for a position and never lifts a block. The block itself is still
+manual: see the "what is still manual" list in `docs/seo/indexnow.md`
+(clear the legacy **Block URLs** list, and use the **Bing Webmaster
+API** — Settings → API access — for bulk submission).
+
 ## Action list
 
 | # | Action | Owner | Why |
@@ -111,3 +135,5 @@ returns 410, so the redirect policy is intact.
 | 4 | Fire the parasite launch package (Ramayana, T-1 = Nov 5) | owner (accounts) | brand SERP + referral traffic |
 | 5 | Build hubs from the demand-ranked queue (spec B4) | code (after this release) | 0 title-level impressions today |
 | 6 | Re-run the monthly snapshot and diff | code | regression gate on clicks/impressions |
+| 7 | Clear Bing's legacy "Block URLs" list + set up the Bing Webmaster API (Settings → API access) | owner (Bing account) | the "Blocked" verdict on legacy URLs is account state, not a crawl issue |
+| 8 | Verify the IndexNow key file is live: `curl https://extramovies.org/<key>.txt` | owner (1 min) | the ping is rejected without a reachable key file |

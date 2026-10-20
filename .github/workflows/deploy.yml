@@ -52,6 +52,10 @@ jobs:
       PM2_NAME: extramovies
       DB_FILE: /home/extramovies.org/private/prod.sqlite
       ECO_FILE: /home/extramovies.org/ecosystem.config.js
+      # Public site origin of THIS brand. The seed import announces freshly
+      # published reviews to IndexNow, which needs absolute URLs on the
+      # site's own host (the key file lives at <SITE_URL>/<key>.txt).
+      SITE_URL: https://extramovies.org
       SSH_HOST: ${{ secrets.SSH_HOST }}
       SSH_USER: ${{ secrets.SSH_USER }}
       SSH_PORT: ${{ secrets.SSH_PORT }}
@@ -64,13 +68,16 @@ jobs:
           chmod 600 ~/.ssh/deploy_key
           ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=accept-new \
             -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" \
-            "bash -s $APP_DIR $APP_PORT $PM2_NAME $DB_FILE $ECO_FILE $DEPLOY_BRANCH $SEED_SITE $GITHUB_SHA $GITHUB_EVENT_NAME" <<'EOF'
+            "bash -s $APP_DIR $APP_PORT $PM2_NAME $DB_FILE $ECO_FILE $DEPLOY_BRANCH $SEED_SITE $GITHUB_SHA $GITHUB_EVENT_NAME $SITE_URL" <<'EOF'
           set -euo pipefail
           # Site values + GITHUB_SHA/GITHUB_EVENT_NAME arrive as positional
           # args: job/default envs never cross SSH into the remote bash.
           APP_DIR="$1" APP_PORT="$2" PM2_NAME="$3"
           export DB_FILE="$4" ECO_FILE="$5" DEPLOY_BRANCH="$6" SEED_SITE="$7"
           DEPLOY_SHA="$8" EVENT_NAME="$9"
+          # Public origin of this brand (used by the IndexNow announcement
+          # in the seed import). Not exported: only the import step needs it.
+          SITE_URL="${10:-}"
 
           # 1. Toolchain: CI SSH is non-interactive so nvm never loads via .bashrc
           export NVM_DIR="$HOME/.nvm"
@@ -116,7 +123,7 @@ jobs:
           # stamps imports site-exclusive (explicit `sites` in the seed file
           # wins). Logs prove what landed.
           if [ -d "seeds/$SEED_SITE" ]; then
-            SITE_ID="$SEED_SITE" npm run import -- "seeds/$SEED_SITE" --skip-existing --refresh
+            SITE_ID="$SEED_SITE" SITE_URL="$SITE_URL" npm run import -- "seeds/$SEED_SITE" --skip-existing --refresh
             node -e '
               const fs = require("fs");
               const dir = "seeds/" + process.env.SEED_SITE;
@@ -189,6 +196,9 @@ jobs:
       PM2_NAME: cinemavilla
       DB_FILE: /home/cinemavilla.in/private/prod.sqlite
       ECO_FILE: /home/cinemavilla.in/ecosystem.config.js
+      # Public site origin of THIS brand (IndexNow announcement in the seed
+      # import needs absolute URLs on the site's own host).
+      SITE_URL: https://cinemavilla.in
       SSH_HOST: ${{ secrets.SSH_HOST }}
       SSH_USER: ${{ secrets.SSH_USER }}
       SSH_PORT: ${{ secrets.SSH_PORT }}
@@ -201,13 +211,16 @@ jobs:
           chmod 600 ~/.ssh/deploy_key
           ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=accept-new \
             -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" \
-            "bash -s $APP_DIR $APP_PORT $PM2_NAME $DB_FILE $ECO_FILE $DEPLOY_BRANCH $SEED_SITE $GITHUB_SHA $GITHUB_EVENT_NAME" <<'EOF'
+            "bash -s $APP_DIR $APP_PORT $PM2_NAME $DB_FILE $ECO_FILE $DEPLOY_BRANCH $SEED_SITE $GITHUB_SHA $GITHUB_EVENT_NAME $SITE_URL" <<'EOF'
           set -euo pipefail
           # Site values + GITHUB_SHA/GITHUB_EVENT_NAME arrive as positional
           # args: job/default envs never cross SSH into the remote bash.
           APP_DIR="$1" APP_PORT="$2" PM2_NAME="$3"
           export DB_FILE="$4" ECO_FILE="$5" DEPLOY_BRANCH="$6" SEED_SITE="$7"
           DEPLOY_SHA="$8" EVENT_NAME="$9"
+          # Public origin of this brand (used by the IndexNow announcement
+          # in the seed import). Not exported: only the import step needs it.
+          SITE_URL="${10:-}"
 
           # 1. Toolchain: CI SSH is non-interactive so nvm never loads via .bashrc
           export NVM_DIR="$HOME/.nvm"
@@ -253,7 +266,7 @@ jobs:
           # stamps imports site-exclusive (explicit `sites` in the seed file
           # wins). Logs prove what landed.
           if [ -d "seeds/$SEED_SITE" ]; then
-            SITE_ID="$SEED_SITE" npm run import -- "seeds/$SEED_SITE" --skip-existing --refresh
+            SITE_ID="$SEED_SITE" SITE_URL="$SITE_URL" npm run import -- "seeds/$SEED_SITE" --skip-existing --refresh
             node -e '
               const fs = require("fs");
               const dir = "seeds/" + process.env.SEED_SITE;
