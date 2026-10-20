@@ -21,7 +21,9 @@
 #        like a traffic collapse)
 #
 # Artifacts (retention 30 days): the snapshot JSON and the gitignored legacy
-# queue CSV — the artifact is how the queue leaves the runner.
+# queue CSV — the artifact is how the queue leaves the runner. The snapshot's
+# path is NOT guessed from the date: the run step globs docs/seo for the
+# baseline-gsc-*.json the tool actually wrote in this run.
 #
 # The tool is Python 3 stdlib only (openssl for the JWT signature), so
 # ubuntu-latest needs no pip install.
@@ -72,10 +74,12 @@ jobs:
 
           # The property must be a plain GSC property string. Anything with
           # whitespace or shell metacharacters is rejected BEFORE it reaches
-          # GITHUB_ENV or the tool's command line.
+          # GITHUB_ENV or the tool's command line. The whole string is
+          # matched (bash regex, not a per-line grep): a value carrying a
+          # newline would inject an extra environment line.
           site="$SITE_INPUT"
-          if ! printf '%s' "$site" | grep -Eq '^[A-Za-z0-9.:/_-]+$'; then
-            echo "::error::invalid site property (must match [A-Za-z0-9.:/_-]+)"
+          if [[ ! "$site" =~ ^[A-Za-z0-9.:/_-]+$ ]]; then
+            echo "::error::invalid site property (allowed: letters, digits, dot, colon, dash, underscore, slash)"
             exit 1
           fi
 
@@ -100,15 +104,25 @@ jobs:
           echo "GSC_SA_KEY=$key_path" >> "$GITHUB_ENV"
           echo "SITE=$site" >> "$GITHUB_ENV"
           if [ -n "$AGAINST_INPUT" ]; then
+            # The baseline path lands in $GITHUB_ENV, so it is validated
+            # against a strict allowlist first: a newline here would inject
+            # an extra environment line. The whole string is matched (bash
+            # regex, not a per-line grep), so a multi-line value cannot
+            # slip through one allowed line at a time.
+            if [[ ! "$AGAINST_INPUT" =~ ^[A-Za-z0-9._/-]+$ ]]; then
+              echo "::error::invalid --against baseline (allowed: letters, digits, dot, dash, underscore, slash)"
+              exit 1
+            fi
             echo "AGAINST=$AGAINST_INPUT" >> "$GITHUB_ENV"
             echo "baseline to diff against: $AGAINST_INPUT"
           fi
 
-          # The tool writes the snapshot to docs/seo/baseline-gsc-<date>.json,
-          # using the runner's date (UTC on GitHub runners).
+          # The tool writes the snapshot to docs/seo/baseline-gsc-<date>.json.
+          # WHICH file that is is decided by the run step (it globs the output
+          # directory for the file the tool actually wrote), never by a date
+          # computed here.
           echo "key_ready=true" >> "$GITHUB_OUTPUT"
           echo "site_slug=$slug" >> "$GITHUB_OUTPUT"
-          echo "snapshot_path=docs/seo/baseline-gsc-$(date +%F).json" >> "$GITHUB_OUTPUT"
           echo "queue_path=data/legacy/gsc_inspect_queue.csv" >> "$GITHUB_OUTPUT"
 
       - name: Run gsc_snapshot.py
@@ -126,8 +140,34 @@ jobs:
           fi
 
           rc=0
+          # Marker: every file in the output directory that is NEWER than this
+          # was written by the tool in THIS run. The upload path is then
+          # derived from that file, so a job that crosses UTC midnight targets
+          # the file the tool really wrote, not a date guessed beforehand.
+          marker="$RUNNER_TEMP/gsc_run_marker"
+          touch "$marker"
+          sleep 1
           python3 scripts/seo/gsc_snapshot.py "${args[@]}" || rc=$?
           echo "exit_code=$rc" >> "$GITHUB_OUTPUT"
+
+          snapshot=""
+          while IFS= read -r candidate; do
+            [ -n "$candidate" ] || continue
+            if [ -z "$snapshot" ] || [ "$candidate" -nt "$snapshot" ]; then
+              snapshot="$candidate"
+            fi
+          done <<< "$(find docs/seo -maxdepth 1 -type f -name 'baseline-gsc-*.json' -newer "$marker" 2>/dev/null || true)"
+          if [ -n "$snapshot" ]; then
+            echo "snapshot file written by this run: $snapshot"
+            # Copied out under its own name: the upload step then globs the
+            # runner temp dir, so the artifact path never depends on a step
+            # output (the run step may have failed on the regression gate).
+            cp "$snapshot" "$RUNNER_TEMP/$(basename "$snapshot")"
+            echo "snapshot_path=$snapshot" >> "$GITHUB_OUTPUT"
+          else
+            echo "::warning::gsc_snapshot: no baseline-gsc-*.json was written — there is nothing to upload"
+          fi
+
           case "$rc" in
             0)
               echo "gsc_snapshot: healthy run — snapshot captured"
@@ -154,7 +194,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: gsc-snapshot-${{ steps.key.outputs.site_slug }}
-          path: ${{ steps.key.outputs.snapshot_path }}
+          path: ${{ runner.temp }}/baseline-gsc-*.json
           retention-days: 30
           if-no-files-found: warn
 
