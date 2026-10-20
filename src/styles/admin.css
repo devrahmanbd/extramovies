@@ -68,6 +68,13 @@ input, textarea, select { width: 100%; box-sizing: border-box; background: #0f12
 .md-preview.full { max-height: none; }
 .md-preview img { max-width: 100%; }
 .md-preview blockquote { border-left: 3px solid var(--accent); margin: 0.5rem 0; padding-left: 0.75rem; color: var(--muted); }
+/* Spoiler gate — same <details> gate as the public page, so the preview
+   looks like what gets published. */
+.md-preview details { border: 1px solid var(--line); border-radius: 8px; padding: 0.5rem 0.75rem; margin: 0.75rem 0; background: var(--panel); }
+.md-preview details > summary { cursor: pointer; font-weight: 700; color: var(--text); }
+.md-preview details > summary::marker { color: var(--accent); }
+.md-preview details > *:first-child { margin-top: 0; }
+.md-preview details > *:last-child { margin-bottom: 0; }
 
 .editor-layout { display: grid; grid-template-columns: 1fr 320px; gap: 1rem; align-items: start; }
 .editor-layout .grow { min-width: 0; }

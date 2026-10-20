@@ -6,11 +6,7 @@
  * All raw HTML is escaped first — safe to render untrusted drafts.
  */
 
-import {
-  findSpoilerClose,
-  matchSpoilerOpen,
-  resolveSpoilerSummary,
-} from "./spoiler";
+import { isCodeFence, renderSpoilerBlock } from "./spoiler";
 
 function escapeHtml(s: string): string {
   return s
@@ -60,6 +56,7 @@ function renderBlocks(lines: string[], inSpoiler: boolean): string[] {
   let para: string[] = [];
   let list: { type: "ul" | "ol"; items: string[] } | null = null;
   let quote: string[] = [];
+  let inCode = false;
 
   const flushPara = () => {
     if (para.length > 0) {
@@ -91,23 +88,25 @@ function renderBlocks(lines: string[], inSpoiler: boolean): string[] {
       continue;
     }
 
-    // Spoiler gate. One level only: inside an open block a `::: spoiler`
-    // line stays literal text.
-    const open = inSpoiler ? null : matchSpoilerOpen(line);
-    if (open) {
-      flushPara(); flushList(); flushQuote();
-      const closeAt = findSpoilerClose(lines, i + 1);
-      if (closeAt === -1) {
-        // FAIL SOFT: an unclosed fence must never swallow the document.
-        // The fence line degrades to literal text, the rest keeps rendering.
-        html.push(`<p>${renderInline(line.trim())}</p>`);
+    // Spoiler gate. The shared module owns the wrapping AND the fail-soft
+    // decision, so the admin preview can never drift from this page.
+    if (isCodeFence(line)) {
+      // A `:::` inside a code fence is code, never a fence.
+      inCode = !inCode;
+    } else if (!inSpoiler && !inCode) {
+      const block = renderSpoilerBlock(
+        lines,
+        i,
+        renderInline,
+        (body) => renderBlocks(body, true).join("\n"),
+      );
+      if (block) {
+        flushPara(); flushList(); flushQuote();
+        html.push(block.html);
+        inCode = block.inCode;
+        i = block.nextIndex;
         continue;
       }
-      const { summary, body } = resolveSpoilerSummary(open.hint, lines.slice(i + 1, closeAt));
-      const bodyHtml = renderBlocks(body, true).join("\n");
-      html.push(`<details><summary>${renderInline(summary)}</summary>\n${bodyHtml}\n</details>`);
-      i = closeAt;
-      continue;
     }
 
     const h2 = line.match(/^##\s+(.+)/);

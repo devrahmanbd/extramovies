@@ -157,6 +157,92 @@ describe('spoiler gate (public renderer)', () => {
     expect(html).toContain('It streams on Amazon Prime Video.');
     expect(html.indexOf('</details>')).toBeLessThan(html.indexOf('<h2>Where to watch Masaan</h2>'));
   });
+
+  it('a malformed block (a second ## heading inside) renders literally with no gate', () => {
+    const html = renderMarkdown(
+      [
+        '::: spoiler',
+        '## Spoiler warning: the ending of Masaan',
+        '',
+        'Piyush does not survive the night.',
+        '',
+        '## Where to watch Masaan',
+        '',
+        'It streams on Amazon Prime Video.',
+        ':::',
+      ].join('\n'),
+    );
+    // a gate may never span two sections: nothing is hidden
+    expect(html).not.toContain('<details>');
+    expect(html).not.toContain('<summary>');
+    // every line is visible
+    expect(html).toContain('Piyush does not survive the night.');
+    expect(html).toContain('<h2>Where to watch Masaan</h2>');
+    expect(html).toContain('It streams on Amazon Prime Video.');
+    // the fence lines stay literal text
+    expect(html).toContain('<p>::: spoiler</p>');
+    expect(html).toContain('<p>:::</p>');
+  });
+
+  it('a malformed block in the shorthand form also renders literally', () => {
+    const html = renderMarkdown(
+      ['::: spoiler The ending', 'Gated text.', '', '## Where to watch', ':::'].join('\n'),
+    );
+    expect(html).not.toContain('<details>');
+    expect(html).toContain('Gated text.');
+    expect(html).toContain('<h2>Where to watch</h2>');
+  });
+
+  it('a ::: inside a code fence does not close the gate', () => {
+    const html = renderMarkdown(
+      [
+        '::: spoiler',
+        '## Gate',
+        '',
+        '```text',
+        ':::',
+        '```',
+        '',
+        'The ending stays inside the gate.',
+        ':::',
+      ].join('\n'),
+    );
+    expect(html).toContain('<details>');
+    expect(html).toContain('<summary>Gate</summary>');
+    const details = html.slice(html.indexOf('<details>'), html.indexOf('</details>'));
+    expect(details).toContain('The ending stays inside the gate.');
+    // the closing fence is the last one, not the ::: inside the code fence
+    expect(html.indexOf('</details>')).toBeGreaterThan(
+      html.indexOf('The ending stays inside the gate.'),
+    );
+  });
+
+  it('a ### or quoted heading is not a summary source and falls back to "Spoilers"', () => {
+    const h3 = renderMarkdown(
+      ['::: spoiler', '### Subheading', 'The ending.', ':::'].join('\n'),
+    );
+    expect(h3).toContain('<summary>Spoilers</summary>');
+    expect(h3).toContain('<h3>Subheading</h3>');
+
+    const quoted = renderMarkdown(
+      ['::: spoiler', '> ## Quoted heading', 'The ending.', ':::'].join('\n'),
+    );
+    expect(quoted).toContain('<summary>Spoilers</summary>');
+    expect(quoted).toContain('Quoted heading');
+
+    const indented = renderMarkdown(
+      ['::: spoiler', '  ## Indented heading', 'The ending.', ':::'].join('\n'),
+    );
+    expect(indented).toContain('<summary>Spoilers</summary>');
+  });
+
+  it('a blank first line inside the block still finds the summary heading', () => {
+    const html = renderMarkdown(
+      ['::: spoiler', '', '## Spoiler warning: the ending of Masaan', 'The ending.', ':::'].join('\n'),
+    );
+    expect(html).toContain('<summary>Spoiler warning: the ending of Masaan</summary>');
+    expect(html).not.toContain('<h2>Spoiler warning: the ending of Masaan</h2>');
+  });
 });
 
 describe('spoiler gate (existing rendering unchanged)', () => {
@@ -244,5 +330,58 @@ describe('spoiler gate (admin live preview)', () => {
     expect(preview).not.toContain('<details>');
     expect(preview).toContain('::: spoiler');
     expect(preview).toContain('Gated text.');
+  });
+});
+
+describe('spoiler gate (public renderer and admin preview agree)', () => {
+  // The two renderers share the gate logic through src/lib/spoiler.ts, so
+  // the preview can never drift from the published page. The fixture sticks
+  // to the constructs both renderers mark up identically (paragraphs,
+  // `##`/`###` headings, **bold**, *italic*): the renderers differ by
+  // design on lists, blockquotes, images and `#` headings.
+  const gate = [
+    '::: spoiler',
+    '## Spoiler warning: the ending of Masaan',
+    '',
+    '**Spoilers:** Everything below gives away the ending.',
+    '',
+    '*Piyush* does not survive the night.',
+    '',
+    '### The last scene',
+    '',
+    'Then they get on a boat together.',
+    ':::',
+  ].join('\n');
+
+  it('produces the SAME output for the same input', () => {
+    const preview = renderAdminPreview(gate);
+    const publicPage = renderMarkdown(gate);
+    expect(preview).toBe(publicPage);
+    expect(preview).toContain('<details><summary>Spoiler warning: the ending of Masaan</summary>');
+    expect(preview).toContain('<p><strong>Spoilers:</strong> Everything below gives away the ending.</p>');
+  });
+
+  it('agrees on a malformed block (no gate on either side)', () => {
+    const malformed = [
+      '::: spoiler',
+      '## Spoiler warning: the ending of Masaan',
+      '',
+      'Piyush does not survive the night.',
+      '',
+      '## Where to watch Masaan',
+      ':::',
+    ].join('\n');
+    const preview = renderAdminPreview(malformed);
+    expect(preview).toBe(renderMarkdown(malformed));
+    expect(preview).not.toContain('<details>');
+    expect(preview).toContain('Piyush does not survive the night.');
+  });
+
+  it('agrees on an unclosed fence (fail soft on either side)', () => {
+    const unclosed = '::: spoiler\nThe ending.';
+    const preview = renderAdminPreview(unclosed);
+    expect(preview).toBe(renderMarkdown(unclosed));
+    expect(preview).not.toContain('<details>');
+    expect(preview).toContain('The ending.');
   });
 });

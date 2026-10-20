@@ -4,11 +4,7 @@
  * HTML is escaped first, so raw HTML in the draft never executes.
  */
 
-import {
-  findSpoilerClose,
-  matchSpoilerOpen,
-  resolveSpoilerSummary,
-} from "../../lib/spoiler";
+import { isCodeFence, renderSpoilerBlock } from "../../lib/spoiler";
 
 export function escapeHtml(s: string): string {
   return s
@@ -41,6 +37,7 @@ function renderBlocks(lines: string[], inSpoiler: boolean): string[] {
   const out: string[] = [];
   let listOpen: "ul" | "ol" | null = null;
   let quote: string[] = [];
+  let inCode = false;
 
   const closeList = () => {
     if (listOpen) {
@@ -58,22 +55,25 @@ function renderBlocks(lines: string[], inSpoiler: boolean): string[] {
   for (let i = 0; i < lines.length; i++) {
     const t = (lines[i] ?? "").trim();
 
-    // Spoiler gate. One level only: inside an open block a `::: spoiler`
-    // line stays literal text.
-    const open = inSpoiler ? null : matchSpoilerOpen(t);
-    if (open) {
-      closeList(); flushQuote();
-      const closeAt = findSpoilerClose(lines, i + 1);
-      if (closeAt === -1) {
-        // FAIL SOFT: an unclosed fence never swallows the document.
-        out.push(`<p>${inline(t)}</p>`);
+    // Spoiler gate. The shared module owns the wrapping AND the fail-soft
+    // decision, so this preview can never drift from the public page.
+    if (isCodeFence(t)) {
+      // A `:::` inside a code fence is code, never a fence.
+      inCode = !inCode;
+    } else if (!inSpoiler && !inCode) {
+      const block = renderSpoilerBlock(
+        lines,
+        i,
+        inline,
+        (body) => renderBlocks(body, true).join("\n"),
+      );
+      if (block) {
+        closeList(); flushQuote();
+        out.push(block.html);
+        inCode = block.inCode;
+        i = block.nextIndex;
         continue;
       }
-      const { summary, body } = resolveSpoilerSummary(open.hint, lines.slice(i + 1, closeAt));
-      const bodyHtml = renderBlocks(body, true).join("\n");
-      out.push(`<details><summary>${inline(summary)}</summary>\n${bodyHtml}\n</details>`);
-      i = closeAt;
-      continue;
     }
 
     if (/^---+$/.test(t) || /^\*\*\*+$/.test(t)) {

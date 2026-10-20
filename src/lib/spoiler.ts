@@ -5,10 +5,12 @@
  * <details>/<summary> gate, so a reader who has not watched the film does
  * not get the ending for free. One shared module so the public renderer
  * (src/lib/markdown.ts) and the admin live preview
- * (src/components/admin/markdown.ts) read exactly the same syntax.
+ * (src/components/admin/markdown.ts) read exactly the same syntax and can
+ * never drift: both call renderSpoilerBlock() below for the wrapping and
+ * for the fail-soft decision.
  *
- * Long form — the summary is the first heading inside the block, and that
- * heading is not repeated in the body:
+ * Long form — the summary is the first `## ` heading inside the block, and
+ * that heading is not repeated in the body:
  *
  *   ::: spoiler
  *   ## Spoiler warning: the ending of Masaan
@@ -22,8 +24,13 @@
  *   :::
  *
  * Rules:
+ *  - a block holds ONE top-level heading (the summary heading) plus body
+ *    paragraphs. A second `## ` heading makes the block malformed: it then
+ *    renders as literal markdown with no <details>, so nothing is ever
+ *    hidden behind a gate that spans more than one section
  *  - one level only: a bare `:::` closes the block, and a `::: spoiler` line
  *    inside an open block is literal text
+ *  - a `:::` inside a fenced code block never closes the block
  *  - an unclosed fence never swallows the rest of the document: the fence
  *    line degrades to literal text and the following lines keep rendering
  *    as normal markdown
@@ -36,8 +43,16 @@ const OPEN_RE = /^:::[ \t]*spoilers?\b[ \t]*(.*)$/i;
 /** Fence that closes a spoiler block: a bare `:::`. */
 const CLOSE_RE = /^:::[ \t]*$/;
 
-/** ATX heading — the long form's summary source. */
-const HEADING_RE = /^#{1,6}[ \t]+(.*)$/;
+/**
+ * A top-level heading inside a block: `## ` at the very start of a line.
+ * `# `, `### `, an indented heading and a quoted heading are NOT top-level
+ * headings here, so they never act as the summary and never make a block
+ * malformed.
+ */
+const TOP_HEADING_RE = /^##[ \t]+(.*)$/;
+
+/** A fenced code block marker (``` or ```lang). */
+const CODE_FENCE_RE = /^```/;
 
 /** Summary used when a block carries neither a fence hint nor a heading. */
 export const DEFAULT_SPOILER_SUMMARY = "Spoilers";
@@ -59,22 +74,48 @@ export function isSpoilerClose(line: string): boolean {
   return CLOSE_RE.test(line.trim());
 }
 
+/** True when the line opens or closes a fenced code block. */
+export function isCodeFence(line: string): boolean {
+  return CODE_FENCE_RE.test(line.trimStart());
+}
+
 /**
- * Index of the closing fence at or after `from`, or -1 when the block is
- * never closed (the caller then degrades to literal text, fail soft).
+ * Find the closing fence of a spoiler block.
+ *
+ * A `:::` inside a fenced code block never closes the block (it is code,
+ * not a fence), so the scan tracks code fences while it walks the lines.
  */
-export function findSpoilerClose(lines: string[], from: number): number {
+export function findSpoilerClose(
+  lines: string[],
+  from: number,
+): { index: number; inCode: boolean } {
+  let inCode = false;
   for (let i = from; i < lines.length; i++) {
-    if (isSpoilerClose(lines[i] ?? "")) return i;
+    const raw = lines[i] ?? "";
+    if (isCodeFence(raw)) {
+      inCode = !inCode;
+      continue;
+    }
+    if (inCode) continue;
+    if (isSpoilerClose(raw)) return { index: i, inCode };
   }
-  return -1;
+  return { index: -1, inCode };
+}
+
+/** How many top-level (`## `) headings a block body carries. */
+export function countTopHeadings(body: string[]): number {
+  let n = 0;
+  for (const line of body) {
+    if (TOP_HEADING_RE.test((line ?? "").trimEnd())) n++;
+  }
+  return n;
 }
 
 /**
  * Resolve the summary and the body of a spoiler block.
  *  - shorthand (`::: spoiler <text>`): the fence text is the summary
- *  - long form: the first heading inside becomes the summary and is removed
- *    from the body (it is not repeated inside the gate)
+ *  - long form: the first `## ` heading inside becomes the summary and is
+ *    removed from the body (it is not repeated inside the gate)
  *  - neither: DEFAULT_SPOILER_SUMMARY
  */
 export function resolveSpoilerSummary(
@@ -84,7 +125,7 @@ export function resolveSpoilerSummary(
   const text = hint.trim();
   if (text) return { summary: text, body };
   for (let i = 0; i < body.length; i++) {
-    const h = HEADING_RE.exec((body[i] ?? "").trim());
+    const h = TOP_HEADING_RE.exec((body[i] ?? "").trimEnd());
     if (h) {
       const summary = (h[1] ?? "").trim();
       return {
@@ -94,4 +135,78 @@ export function resolveSpoilerSummary(
     }
   }
   return { summary: DEFAULT_SPOILER_SUMMARY, body };
+}
+
+export interface SpoilerBlock {
+  /** Rendered HTML for the block: a <details> gate, or literal markdown. */
+  html: string;
+  /** Index of the last line the block consumed; the caller resumes at nextIndex + 1. */
+  nextIndex: number;
+  /** Code-fence state after the consumed lines, so the caller stays in sync. */
+  inCode: boolean;
+}
+
+/**
+ * Render the spoiler block that starts at `startIndex`.
+ *
+ * Returns null when the line is not a spoiler opener (the caller then keeps
+ * its normal rendering). Otherwise this function owns the whole block: it
+ * finds the closing fence, judges the block, and returns the HTML.
+ *
+ *  - well formed → a <details> gate whose summary is the fence hint or the
+ *    block's single `## ` heading
+ *  - malformed (a second `## ` heading before the closer) → literal
+ *    markdown, no <details>: a gate must never span more than one section,
+ *    and nothing may be hidden by a malformed block
+ *  - unclosed → the fence line as literal text; the caller keeps rendering
+ *    the rest of the document as normal markdown
+ *
+ * `inline` renders one line of text, `renderBody` renders the block body as
+ * markdown (never opening a nested gate).
+ */
+export function renderSpoilerBlock(
+  lines: string[],
+  startIndex: number,
+  inline: (text: string) => string,
+  renderBody: (body: string[]) => string,
+): SpoilerBlock | null {
+  const openerLine = lines[startIndex] ?? "";
+  const opener = matchSpoilerOpen(openerLine);
+  if (!opener) return null;
+
+  const close = findSpoilerClose(lines, startIndex + 1);
+  if (close.index === -1) {
+    // FAIL SOFT: an unclosed fence never swallows the document.
+    return {
+      html: `<p>${inline(openerLine.trim())}</p>`,
+      nextIndex: startIndex,
+      inCode: false,
+    };
+  }
+
+  const body = lines.slice(startIndex + 1, close.index);
+
+  // A block holds one top-level heading (the summary) and body paragraphs.
+  // A second one means the writer used the fence across two sections: the
+  // gate would then hide a section the reader never asked to hide.
+  const allowedTopHeadings = opener.hint ? 0 : 1;
+  if (countTopHeadings(body) > allowedTopHeadings) {
+    // MALFORMED: render the block as literal markdown, no <details>.
+    return {
+      html: [
+        `<p>${inline(openerLine.trim())}</p>`,
+        renderBody(body),
+        `<p>${inline((lines[close.index] ?? "").trim())}</p>`,
+      ].join("\n"),
+      nextIndex: close.index,
+      inCode: close.inCode,
+    };
+  }
+
+  const { summary, body: gated } = resolveSpoilerSummary(opener.hint, body);
+  return {
+    html: `<details><summary>${inline(summary)}</summary>\n${renderBody(gated)}\n</details>`,
+    nextIndex: close.index,
+    inCode: close.inCode,
+  };
 }
