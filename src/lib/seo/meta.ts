@@ -10,7 +10,8 @@ export const SEO_TITLE_MAX = 60;
 export const META_DESC_MIN = 150;
 export const META_DESC_MAX = 160;
 
-function truncateAtWord(text: string, max: number): string {
+/** Truncate at a word boundary, marking the cut with an ellipsis. */
+export function truncateAtWord(text: string, max: number): string {
   const clean = text.replace(/\s+/g, " ").trim();
   if (clean.length <= max) return clean;
   const cut = clean.slice(0, max - 1);
@@ -21,10 +22,18 @@ function truncateAtWord(text: string, max: number): string {
 /**
  * Build an SEO title targeting 50–60 chars: "Page headline | Brand".
  * Falls back to brand name alone when no page title is given.
+ *
+ * A title that ALREADY leads with the brand (the homepage fallback:
+ * "Brand | descriptor") is returned as-is — repeating the brand reads as
+ * spam ("Brand | descriptor | Brand") and breaks the 50–60 char band.
  */
 export function buildSeoTitle(pageTitle: string, brandName: string): string {
   const clean = pageTitle.replace(/\s+/g, " ").trim();
   if (!clean) return brandName;
+  const brand = brandName.trim();
+  if (brand && clean.toLowerCase().startsWith(brand.toLowerCase())) {
+    return clean.length <= SEO_TITLE_MAX ? clean : truncateAtWord(clean, SEO_TITLE_MAX);
+  }
   const full = `${clean} | ${brandName}`;
   if (full.length >= SEO_TITLE_MIN && full.length <= SEO_TITLE_MAX) return full;
   if (full.length < SEO_TITLE_MIN) return full;

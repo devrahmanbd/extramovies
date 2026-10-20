@@ -103,6 +103,25 @@ const DEFAULTS: Record<SettingKey, string> = {
   'homepage.genre_heading': 'Browse by genre',
 };
 
+/**
+ * Effective value WITHOUT the coded default: dbValue (if non-empty) -> env
+ * seed -> ''. Callers that compose their own fallback (e.g. the brand-leading
+ * homepage title) use this so the coded default never overwrites the
+ * composition it is part of.
+ */
+export function effectiveOverride(
+  key: SettingKey,
+  dbValue: string | null | undefined,
+): string {
+  if (typeof dbValue === 'string' && dbValue.trim() !== '') return dbValue;
+  const seed = ENV_SEED[key];
+  if (seed) {
+    const v = envVal(seed).trim();
+    if (v) return v;
+  }
+  return '';
+}
+
 /** Keys treated as secrets — never returned in full by the admin GET API. */
 export const SECRET_KEYS: SettingKey[] = ['tmdb.api_key', 'omdb.api_key', 'openrouter.api_key'];
 

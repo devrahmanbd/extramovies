@@ -1,0 +1,174 @@
+{
+  "captured_at": "2026-10-20T10:11:30.768+00:00",
+  "base": "http://127.0.0.1:4321",
+  "pages": {
+    "/": {
+      "status": 200,
+      "title": "Extramovies | Movie reviews: honest, personal film criticism",
+      "meta_description": "Extramovies: honest movie reviews and slow, personal film criticism — every review argued from a real viewing, newest first. New reviews weekly. No hype…",
+      "canonical": "http://127.0.0.1:4321/",
+      "robots": "index, follow",
+      "og_title": "Extramovies | Movie reviews: honest, personal film criticism",
+      "h1": [
+        "Trending this week"
+      ],
+      "h2_count": 28,
+      "schema_types": [
+        "BreadcrumbList",
+        "EntryPoint",
+        "ListItem",
+        "Organization",
+        "SearchAction",
+        "WebSite"
+      ],
+      "html_sha256": "b2ca1d19915bafa9"
+    },
+    "/reviews": {
+      "status": 200,
+      "title": "Movie reviews | Extramovies",
+      "meta_description": "The complete review archive, newest first — every film covered in the journal. Browse the full collection by genre — horror, drama, comedy, and more, every…",
+      "canonical": "http://127.0.0.1:4321/reviews",
+      "robots": "index, follow",
+      "og_title": "Movie reviews | Extramovies",
+      "h1": [
+        "Every film review in the journal, newest first"
+      ],
+      "h2_count": 4,
+      "schema_types": [
+        "BreadcrumbList",
+        "CollectionPage",
+        "ItemList",
+        "ListItem"
+      ],
+      "html_sha256": "9f9e13fd2d58a6b0"
+    },
+    "/movies": {
+      "status": 200,
+      "title": "Browse movies | Extramovies",
+      "meta_description": "Browse films by genre, year, and where to watch — streaming availability via TMDB.",
+      "canonical": "http://127.0.0.1:4321/movies",
+      "robots": "index, follow",
+      "og_title": "Browse movies | Extramovies",
+      "h1": [
+        "Browse movies"
+      ],
+      "h2_count": 4,
+      "schema_types": [
+        "BreadcrumbList",
+        "ListItem"
+      ],
+      "html_sha256": "590f41188c7601c2"
+    },
+    "/movies/693134": {
+      "status": 200,
+      "title": "Dune: Part Two (2024) review — verdict &amp;… | Extramovies",
+      "meta_description": "Follow the mythic journey of Paul Atreides as he unites with Chani and the Fremen while on a path of revenge against the conspirators who destroyed his…",
+      "canonical": "http://127.0.0.1:4321/movies/693134",
+      "robots": "index, follow",
+      "og_title": "Dune: Part Two (2024) review — verdict &#38;… | Extramovies",
+      "h1": [
+        "Dune: Part Two<span class=\"tnum\" data-astro-source-file=\"/Users/rahman/Documents/Movie Rev"
+      ],
+      "h2_count": 6,
+      "schema_types": [
+        "AggregateRating",
+        "BreadcrumbList",
+        "ListItem",
+        "Movie",
+        "Person",
+        "Rating",
+        "Review",
+        "WebPage"
+      ],
+      "html_sha256": "acf57f9a56785432"
+    },
+    "/reviews/dune-part-two": {
+      "status": 200,
+      "title": "Dune: Part Two (2024) review: Dune: Part Two… | Extramovies",
+      "meta_description": "Villeneuve's sequel finds weight in myth and spectacle, built for the biggest screen. Full Dune: Part Two (2024) review — rated 8.8/10, with verdict, where to…",
+      "canonical": "http://127.0.0.1:4321/reviews/dune-part-two",
+      "robots": "index, follow",
+      "og_title": "Dune: Part Two (2024) review: Dune: Part Two… | Extramovies",
+      "h1": [
+        "Dune: Part Two Earns Every Minute of Its Desert"
+      ],
+      "h2_count": 10,
+      "schema_types": [
+        "Article",
+        "BreadcrumbList",
+        "ImageObject",
+        "ListItem",
+        "Movie",
+        "Organization",
+        "Person",
+        "Rating",
+        "Review",
+        "WebPage"
+      ],
+      "html_sha256": "74567ca204242b51"
+    },
+    "/search?q=Dune": {
+      "status": 200,
+      "title": "Search: Dune | Extramovies",
+      "meta_description": "Search movies and series (TMDB) and the review archive by title, genre, or year.",
+      "canonical": "http://127.0.0.1:4321/search",
+      "robots": "noindex, follow",
+      "og_title": "Search: Dune | Extramovies",
+      "h1": [
+        "Search"
+      ],
+      "h2_count": 6,
+      "schema_types": [
+        "BreadcrumbList",
+        "ListItem"
+      ],
+      "html_sha256": "a3c22af3b6bcd15b"
+    },
+    "/u/rakib": {
+      "status": 200,
+      "title": "Rakib Islam (@rakib) | Extramovies",
+      "meta_description": "Member reviews and watchlist from @rakib.",
+      "canonical": "http://127.0.0.1:4321/u/rakib",
+      "robots": "index, follow",
+      "og_title": "Rakib Islam (@rakib) | Extramovies",
+      "h1": [
+        "Rakib Islam"
+      ],
+      "h2_count": 5,
+      "schema_types": [
+        "Person",
+        "ProfilePage"
+      ],
+      "html_sha256": "46b83a3266456432"
+    },
+    "/login": {
+      "status": 200,
+      "title": "Log in · Extramovies",
+      "meta_description": null,
+      "canonical": null,
+      "robots": "noindex, nofollow",
+      "og_title": null,
+      "h1": [
+        "Log in"
+      ],
+      "h2_count": 0,
+      "schema_types": [],
+      "html_sha256": "a31a40b9c2f2bbb8"
+    },
+    "/sitemap.xml": {
+      "status": 200,
+      "title": null,
+      "meta_description": null,
+      "canonical": null,
+      "robots": null,
+      "og_title": null,
+      "html_sha256": "f73af54548302d74",
+      "url_count": 9
+    },
+    "/robots.txt": {
+      "status": 200,
+      "html_sha256": "0b0936e7d1432220",
+      "body_head": "User-agent: *\nAllow: /\nDisallow: /search\nDisallow: /api/\n\nSitemap: http://127.0.0.1:4321/sitemap.xml\n"
+    }
+  }
+}

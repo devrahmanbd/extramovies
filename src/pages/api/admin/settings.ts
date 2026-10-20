@@ -12,6 +12,7 @@ import {
   validateSettingsPayload,
   type SettingKey,
 } from "../../../lib/settings";
+import { getHomepageCopy } from "../../../lib/homepage";
 
 export const prerender = false;
 
@@ -58,6 +59,19 @@ function isMaskedPlaceholder(v: string): boolean {
 }
 
 /**
+ * Read one setting from the store (the DB mirror of the settings file).
+ * Fail-soft: a missing DB is not an error here.
+ */
+async function readStoreSetting(key: string): Promise<string | null> {
+  try {
+    const { getDb, getSetting } = await import("../../../lib/db/adapter");
+    return await getSetting(getDb({}), key);
+  } catch {
+    return null;
+  }
+}
+
+/**
  * GET /api/admin/settings — dashboard values.
  * Secrets are masked (never returned in full); `configured` flags tell the UI
  * whether a value exists. Non-secrets are returned in full (effective values).
@@ -66,10 +80,17 @@ async function handleGet(req: NextApiRequest, res: NextApiResponse) {
   const auth = await requireAdminApi(req as never, res as never);
   if (!auth) return;
   const file = await readFileSettings();
+  // The homepage meta strings are brand-leading and composed by the loader
+  // (file → store → env seed → brand preset). Show the composed value so the
+  // dashboard renders exactly what the homepage renders — otherwise saving
+  // from the dashboard would freeze the pre-brand descriptor as an override.
+  const homepageCopy = await getHomepageCopy(readStoreSetting);
   const values: Record<string, string> = {};
   const configured: Record<string, boolean> = {};
   for (const key of SETTING_KEYS) {
-    const full = effective(key, file[key]);
+    let full = effective(key, file[key]);
+    if (key === "homepage.meta_title") full = homepageCopy.metaTitle;
+    else if (key === "homepage.meta_description") full = homepageCopy.metaDescription;
     configured[key] = full.trim() !== '';
     values[key] = (SECRET_KEYS as readonly string[]).includes(key) ? maskSecret(full) : full;
   }

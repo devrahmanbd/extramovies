@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   effective,
+  effectiveOverride,
   effectiveWithoutDb,
   maskSecret,
   resolveAll,
@@ -28,6 +29,14 @@ describe('settings: DB wins, env seeds, defaults last', () => {
     const all = resolveAll({ 'region.default': 'FR' });
     expect(all['region.default']).toBe('FR');
     expect(all['brand.preset'].length).toBeGreaterThan(0);
+  });
+
+  it('effectiveOverride keeps the db value and drops the coded default', () => {
+    expect(effectiveOverride('region.default', 'DE')).toBe('DE');
+    // A coded default is NOT an override — the caller keeps its own fallback.
+    expect(effectiveOverride('homepage.meta_title', '')).toBe('');
+    expect(effectiveOverride('homepage.meta_title', null)).toBe('');
+    expect(effectiveOverride('homepage.meta_title', undefined)).toBe('');
   });
 });
 
