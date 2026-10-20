@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { renderMarkdown } from '../src/lib/markdown';
 import { renderMarkdown as renderAdminPreview } from '../src/components/admin/markdown';
-import { DEFAULT_SPOILER_SUMMARY, resolveSpoilerSummary } from '../src/lib/spoiler';
+import { DEFAULT_SPOILER_SUMMARY, countTopHeadings, resolveSpoilerSummary } from '../src/lib/spoiler';
 
 // Spoiler gate — `::: spoiler` blocks in the public renderer
 // (src/lib/markdown.ts) and in the admin live preview
@@ -158,7 +158,7 @@ describe('spoiler gate (public renderer)', () => {
     expect(html.indexOf('</details>')).toBeLessThan(html.indexOf('<h2>Where to watch Masaan</h2>'));
   });
 
-  it('a malformed block (a second ## heading inside) renders literally with no gate', () => {
+  it('a malformed block (more than one ## heading inside) renders literally with no gate', () => {
     const html = renderMarkdown(
       [
         '::: spoiler',
@@ -184,13 +184,50 @@ describe('spoiler gate (public renderer)', () => {
     expect(html).toContain('<p>:::</p>');
   });
 
-  it('a malformed block in the shorthand form also renders literally', () => {
+  it('a shorthand block with one ## heading still renders as a gate', () => {
     const html = renderMarkdown(
       ['::: spoiler The ending', 'Gated text.', '', '## Where to watch', ':::'].join('\n'),
     );
-    expect(html).not.toContain('<details>');
+    expect(html).toContain('<details>');
+    // the heading inside wins as the summary
+    expect(html).toContain('<summary>Where to watch</summary>');
+    expect(html).not.toContain('<h2>Where to watch</h2>');
     expect(html).toContain('Gated text.');
-    expect(html).toContain('<h2>Where to watch</h2>');
+  });
+
+  it('a ## heading inside a code fence does not make the block malformed', () => {
+    const html = renderMarkdown(
+      [
+        '::: spoiler',
+        '## Gate',
+        '',
+        '```md',
+        '## this is code, not a heading',
+        ':::',
+        '```',
+        '',
+        'The ending stays inside the gate.',
+        ':::',
+      ].join('\n'),
+    );
+    // the fenced heading is code: the block stays a gate
+    expect(html).toContain('<details>');
+    expect(html).toContain('<summary>Gate</summary>');
+    const details = html.slice(html.indexOf('<details>'), html.indexOf('</details>'));
+    expect(details).toContain('this is code, not a heading');
+    expect(details).toContain('The ending stays inside the gate.');
+    expect(html.indexOf('</details>')).toBeGreaterThan(
+      html.indexOf('The ending stays inside the gate.'),
+    );
+  });
+
+  it('a shorthand block with no heading uses the fence-line text as the summary', () => {
+    const html = renderMarkdown(
+      ['::: spoiler The ending of Masaan', 'The ending.', ':::'].join('\n'),
+    );
+    expect(html).toContain('<details>');
+    expect(html).toContain('<summary>The ending of Masaan</summary>');
+    expect(html).toContain('The ending.');
   });
 
   it('a ::: inside a code fence does not close the gate', () => {
@@ -287,20 +324,32 @@ describe('spoiler gate (existing rendering unchanged)', () => {
 });
 
 describe('spoiler gate (shared syntax helper)', () => {
-  it('resolveSpoilerSummary prefers the fence hint, then the first heading', () => {
-    const withHint = resolveSpoilerSummary("The ending", ['## Inside heading', 'text']);
-    expect(withHint.summary).toBe('The ending');
-    expect(withHint.body).toEqual(['## Inside heading', 'text']);
-
+  it('resolveSpoilerSummary takes the first heading, then the fence hint', () => {
     const withHeading = resolveSpoilerSummary('', ['intro', '## Inside heading', 'text']);
     expect(withHeading.summary).toBe('Inside heading');
     expect(withHeading.body).toEqual(['intro', 'text']);
+
+    // the heading wins over the shorthand text, and is removed from the body
+    const headingAndHint = resolveSpoilerSummary('The ending', ['## Inside heading', 'text']);
+    expect(headingAndHint.summary).toBe('Inside heading');
+    expect(headingAndHint.body).toEqual(['text']);
+
+    // no heading: the fence text is the summary
+    const withHint = resolveSpoilerSummary('The ending', ['just text']);
+    expect(withHint.summary).toBe('The ending');
+    expect(withHint.body).toEqual(['just text']);
   });
 
   it('resolveSpoilerSummary falls back to a default summary', () => {
     const none = resolveSpoilerSummary('', ['just text']);
     expect(none.summary).toBe(DEFAULT_SPOILER_SUMMARY);
     expect(none.body).toEqual(['just text']);
+  });
+
+  it('countTopHeadings skips headings inside code fences', () => {
+    expect(countTopHeadings(['## one', 'text', '## two'])).toBe(2);
+    expect(countTopHeadings(['```md', '## code', '```', '## real'])).toBe(1);
+    expect(countTopHeadings(['### sub', '> ## quoted', '  ## indented'])).toBe(0);
   });
 });
 

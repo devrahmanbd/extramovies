@@ -24,13 +24,14 @@
  *   :::
  *
  * Rules:
- *  - a block holds ONE top-level heading (the summary heading) plus body
- *    paragraphs. A second `## ` heading makes the block malformed: it then
- *    renders as literal markdown with no <details>, so nothing is ever
- *    hidden behind a gate that spans more than one section
+ *  - a block holds at most ONE top-level heading (the summary heading) plus
+ *    body paragraphs. More than one `## ` heading makes the block malformed:
+ *    it then renders as literal markdown with no <details>, so nothing is
+ *    ever hidden behind a gate that spans more than one section
  *  - one level only: a bare `:::` closes the block, and a `::: spoiler` line
  *    inside an open block is literal text
- *  - a `:::` inside a fenced code block never closes the block
+ *  - a `:::` inside a fenced code block never closes the block, and a `## `
+ *    inside a fenced code block is code, not a heading
  *  - an unclosed fence never swallows the rest of the document: the fence
  *    line degrades to literal text and the following lines keep rendering
  *    as normal markdown
@@ -102,38 +103,59 @@ export function findSpoilerClose(
   return { index: -1, inCode };
 }
 
-/** How many top-level (`## `) headings a block body carries. */
-export function countTopHeadings(body: string[]): number {
-  let n = 0;
-  for (const line of body) {
-    if (TOP_HEADING_RE.test((line ?? "").trimEnd())) n++;
+export interface TopHeading {
+  /** Index of the heading line inside the body. */
+  index: number;
+  /** The heading text, without the `## ` markers. */
+  text: string;
+}
+
+/**
+ * The top-level (`## `) headings of a block body, skipping lines inside
+ * fenced code blocks: a `## ` in a code fence is code, not a heading, so it
+ * never counts (and never makes the block malformed).
+ */
+export function topHeadings(body: string[]): TopHeading[] {
+  const found: TopHeading[] = [];
+  let inCode = false;
+  for (let i = 0; i < body.length; i++) {
+    const line = body[i] ?? "";
+    if (isCodeFence(line)) {
+      inCode = !inCode;
+      continue;
+    }
+    if (inCode) continue;
+    const h = TOP_HEADING_RE.exec(line.trimEnd());
+    if (h) found.push({ index: i, text: (h[1] ?? "").trim() });
   }
-  return n;
+  return found;
+}
+
+/** How many top-level (`## `) headings a block body carries (fences skipped). */
+export function countTopHeadings(body: string[]): number {
+  return topHeadings(body).length;
 }
 
 /**
  * Resolve the summary and the body of a spoiler block.
- *  - shorthand (`::: spoiler <text>`): the fence text is the summary
- *  - long form: the first `## ` heading inside becomes the summary and is
+ *  - the first `## ` heading inside the block is the summary, and it is
  *    removed from the body (it is not repeated inside the gate)
- *  - neither: DEFAULT_SPOILER_SUMMARY
+ *  - otherwise the shorthand text after `spoiler` on the fence line
+ *  - otherwise DEFAULT_SPOILER_SUMMARY
  */
 export function resolveSpoilerSummary(
   hint: string,
   body: string[],
 ): { summary: string; body: string[] } {
+  const first = topHeadings(body)[0];
+  if (first) {
+    return {
+      summary: first.text || DEFAULT_SPOILER_SUMMARY,
+      body: body.slice(0, first.index).concat(body.slice(first.index + 1)),
+    };
+  }
   const text = hint.trim();
   if (text) return { summary: text, body };
-  for (let i = 0; i < body.length; i++) {
-    const h = TOP_HEADING_RE.exec((body[i] ?? "").trimEnd());
-    if (h) {
-      const summary = (h[1] ?? "").trim();
-      return {
-        summary: summary || DEFAULT_SPOILER_SUMMARY,
-        body: body.slice(0, i).concat(body.slice(i + 1)),
-      };
-    }
-  }
   return { summary: DEFAULT_SPOILER_SUMMARY, body };
 }
 
@@ -153,9 +175,9 @@ export interface SpoilerBlock {
  * its normal rendering). Otherwise this function owns the whole block: it
  * finds the closing fence, judges the block, and returns the HTML.
  *
- *  - well formed → a <details> gate whose summary is the fence hint or the
- *    block's single `## ` heading
- *  - malformed (a second `## ` heading before the closer) → literal
+ *  - well formed → a <details> gate whose summary is the block's first
+ *    `## ` heading, or the fence hint when the block has no heading
+ *  - malformed (more than one `## ` heading before the closer) → literal
  *    markdown, no <details>: a gate must never span more than one section,
  *    and nothing may be hidden by a malformed block
  *  - unclosed → the fence line as literal text; the caller keeps rendering
@@ -186,11 +208,11 @@ export function renderSpoilerBlock(
 
   const body = lines.slice(startIndex + 1, close.index);
 
-  // A block holds one top-level heading (the summary) and body paragraphs.
-  // A second one means the writer used the fence across two sections: the
-  // gate would then hide a section the reader never asked to hide.
-  const allowedTopHeadings = opener.hint ? 0 : 1;
-  if (countTopHeadings(body) > allowedTopHeadings) {
+  // A block holds at most one top-level heading (the summary) plus body
+  // paragraphs. More than one means the writer used the fence across two
+  // sections: the gate would then hide a section the reader never asked to
+  // hide. A heading inside a code fence is code, so it does not count.
+  if (countTopHeadings(body) > 1) {
     // MALFORMED: render the block as literal markdown, no <details>.
     return {
       html: [
