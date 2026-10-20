@@ -92,5 +92,3 @@ That is a soft landing for a story about a man deciding to end technological civ
 He is right. The collapse of global electronics is waved through in a paragraph, and the garden is left standing as proof of good intentions, which is what every story about a benevolent god ends up doing. Read the last five minutes as a pitch for a sequel and it still falls flat.
 
 :::
-
-**Owner note, delete this line before publishing:** the rating in this file's frontmatter is still 0, and the site will not publish a review with a 0 rating. Set the score in the frontmatter and in /admin, then delete this line.

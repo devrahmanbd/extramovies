@@ -85,5 +85,3 @@ The Delhi strand ends in a police station. Leela and Sakhi are behind bars, and 
 
 Neither strand resolves. Leela has left her father a message asking him to accept her sexuality, and his answer at the police station is not acceptance. The title is the argument the film ends on: Faiz Ahmad Faiz's "Ye Dagh Dagh Ujala", the wounded dawn Kumar borrows for a story about people who will not look at themselves. Kumar gives his characters the freedom the title promises, then takes it away again.
 :::
-
-**Owner note, delete this line before publishing:** the rating in this file's frontmatter is still 0, and the site will not publish a review with a 0 rating. Set the score in the frontmatter and in /admin, then delete this line.

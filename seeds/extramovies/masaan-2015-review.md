@@ -70,5 +70,3 @@ Deepak graduates and takes an engineering job with the Indian Railways in Allaha
 Then they get on a boat together. As a boatman calls out, they head for the Sangam at Allahabad and start talking. Two people who never met, in the same boat, moving downstream. Ghaywan lets the river carry them and trusts you to decide how to feel about it.
 
 :::
-
-**Owner note, delete this line before publishing:** the rating in this file's frontmatter is still 0, and the site will not publish a review with a 0 rating. Set the score in the frontmatter and in /admin, then delete this line.
