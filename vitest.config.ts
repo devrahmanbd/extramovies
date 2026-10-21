@@ -1,7 +1,17 @@
 import { defineConfig } from 'vitest/config';
 import path from 'node:path';
+import { getViteConfig } from 'astro/config';
+
+/**
+ * Astro's own vite config (the .astro compiler + the react integration) is
+ * merged in so a test can render a real Astro component through the
+ * container API (astro/container). Without it a .astro import is a parse
+ * error; with it, component markup is assertable in `npm test`.
+ */
+const astroVite = await getViteConfig({ root: __dirname })({ mode: 'test', command: 'serve' });
 
 export default defineConfig({
+  ...astroVite,
   test: {
     environment: 'node',
     globals: false,

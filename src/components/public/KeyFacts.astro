@@ -1,0 +1,108 @@
+---
+/**
+ * KeyFacts — the extractable fact card for a review.
+ *
+ * A small, dated, attributable block that sits above the long-form body:
+ * title, year, release date, runtime, director, main cast, genres, our own
+ * rating, our own verdict, where to watch (with the date availability was
+ * checked) and the review date with its byline. Every value comes from the
+ * row the page already loaded.
+ *
+ * Fallback-first: a field the review does not carry drops its row instead
+ * of printing an empty label, and a review with nothing to say renders no
+ * block at all. Server-rendered, zero client JavaScript.
+ */
+import type { PublicReview } from "../../lib/seo/content";
+import { keyFactRows } from "../../lib/seo/key-facts";
+
+interface Props {
+  /** The public review row the page already holds. */
+  review: PublicReview;
+  /** Display byline (settings-aware); falls back to the row's own author. */
+  authorName?: string | null;
+}
+
+const { review, authorName = null } = Astro.props;
+const rows = keyFactRows(review, { authorName });
+---
+{rows.length > 0 ? (
+  <section class="keyfacts" aria-labelledby="key-facts">
+    <h2 id="key-facts" class="keyfacts-title">Key facts</h2>
+    <dl class="keyfacts-list">
+      {rows.map((row) => (
+        <div class="keyfacts-row">
+          <dt>{row.label}</dt>
+          <dd>{row.value}</dd>
+        </div>
+      ))}
+    </dl>
+  </section>
+) : null}
+
+<style>
+  .keyfacts {
+    margin: var(--space-8) 0 0;
+    padding: var(--space-5) var(--space-6);
+    border: 1px solid var(--color-rule);
+    border-left: 3px solid var(--color-accent);
+    border-radius: var(--radius-card);
+    background: var(--color-paper-2);
+    max-width: var(--measure);
+  }
+
+  .keyfacts-title {
+    font-family: var(--font-sans);
+    font-size: var(--text-xs);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-ink-2);
+    margin: 0 0 var(--space-3);
+    line-height: 1.2;
+  }
+
+  .keyfacts-list {
+    margin: 0;
+    display: grid;
+    gap: 0;
+  }
+
+  .keyfacts-row {
+    display: grid;
+    grid-template-columns: 8.5rem minmax(0, 1fr);
+    gap: var(--space-3);
+    padding: var(--space-2) 0;
+    border-top: 1px solid var(--color-rule);
+    min-width: 0;
+  }
+
+  .keyfacts-row:first-child {
+    border-top: 0;
+  }
+
+  .keyfacts-row dt {
+    font-family: var(--font-sans);
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-ink-2);
+    margin: 0;
+  }
+
+  .keyfacts-row dd {
+    margin: 0;
+    font-size: var(--text-sm);
+    line-height: var(--leading-body);
+    color: var(--color-ink);
+    overflow-wrap: anywhere;
+  }
+
+  @media (max-width: 30rem) {
+    .keyfacts {
+      padding: var(--space-4);
+    }
+
+    .keyfacts-row {
+      grid-template-columns: 6.5rem minmax(0, 1fr);
+    }
+  }
+</style>

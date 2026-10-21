@@ -4,8 +4,10 @@
  * MOVIE hero (MovieShowcase dramatic photographic title block: full-bleed
  * backdrop + scrim, poster overlapping the image edge, manifesto h1 + film
  * identity + compact meta + credits, then monumental MY RATING + verdict in
- * an overlap band over the art field) → WHERE TO WATCH (WhereToWatch,
- * unified rows above the prose) → MY REVIEW (article, opened by a designed
+ * an overlap band over the art field) → KEY FACTS + QUICK ANSWER (the
+ * extraction block: fact rows and question-shaped answers, above the prose)
+ * → WHERE TO WATCH (WhereToWatch, unified rows above the prose) → MY REVIEW
+ * (article, opened by a designed
  * art-edge bridge rule + lede drop-cap, never a plain stack) →
  * MOVIE DETAILS (compact, secondary) → RELATED (cinematic strip).
  * Article is server-rendered HTML: fully readable with JS disabled.
@@ -14,6 +16,8 @@
  */
 import Base from "../../layouts/Base.astro";
 import MovieShowcase from "../../components/public/MovieShowcase.astro";
+import KeyFacts from "../../components/public/KeyFacts.astro";
+import QuickAnswer from "../../components/public/QuickAnswer.astro";
 import WhereToWatch from "../../components/public/WhereToWatch.astro";
 import RelatedReviews from "../../components/public/RelatedReviews.astro";
 import { getSiteBrand } from "../../lib/seo/brand";
@@ -113,6 +117,9 @@ const pageTitle = reviewDisplayTitle(review.movieTitle, review.reviewTitle, revi
     </div>
 
     <div class="wrap">
+      <KeyFacts review={review} authorName={displayAuthor(review.authorName)} />
+      <QuickAnswer review={review} />
+
       {review.providers || review.customWatch ? (
         <div class="pub-buybox pub-buybox--glam band--alt section--sm">
         <WhereToWatch

@@ -123,6 +123,8 @@ function storeToPublic(r: Review): PublicReview | null {
     backdropUrl: null,
     director: typeof movie.director === "string" ? movie.director : null,
     cast: Array.isArray(movie.cast) ? movie.cast.filter((c): c is string => typeof c === "string") : [],
+    runtimeLabel: typeof movie.runtime === "string" ? movie.runtime : null,
+    releaseDate: typeof movie.releaseDate === "string" ? movie.releaseDate : null,
     publishedAt: r.publishedAt ?? r.updatedAt,
     updatedAt: r.updatedAt,
     authorName: "The Editor",
@@ -165,6 +167,8 @@ function mergeDemo(demo: PublicReview, r: Review): PublicReview {
     posterUrl: str(movie.poster) ?? demo.posterUrl,
     director: str(movie.director) ?? demo.director,
     cast: strs(movie.cast) ?? demo.cast,
+    runtimeLabel: str(movie.runtime) ?? demo.runtimeLabel ?? null,
+    releaseDate: str(movie.releaseDate) ?? demo.releaseDate ?? null,
     publishedAt: r.publishedAt ?? demo.publishedAt,
     updatedAt: r.updatedAt ?? demo.updatedAt,
     platformPick:

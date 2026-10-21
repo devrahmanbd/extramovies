@@ -11,6 +11,8 @@ export interface ReviewMovie {
   year?: string;
   genres?: string[];
   runtime?: string;
+  /** Film release date (ISO, YYYY-MM-DD) when the editor records one. */
+  releaseDate?: string;
   director?: string;
   cast?: string[];
   overview?: string;

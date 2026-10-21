@@ -1,0 +1,63 @@
+---
+/**
+ * QuickAnswer — the AEO block: a question per heading, the direct answer
+ * directly under it.
+ *
+ * Two questions carry the most search intent ("Is it worth watching?",
+ * "Where can I watch it?"). Both answers are built from the review's own
+ * verdict and watch data, in the site's voice, with no new claims and no
+ * marketing language.
+ *
+ * Fallback-first: a review with no verdict renders no block at all, and a
+ * question with no answer behind it is never printed. Server-rendered, zero
+ * client JavaScript.
+ */
+import type { PublicReview } from "../../lib/seo/content";
+import { quickAnswers } from "../../lib/seo/key-facts";
+
+interface Props {
+  /** The public review row the page already holds. */
+  review: PublicReview;
+}
+
+const { review } = Astro.props;
+const answers = quickAnswers(review);
+---
+{answers.length > 0 ? (
+  <section class="quickanswer" aria-label="Quick answer">
+    {answers.map((answer, index) => (
+      <div class="quickanswer-item">
+        <h2 class="quickanswer-question" id={`quickanswer-question-${index}`}>
+          {answer.question}
+        </h2>
+        <p class="quickanswer-answer">{answer.answer}</p>
+      </div>
+    ))}
+  </section>
+) : null}
+
+<style>
+  .quickanswer {
+    margin: var(--space-8) 0 0;
+    max-width: var(--measure);
+  }
+
+  .quickanswer-item + .quickanswer-item {
+    margin-top: var(--space-6);
+  }
+
+  .quickanswer-question {
+    font-size: var(--text-xl);
+    margin: 0 0 var(--space-2);
+    line-height: var(--leading-display);
+  }
+
+  .quickanswer-answer {
+    margin: 0;
+    padding-left: var(--space-4);
+    border-left: 2px solid var(--color-accent);
+    color: var(--color-ink);
+    font-size: var(--text-base);
+    line-height: var(--leading-body);
+  }
+</style>

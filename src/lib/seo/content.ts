@@ -60,6 +60,14 @@ export interface PublicReview {
   backdropUrl: string | null;
   director: string | null;
   cast: string[];
+  /**
+   * Runtime as the row stores it ("109 min") when no numeric runtime is
+   * available. Carried from the admin store through the same merge, so the
+   * fact card can print the runtime without a second lookup.
+   */
+  runtimeLabel?: string | null;
+  /** Film release date (ISO) when the row carries one. */
+  releaseDate?: string | null;
   publishedAt: string;
   updatedAt: string;
   authorName: string;
