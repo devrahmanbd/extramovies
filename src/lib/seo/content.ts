@@ -72,6 +72,19 @@ export interface PublicReview {
   updatedAt: string;
   authorName: string;
   featured?: boolean;
+  /**
+   * The row's own SEO title (a seed's `seo_title` / the admin editor's
+   * SEO title). When it is a non-empty string it IS the document title
+   * (and og:title / twitter:title) — the keyword title the owner wrote.
+   * Absent/blank = the page falls back to the editorial headline.
+   */
+  seoTitle?: string | null;
+  /**
+   * True when the row came from the admin store, false for the DEMO
+   * starter pack. The featured slot prefers a flagged STORE row; the
+   * DEMO row stays the fallback so the shared starter pack stays neutral.
+   */
+  fromStore?: boolean;
   /** Owner-curated "Platform Pick" badge (title cards + review cards). */
   platformPick?: boolean;
   providers: WatchProviders | null;
@@ -294,8 +307,18 @@ export function reviewDisplayTitle(
   return `${m}${year ? ` (${year})` : ""} review: ${t}`;
 }
 
+/**
+ * The featured review — the homepage cover slot.
+ *
+ * A flagged STORE row wins the slot; the flagged DEMO row (dune-part-two,
+ * the shared starter pack) stays the fallback when no store row is flagged.
+ * The DEMO rows are never edited, so a brand that ships no flagged row
+ * keeps exactly the H1 it has today.
+ */
 export function getFeaturedReview(): PublicReview | null {
   const all = published();
+  const storeFlagged = all.find((r) => r.featured && r.fromStore);
+  if (storeFlagged) return storeFlagged;
   return all.find((r) => r.featured) ?? all[0] ?? null;
 }
 

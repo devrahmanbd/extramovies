@@ -108,6 +108,10 @@ function storeToPublic(r: Review): PublicReview | null {
   if (!slug || !title || !markdown || !excerpt) return null;
   const movie = r.movie ?? {};
   const tmdbId = positiveTmdbId(movie.movieId, r.tmdbId);
+  const seoTitle =
+    typeof r.seo?.seoTitle === "string" && r.seo.seoTitle.trim()
+      ? r.seo.seoTitle.trim()
+      : null;
   return {
     slug,
     reviewTitle: title,
@@ -128,6 +132,9 @@ function storeToPublic(r: Review): PublicReview | null {
     publishedAt: r.publishedAt ?? r.updatedAt,
     updatedAt: r.updatedAt,
     authorName: "The Editor",
+    seoTitle,
+    fromStore: true,
+    ...(r.featured === true ? { featured: true as const } : {}),
     ...(r.platformPick === true ? { platformPick: true as const } : {}),
     providers: null,
     ...(r.customWatch ? { customWatch: r.customWatch } : {}),
@@ -141,7 +148,9 @@ function storeToPublic(r: Review): PublicReview | null {
 /**
  * Merge a store row over its DEMO counterpart, per field. The store wins
  * everywhere it has a value; the DEMO fills fields the store shape cannot
- * carry (verdict, backdrop, providers, author, featured).
+ * carry (verdict, backdrop, providers, author). The `featured` flag and the
+ * row's own SEO title follow the platformPick rule: the store wins, the
+ * DEMO fills the gap.
  */
 function mergeDemo(demo: PublicReview, r: Review): PublicReview {
   const movie = r.movie ?? {};
@@ -171,6 +180,12 @@ function mergeDemo(demo: PublicReview, r: Review): PublicReview {
     releaseDate: str(movie.releaseDate) ?? demo.releaseDate ?? null,
     publishedAt: r.publishedAt ?? demo.publishedAt,
     updatedAt: r.updatedAt ?? demo.updatedAt,
+    seoTitle: str(r.seo?.seoTitle) ?? demo.seoTitle ?? null,
+    fromStore: true,
+    featured:
+      "featured" in r && typeof r.featured === "boolean"
+        ? r.featured
+        : (demo.featured ?? false),
     platformPick:
       "platformPick" in r && typeof r.platformPick === "boolean"
         ? r.platformPick

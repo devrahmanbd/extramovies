@@ -33,6 +33,13 @@ interface Props {
   current?: string;
   /** Hero artwork to preload (LCP). Size pair included only when known. */
   preloadImage?: HeroImagePreload | null;
+  /**
+   * The page's OWN SEO title (a review row's `seo_title`), used verbatim
+   * for <title>, og:title and twitter:title — no brand suffix, no
+   * truncation. Blank/absent = the brand-suffixed page title, byte for byte
+   * what the site rendered before.
+   */
+  seoTitle?: string | null;
 }
 
 const {
@@ -48,6 +55,7 @@ const {
   jsonld = [],
   current = "",
   preloadImage = null,
+  seoTitle = null,
 } = Astro.props;
 
 const brand = await getSiteBrand((k) => getSetting(getDb({}), k));
@@ -68,6 +76,14 @@ const meta = buildPageMeta({
   path,
   origin,
 });
+/**
+ * The document title. A page that carries its own SEO title (a review
+ * row's `seo_title`) owns the SERP title VERBATIM; every other page keeps
+ * the brand-suffixed title buildPageMeta() computed (unchanged).
+ */
+const exactSeoTitle =
+  typeof seoTitle === "string" && seoTitle.trim() ? seoTitle.trim() : null;
+const docTitle = exactSeoTitle ?? meta.seoTitle;
 const rawOgImage = image ?? brand.defaultOgImage ?? null;
 // og:image must be absolute for scrapers; brand art is root-relative
 // (multi-site safe), so prefix the request origin when needed.
@@ -112,7 +128,7 @@ try {
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{meta.seoTitle}</title>
+    <title>{docTitle}</title>
     <meta name="description" content={meta.metaDesc} />
     <link rel="canonical" href={meta.canonical} />
     <meta name="robots" content={robots} />
@@ -140,7 +156,7 @@ try {
 
     <meta property="og:type" content={ogType} />
     <meta property="og:site_name" content={brand.name} />
-    <meta property="og:title" content={meta.seoTitle} />
+    <meta property="og:title" content={docTitle} />
     <meta property="og:description" content={meta.metaDesc} />
     <meta property="og:url" content={meta.canonical} />
     <meta property="og:locale" content={brand.locale} />
@@ -157,7 +173,7 @@ try {
       name="twitter:card"
       content={ogImage ? "summary_large_image" : "summary"}
     />
-    <meta name="twitter:title" content={meta.seoTitle} />
+    <meta name="twitter:title" content={docTitle} />
     <meta name="twitter:description" content={meta.metaDesc} />
     {ogImage ? <meta name="twitter:image" content={ogImage} /> : null}
 

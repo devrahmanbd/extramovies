@@ -20,6 +20,11 @@ export interface PortableReview {
   published_at?: string | null;
   seo_title?: string | null;
   seo_description?: string | null;
+  /**
+   * Featured-review flag (the homepage cover slot). A boolean in the
+   * frontmatter; anything else is ignored (the row keeps no flag).
+   */
+  featured?: boolean | null;
   body: string;
   // passthrough extras (excerpt, director, year...) preserved but optional
   [k: string]: unknown;
@@ -167,6 +172,9 @@ export function markdownToReview(md: string, fallbackSlug?: string): ImportResul
     published_at: (data.published_at as string | null) ?? null,
     seo_title: (data.seo_title as string | null) ?? null,
     seo_description: (data.seo_description as string | null) ?? null,
+    // Only a real boolean is a flag; anything else (a string, a number)
+    // is ignored so a typo never lands in the store.
+    featured: typeof data.featured === 'boolean' ? data.featured : null,
     body: body.trim() + '\n',
   };
   // carry extras through

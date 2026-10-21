@@ -77,9 +77,17 @@ const jsonld = [
   ]),
 ];
 const pageTitle = reviewDisplayTitle(review.movieTitle, review.reviewTitle, review.year);
+/**
+ * The row's own SEO title (a seed's `seo_title`): when it carries one, it
+ * IS the document title + og:title + twitter:title. Blank/absent = the
+ * editorial headline above, exactly as before. The visible h1 stays the
+ * editorial headline (MovieShowcase renders review.reviewTitle).
+ */
+const seoTitle = typeof review.seoTitle === "string" ? review.seoTitle : null;
 ---
 <Base
   title={pageTitle}
+  seoTitle={seoTitle}
   description={review.excerpt}
   descriptionExtra={`Full ${review.movieTitle}${review.year ? ` (${review.year})` : ""} review — rated ${review.rating}/10, with verdict, where to watch, and related films.`}
   path={path}

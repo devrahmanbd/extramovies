@@ -45,6 +45,12 @@ export interface Review {
   tmdbId?: number | string | null;
   /** Owner-curated "Platform Pick" badge shown on public title/review cards. */
   platformPick?: boolean;
+  /**
+   * Owner-curated "featured review" flag (the homepage cover slot).
+   * A seed may set it through its `featured` frontmatter; the import
+   * writes it and the public loader prefers a flagged store row.
+   */
+  featured?: boolean;
   /** Manual watch links (custom free sites + paid options), edited in the dashboard. */
   customWatch?: CustomWatch;
   /**

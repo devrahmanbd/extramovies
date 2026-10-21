@@ -64,11 +64,15 @@ planned. Read this whole file before acting. Short hard-rules version: `.rules`.
 - ONE exception to "a published row is never overwritten": a seed may declare
   `managed_fields` in its frontmatter and then a deploy refreshes ONLY those
   fields on its own published row. Allowlist: `seo_title`, `seo_description`,
-  `excerpt`, `body` — nothing else, ever. Rating, `published_at`, status,
-  title, id and the row's `sites` tag stay untouched; an unknown field name is
-  reported and ignored, never written. A seed without the key behaves exactly
-  as before. Frontmatter: `managed_fields: "[\"seo_title\", \"seo_description\"]"`.
+  `excerpt`, `body`, `featured` — nothing else, ever. Rating, `published_at`,
+  status, title, id and the row's `sites` tag stay untouched; an unknown field
+  name is reported and ignored, never written. A seed without the key behaves
+  exactly as before. Frontmatter: `managed_fields: "[\"seo_title\", \"seo_description\"]"`.
   Deploy log: `SEED OK <slug> (status=published, seo refreshed: seo_title, seo_description)`.
+- `featured` (the homepage cover slot) is a BOOLEAN flag: `featured: true` in a
+  seed flags the row, a non-boolean value is ignored. A flagged STORE row wins
+  the slot; the flagged DEMO row (dune-part-two) stays the fallback, so a brand
+  with no flagged row keeps its current H1. The DEMO rows are never edited.
 
 ## 3. Content model (core shared, content per site)
 

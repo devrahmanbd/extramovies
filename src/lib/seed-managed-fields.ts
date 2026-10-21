@@ -14,7 +14,8 @@
  * owner's own edits, the row id, its sites tag) stays exactly as it was.
  *
  * Narrow by construction:
- *   - the allowlist is fixed: seo_title, seo_description, excerpt, body;
+ *   - the allowlist is fixed: seo_title, seo_description, excerpt, body,
+ *     featured;
  *   - an unknown name is reported loudly and IGNORED, never written;
  *   - a seed without the key changes no behaviour at all (additive,
  *     fallback-first — AGENTS.md §6);
@@ -26,12 +27,13 @@ import type { PortableReview } from './portability';
 /** Frontmatter key a seed uses to declare which fields the repo owns. */
 export const MANAGED_FIELDS_KEY = 'managed_fields';
 
-/** The ONLY fields a seed may ever manage (SEO/meta surface). */
+/** The ONLY fields a seed may ever manage (SEO/meta surface + placement). */
 export const MANAGED_FIELD_NAMES = [
   'seo_title',
   'seo_description',
   'excerpt',
   'body',
+  'featured',
 ] as const;
 
 export type ManagedField = (typeof MANAGED_FIELD_NAMES)[number];
@@ -57,6 +59,14 @@ export interface ManagedRefreshPlan {
 /** A usable string value, or undefined for empty/blank/non-string input. */
 function usable(v: unknown): string | undefined {
   return typeof v === 'string' && v.trim() ? v : undefined;
+}
+
+/**
+ * A usable boolean value, or undefined for anything that is not a real
+ * boolean (a string, a number, null). Only `true`/`false` are flags.
+ */
+function flag(v: unknown): boolean | undefined {
+  return typeof v === 'boolean' ? v : undefined;
 }
 
 /**
@@ -97,7 +107,7 @@ function seoOf(row: Record<string, unknown>): Record<string, unknown> {
 export function seedManagedValue(
   field: ManagedField,
   review: PortableReview,
-): string | undefined {
+): string | boolean | undefined {
   switch (field) {
     case 'seo_title':
       return usable(review.seo_title);
@@ -107,6 +117,8 @@ export function seedManagedValue(
       return usable((review as Record<string, unknown>).excerpt);
     case 'body':
       return usable(review.body);
+    case 'featured':
+      return flag((review as Record<string, unknown>).featured);
   }
 }
 
@@ -114,7 +126,7 @@ export function seedManagedValue(
 export function rowManagedValue(
   row: Record<string, unknown>,
   field: ManagedField,
-): string | undefined {
+): string | boolean | undefined {
   switch (field) {
     case 'seo_title':
       return usable(seoOf(row).seoTitle);
@@ -124,6 +136,8 @@ export function rowManagedValue(
       return usable(row.excerpt);
     case 'body':
       return usable(row.markdown);
+    case 'featured':
+      return flag(row.featured);
   }
 }
 
@@ -170,16 +184,19 @@ export function applyManagedRefresh(
     if (value === undefined) continue;
     switch (field) {
       case 'seo_title':
-        row.seo = { ...seoOf(row), seoTitle: value };
+        row.seo = { ...seoOf(row), seoTitle: value as string };
         break;
       case 'seo_description':
-        row.seo = { ...seoOf(row), metaDesc: value };
+        row.seo = { ...seoOf(row), metaDesc: value as string };
         break;
       case 'excerpt':
         row.excerpt = value;
         break;
       case 'body':
         row.markdown = value;
+        break;
+      case 'featured':
+        row.featured = value as boolean;
         break;
     }
     written.push(field);

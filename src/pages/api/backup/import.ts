@@ -48,6 +48,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       redirects: Array.isArray((item as Record<string, unknown>).redirects)
         ? ((item as Record<string, unknown>).redirects as string[])
         : [],
+      // Featured-review flag: a boolean only, anything else is ignored.
+      ...(typeof (item as Record<string, unknown>).featured === 'boolean'
+        ? { featured: (item as Record<string, unknown>).featured as boolean }
+        : {}),
       createdAt: String((item as Record<string, unknown>).createdAt ?? new Date().toISOString()),
       updatedAt: new Date().toISOString(),
       publishedAt: (review.published_at as string) ?? undefined,

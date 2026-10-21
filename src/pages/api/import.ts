@@ -38,6 +38,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     rating: review.rating,
     region: '',
     seo: { seoTitle: (review.seo_title as string) ?? undefined, metaDesc: (review.seo_description as string) ?? undefined },
+    // Featured-review flag: a boolean only, anything else is ignored.
+    ...(typeof review.featured === 'boolean' ? { featured: review.featured } : {}),
     redirects: [] as string[],
     createdAt: now,
     updatedAt: now,

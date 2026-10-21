@@ -258,6 +258,12 @@ export async function importMarkdown(
           ? { publishedAt: review.published_at }
           : {}),
         seo: { seoTitle: review.seo_title, metaDesc: review.seo_description },
+        /**
+         * The featured-review flag (the homepage cover slot). A boolean in
+         * the frontmatter only — a string or a number is ignored, never
+         * written, so a typo can never flag a row.
+         */
+        ...(typeof extras.featured === 'boolean' ? { featured: extras.featured } : {}),
         redirects: [],
         createdAt: now,
         updatedAt: now,
