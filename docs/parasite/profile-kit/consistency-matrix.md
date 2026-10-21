@@ -26,7 +26,7 @@ with the region and the date we checked.
 |---|---|---|
 | Display name | `Extramovies` | One word, capital E, no `.org`. A model that sees two spellings reads two entities. |
 | Description | the sentence above, verbatim | The corroboration is the repetition, not the sentence. |
-| Website link | `https://extramovies.org` | The root, `https`, no trailing slash, no `www`. A review URL on one platform and the root on another splits the signal. |
+| Website link | `https://extramovies.org?utm_source=profile&utm_medium=parasite&utm_campaign=brand-2026` | The root, `https`, no trailing slash, no `www`. A review URL on one platform and the root on another splits the signal. |
 | Anchor text on any link out | `Extramovies` or the review title | Never the query string. Never a URL as the anchor. |
 | Profile photo | the same file everywhere | One file, five platforms, so the accounts look like one brand. |
 
@@ -36,12 +36,12 @@ with the region and the date we checked.
 
 | Platform | Display name | Handle | One-line description | Website link | Target query it serves | State |
 |---|---|---|---|---|---|---|
-| Letterboxd | `Extramovies` | `extramovies` | Extramovies is an independent film-review magazine: original criticism with our own rating, no links to piracy, streaming availability checked and dated. | https://extramovies.org | `extramovies` (brand, 2.9K US / 201K IN per Semrush), `extramovies review`, and every film review query through the 20 diary entries | **Exists, ours.** https://letterboxd.com/extramovies/ |
-| YouTube | `Extramovies` | `@extramoviesmag` | Extramovies is an independent film-review magazine: original criticism with our own rating, no links to piracy, streaming availability checked and dated. | https://extramovies.org | `toy story 5 review` (3,600), `spiderman brand new day review` (1,000), `avengers endgame review` (720), `resident evil review` (260), `the odyssey 2026 review` (260) | Handle to try. No channel exists. |
-| Medium | `Extramovies` | `@extramoviesreviews` | Extramovies is an independent film-review magazine: original criticism with our own rating, no links to piracy, streaming availability checked and dated. | https://extramovies.org | `extramovies review`, `extramovies movie reviews`, `extramovies web series` (170) | Handle to try. `@extramovies` is suspended (410). |
-| Reddit | `Extramovies` | `u/extramoviesmag` | Extramovies is an independent film-review magazine: original criticism with our own rating, no links to piracy, streaming availability checked and dated. | https://extramovies.org | `extramovies com` (the People Also Ask block: "is extramovies a safe site", "what are some websites similar to extramovies"), `extramovies web series` | Handle to try. r/Extramovies is banned. |
-| Quora | `Extramovies` | `Extramovies` | Extramovies is an independent film-review magazine: original criticism with our own rating, no links to piracy, streaming availability checked and dated. | https://extramovies.org | `is extramovies a safe site`, `extramovies web series`, `extramovies review` | Display name to try. No profile exists. |
-| X | `Extramovies` | `@extramoviesmag` | Extramovies is an independent film-review magazine: original criticism with our own rating, no links to piracy, streaming availability checked and dated. | https://extramovies.org | `extramovies`, `extramovies com`, `extramovies web series` | Handle to try. `@extraMOVIES` is a 2012 ghost. |
+| Letterboxd | `Extramovies` | `extramovies` | Extramovies is an independent film-review magazine: original criticism with our own rating, no links to piracy, streaming availability checked and dated. | https://extramovies.org?utm_source=profile&utm_medium=parasite&utm_campaign=brand-2026 | `extramovies` (brand, 2.9K US / 201K IN per Semrush), `extramovies review`, and every film review query through the 20 diary entries | **Exists, ours.** https://letterboxd.com/extramovies/ |
+| YouTube | `Extramovies` | `@extramoviesmag` | Extramovies is an independent film-review magazine: original criticism with our own rating, no links to piracy, streaming availability checked and dated. | https://extramovies.org?utm_source=profile&utm_medium=parasite&utm_campaign=brand-2026 | `toy story 5 review` (3,600), `spiderman brand new day review` (1,000), `avengers endgame review` (720), `resident evil review` (260), `the odyssey 2026 review` (260) | Handle to try. No channel exists. |
+| Medium | `Extramovies` | `@extramoviesreviews` | Extramovies is an independent film-review magazine: original criticism with our own rating, no links to piracy, streaming availability checked and dated. | https://extramovies.org?utm_source=profile&utm_medium=parasite&utm_campaign=brand-2026 | `extramovies review`, `extramovies movie reviews`, `extramovies web series` (170) | Handle to try. `@extramovies` is suspended (410). |
+| Reddit | `Extramovies` | `u/extramoviesmag` | Extramovies is an independent film-review magazine: original criticism with our own rating, no links to piracy, streaming availability checked and dated. | https://extramovies.org?utm_source=profile&utm_medium=parasite&utm_campaign=brand-2026 | `extramovies com` (the People Also Ask block: "is extramovies a safe site", "what are some websites similar to extramovies"), `extramovies web series` | Handle to try. r/Extramovies is banned. |
+| Quora | `Extramovies` | `Extramovies` | Extramovies is an independent film-review magazine: original criticism with our own rating, no links to piracy, streaming availability checked and dated. | https://extramovies.org?utm_source=profile&utm_medium=parasite&utm_campaign=brand-2026 | `is extramovies a safe site`, `extramovies web series`, `extramovies review` | Display name to try. No profile exists. |
+| X | `Extramovies` | `@extramoviesmag` | Extramovies is an independent film-review magazine: original criticism with our own rating, no links to piracy, streaming availability checked and dated. | https://extramovies.org?utm_source=profile&utm_medium=parasite&utm_campaign=brand-2026 | `extramovies`, `extramovies com`, `extramovies web series` | Handle to try. `@extraMOVIES` is a 2012 ghost. |
 
 **No profile URL appears in this table except Letterboxd's**, because no other profile
 exists yet. The moment one does, write the URL into this file, and add it to the
@@ -67,7 +67,7 @@ serves is worse than no URL.
 
 - [ ] Display name is `Extramovies` on all six, capital E, no `.org`.
 - [ ] The description sentence is byte-identical on all six.
-- [ ] The website link is `https://extramovies.org` on all six, no trailing slash.
+- [ ] The website link is `https://extramovies.org?utm_source=profile&utm_medium=parasite&utm_campaign=brand-2026` on all six, no trailing slash.
 - [ ] The profile photo is the same file on all five that take one.
 - [ ] The `sameAs` array on the site lists the profiles that exist.
 - [ ] Nothing anywhere says "biggest", "first", "oldest", "best" or names an award.

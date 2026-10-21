@@ -43,7 +43,7 @@ marketing adjectives. No claim of size, age, rank or award.
 ## Website link to put in the profile
 
 ```
-https://extramovies.org
+https://extramovies.org?utm_source=profile&utm_medium=parasite&utm_campaign=brand-2026
 ```
 
 The website field, not a link typed into the bio. The bio already names the domain in
@@ -66,7 +66,7 @@ point at the root. The two together, both directions, is what makes the entity l
 | Display name | `Extramovies` | One name across every platform. See above. |
 | Username | leave as `extramovies` | The URL is already indexed. Changing it breaks the link Google has. |
 | Bio | the three sentences above | The durable surface. It counts for every entry, not one post. |
-| Website | `https://extramovies.org` | The only machine-readable link on the profile. |
+| Website | `https://extramovies.org?utm_source=profile&utm_medium=parasite&utm_campaign=brand-2026` | The only machine-readable link on the profile. |
 | Location | leave blank | Do not invent a city. It is not a ranking factor and a false field is a false field. |
 | Profile photo | set one, see below | A profile with no photo and no bio reads as abandoned. A photo plus a bio reads as a publication. |
 | Films (the log) | keep all 453, do not clear, do not bulk-edit | The log is the reason the profile reads as a real film account rather than a shell. Deleting it throws away the only thing Google already trusts on this domain. |
@@ -121,7 +121,7 @@ it wastes the one surface Letterboxd actually promotes.
 
 1. Set the display name to `Extramovies`.
 2. Paste the bio.
-3. Set the website field to `https://extramovies.org`.
+3. Set the website field to `https://extramovies.org?utm_source=profile&utm_medium=parasite&utm_campaign=brand-2026`.
 4. Upload the profile photo.
 5. Post the 20 diary entries from `letterboxd-diary-entries.md`, 10 on 2026-10-20 and
    10 on 2026-10-21.

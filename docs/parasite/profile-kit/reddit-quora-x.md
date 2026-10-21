@@ -40,7 +40,7 @@ variant.
 ## Bio to paste
 
 ```
-Extramovies is an independent film-review magazine: original criticism with our own rating, no links to piracy, streaming availability checked and dated. Reviews: https://extramovies.org
+Extramovies is an independent film-review magazine: original criticism with our own rating, no links to piracy, streaming availability checked and dated. Reviews: https://extramovies.org?utm_source=profile&utm_medium=parasite&utm_campaign=brand-2026
 ```
 
 153 characters plus the link, inside Reddit's 200 character bio limit.
@@ -98,7 +98,7 @@ URL: Quora could not be read from this host on 2026-10-21.
 ## Bio to paste
 
 ```
-Extramovies is an independent film-review magazine: original criticism with our own rating, no links to piracy, streaming availability checked and dated. Reviews: https://extramovies.org
+Extramovies is an independent film-review magazine: original criticism with our own rating, no links to piracy, streaming availability checked and dated. Reviews: https://extramovies.org?utm_source=profile&utm_medium=parasite&utm_campaign=brand-2026
 ```
 
 ## The one thing to do FIRST
@@ -136,7 +136,7 @@ point of the site. If your question is whether it is safe to download from a sit
 that name, no, and the reasons are malware, phishing and the legal exposure that comes
 with all three. None of that has anything to do with us.
 
-Our reviews are here: https://extramovies.org
+Our reviews are here: https://extramovies.org?utm_source=profile&utm_medium=parasite&utm_campaign=brand-2026
 ```
 
 ### After that
@@ -195,7 +195,7 @@ Extramovies is an independent film-review magazine: original criticism with our 
 ```
 
 153 characters, inside X's 160 character limit. The link goes in the profile's website
-field as `https://extramovies.org`, not in the bio, so the bio keeps the entity
+field as `https://extramovies.org?utm_source=profile&utm_medium=parasite&utm_campaign=brand-2026`, not in the bio, so the bio keeps the entity
 sentence intact.
 
 ## The one thing to do FIRST

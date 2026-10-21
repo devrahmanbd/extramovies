@@ -53,7 +53,7 @@ and X. One name or the entity reads as several.
 **How the publication is set up**
 
 1. Create the writer profile first, on the handle above, with the display name
-   `Extramovies` and the website `https://extramovies.org`.
+   `Extramovies` and the website `https://extramovies.org?utm_source=profile&utm_medium=parasite&utm_campaign=brand-2026`.
 2. Create a publication owned by that profile, named `Extramovies`.
 3. Publish every post to that publication, not to a generic Medium publication. A post
    in a self-owned publication carries the publication name in the byline, which is the
@@ -65,7 +65,7 @@ and X. One name or the entity reads as several.
 ## Publication description (the short one, Medium's publication description field)
 
 ```
-Extramovies is an independent film-review magazine: original criticism with our own rating, no links to piracy, streaming availability checked and dated. Full reviews on https://extramovies.org
+Extramovies is an independent film-review magazine: original criticism with our own rating, no links to piracy, streaming availability checked and dated. Full reviews on https://extramovies.org?utm_source=profile&utm_medium=parasite&utm_campaign=brand-2026
 ```
 
 Same first sentence as every other platform in this kit, word for word. The second
@@ -81,7 +81,7 @@ Extramovies publishes original film criticism with a rating out of ten that the 
 awards once the argument is written. We do not link to piracy, download pages or
 unofficial streams, and the where-to-watch block on every review names legal services
 only, with the region and the date we checked. Reviews, the critic numbers, the spoiler
-sections and the full archive are published on extramovies.org: https://extramovies.org
+sections and the full archive are published on extramovies.org: https://extramovies.org?utm_source=profile&utm_medium=parasite&utm_campaign=brand-2026
 ```
 
 Three sentences, every one of them a fact about the site as it behaves today. No claim
@@ -92,12 +92,12 @@ of size, age, awards, staff or readership.
 ## Writer profile bio (the short field on the profile itself)
 
 ```
-Extramovies is an independent film-review magazine: original criticism with our own rating, no links to piracy, streaming availability checked and dated. Reviews and the full archive: https://extramovies.org
+Extramovies is an independent film-review magazine: original criticism with our own rating, no links to piracy, streaming availability checked and dated. Reviews and the full archive: https://extramovies.org?utm_source=profile&utm_medium=parasite&utm_campaign=brand-2026
 ```
 
 ## Profile links
 
-Set the profile's website field to `https://extramovies.org` as well. A Medium profile
+Set the profile's website field to `https://extramovies.org?utm_source=profile&utm_medium=parasite&utm_campaign=brand-2026` as well. A Medium profile
 with a bio and a link is a live entity statement, and it is the only Medium page that
 carries the brand when no article is being read.
 
@@ -133,7 +133,7 @@ say so plainly than take a page view for it. If you want to know whether a film 
 your evening, that is what we are here for, and the answer comes with a number attached
 to it and the reasoning next to it.
 
-The full archive is on extramovies.org: https://extramovies.org
+The full archive is on extramovies.org: https://extramovies.org?utm_source=profile&utm_medium=parasite&utm_campaign=brand-2026
 ```
 
 **Canonical link to set on every Medium post:** the review URL on extramovies.org.

@@ -48,13 +48,13 @@ Availability is never final, so try it first and fall back in this order if it i
 ```
 Extramovies is an independent film-review magazine: original criticism with our own rating, no links to piracy, streaming availability checked and dated.
 
-One rating out of ten, awarded by the editor after the argument is written. Full reviews, the critic numbers and the spoiler sections are published on extramovies.org: https://extramovies.org
+One rating out of ten, awarded by the editor after the argument is written. Full reviews, the critic numbers and the spoiler sections are published on extramovies.org: https://extramovies.org?utm_source=profile&utm_medium=parasite&utm_campaign=brand-2026
 ```
 
 The first line is the one-line description used word for word on every other platform in
 this kit. The second line is what a reader gets when they ask what the channel is for.
 
-Keep `https://extramovies.org` in the description. Do not shorten it to `extramovies.org`
+Keep `https://extramovies.org?utm_source=profile&utm_medium=parasite&utm_campaign=brand-2026` in the description. Do not shorten it to `extramovies.org`
 without the scheme, and do not link a single review instead of the root. The root is the
 brand.
 
@@ -69,7 +69,7 @@ it is the one brand term with no AI Overview and therefore the one with the most
 
 ## Channel links section
 
-Add `https://extramovies.org` as the primary link. If a second slot is used, the second
+Add `https://extramovies.org?utm_source=profile&utm_medium=parasite&utm_campaign=brand-2026` as the primary link. If a second slot is used, the second
 link should be a specific review, not another site. Never point a YouTube link at a
 Medium or Reddit profile. One destination per link.
 
@@ -118,18 +118,18 @@ Use this shape, with the film name and the canonical URL filled in:
 
 ```
 <Film name> review: <verdict in one line>. Our rating out of ten, the critic numbers
-and the full argument: https://extramovies.org/reviews/<slug>
+and the full argument: https://extramovies.org/reviews/<slug>?utm_source=profile&utm_medium=parasite&utm_campaign=brand-2026
 ```
 
 The canonical URLs, one per film:
 
 | Video | Canonical URL |
 |---|---|
-| Toy Story 5 | https://extramovies.org/reviews/toy-story-5-2026-review |
-| Spider-Man: Brand New Day | https://extramovies.org/reviews/spider-man-brand-new-day-2026-review |
-| Avengers: Endgame | https://extramovies.org/reviews/avengers-endgame-2019-review |
-| Resident Evil | https://extramovies.org/reviews/resident-evil-2026-review |
-| The Odyssey | https://extramovies.org/reviews/the-odyssey-2026-review |
+| Toy Story 5 | https://extramovies.org/reviews/toy-story-5-2026-review?utm_source=profile&utm_medium=parasite&utm_campaign=brand-2026 |
+| Spider-Man: Brand New Day | https://extramovies.org/reviews/spider-man-brand-new-day-2026-review?utm_source=profile&utm_medium=parasite&utm_campaign=brand-2026 |
+| Avengers: Endgame | https://extramovies.org/reviews/avengers-endgame-2019-review?utm_source=profile&utm_medium=parasite&utm_campaign=brand-2026 |
+| Resident Evil | https://extramovies.org/reviews/resident-evil-2026-review?utm_source=profile&utm_medium=parasite&utm_campaign=brand-2026 |
+| The Odyssey | https://extramovies.org/reviews/the-odyssey-2026-review?utm_source=profile&utm_medium=parasite&utm_campaign=brand-2026 |
 
 ### Tags per video
 

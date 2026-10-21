@@ -44,7 +44,7 @@ that was created the same morning.
 
 - [ ] Display name to `Extramovies`.
 - [ ] Paste the three-sentence bio from `letterboxd-profile.md`.
-- [ ] Set the website field to `https://extramovies.org`.
+- [ ] Set the website field to `https://extramovies.org?utm_source=profile&utm_medium=parasite&utm_campaign=brand-2026`.
 - [ ] Upload the profile photo (see `letterboxd-profile.md` for the spec).
 - [ ] Log the 20 diary entries, 10 dated 2026-10-20 and 10 dated 2026-10-21, using
       `letterboxd-diary-entries.md`. Check the three films already on the profile and

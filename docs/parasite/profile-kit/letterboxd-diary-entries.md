@@ -32,26 +32,26 @@ wins and this file is wrong.
 
 | # | Film | Year | Our rating | Stars | Log date | Canonical URL |
 |---|---|---|---|---|---|---|
-| 1 | Animals | 2026 | 4.5 / 10 | 2.5 | 2026-10-20 | https://extramovies.org/reviews/animals-2026-review |
-| 2 | Avengers: Endgame | 2019 | 8.4 / 10 | 4.0 | 2026-10-20 | https://extramovies.org/reviews/avengers-endgame-2019-review |
-| 3 | Digger | 2026 | 5.5 / 10 | 3.0 | 2026-10-20 | https://extramovies.org/reviews/digger-2026-review |
-| 4 | Fall 2: Deadpoint | 2026 | 5.5 / 10 | 3.0 | 2026-10-20 | https://extramovies.org/reviews/fall-2-deadpoint-2026-review |
-| 5 | Hope | 2026 | 6.9 / 10 | 3.5 | 2026-10-20 | https://extramovies.org/reviews/hope-2026-review |
-| 6 | Insidious: Out of the Further | 2026 | 5.8 / 10 | 3.0 | 2026-10-20 | https://extramovies.org/reviews/insidious-out-of-the-further-2026-review |
-| 7 | Masterplan | 2026 | 5.0 / 10 | 2.5 | 2026-10-20 | https://extramovies.org/reviews/masterplan-2026-review |
-| 8 | Other Mommy | 2026 | 4.5 / 10 | 2.5 | 2026-10-20 | https://extramovies.org/reviews/other-mommy-2026-review |
-| 9 | Practical Magic 2 | 2026 | 4.5 / 10 | 2.5 | 2026-10-20 | https://extramovies.org/reviews/practical-magic-2-2026-review |
-| 10 | Resident Evil | 2026 | 7.5 / 10 | 4.0 | 2026-10-20 | https://extramovies.org/reviews/resident-evil-2026-review |
-| 11 | Runner | 2026 | 6.5 / 10 | 3.5 | 2026-10-21 | https://extramovies.org/reviews/runner-2026-review |
-| 12 | Sense and Sensibility | 2026 | 7.0 / 10 | 3.5 | 2026-10-21 (already logged, edit in place) | https://extramovies.org/reviews/sense-and-sensibility-2026-review |
-| 13 | Spider-Man: Brand New Day | 2026 | 7.0 / 10 | 3.5 | 2026-10-21 | https://extramovies.org/reviews/spider-man-brand-new-day-2026-review |
-| 14 | Street Fighter | 2026 | 5.5 / 10 | 3.0 | 2026-10-21 | https://extramovies.org/reviews/street-fighter-2026-review |
-| 15 | The Fix | 2026 | 4.0 / 10 | 2.0 | 2026-10-21 | https://extramovies.org/reviews/the-fix-2026-review |
-| 16 | The Odyssey | 2026 | 8.0 / 10 | 4.0 | 2026-10-21 | https://extramovies.org/reviews/the-odyssey-2026-review |
-| 17 | The Social Reckoning | 2026 | 6.0 / 10 | 3.0 | 2026-10-21 (already logged, edit in place) | https://extramovies.org/reviews/the-social-reckoning-2026-review |
-| 18 | Toy Story 5 | 2026 | 7.4 / 10 | 3.5 | 2026-10-21 | https://extramovies.org/reviews/toy-story-5-2026-review |
-| 19 | Whalefall | 2026 | 6.5 / 10 | 3.5 | 2026-10-21 | https://extramovies.org/reviews/whalefall-2026-review |
-| 20 | You Can See Everything | 2026 | 8.8 / 10 | 4.5 | 2026-10-21 (already logged, edit in place) | https://extramovies.org/reviews/you-can-see-everything-2026-review |
+| 1 | Animals | 2026 | 4.5 / 10 | 2.5 | 2026-10-20 | https://extramovies.org/reviews/animals-2026-review?utm_source=profile&utm_medium=parasite&utm_campaign=brand-2026 |
+| 2 | Avengers: Endgame | 2019 | 8.4 / 10 | 4.0 | 2026-10-20 | https://extramovies.org/reviews/avengers-endgame-2019-review?utm_source=profile&utm_medium=parasite&utm_campaign=brand-2026 |
+| 3 | Digger | 2026 | 5.5 / 10 | 3.0 | 2026-10-20 | https://extramovies.org/reviews/digger-2026-review?utm_source=profile&utm_medium=parasite&utm_campaign=brand-2026 |
+| 4 | Fall 2: Deadpoint | 2026 | 5.5 / 10 | 3.0 | 2026-10-20 | https://extramovies.org/reviews/fall-2-deadpoint-2026-review?utm_source=profile&utm_medium=parasite&utm_campaign=brand-2026 |
+| 5 | Hope | 2026 | 6.9 / 10 | 3.5 | 2026-10-20 | https://extramovies.org/reviews/hope-2026-review?utm_source=profile&utm_medium=parasite&utm_campaign=brand-2026 |
+| 6 | Insidious: Out of the Further | 2026 | 5.8 / 10 | 3.0 | 2026-10-20 | https://extramovies.org/reviews/insidious-out-of-the-further-2026-review?utm_source=profile&utm_medium=parasite&utm_campaign=brand-2026 |
+| 7 | Masterplan | 2026 | 5.0 / 10 | 2.5 | 2026-10-20 | https://extramovies.org/reviews/masterplan-2026-review?utm_source=profile&utm_medium=parasite&utm_campaign=brand-2026 |
+| 8 | Other Mommy | 2026 | 4.5 / 10 | 2.5 | 2026-10-20 | https://extramovies.org/reviews/other-mommy-2026-review?utm_source=profile&utm_medium=parasite&utm_campaign=brand-2026 |
+| 9 | Practical Magic 2 | 2026 | 4.5 / 10 | 2.5 | 2026-10-20 | https://extramovies.org/reviews/practical-magic-2-2026-review?utm_source=profile&utm_medium=parasite&utm_campaign=brand-2026 |
+| 10 | Resident Evil | 2026 | 7.5 / 10 | 4.0 | 2026-10-20 | https://extramovies.org/reviews/resident-evil-2026-review?utm_source=profile&utm_medium=parasite&utm_campaign=brand-2026 |
+| 11 | Runner | 2026 | 6.5 / 10 | 3.5 | 2026-10-21 | https://extramovies.org/reviews/runner-2026-review?utm_source=profile&utm_medium=parasite&utm_campaign=brand-2026 |
+| 12 | Sense and Sensibility | 2026 | 7.0 / 10 | 3.5 | 2026-10-21 (already logged, edit in place) | https://extramovies.org/reviews/sense-and-sensibility-2026-review?utm_source=profile&utm_medium=parasite&utm_campaign=brand-2026 |
+| 13 | Spider-Man: Brand New Day | 2026 | 7.0 / 10 | 3.5 | 2026-10-21 | https://extramovies.org/reviews/spider-man-brand-new-day-2026-review?utm_source=profile&utm_medium=parasite&utm_campaign=brand-2026 |
+| 14 | Street Fighter | 2026 | 5.5 / 10 | 3.0 | 2026-10-21 | https://extramovies.org/reviews/street-fighter-2026-review?utm_source=profile&utm_medium=parasite&utm_campaign=brand-2026 |
+| 15 | The Fix | 2026 | 4.0 / 10 | 2.0 | 2026-10-21 | https://extramovies.org/reviews/the-fix-2026-review?utm_source=profile&utm_medium=parasite&utm_campaign=brand-2026 |
+| 16 | The Odyssey | 2026 | 8.0 / 10 | 4.0 | 2026-10-21 | https://extramovies.org/reviews/the-odyssey-2026-review?utm_source=profile&utm_medium=parasite&utm_campaign=brand-2026 |
+| 17 | The Social Reckoning | 2026 | 6.0 / 10 | 3.0 | 2026-10-21 (already logged, edit in place) | https://extramovies.org/reviews/the-social-reckoning-2026-review?utm_source=profile&utm_medium=parasite&utm_campaign=brand-2026 |
+| 18 | Toy Story 5 | 2026 | 7.4 / 10 | 3.5 | 2026-10-21 | https://extramovies.org/reviews/toy-story-5-2026-review?utm_source=profile&utm_medium=parasite&utm_campaign=brand-2026 |
+| 19 | Whalefall | 2026 | 6.5 / 10 | 3.5 | 2026-10-21 | https://extramovies.org/reviews/whalefall-2026-review?utm_source=profile&utm_medium=parasite&utm_campaign=brand-2026 |
+| 20 | You Can See Everything | 2026 | 8.8 / 10 | 4.5 | 2026-10-21 (already logged, edit in place) | https://extramovies.org/reviews/you-can-see-everything-2026-review?utm_source=profile&utm_medium=parasite&utm_campaign=brand-2026 |
 
 ### Two things about the dates
 
