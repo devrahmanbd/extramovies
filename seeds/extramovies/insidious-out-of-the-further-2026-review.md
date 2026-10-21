@@ -5,9 +5,10 @@ rating: 5.8
 published_at: "2026-10-21T09:00:00.000Z"
 tmdb_id: 1291595
 imdb_id: "tt32393988"
-seo_title: "Insidious: Out of the Further (2026) Review: Is It Worth It?"
-seo_description: "Our Insidious: Out of the Further review: Jacob Chase's 106-minute horror sequel scores 57% on Rotten Tomatoes, 47 on Metacritic. Is it worth watching?"
-excerpt: "The pillow fort is genuinely scary. The mythology is not. Jacob Chase's sixth Insidious is a 57 percent Tomatometer horror sequel, and our verdict."
+seo_title: "Insidious: Out of the Further (2026) Review: Worth It?"
+seo_description: "Jacob Chase's Insidious: Out of the Further (2026) stars Amelia Eve and Lin Shaye. Our horror sequel review, with our 5.8 out of 10 verdict."
+excerpt: "The pillow fort is genuinely scary. The mythology is not. Our Insidious: Out of the Further (2026) verdict."
+managed_fields: "[\"seo_title\",\"seo_description\",\"excerpt\"]"
 movie_title: "Insidious: Out of the Further"
 movie_year: "2026"
 movie_genres: "[\"Horror\", \"Thriller\"]"

@@ -5,9 +5,10 @@ rating: 7.4
 published_at: "2026-10-21T09:00:00.000Z"
 tmdb_id: 1084244
 imdb_id: "tt29355505"
-seo_title: "Toy Story 5 (2026) Review: Is It Worth Watching?"
-seo_description: "Is Toy Story 5 worth watching? Our review of Andrew Stanton's Pixar sequel: 92 percent on Rotten Tomatoes, the Jessie problem, where to watch, and our verdict."
-excerpt: "Andrew Stanton hands Toy Story 5 to Joan Cusack's Jessie and makes a tablet the villain. The craft is immaculate and the script repeats itself. Our verdict."
+seo_title: "Toy Story 5 Review (2026): Is It Worth Watching?"
+seo_description: "Andrew Stanton's Toy Story 5 (2026) gives the franchise to Joan Cusack's Jessie. Our Pixar sequel review, with our 7.4 out of 10 verdict."
+excerpt: "Joan Cusack's Jessie takes the lead in Andrew Stanton's Toy Story 5 (2026). Immaculate animation, a script that repeats itself. Our verdict."
+managed_fields: "[\"seo_title\",\"seo_description\",\"excerpt\"]"
 movie_title: "Toy Story 5"
 movie_year: "2026"
 movie_genres: "[\"Animation\", \"Family\", \"Comedy\", \"Adventure\"]"

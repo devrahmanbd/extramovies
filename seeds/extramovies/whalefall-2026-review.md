@@ -5,9 +5,10 @@ rating: 6.5
 published_at: "2026-10-21T09:00:00.000Z"
 tmdb_id: 1255833
 imdb_id: "tt28535715"
-seo_title: "Whalefall (2026) Review: Is It Worth Watching?"
-seo_description: "Our Whalefall review: Austin Abrams swallowed by a sperm whale in Duffield's thriller. Rotten Tomatoes says 72 percent, Oct 21, 2026. Is it worth watching?"
-excerpt: "Watch it in theaters. Austin Abrams is inside a sperm whale, and Duffield's thriller is strangest when it stops being about feelings. RT: 72 percent, Oct 2026."
+seo_title: "Whalefall Review (2026): Is It Worth Watching?"
+seo_description: "Brian Duffield's Whalefall (2026) stars Austin Abrams and Josh Brolin. A man swallowed by a sperm whale. Our thriller review, with our 6.5 out of 10 verdict."
+excerpt: "Austin Abrams is swallowed by a sperm whale in Duffield's Whalefall (2026). Unforgettable set pieces, undone by flashbacks. Our verdict."
+managed_fields: "[\"seo_title\",\"seo_description\",\"excerpt\"]"
 movie_title: "Whalefall"
 movie_year: "2026"
 movie_genres: "[\"Thriller\"]"

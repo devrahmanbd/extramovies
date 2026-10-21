@@ -5,9 +5,10 @@ rating: 7.5
 published_at: "2026-10-21T09:00:00.000Z"
 tmdb_id: 1423191
 imdb_id: "tt35538033"
-seo_title: "Resident Evil (2026) Review: Is It Worth Watching?"
-seo_description: "Is Resident Evil worth watching? Our review of Zach Cregger's reboot: 96 percent on Rotten Tomatoes, where to watch, and our 7.5 out of 10 verdict."
-excerpt: "Zach Cregger's Resident Evil is a funny, nasty 95-minute thrill ride carried by Austin Abrams. Rotten Tomatoes has it at 96 percent from 300 reviews. Our take."
+seo_title: "Resident Evil Review (2026): Is It Worth Watching?"
+seo_description: "Zach Cregger's Resident Evil (2026) stars Austin Abrams in a 95-minute horror reboot. Our review, with our 7.5 out of 10 verdict."
+excerpt: "Austin Abrams carries a horror reboot with real jokes and real teeth. Our Resident Evil (2026) review, with the verdict."
+managed_fields: "[\"seo_title\",\"seo_description\",\"excerpt\"]"
 movie_title: "Resident Evil"
 movie_year: "2026"
 movie_genres: "[\"Horror\", \"Science Fiction\", \"Adventure\"]"

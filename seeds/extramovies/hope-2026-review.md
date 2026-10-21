@@ -5,9 +5,10 @@ rating: 6.9
 published_at: "2026-10-21T09:00:00.000Z"
 tmdb_id: 1058424
 imdb_id: "tt27369017"
-seo_title: "Hope (2026) Review: Is Na Hong-jin's Monster Epic Worth It?"
-seo_description: "Our Hope (2026) review: Na Hong-jin's Korean monster epic with Hwang Jung-min and Hoyeon scores 79% on Rotten Tomatoes, 67 on Metacritic. Is it worth watching?"
-excerpt: "The year's most entertaining Korean monster movie, and its most uneven. Rotten Tomatoes has Na Hong-jin's Hope at 79 percent from 177 reviews. Our verdict."
+seo_title: "Hope (2026) Review: Is It Worth Watching?"
+seo_description: "Na Hong-jin's Hope (2026) stars Hwang Jung-min and Hoyeon. Our Korean monster epic review, with our 6.9 out of 10 verdict."
+excerpt: "Hwang Jung-min and Hoyeon carry Na Hong-jin's Hope (2026), the most entertaining Korean monster movie of the year. Our verdict."
+managed_fields: "[\"seo_title\",\"seo_description\",\"excerpt\"]"
 movie_title: "Hope"
 movie_year: "2026"
 movie_genres: "[\"Science Fiction\", \"Mystery\", \"Action\"]"

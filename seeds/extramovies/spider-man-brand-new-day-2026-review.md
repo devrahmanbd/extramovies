@@ -5,9 +5,10 @@ rating: 7
 published_at: "2026-10-21T09:00:00.000Z"
 tmdb_id: 969681
 imdb_id: "tt22084616"
-seo_title: "Spider-Man: Brand New Day (2026) Review: Is It Worth It?"
-seo_description: "Is Spider-Man: Brand New Day worth watching? Our review of Cretton's Spider-Man: 90 percent on Rotten Tomatoes, where to watch it, and our 7 out of 10 verdict."
-excerpt: "Tom Holland is lonely and 30 in Cretton's reset. Rotten Tomatoes has the 2026 film at 90 percent from 439 critic reviews. Where to watch, and our verdict."
+seo_title: "Spider-Man: Brand New Day Review (2026): Is It Worth It?"
+seo_description: "Destin Daniel Cretton's Spider-Man: Brand New Day (2026) stars Tom Holland and Zendaya. Our review of the reset, with our 7 out of 10 verdict."
+excerpt: "Tom Holland is 30 and lonely in Cretton's Spider-Man: Brand New Day (2026), and Zendaya rescues the film. Our verdict."
+managed_fields: "[\"seo_title\",\"seo_description\",\"excerpt\"]"
 movie_title: "Spider-Man: Brand New Day"
 movie_year: "2026"
 movie_genres: "[\"Science Fiction\", \"Action\", \"Adventure\"]"

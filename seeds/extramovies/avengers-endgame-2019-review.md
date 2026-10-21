@@ -5,9 +5,10 @@ rating: 8.4
 published_at: "2026-10-21T09:00:00.000Z"
 tmdb_id: 299534
 imdb_id: "tt4154796"
-seo_title: "Avengers: Endgame (2019) Review: The 2026 Encore"
-seo_description: "Is Avengers: Endgame worth watching in the 2026 encore? Our review of the 2019 finale, where to watch it, and our 8.4 out of 10 verdict."
-excerpt: "Back in cinemas as the 2026 Encore edition. Rotten Tomatoes has the 2019 film at 94 percent from 553 critic reviews. Where to watch, and our verdict."
+seo_title: "Avengers: Endgame Review (2019): Is It Worth Watching?"
+seo_description: "The Russo brothers' Avengers: Endgame (2019) is back in cinemas for the 2026 Encore edition. Our finale review, with our 8.4 out of 10 verdict."
+excerpt: "Back in cinemas as the 2026 Encore edition. Our Avengers: Endgame (2019) review of the Russo finale, with the verdict."
+managed_fields: "[\"seo_title\",\"seo_description\",\"excerpt\"]"
 movie_title: "Avengers: Endgame"
 movie_year: "2019"
 movie_genres: "[\"Adventure\", \"Science Fiction\", \"Action\"]"

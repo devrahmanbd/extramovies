@@ -5,9 +5,10 @@ rating: 5.5
 published_at: "2026-10-21T09:00:00.000Z"
 tmdb_id: 1248832
 imdb_id: "tt31450459"
-seo_title: "Digger (2026) Review: Is It Worth Watching?"
-seo_description: "Our Digger review: Iñárritu and Tom Cruise on oil, greed and the end of the world. 53% on Rotten Tomatoes, 46 on Metacritic, and our verdict."
-excerpt: "Cruise gives the performance of his career inside a film that shouts every thought it has. Rotten Tomatoes has Iñárritu's Digger at 53 percent."
+seo_title: "Digger Review (2026): Is It Worth Watching?"
+seo_description: "Alejandro González Iñárritu's Digger (2026) stars Tom Cruise and Riz Ahmed. Our review of the oil thriller, with our 5.5 out of 10 verdict."
+excerpt: "Tom Cruise gives the performance of his career in Iñárritu's Digger (2026). The film shouts every thought it has. Our verdict."
+managed_fields: "[\"seo_title\",\"seo_description\",\"excerpt\"]"
 movie_title: "Digger"
 movie_year: "2026"
 movie_genres: "[\"Comedy\", \"Drama\"]"
