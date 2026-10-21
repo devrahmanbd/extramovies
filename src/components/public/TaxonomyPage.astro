@@ -1,0 +1,116 @@
+---
+/**
+ * Taxonomy page body — one shared layout for the cast, director and
+ * category archives (AGENTS.md §3, §5).
+ *
+ * The page lists ONLY the site's own published reviews for the entity, with
+ * the review title, rating, year and a one-line summary. A one-review page
+ * says so in the intro and carries `noindex, follow`; two or more reviews
+ * make it indexable.
+ *
+ * Schema: CollectionPage + ItemList + BreadcrumbList (the same shapes the
+ * review archive uses). No FAQ, no HowTo, no hidden markup, no invented
+ * people or facts.
+ */
+import Base from "../../layouts/Base.astro";
+import TaxonomyReviewItem from "./TaxonomyReviewItem.astro";
+import { breadcrumbJsonLd } from "../../lib/seo/jsonld";
+import type { TaxonomyPageMeta } from "../../lib/seo/taxonomy";
+
+interface Props {
+  meta: TaxonomyPageMeta;
+  origin: string;
+  theme: string;
+}
+
+const { meta, origin, theme } = Astro.props;
+const entry = meta.entry;
+const isDiscovery = theme === "discovery";
+const reviews = entry.reviews;
+const kicker = entry.kind === "cast" ? "Cast" : entry.kind === "director" ? "Director" : "Category";
+const headingIsLong = meta.title.length > 40;
+const lead = reviews[0];
+const image = lead?.posterUrl ?? lead?.backdropUrl ?? null;
+
+const jsonld = [
+  breadcrumbJsonLd(origin, [
+    { name: "Home", path: "/" },
+    { name: "Reviews", path: "/reviews" },
+    { name: entry.label, path: meta.path },
+  ]),
+  {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: meta.title,
+    url: `${origin}${meta.path}`,
+    mainEntity: {
+      "@type": "ItemList",
+      numberOfItems: reviews.length,
+      itemListElement: reviews.map((r, i) => ({
+        "@type": "ListItem",
+        position: i + 1,
+        name: r.reviewTitle,
+        url: `${origin}/reviews/${r.slug}`,
+      })),
+    },
+  },
+];
+---
+<Base
+  title={meta.title}
+  description={meta.description}
+  descriptionExtra="Ratings, verdicts and where to watch, from the site's own review archive."
+  path={meta.path}
+  image={image}
+  imageAlt={lead ? `${lead.movieTitle} artwork` : undefined}
+  robots={meta.robots}
+  jsonld={jsonld}
+  current="reviews"
+>
+  {isDiscovery ? (
+  <div class="wrap">
+    <section class="band section--md d-browse-head" aria-labelledby="taxonomy-title">
+      <nav class="d-crumb" aria-label="Breadcrumb">
+        <a href="/">Home</a><span aria-hidden="true"> / </span><a href="/reviews">Reviews</a><span aria-hidden="true"> / </span><span aria-current="page">{entry.label}</span>
+      </nav>
+      <p class="d-kicker">{kicker}</p>
+      <h1 id="taxonomy-title" class={headingIsLong ? "display--long" : undefined}>{meta.title}</h1>
+      <p class="d-lede tnum">
+        {meta.countText}{reviews.length > 1 ? ", newest first" : ""}.
+      </p>
+    </section>
+
+    <section class="band--alt section--md d-results" aria-labelledby="taxonomy-list-heading">
+      <div class="section-head d-section-row">
+        <div>
+          <h2 id="taxonomy-list-heading" class="tnum">{meta.countText}</h2>
+          <p>{meta.intro}</p>
+        </div>
+      </div>
+      <ol class="glam-archive">
+        {reviews.map((r, i) => <TaxonomyReviewItem review={r} index={i} />)}
+      </ol>
+    </section>
+  </div>
+  ) : (
+  <>
+  <div class="wrap">
+    <section aria-labelledby="taxonomy-title" class="band section--lg glam-archive-head">
+      <div class="section-head">
+        <p class="glam-kicker tnum">{kicker}</p>
+        <h1 id="taxonomy-title" class={headingIsLong ? "display--long" : undefined}>{meta.title}</h1>
+        <p class="tnum glam-archive-dek">{meta.intro}</p>
+      </div>
+    </section>
+  </div>
+
+  <div class="band section--md glam-archive-band">
+    <div class="wrap">
+      <ol class="glam-archive">
+        {reviews.map((r, i) => <TaxonomyReviewItem review={r} index={i} />)}
+      </ol>
+    </div>
+  </div>
+  </>
+  )}
+</Base>

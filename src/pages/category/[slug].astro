@@ -1,0 +1,43 @@
+---
+/**
+ * /category/<slug> — every Extramovies review filed under this category.
+ *
+ * Part of the taxonomy rebuild (AGENTS.md §5): the legacy archive indexed
+ * `/category/<slug>/` URLs, so those inbound links are dead until the site
+ * serves the path again. Membership comes from the site's own published
+ * reviews only — a slug the site does not publish answers 404, never a
+ * padded page.
+ *
+ * The category axis is the site's own genre list. The legacy corpus also
+ * used piracy-catalogue facets ("hindi-dubbed-movies", "dual-audio-movies");
+ * the site has no honest data for those, so they stay dead rather than
+ * being faked with films the journal never reviewed.
+ *
+ * Indexing policy: fewer than two published reviews is `noindex, follow`
+ * (the decision lives in src/lib/seo/taxonomy.ts, shared by the sibling
+ * cast and director routes).
+ */
+import TaxonomyPage from "../../components/public/TaxonomyPage.astro";
+import { getSiteBrand } from "../../lib/seo/brand";
+import { getDb, getSetting } from "../../lib/db/adapter";
+import { siteOrigin } from "../../lib/seo/meta";
+import { taxonomyPageMeta } from "../../lib/seo/taxonomy";
+import { currentTheme } from "../../lib/tmdb/discover";
+
+const slug = (Astro.params.slug ?? "").trim().toLowerCase();
+const brand = await getSiteBrand((k) => getSetting(getDb({}), k));
+const origin = siteOrigin(Astro.url.origin);
+
+let theme = "publication";
+try {
+  theme = await currentTheme();
+} catch {
+  theme = "publication";
+}
+
+const meta = taxonomyPageMeta("category", slug, brand.name);
+if (!meta) {
+  return new Response("Category page not found", { status: 404 });
+}
+---
+<TaxonomyPage meta={meta} origin={origin} theme={theme} />

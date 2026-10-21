@@ -1,0 +1,33 @@
+---
+/**
+ * One review in a taxonomy list — the four facts the taxonomy pages owe the
+ * reader: the review's own title, the rating, the year and a one-line
+ * summary. Nothing is added that the review row does not already carry.
+ */
+import type { PublicReview } from "../../lib/seo/content";
+import RatingMark from "./RatingMark.astro";
+
+interface Props {
+  review: PublicReview;
+  index?: number;
+}
+
+const { review, index } = Astro.props;
+const url = `/reviews/${review.slug}`;
+const num = typeof index === "number" ? String(index + 1).padStart(2, "0") : null;
+const meta = [review.movieTitle, review.year ? String(review.year) : null]
+  .filter(Boolean)
+  .join(" — ");
+const summary = review.excerpt || review.verdict;
+---
+<li class="glam-item glam-terse">
+  {num ? <span class="glam-num" aria-hidden="true">{num}</span> : null}
+  <div class="glam-terse-main">
+    <h3 class="glam-terse-title">
+      <a href={url}>{review.reviewTitle}</a>
+    </h3>
+    {meta ? <p class="glam-meta tnum">{meta}</p> : null}
+    {summary ? <p class="glam-verdict">{summary}</p> : null}
+  </div>
+  <RatingMark rating={review.rating} />
+</li>

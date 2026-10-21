@@ -1,10 +1,22 @@
 import fs from "node:fs";
 import path from "node:path";
+import { parseTaxonomyPath } from "./taxonomy-path";
+import { hasTaxonomyPage } from "../seo/taxonomy";
 
 // Legacy piracy-archive URL router (AGENTS.md §5). Serves the per-server
 // redirect map produced by scripts/legacy/archive_recover.py into the
 // legacy dir (default sibling of the app dir, override LEGACY_DATA_DIR).
 // Fail-soft: missing/invalid files -> pass-through, today's output unchanged.
+//
+// Taxonomy redirect (added with the cast/director/category rebuild): the
+// legacy archive indexed `/cast/<slug>/`, `/director/<slug>/` and
+// `/category/<slug>/` URLs that the current site no longer serves, so the
+// link equity behind them was dead. When the site now publishes a page for
+// one of those slugs, the router answers 301 to it — computed here, with no
+// edit to the on-box CSV. Every other path keeps today's behaviour: mapped
+// -> 301 to its mapped target, unresolved -> 410, everything else passes
+// through. The lookup is fail-soft (AGENTS.md §6): if it throws, the
+// request passes through exactly as before.
 
 const CATEGORY_RE = /^(?:\d+(?:mb)?-movies|movies|movie|web-series|webseries|tv-shows|tv|series|dual-audio-movies|hindi-dubbed-movies|south-movies|punjabi-movies|hindi-movies|bollywood-movies|hollywood-movies|adult-movies)$/;
 const PAGINATION_RE = /^page\/(\d+)$/;
@@ -193,6 +205,40 @@ export function createLegacyRouter(dir?: string) {
     }
   }
 
+  /**
+   * Taxonomy redirect target for a legacy path, or null.
+   *
+   * Fail-soft by contract: a broken store, a missing file or any other
+   * failure answers null, so the caller passes the request through exactly
+   * as it does today.
+   */
+  function taxonomyTarget(norm: string): string | null {
+    try {
+      const parsed = parseTaxonomyPath(norm);
+      if (!parsed) return null;
+      if (!hasTaxonomyPage(parsed.kind, parsed.slug)) return null;
+      return `/${parsed.kind}/${parsed.slug}`;
+    } catch {
+      return null;
+    }
+  }
+
+  /**
+   * True when the request already IS the taxonomy page's canonical URL.
+   *
+   * The taxonomy routes canonicalize to `/<kind>/<slug>` (no trailing
+   * slash — the same shape as `/reviews/<slug>`), while the legacy corpus
+   * indexed the slashed form `/<kind>/<slug>/`. Redirecting the canonical
+   * URL to itself would loop, so it is left to serve the page (200); the
+   * slashed legacy form still 301s to the canonical one. The live page
+   * also wins over the legacy corpus' unresolved set — a resurrected slug
+   * must not 410.
+   */
+  function isCanonicalTaxonomyPath(pathname: string, target: string): boolean {
+    const raw = pathname.split("?")[0]?.split("#")[0] ?? "";
+    return raw === target;
+  }
+
   return {
     check(pathname: string): Response | null {
       const norm = normalizeLegacyPath(pathname);
@@ -203,10 +249,19 @@ export function createLegacyRouter(dir?: string) {
       // a percent-encoded dot cannot slip past.
       if (isAssetExempt(norm)) return null;
       load();
-      if (!state) return null;
-      const target = state.map.get(norm);
-      if (target) return new Response(null, { status: 301, headers: { Location: target } });
-      if (state.unresolved.has(norm)) return new Response(null, { status: 410 });
+      // The explicit map still wins: it is the owner's own redirect table.
+      const mapped = state?.map.get(norm);
+      if (mapped) return new Response(null, { status: 301, headers: { Location: mapped } });
+      // Taxonomy shape the site now publishes -> 301 to the live page.
+      // Runs before the 410 so a resurrected slug is not killed by the
+      // legacy corpus' unresolved set: the path is live again.
+      const taxonomy = taxonomyTarget(norm);
+      if (taxonomy) {
+        // The canonical URL is the page itself: let the route serve it.
+        if (isCanonicalTaxonomyPath(pathname, taxonomy)) return null;
+        return new Response(null, { status: 301, headers: { Location: taxonomy } });
+      }
+      if (state?.unresolved.has(norm)) return new Response(null, { status: 410 });
       return null;
     },
     stats(): { ready: boolean; mapped: number; gone: number } {
