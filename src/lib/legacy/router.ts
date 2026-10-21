@@ -97,6 +97,7 @@ export const LIVE_ROUTE_PATTERNS: readonly string[] = [
   "/reviews/:slug",
   "/movies",
   "/movies/:tmdbId",
+  "/series",
   "/series/:tmdbId",
   "/cast/:slug",
   "/director/:slug",

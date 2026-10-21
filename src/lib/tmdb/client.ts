@@ -148,6 +148,43 @@ export async function findTmdbIdByImdbId(imdbId: string): Promise<number | null>
   }
 }
 
+/**
+ * Media type ("movie" | "tv") of an IMDb id, via the same /find endpoint.
+ *
+ * TMDB keeps the film and the TV id in SEPARATE namespaces and an IMDb id
+ * can point at either, so the /find answer decides it: the list that carries
+ * the id is the namespace the title lives in.
+ *
+ * `tmdbId` (when known) disambiguates the rare IMDb id that resolves to both
+ * a film and a show: the list that carries THAT id wins.
+ *
+ * Fail-soft: no key, a 404 or a network error resolves to null ("unknown"),
+ * never to a guess.
+ */
+export async function findMediaTypeByImdbId(
+  imdbId: string,
+  tmdbId?: number | null,
+): Promise<"movie" | "tv" | null> {
+  const clean = imdbId.trim();
+  if (!/^tt\d+$/.test(clean)) return null;
+  try {
+    const res = await tmdbFetch<TmdbFindResult>(`/find/${clean}`, {
+      external_source: "imdb_id",
+    });
+    const movies = res.movie_results ?? [];
+    const shows = res.tv_results ?? [];
+    if (typeof tmdbId === "number" && Number.isFinite(tmdbId)) {
+      if (shows.some((t) => t.id === tmdbId)) return "tv";
+      if (movies.some((m) => m.id === tmdbId)) return "movie";
+    }
+    if (shows.length > 0 && movies.length === 0) return "tv";
+    if (movies.length > 0 && shows.length === 0) return "movie";
+    return null; // both or neither — unknown, never a guess
+  } catch {
+    return null;
+  }
+}
+
 /** Search by title (first page). Returns raw details list for disambiguation. */
 export async function searchMoviesByTitle(
   title: string,

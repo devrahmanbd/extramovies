@@ -98,6 +98,29 @@ function positiveTmdbId(...candidates: unknown[]): number | null {
   return null;
 }
 
+/**
+ * Media type pinned on a store row ("movie" | "tv"), when the editor set
+ * one. Anything else (a typo, a number, a blank) is ignored: the loader
+ * resolves the media type from TMDB instead of trusting a bad value.
+ */
+export function rowMediaType(row: { mediaType?: unknown }): "movie" | "tv" | undefined {
+  const v = row?.mediaType;
+  return v === "movie" || v === "tv" ? v : undefined;
+}
+
+/**
+ * IMDb id of a store row (top level first, then the linked movie record).
+ * The media-type lookup needs it: it is the one id TMDB keeps unique across
+ * the film and the TV namespaces.
+ */
+function rowImdbId(row: Review): string | null {
+  const movie = row.movie ?? {};
+  const direct = typeof row.imdbId === "string" ? row.imdbId.trim() : "";
+  if (direct) return direct;
+  const linked = typeof movie.imdbId === "string" ? movie.imdbId.trim() : "";
+  return linked || null;
+}
+
 /** Map an admin-store row onto the public contract. Null when unusable. */
 function storeToPublic(r: Review): PublicReview | null {
   if (!r || r.status !== "published") return null;
@@ -136,6 +159,8 @@ function storeToPublic(r: Review): PublicReview | null {
     fromStore: true,
     ...(r.featured === true ? { featured: true as const } : {}),
     ...(r.platformPick === true ? { platformPick: true as const } : {}),
+    ...(rowMediaType(r) ? { mediaType: rowMediaType(r) as "movie" | "tv" } : {}),
+    ...(rowImdbId(r) ? { imdbId: rowImdbId(r) as string } : {}),
     providers: null,
     ...(r.customWatch ? { customWatch: r.customWatch } : {}),
     ...("sites" in r && Array.isArray(r.sites)
@@ -190,6 +215,10 @@ function mergeDemo(demo: PublicReview, r: Review): PublicReview {
       "platformPick" in r && typeof r.platformPick === "boolean"
         ? r.platformPick
         : (demo.platformPick ?? false),
+    // A pinned media type and the IMDb id come from the store row; the DEMO
+    // starter pack carries neither, so nothing is lost when they are absent.
+    ...(rowMediaType(r) ? { mediaType: rowMediaType(r) as "movie" | "tv" } : {}),
+    ...(rowImdbId(r) ? { imdbId: rowImdbId(r) as string } : {}),
     ...(r.customWatch ? { customWatch: r.customWatch } : {}),
     ...("sites" in r && Array.isArray(r.sites)
       ? { sites: r.sites.filter((s): s is string => typeof s === "string") }

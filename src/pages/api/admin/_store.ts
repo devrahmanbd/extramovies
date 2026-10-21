@@ -51,6 +51,15 @@ export interface Review {
    * writes it and the public loader prefers a flagged store row.
    */
   featured?: boolean;
+  /**
+   * Media type of the subject: "movie" or "tv" (series).
+   *
+   * Optional, and never guessed at write time. When it is absent the public
+   * loader resolves the media type from TMDB (src/lib/tmdb/media-type.ts),
+   * so a row without the tag still lands on the right index. When it IS
+   * set it wins: the editor pinned the answer, no lookup overrules it.
+   */
+  mediaType?: "movie" | "tv";
   /** Manual watch links (custom free sites + paid options), edited in the dashboard. */
   customWatch?: CustomWatch;
   /**

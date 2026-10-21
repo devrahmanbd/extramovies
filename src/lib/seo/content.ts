@@ -87,6 +87,20 @@ export interface PublicReview {
   fromStore?: boolean;
   /** Owner-curated "Platform Pick" badge (title cards + review cards). */
   platformPick?: boolean;
+  /**
+   * Media type of the subject: "movie" or "tv" (series).
+   *
+   * Carried from the admin store row when the editor pinned it. Absent means
+   * "not pinned" — the media type is then resolved from TMDB by
+   * src/lib/seo/series-reviews.ts (never guessed from the title alone).
+   */
+  mediaType?: "movie" | "tv";
+  /**
+   * IMDb id of the subject ("tt1234567"), when the row carries one. The one
+   * identifier TMDB keeps unique across the film and the TV namespaces, so
+   * it is what settles whether a review is about a film or a series.
+   */
+  imdbId?: string | null;
   providers: WatchProviders | null;
   /** Manual editor links (custom free sites + paid watch). Null when none. */
   customWatch?: CustomWatch | null;

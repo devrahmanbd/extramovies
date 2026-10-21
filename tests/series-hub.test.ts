@@ -50,15 +50,21 @@ describe('series hub page (S1) contract', () => {
     expect(s).toContain('/^\\d+$/');
   });
 
-  it('has no editorial slot and adds no sitemap entries', async () => {
+  it('has no editorial slot and adds no sitemap entry of its own', async () => {
     const s = await src();
     expect(s).not.toContain('findReviewForTmdbId');
     expect(s).not.toContain('MovieShowcase');
+    // The hub page never lists itself. A /series/<tmdbId> entry joins the
+    // sitemap only when a PUBLISHED series review is attached to it, the
+    // same review-driven rule the film hubs follow (AGENTS.md §5) — the
+    // decision lives in src/pages/sitemap.xml.ts, not in the hub.
+    expect(s).not.toContain('buildSitemapXml');
+    expect(s).not.toContain('SitemapEntry');
     const sitemap = await fs.readFile(
       path.join(process.cwd(), 'src', 'pages', 'sitemap.xml.ts'),
       'utf8',
     );
-    expect(sitemap).not.toContain('/series/');
+    expect(sitemap).toContain('seriesReviews');
   });
 
   it('tolerates null show fields (safeShowDefaults path)', async () => {

@@ -2,10 +2,14 @@
 /**
  * /series/[tmdbId] — series hub: TMDB showcase + automatic providers.
  * Lean mirror of src/pages/movies/[tmdbId].astro (S1, publication-first).
- * No editorial-review slot (no series rows in content.ts), no related strip,
- * no sitemap entries (revisit when editorial covers series).
+ * No editorial-review slot on the page itself (the review lives on
+ * /reviews/<slug> and is listed by /series), no related strip.
  * Custom manual links are out of scope here, so customWatch is always
  * null — never fabricated. Zero client JS.
+ *
+ * The sitemap entry for this hub is NOT written here: src/pages/sitemap.xml.ts
+ * lists /series/<tmdbId> when a published series review is attached to it,
+ * the same review-driven rule the film hubs follow (AGENTS.md §5).
  */
 import Base from "../../layouts/Base.astro";
 import WhereToWatch from "../../components/public/WhereToWatch.astro";

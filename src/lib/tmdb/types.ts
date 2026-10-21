@@ -230,4 +230,15 @@ export interface TmdbWatchProviders {
 
 export interface TmdbFindResult {
   movie_results?: Array<TmdbMovieDetails>;
+  /**
+   * TV hits for the same /find lookup. The IMDb id namespace is shared
+   * across films and shows, so both lists have to be read before the
+   * media type can be decided (see src/lib/tmdb/media-type.ts).
+   */
+  tv_results?: Array<{
+    id: number;
+    name?: string;
+    original_name?: string;
+    first_air_date?: string;
+  }>;
 }
