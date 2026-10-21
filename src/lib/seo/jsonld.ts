@@ -5,7 +5,7 @@
  * - Review carries MY rating only — never a fabricated aggregateRating.
  * - No FAQ schema, no keyword stuffing.
  */
-import type { Brand } from "./brand";
+import { BRAND_ALTERNATE_NAMES, type Brand } from "./brand";
 import type { PublicReview } from "./content";
 import { displayAuthor } from "../site-author";
 
@@ -34,10 +34,16 @@ function tmdbSourceUrl(tmdbId: number | null | undefined): string | null {
 }
 
 export function websiteJsonLd(brand: Brand): JsonLd {
+  // The other spellings of this site ("extramovies", "extramovies.org").
+  // ONE WebSite node, never a second block: Google offers these as
+  // site-name alternatives when its automated system does not pick the
+  // brand name on its own. The list is per site — see BRAND_ALTERNATE_NAMES.
+  const alternateName = BRAND_ALTERNATE_NAMES(brand);
   return {
     "@context": "https://schema.org",
     "@type": "WebSite",
     name: brand.name,
+    ...(alternateName.length > 0 ? { alternateName } : {}),
     url: `${brand.origin}/`,
     description: brand.description,
     inLanguage: brand.locale.replace("_", "-"),

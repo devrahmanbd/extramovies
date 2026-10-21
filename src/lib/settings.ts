@@ -24,6 +24,7 @@ export const SETTING_KEYS = [
   'openrouter.base_url',
   'site.url',
   'site.name',
+  'site.alternate_name',
   'site.theme',
   'brand.preset',
   'brand.logo',
@@ -55,6 +56,7 @@ const ENV_SEED: Record<SettingKey, string> = {
   'openrouter.base_url': 'OPENROUTER_BASE_URL',
   'site.url': 'SITE_URL',
   'site.name': 'SITE_NAME',
+  'site.alternate_name': 'SITE_ALTERNATE_NAME',
   'site.theme': 'SITE_THEME',
   'brand.preset': 'BRAND_PRESET',
   'brand.logo': 'BRAND_LOGO',
@@ -83,6 +85,10 @@ const DEFAULTS: Record<SettingKey, string> = {
   'openrouter.base_url': 'https://openrouter.ai/api/v1',
   'site.url': '',
   'site.name': '',
+  // Empty = derive the list from the brand's own name and domain (see
+  // BRAND_ALTERNATE_NAMES in src/lib/seo/brand.ts). Never a hardcoded
+  // domain here: the second brand lives on another host.
+  'site.alternate_name': '',
   'site.theme': 'publication',
   'brand.preset': 'noir-cinema',
   'brand.logo': '',
@@ -200,6 +206,11 @@ export function validateSettingsPayload(input: Record<string, unknown>): string 
   const url = input['site.url'];
   if (typeof url === 'string' && url.trim() !== '' && !/^https?:\/\/.+\..+/.test(url.trim())) {
     return 'site.url must be a full URL (https://…)';
+  }
+  // The alternate-name list is a short, comma separated list of aliases.
+  const altNames = input['site.alternate_name'];
+  if (typeof altNames === 'string' && altNames.length > 200) {
+    return 'site.alternate_name is too long (max 200 chars)';
   }
   const taste = input['taste.profile'];
   if (typeof taste === 'string' && taste.trim() !== '') {

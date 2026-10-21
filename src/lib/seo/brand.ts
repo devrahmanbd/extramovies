@@ -30,6 +30,12 @@ export interface Brand {
   tagline: string;
   domain: string;
   origin: string;
+  /**
+   * The brand's PINNED alternate names (aliases) — the per-site override of
+   * `BRAND_ALTERNATE_NAMES`. Undefined means "derive from the brand's own
+   * name and origin" (the default every brand gets).
+   */
+  alternateNames?: string[];
   logo: string | null;
   favicon: string;
   icon: string;
@@ -39,6 +45,76 @@ export interface Brand {
   description: string;
   defaultOgImage: string | null;
   themeColor: string;
+}
+
+/**
+ * The brand's alternate names — the other spellings of this site a reader or
+ * a crawler may use ("extramovies", "extramovies.org").
+ *
+ * ONE documented constant, next to the other site-name values (name,
+ * origin), so a second brand overrides it in a single place instead of
+ * editing code. Resolution — the same per-site pattern `site.name` uses:
+ *
+ *   1. the PINNED list on the brand: the dashboard setting
+ *      `site.alternate_name` (comma separated; env seed
+ *      `SITE_ALTERNATE_NAME` on first boot);
+ *   2. otherwise the default DERIVED from the brand's OWN name and origin.
+ *
+ * Step 2 is why nothing here hardcodes a domain: the second brand lives on
+ * another host (cinemavilla.in) and must resolve to its own aliases
+ * ("cinemavilla", "cinemavilla.in") — a hardcoded "extramovies.org" would
+ * be a false claim on that site.
+ *
+ * Why the list exists: Google derives the SERP site name from the homepage
+ * title, the headings, the WebSite structured data and og:site_name.
+ * `alternateName` offers it the alternatives when its automated system does
+ * not pick the brand name on its own.
+ */
+export const BRAND_ALTERNATE_NAMES = (
+  brand: Pick<Brand, "name" | "origin" | "alternateNames">,
+): string[] => {
+  const pinned = (brand.alternateNames ?? []).map((s) => s.trim()).filter(Boolean);
+  if (pinned.length > 0) return unique(pinned);
+  const name = (brand.name ?? "").trim().toLowerCase();
+  const host = hostOf(brand.origin);
+  return unique([name, host].filter(Boolean));
+};
+
+/** Keep the order, drop the duplicates and the blanks. */
+function unique(values: string[]): string[] {
+  const out: string[] = [];
+  for (const v of values) {
+    const t = v.trim();
+    if (t && !out.includes(t)) out.push(t);
+  }
+  return out;
+}
+
+/** The host of an origin ("https://extramovies.org" -> "extramovies.org"). */
+function hostOf(origin: string | undefined | null): string {
+  const raw = (origin ?? "").trim();
+  if (!raw) return "";
+  try {
+    // hostname, not host: a dev port ("localhost:4321") is not part of a name.
+    return new URL(raw).hostname.toLowerCase();
+  } catch {
+    return raw
+      .toLowerCase()
+      .replace(/^[a-z]+:\/\//, "")
+      .replace(/\/.*$/, "")
+      .replace(/:\d+$/, "");
+  }
+}
+
+/** Split a comma/newline separated alias list into clean entries. */
+export function parseAlternateNames(raw: string | null | undefined): string[] {
+  if (!raw) return [];
+  return unique(
+    raw
+      .split(/[,\n]/)
+      .map((s) => s.trim())
+      .filter(Boolean),
+  );
 }
 
 export function adaptPreset(p: BrandPreset): Brand {
@@ -132,16 +208,23 @@ export async function getSiteBrand(
       }
       return null;
     };
-    const [presetId, siteName, logo, favicon] = await Promise.all([
+    const [presetId, siteName, logo, favicon, alternateNames] = await Promise.all([
       val("brand.preset"),
       val("site.name"),
       val("brand.logo"),
       val("brand.favicon"),
+      val("site.alternate_name"),
     ]);
     const preset = resolvePreset(presetId, env);
     const base = adaptPreset(preset);
     const overrides: BrandOverrides = {};
     if (siteName !== null && siteName !== "") overrides.name = siteName;
+    // The pinned alias list (dashboard setting, env seed on first boot).
+    // Empty = the derived default (brand name + this site's own host).
+    const pinned = parseAlternateNames(
+      alternateNames ?? envSeed("SITE_ALTERNATE_NAME", env),
+    );
+    if (pinned.length > 0) overrides.alternateNames = pinned;
     // Dashboard uploads are stored as root paths (/uploads/…) and must stay
     // root-relative so they resolve on THIS domain (see adaptPreset).
     if (logo !== null && logo !== "") {
@@ -165,6 +248,20 @@ export async function getSiteBrand(
   } catch {
     return getBrand();
   }
+}
+
+/** Env seed for a setting (first boot / CI), same pattern as the env seed. */
+function envSeed(
+  name: string,
+  env?: Record<string, string | undefined>,
+): string | undefined {
+  const fromEnv = env?.[name];
+  if (typeof fromEnv === "string" && fromEnv.trim() !== "") return fromEnv;
+  if (typeof process !== "undefined") {
+    const v = process.env[name];
+    if (typeof v === "string" && v.trim() !== "") return v;
+  }
+  return undefined;
 }
 
 /** Resolve a preset id (settings file → env BRAND_PRESET → noir-cinema). */

@@ -5567,8 +5567,11 @@ a.d-shelf-see:hover { color: var(--color-accent); }
 
 /* === BRAND NOTE + SITE PAGES (append-only) ===
  * .d-brand-note  — the discovery home's entity line, rendered UNDER the hero
- *   slider. A quiet strip: hairline rule, muted ink, accent link. It never
- *   sits above the hero, so the LCP image keeps its place. Not a banner.
+ *   slider. A quiet strip: hairline rule, muted ink, the brand name as a
+ *   plain heading that links to /about. It never sits above the hero, so the
+ *   LCP image keeps its place. Not a banner: no all-caps, no call to
+ *   action, no animation. Token-driven, so it reads on light and dark
+ *   paper alike.
  * .contact-placeholder — the marked placeholder the contact page shows while
  *   no address is configured. Deliberately visible, never hidden.
  * Existing tokens only (--space-*, --color-*, --radius-*). Zero JS.
@@ -5584,7 +5587,30 @@ a.d-shelf-see:hover { color: var(--color-accent); }
   min-width: 0;
 }
 
-.d-brand-note p {
+/* The brand name, as a heading: the site's entity signal. Not a CTA. */
+.d-brand-note-name {
+  flex: 0 0 auto;
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: 700;
+  line-height: var(--leading-display);
+  letter-spacing: var(--tracking-display);
+  text-transform: none;
+}
+
+.d-brand-note-name a {
+  color: var(--color-ink);
+  text-decoration: none;
+}
+
+.d-brand-note-name a:hover,
+.d-brand-note-name a:focus-visible {
+  color: var(--color-accent);
+  text-decoration: underline;
+}
+
+.d-brand-note-text {
   flex: 1 1 18rem;
   min-width: 0;
   margin: 0;
@@ -5593,23 +5619,6 @@ a.d-shelf-see:hover { color: var(--color-accent); }
   line-height: var(--leading-body);
   overflow-wrap: anywhere;
 }
-
-.d-brand-note a {
-  flex: 0 0 auto;
-  display: inline-flex;
-  align-items: center;
-  min-height: 44px;
-  font-family: var(--font-sans);
-  font-size: var(--text-xs);
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--color-accent);
-  text-decoration: none;
-  white-space: nowrap;
-}
-
-.d-brand-note a:hover { text-decoration: underline; }
 
 /* The contact placeholder: marked, bracketed, never styled away. */
 .contact-placeholder {

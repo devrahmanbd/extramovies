@@ -2,10 +2,16 @@
 /**
  * BrandNote — the discovery home's entity line.
  *
- * Two sentences and a link: what this site is, and where to read about it.
+ * The brand name is a HEADING (an h2 that links to /about), with the
+ * sentence that says what the site is as body text under it. Google reads
+ * the SERP site name from the homepage title, the headings, the WebSite
+ * structured data and og:site_name — the homepage h1 is "Trending this
+ * week", so this heading is where the brand name lives.
+ *
  * It renders UNDER the hero slider, never above it, so the hero (and the
  * LCP image in its first slide) stays exactly where it was. It is a quiet
- * strip with the theme's own tokens, not a promo banner.
+ * strip with the theme's own tokens, not a promo banner: no all-caps, no
+ * call to action, no animation.
  *
  * The brand name is a prop, never a hardcoded word: the same component
  * serves every brand.
@@ -17,10 +23,10 @@ interface Props {
 const { name } = Astro.props;
 ---
 <aside class="d-brand-note" aria-label={`About ${name}`}>
-  <p>
+  <h2 class="d-brand-note-name"><a href="/about">{name}</a></h2>
+  <p class="d-brand-note-text">
     {name} is an independent film-review magazine. Every review is written
     here, rated by the editor out of ten, with where to watch and the date we
     checked.
   </p>
-  <a href="/about">About {name}</a>
 </aside>

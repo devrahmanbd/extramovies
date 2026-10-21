@@ -47,6 +47,7 @@ interface DashboardSettings {
   siteName: string;
   siteLogo: string;
   siteFavicon: string;
+  siteAlternateNames: string;
 }
 
 interface HomepageState {
@@ -82,6 +83,7 @@ const EMPTY_DASHBOARD: DashboardSettings = {
   siteName: "",
   siteLogo: "",
   siteFavicon: "",
+  siteAlternateNames: "",
 };
 
 const BLANK_SAMPLE: Sample = { title: "", rating: "", text: "" };
@@ -175,6 +177,7 @@ export function SettingsForm({ serverDefaults, csrfToken }: { serverDefaults: Se
           siteName: v["site.name"] ?? "",
           siteLogo: v["brand.logo"] ?? "",
           siteFavicon: v["brand.favicon"] ?? "",
+          siteAlternateNames: v["site.alternate_name"] ?? "",
         });
         setConfigured((json.configured ?? {}) as Record<string, boolean>);
         setHome({
@@ -214,6 +217,7 @@ export function SettingsForm({ serverDefaults, csrfToken }: { serverDefaults: Se
       "site.name": dash.siteName.trim(),
       "brand.logo": dash.siteLogo.trim(),
       "brand.favicon": dash.siteFavicon.trim(),
+      "site.alternate_name": dash.siteAlternateNames.trim(),
       "brand.preset": taste.sitePreset,
       "region.default": taste.defaultRegion.trim(),
       "seo.title_suffix": taste.seoTitleSuffix,
@@ -393,6 +397,8 @@ export function SettingsForm({ serverDefaults, csrfToken }: { serverDefaults: Se
           <label>Site name<input value={dash.siteName} onChange={setD("siteName")} placeholder="Extramovies" /></label>
           <label>Site URL<input value={dash.siteUrl} onChange={setD("siteUrl")} placeholder="https://extramovies.org" inputMode="url" /></label>
         </div>
+        <label>Alternate names (comma separated)<input value={dash.siteAlternateNames} onChange={setD("siteAlternateNames")} placeholder="extramovies, extramovies.org" /></label>
+        <p className="muted">Site-name aliases offered to search engines. Leave blank: derived from the site name and domain.</p>
         <label>Logo path<input value={dash.siteLogo} onChange={setD("siteLogo")} placeholder="/brand/noir-cinema/logo.svg" /></label>
         <div className="row">
           <input type="file" ref={logoFileRef} accept=".svg,.png,.jpg,.jpeg,.webp,.ico" aria-label="Choose logo file" />
