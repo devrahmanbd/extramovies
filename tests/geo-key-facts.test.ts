@@ -224,9 +224,9 @@ describe('GET /llms.txt', () => {
     const body = await (await call('https://extramovies.test/llms.txt')).text();
     const lines = body.trimEnd().split('\n');
     expect(lines.length).toBeLessThanOrEqual(60);
-    // Header, one summary line, generation line, three content types, then
-    // at most twenty reviews.
-    expect(lines.filter((l) => l.startsWith('- [')).length).toBeLessThanOrEqual(23);
+    // Header, one summary line, generation line, five content types (review,
+    // title hub, archive, about, contact), then at most twenty reviews.
+    expect(lines.filter((l) => l.startsWith('- [')).length).toBeLessThanOrEqual(25);
   });
 
   it('is deterministic for a fixed store', async () => {
@@ -265,6 +265,8 @@ describe('GET /llms.txt', () => {
         '- [Review](https://extramovies.org/reviews/<slug>): one long-form review with our rating, our verdict, the runtime, the credits, and where to watch.',
         '- [Title hub](https://extramovies.org/movies/<tmdbId>): streaming options, full credits, and member reviews for one film.',
         '- [Review archive](https://extramovies.org/reviews): every published review, newest first.',
+        '- [About](https://extramovies.org/about): what this magazine is, how the ratings work, and the editorial standards it runs on.',
+        '- [Contact](https://extramovies.org/contact): how to reach the editor.',
         '',
         '## Latest reviews',
         '',

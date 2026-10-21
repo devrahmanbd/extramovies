@@ -1,0 +1,26 @@
+---
+/**
+ * BrandNote — the discovery home's entity line.
+ *
+ * Two sentences and a link: what this site is, and where to read about it.
+ * It renders UNDER the hero slider, never above it, so the hero (and the
+ * LCP image in its first slide) stays exactly where it was. It is a quiet
+ * strip with the theme's own tokens, not a promo banner.
+ *
+ * The brand name is a prop, never a hardcoded word: the same component
+ * serves every brand.
+ */
+interface Props {
+  name: string;
+}
+
+const { name } = Astro.props;
+---
+<aside class="d-brand-note" aria-label={`About ${name}`}>
+  <p>
+    {name} is an independent film-review magazine. Every review is written
+    here, rated by the editor out of ten, with where to watch and the date we
+    checked.
+  </p>
+  <a href="/about">About {name}</a>
+</aside>

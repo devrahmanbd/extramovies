@@ -1,0 +1,277 @@
+---
+/**
+ * About — what this site is, what it publishes, how the rating works and
+ * the standards it runs on.
+ *
+ * The page exists for the brand query. The FIRST paragraph answers it
+ * plainly: what the site is, and that it is a review site. Nothing in the
+ * copy is a fact the site does not already act on, and every claim about
+ * behaviour is checkable in the code:
+ *   - ratings are editorial, one number out of ten, set before publish
+ *     (src/lib/publish-guard.ts) and never an aggregate (src/lib/seo/jsonld.ts)
+ *   - the where-to-watch block names legal services and prints the region
+ *     and the date it was checked (src/components/public/WhereToWatch.astro)
+ *   - spoiler blocks render behind a native gate (src/lib/spoiler.ts)
+ *   - member reviews are separate from ours (src/lib/members/reviews.ts)
+ *
+ * The brand name is never hardcoded: it comes from getBrand(), so every
+ * brand gets the same page in its own name.
+ */
+import Base from "../layouts/Base.astro";
+import { getSiteBrand } from "../lib/seo/brand";
+import { getDb, getSetting } from "../lib/db/adapter";
+import { siteOrigin } from "../lib/seo/meta";
+import {
+  aboutPageJsonLd,
+  breadcrumbJsonLd,
+  organizationJsonLd,
+} from "../lib/seo/jsonld";
+import { brandLeadingDescription, brandLeadingTitle } from "../lib/homepage";
+
+const brand = await getSiteBrand((k) => getSetting(getDb({}), k));
+const name = brand.name;
+const origin = siteOrigin(Astro.url.origin);
+const path = "/about";
+const canonical = `${origin}${path}`;
+
+/** The document title: brand first, then what the site is. */
+const pageTitle = brandLeadingTitle("An independent film-review magazine", name);
+/** The meta description: the same sentence, brand first. */
+const pageDescription = brandLeadingDescription(
+  "an independent film-review magazine: original criticism, a rating out of ten from the editor, and where to watch, with the date it was checked",
+  name,
+);
+
+const jsonld = [
+  aboutPageJsonLd({ ...brand, origin }, canonical, pageDescription),
+  // The site's ONE Organization node (the entity behind the brand).
+  organizationJsonLd({ ...brand, origin }),
+  breadcrumbJsonLd(origin, [
+    { name: "Home", path: "/" },
+    { name: "About", path },
+  ]),
+];
+---
+<Base
+  title={pageTitle}
+  description={pageDescription}
+  descriptionExtra="What we publish, how the rating works, how films get picked, and the standards we hold ourselves to."
+  path={path}
+  jsonld={jsonld}
+  current="about"
+>
+  <div class="wrap">
+    <section aria-labelledby="about-title" class="band section--lg about-head">
+      <div class="section-head">
+        <h1 id="about-title">About {name}</h1>
+      </div>
+      <div class="prose">
+        <p>
+          {name} is an independent film-review magazine. Every review here is
+          criticism written for this site, with our own rating, our own
+          verdict, and the date we checked where the film can be watched. We
+          write about films and point you at the services that carry them.
+        </p>
+      </div>
+    </section>
+  </div>
+
+  <div class="band section--md">
+    <div class="wrap">
+      <section aria-labelledby="about-publishes">
+        <div class="section-head">
+          <h2 id="about-publishes">What {name} publishes</h2>
+          <p>Three kinds of page, and they do not blur into each other.</p>
+        </div>
+        <div class="prose">
+          <h3>Editorial reviews</h3>
+          <p>
+            Long-form criticism with one rating out of ten, a one-line
+            verdict, the runtime, the director, the credits and the date the
+            review went up. The rating is ours and the argument is ours. The
+            <a href="/reviews">review archive</a> lists every one of them,
+            newest first.
+          </p>
+          <h3>Title hubs</h3>
+          <p>
+            Every film we have reviewed gets a page of its own: the full
+            credit list, where it can be streamed, rented or bought, and what
+            readers wrote about it. The hub is where you check availability.
+            The review is where you read the argument.
+          </p>
+          <h3>Member reviews</h3>
+          <p>
+            Signed-in readers can write a short review and a score for a film
+            on its hub. A member review carries the reader's name and the
+            reader's own number, and it stays separate from ours. Readers can
+            report a member review, and a reported review is pulled for
+            review instead of staying up.
+          </p>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <div class="band--alt section--md">
+    <div class="wrap">
+      <section aria-labelledby="about-rating">
+        <div class="section-head">
+          <h2 id="about-rating">How the rating works</h2>
+          <p>
+            One number out of ten, and it has to be earned by the review it
+            belongs to.
+          </p>
+        </div>
+        <div class="prose">
+          <p>
+            Every editorial review carries a single rating out of ten. The
+            editor sets it once the criticism is written, and the score has
+            to match the argument: a thin review does not get a high number,
+            and a good review does not get a low number because a score
+            somewhere else said so.
+          </p>
+          <p>
+            We do not publish an average of other people's scores as our
+            rating, and we do not copy one into it. Member scores sit on the
+            film's page and are never added into ours.
+          </p>
+          <p>
+            A review cannot go live without a score. Nothing publishes
+            unfinished, so every review in the archive carries a number.
+          </p>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <div class="band section--md">
+    <div class="wrap">
+      <section aria-labelledby="about-picks">
+        <div class="section-head">
+          <h2 id="about-picks">How films get picked</h2>
+          <p>
+            The editor chooses the titles, and nothing goes up until the
+            writing and the number are both done.
+          </p>
+        </div>
+        <div class="prose">
+          <p>
+            A film gets reviewed when there is something in it worth
+            arguing about. The editor picks the title, writes or commissions
+            the criticism, and sets the score. Only then does the review
+            publish, and it lands in the archive in the order it was
+            published.
+          </p>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <div class="band--alt section--md">
+    <div class="wrap">
+      <section aria-labelledby="about-watch">
+        <div class="section-head">
+          <h2 id="about-watch">Where to watch</h2>
+          <p>Legal services only, and the date we checked them.</p>
+        </div>
+        <div class="prose">
+          <p>
+            Each review carries a where-to-watch block with the services that
+            actually carry the film: what you can watch free, what you can
+            stream, and what you can rent or buy. The block names the region
+            it was checked in and the date it was checked, because
+            availability moves and rights change. Where the editor picked a
+            link, the row says so. Where a paid link earns us a commission,
+            the block says that too.
+          </p>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <div class="band section--md">
+    <div class="wrap">
+      <section aria-labelledby="about-standards">
+        <div class="section-head">
+          <h2 id="about-standards">Editorial standards</h2>
+          <p>The rules this site runs on.</p>
+        </div>
+        <dl class="fact-list">
+          <div>
+            <dt>We write our own criticism</dt>
+            <dd>
+              Every review is argued from the film itself. A score never
+              comes from an aggregate, and a verdict never comes from
+              another outlet.
+            </dd>
+          </div>
+          <div>
+            <dt>We never link to piracy or download pages</dt>
+            <dd>
+              The only outbound links in a review are legal services and the
+              film's TMDB record. An editor-picked link is marked as one,
+              and a paid link that earns a commission says so.
+            </dd>
+          </div>
+          <div>
+            <dt>We correct mistakes and say so</dt>
+            <dd>
+              A wrong fact, a wrong credit or a score that does not match
+              its own review gets fixed in the review, and the review says it
+              was corrected.
+            </dd>
+          </div>
+          <div>
+            <dt>Availability is re-checked and dated</dt>
+            <dd>
+              Every where-to-watch block carries the region and the date it
+              was checked. A stale service gets corrected when a reader
+              tells us.
+            </dd>
+          </div>
+          <div>
+            <dt>Reviews are not paid for</dt>
+            <dd>
+              No review, rating or verdict has been bought, and no review
+              here is an advertisement. Where a service link earns a
+              commission, the watch block says so.
+            </dd>
+          </div>
+          <div>
+            <dt>Spoilers sit behind a gate</dt>
+            <dd>
+              Anything about the ending stays behind a spoiler warning until
+              you open it, so a reader who has not seen the film can stop
+              there.
+            </dd>
+          </div>
+          <div>
+            <dt>Film facts come from TMDB</dt>
+            <dd>
+              Credits, runtime, release date and artwork come from the
+              film's TMDB record, and every review links to the record it
+              used.
+            </dd>
+          </div>
+        </dl>
+      </section>
+    </div>
+  </div>
+
+  <div class="band--alt section--md">
+    <div class="wrap">
+      <section aria-labelledby="about-contact">
+        <div class="section-head">
+          <h2 id="about-contact">Get in touch</h2>
+          <p>A correction, a streaming fix or a question all reach the editor.</p>
+        </div>
+        <div class="prose">
+          <p>
+            One address, and the editor reads it. <a href="/contact">Contact {name}</a>
+            says what to write about and how fast to expect a reply.
+          </p>
+        </div>
+      </section>
+    </div>
+  </div>
+</Base>

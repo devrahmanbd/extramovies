@@ -31,6 +31,11 @@ export const GET: APIRoute = async ({ url }) => {
   const xml = buildSitemapXml([
     { loc: `${origin}/`, changefreq: "daily", priority: 1.0, ...(newest ? { lastmod: newest } : {}) },
     { loc: `${origin}/reviews`, changefreq: "daily", priority: 0.8, ...(newest ? { lastmod: newest } : {}) },
+    // Site pages, not review pages: the review-driven rule does not apply to
+    // them. Both are indexable (AGENTS.md §5) and both are the entity
+    // corroboration the brand SERP needs.
+    { loc: `${origin}/about`, changefreq: "monthly", priority: 0.6 },
+    { loc: `${origin}/contact`, changefreq: "monthly", priority: 0.4 },
     ...(theme === "publication"
       ? []
       : [{ loc: `${origin}/movies`, changefreq: "daily" as const, priority: 0.8, ...(newest ? { lastmod: newest } : {}) }]),

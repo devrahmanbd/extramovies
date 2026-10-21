@@ -52,6 +52,24 @@ export function websiteJsonLd(brand: Brand): JsonLd {
   };
 }
 
+/**
+ * sameAs profiles for the Organization node.
+ *
+ * EMPTY ON PURPOSE: this brand has no Letterboxd, YouTube, Medium, Reddit or
+ * X profile yet, and a sameAs pointing at a page that does not exist is a
+ * false claim to a crawler.
+ *
+ * When the owner publishes those profiles (the parasite drafts live under
+ * docs/parasite/), add the URLs here, one per line. One array, one place,
+ * every page that emits the Organization node:
+ *
+ *   export const BRAND_SAME_AS: string[] = [
+ *     "https://letterboxd.com/<user>",
+ *   ];
+ */
+export const BRAND_SAME_AS: string[] = [];
+
+/** The site's ONE Organization node (the entity behind the brand). */
 export function organizationJsonLd(brand: Brand): JsonLd {
   return {
     "@context": "https://schema.org",
@@ -62,6 +80,30 @@ export function organizationJsonLd(brand: Brand): JsonLd {
     // Brand logos are root-relative (multi-site safe); schema.org wants
     // absolute, so prefix the request origin (callers override brand.origin).
     ...(brand.logo ? { logo: absolutize(brand.origin, brand.logo) } : {}),
+    // Emitted only when the owner has real profiles (see BRAND_SAME_AS).
+    ...(BRAND_SAME_AS.length > 0 ? { sameAs: [...BRAND_SAME_AS] } : {}),
+  };
+}
+
+/**
+ * The About page node.
+ *
+ * The entity itself is the Organization node above (exactly one per page).
+ * This node describes the PAGE, so it carries no second Organization and no
+ * second copy of the brand entity.
+ */
+export function aboutPageJsonLd(
+  brand: Brand,
+  canonical: string,
+  description: string,
+): JsonLd {
+  return {
+    "@context": "https://schema.org",
+    "@type": "AboutPage",
+    name: `About ${brand.name}`,
+    description,
+    url: canonical,
+    inLanguage: brand.locale.replace("_", "-"),
   };
 }
 

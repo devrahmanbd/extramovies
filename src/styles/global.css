@@ -5564,3 +5564,74 @@ a.d-shelf-see:hover { color: var(--color-accent); }
 @media (max-width: 30rem) {
   .d-week-row > .index-thumb { display: none; }
 }
+
+/* === BRAND NOTE + SITE PAGES (append-only) ===
+ * .d-brand-note  — the discovery home's entity line, rendered UNDER the hero
+ *   slider. A quiet strip: hairline rule, muted ink, accent link. It never
+ *   sits above the hero, so the LCP image keeps its place. Not a banner.
+ * .contact-placeholder — the marked placeholder the contact page shows while
+ *   no address is configured. Deliberately visible, never hidden.
+ * Existing tokens only (--space-*, --color-*, --radius-*). Zero JS.
+ */
+.d-brand-note {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-2) var(--space-5);
+  padding-block: var(--space-5);
+  border-top: 1px solid var(--color-rule);
+  border-bottom: 1px solid var(--color-rule);
+  min-width: 0;
+}
+
+.d-brand-note p {
+  flex: 1 1 18rem;
+  min-width: 0;
+  margin: 0;
+  color: var(--color-ink-2);
+  font-size: var(--text-sm);
+  line-height: var(--leading-body);
+  overflow-wrap: anywhere;
+}
+
+.d-brand-note a {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.d-brand-note a:hover { text-decoration: underline; }
+
+/* The contact placeholder: marked, bracketed, never styled away. */
+.contact-placeholder {
+  display: inline-block;
+  padding: var(--space-1) var(--space-2);
+  border: 1px dashed var(--color-line-strong);
+  border-radius: var(--radius-input);
+  color: var(--color-ink-2);
+  font-size: var(--text-sm);
+  overflow-wrap: anywhere;
+}
+
+/* The About / Contact head band: the h1 + lead column. The short accent
+   rule above the h1 replaces the kicker paragraph, so the FIRST paragraph
+   on the page is the lead that answers the brand query. */
+.about-head .section-head { margin-bottom: var(--space-4); }
+.about-head .section-head h1 { margin-top: 0; }
+.about-head .section-head h1::before {
+  content: "";
+  display: block;
+  width: 2rem;
+  height: 2px;
+  background: var(--color-accent);
+  margin-bottom: var(--space-4);
+}

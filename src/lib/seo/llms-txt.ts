@@ -83,6 +83,10 @@ export function renderLlmsTxt(input: LlmsTxtInput): string {
     `- [Title hub](${origin}/movies/<tmdbId>): streaming options, full credits, and member reviews for one film.`,
   );
   lines.push(`- [Review archive](${origin}/reviews): every published review, newest first.`);
+  lines.push(
+    `- [About](${origin}/about): what this magazine is, how the ratings work, and the editorial standards it runs on.`,
+  );
+  lines.push(`- [Contact](${origin}/contact): how to reach the editor.`);
   lines.push("");
   lines.push("## Latest reviews");
   lines.push("");

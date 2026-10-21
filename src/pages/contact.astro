@@ -1,0 +1,174 @@
+---
+/**
+ * Contact — how to reach the editor.
+ *
+ * One address, one inbox, no form. The address is NOT hardcoded: it comes
+ * from src/lib/site-contact.ts (env CONTACT_EMAIL, then the coded constant).
+ * While no address is configured the page renders a clearly marked
+ * placeholder instead of a mail link, so it never sends a reader to a dead
+ * inbox and never claims to have one.
+ *
+ * The three things a reader writes about (a correction, a streaming fix, a
+ * general question) and the reply window are stated on the page. The window
+ * is the owner's own words when it is set, and an honest description of how
+ * the inbox is worked when it is not.
+ */
+import Base from "../layouts/Base.astro";
+import { getSiteBrand } from "../lib/seo/brand";
+import { getDb, getSetting } from "../lib/db/adapter";
+import { siteOrigin } from "../lib/seo/meta";
+import {
+  breadcrumbJsonLd,
+  organizationJsonLd,
+} from "../lib/seo/jsonld";
+import { brandLeadingDescription, brandLeadingTitle } from "../lib/homepage";
+import { contactMailto, getSiteContact } from "../lib/site-contact";
+
+const brand = await getSiteBrand((k) => getSetting(getDb({}), k));
+const name = brand.name;
+const origin = siteOrigin(Astro.url.origin);
+const path = "/contact";
+const canonical = `${origin}${path}`;
+
+const pageTitle = brandLeadingTitle("Contact the editor", name);
+const pageDescription = brandLeadingDescription(
+  "how to reach the editor: corrections to a review, a streaming availability fix, or a general question, and how fast to expect a reply",
+  name,
+);
+
+const contact = getSiteContact();
+const mailto = contactMailto(contact.email, `${name} contact`);
+
+const jsonld = [
+  // The site's ONE Organization node (the entity behind the brand).
+  organizationJsonLd({ ...brand, origin }),
+  breadcrumbJsonLd(origin, [
+    { name: "Home", path: "/" },
+    { name: "Contact", path },
+  ]),
+];
+---
+<Base
+  title={pageTitle}
+  description={pageDescription}
+  descriptionExtra="Corrections, streaming fixes and general questions all reach the same editor."
+  path={path}
+  jsonld={jsonld}
+  current="contact"
+>
+  <div class="wrap">
+    <section aria-labelledby="contact-title" class="band section--lg about-head">
+      <div class="section-head">
+        <h1 id="contact-title">Contact {name}</h1>
+      </div>
+      <div class="prose">
+        <p>
+          Corrections, streaming fixes and plain questions all reach the same
+          desk, and the desk is the editor. There is one address, it is read
+          by a person, and there is no form to fill in.
+        </p>
+      </div>
+    </section>
+  </div>
+
+  <div class="band section--md">
+    <div class="wrap">
+      <section aria-labelledby="contact-write">
+        <div class="section-head">
+          <h2 id="contact-write">Write to the editor</h2>
+          <p>Put the topic in the subject line: correction, streaming, or a question.</p>
+        </div>
+        <div class="prose">
+          {contact.hasEmail ? (
+            <p>
+              <a href={mailto}>{contact.email}</a>
+            </p>
+          ) : (
+            <p>
+              <span class="contact-placeholder">
+                [contact address not set yet: the owner fills it in via the
+                CONTACT_EMAIL env var on the box, or the
+                SITE_CONTACT_EMAIL constant in src/lib/site-contact.ts]
+              </span>
+            </p>
+          )}
+          <p>
+            Mention the review or the film in the first line. A message that
+            names the page gets fixed faster than one that has to be matched
+            to a title.
+          </p>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <div class="band--alt section--md">
+    <div class="wrap">
+      <section aria-labelledby="contact-topics">
+        <div class="section-head">
+          <h2 id="contact-topics">What to write about</h2>
+          <p>Three kinds of message, and they are read in this order.</p>
+        </div>
+        <dl class="fact-list">
+          <div>
+            <dt>A correction</dt>
+            <dd>
+              A review with a fact wrong, a credit wrong, or a score that
+              does not match its own argument. Say which review and what is
+              wrong. The correction goes into the review itself, and the
+              review says it was corrected.
+            </dd>
+          </div>
+          <div>
+            <dt>A streaming fix</dt>
+            <dd>
+              A where-to-watch block naming a service that does not carry
+              the film in your region, or missing one that does. Say which
+              film and which country you are in.
+            </dd>
+          </div>
+          <div>
+            <dt>A general question</dt>
+            <dd>
+              Anything else about the archive, the ratings or the site. If
+              the answer is already written down, the
+              <a href="/about">About page</a> has it.
+            </dd>
+          </div>
+        </dl>
+      </section>
+    </div>
+  </div>
+
+  <div class="band section--md">
+    <div class="wrap">
+      <section aria-labelledby="contact-response">
+        <div class="section-head">
+          <h2 id="contact-response">Response time</h2>
+          <p>What happens after you press send.</p>
+        </div>
+        <div class="prose">
+          <p>
+            The editor reads every message. Corrections to a published review
+            come first, streaming fixes next, general questions last.
+          </p>
+          {contact.responseTime ? (
+            <p>Most replies land within {contact.responseTime}.</p>
+          ) : (
+            <p>
+              <span class="contact-placeholder">
+                [reply window not set yet: the owner states it here, via the
+                CONTACT_RESPONSE_TIME env var or the
+                SITE_CONTACT_RESPONSE_TIME constant in src/lib/site-contact.ts]
+              </span>
+            </p>
+          )}
+          <p>
+            There is no autoresponder, so a reply means a person read the
+            message and looked at the page.
+          </p>
+        </div>
+      </section>
+    </div>
+  </div>
+</Base>

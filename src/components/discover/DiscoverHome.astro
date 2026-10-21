@@ -12,6 +12,7 @@
  */
 import MovieTile from "./MovieTile.astro";
 import NewThisWeek from "./NewThisWeek.astro";
+import BrandNote from "./BrandNote.astro";
 import type { DiscoverTile, SiteTheme } from "../../lib/tmdb/discover";
 import { COLLECTIONS, buildListHref } from "../../lib/tmdb/discover";
 import type { Genre } from "../../lib/tmdb/types";
@@ -29,6 +30,11 @@ interface Props {
   tmdbGenres: Genre[];
   localGenres: string[];
   localLatest: PublicReview[];
+  /**
+   * The brand name, used by the brand note under the hero. Never hardcoded
+   * in this component: every brand gets its own name on its own front.
+   */
+  brandName: string;
   /**
    * Reviews published inside the weekly window (the "new movie reviews
    * this week" module). The page owns the window; the component only
@@ -63,6 +69,7 @@ const {
   tmdbGenres,
   localGenres,
   localLatest,
+  brandName,
   thisWeek,
   topRated,
   featured,
@@ -241,6 +248,10 @@ const countText = (n: number, singular: string, plural: string) =>
     ) : null}
   </section>
 ) : null}
+{/* Brand note: the entity line, UNDER the hero. It never pushes the hero
+    slider (or its LCP image) down. Rendered ONCE: after the hero when there
+    is a hero, after the head block when there is not. */}
+{heroSlides.length > 0 ? <BrandNote name={brandName} /> : null}
 {carousel.length > 0 ? (
   <section class="d-carousel band" aria-roledescription="carousel" aria-label="Reviewed movies">
     <div class="d-car-head">
@@ -292,6 +303,8 @@ const countText = (n: number, singular: string, plural: string) =>
     </div>
   </section>
 )}
+{/* No hero slides: the brand note follows the head block instead. */}
+{heroSlides.length === 0 ? <BrandNote name={brandName} /> : null}
 
 {/* Weekly refresh module — the reviews published in the last 7 days.
    Renders nothing when the week brought no published review. */}
