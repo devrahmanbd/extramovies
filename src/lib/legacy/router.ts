@@ -13,8 +13,14 @@ import { hasTaxonomyPage } from "../seo/taxonomy";
 // `/category/<slug>/` URLs that the current site no longer serves, so the
 // link equity behind them was dead. When the site now publishes a page for
 // one of those slugs, the router answers 301 to it — computed here, with no
-// edit to the on-box CSV. Every other path keeps today's behaviour: mapped
-// -> 301 to its mapped target, unresolved -> 410, everything else passes
+// edit to the on-box CSV.
+//
+// Live-route exemption (added with the /about fix, 2026-10-21): the old
+// site's `/about` is in the archive's unresolved set, so the router answered
+// 410 for the NEW About page before the route could run. The archive must
+// never answer for a path the app serves: mapped -> 301 to its mapped
+// target (the owner's own table still wins), live route -> pass through
+// (the route answers 200 or 404), unresolved -> 410, everything else passes
 // through. The lookup is fail-soft (AGENTS.md §6): if it throws, the
 // request passes through exactly as before.
 
@@ -45,6 +51,76 @@ const ASSET_NAMESPACES = new Set([
   "brand", "uploads", "assets", "images", "img", "media",
   "css", "js", "fonts", "static", "_astro", "vendor", ".well-known",
 ]);
+
+/**
+ * The live-route list — the routes the app really serves.
+ *
+ * The legacy archive answers 410 for every path in its unresolved set, and
+ * the OLD site's `/about` is in that set: the archive was right about the
+ * old page and is wrong about the new one. The middleware runs before the
+ * router, so the 410 was served before the real route could answer and the
+ * new About page was unreachable (live bug, 2026-10-21).
+ *
+ * Rule: the archive must never answer for a path the app serves. The
+ * mapped row still wins (the owner's own redirect table, checked first),
+ * and a genuinely dead legacy path still 410s — but a live route passes
+ * through, so the route itself answers (200) or not (404), which is the
+ * app's business, not the archive's (AGENTS.md §6).
+ *
+ * The list lives here as a constant so the router keeps its contract:
+ * dependency-free (no filesystem walk, no store, no network) and
+ * fail-soft. It is PINNED against the real route set by
+ * tests/legacy-router.test.ts, which derives the routes from `src/pages/`
+ * on disk and fails when the two drift apart in EITHER direction: a route
+ * the app serves but the list misses, or a list entry the app does not
+ * serve.
+ *
+ * Pattern syntax:
+ *   "/about"           an exact path
+ *   "/reviews/:slug"   one path segment (the name is documentation)
+ *   "/admin/*"         the prefix and everything below it
+ *
+ * Taxonomy paths (/cast/, /director/, /category/) are listed here, but
+ * their content is decided by the taxonomy resolver above: a slug the site
+ * publishes is served, a slug it does not publish is NOT a live page and
+ * keeps the legacy answer.
+ */
+export const LIVE_ROUTE_PATTERNS: readonly string[] = [
+  "/",
+  "/about",
+  "/contact",
+  "/search",
+  "/login",
+  "/signup",
+  "/setup",
+  "/reviews",
+  "/reviews/:slug",
+  "/movies",
+  "/movies/:tmdbId",
+  "/series/:tmdbId",
+  "/cast/:slug",
+  "/director/:slug",
+  "/category/:slug",
+  "/u/:handle",
+  "/admin/*",
+  "/api/*",
+  "/uploads/*",
+  "/llms.txt",
+  "/sitemap.xml",
+  "/robots.txt",
+  "/rss.xml",
+];
+
+/**
+ * Route parameters that must be numeric.
+ *
+ * A TMDB id is an integer, so `/movies/foo-full-movie-download` is a
+ * legacy download slug that merely shares a prefix with a live route, not
+ * a movie page: it stays in the legacy corpus and keeps its 410. Without
+ * this rule the category-prefixed half of the corpus (`/series/<slug>`,
+ * `/movies/<slug>`) would silently turn into a 404 instead of a 410.
+ */
+const NUMERIC_PARAMS: ReadonlySet<string> = new Set(["tmdbId"]);
 
 /**
  * Exemption test on an ALREADY NORMALIZED path (see normalizeLegacyPath).
@@ -79,6 +155,77 @@ function isAssetExempt(norm: string): boolean {
  */
 export function isStaticAssetPath(input: string): boolean {
   return isAssetExempt(normalizeLegacyPath(input));
+}
+
+/**
+ * Split a request path into its segments: the query string, the fragment
+ * and the trailing slash are ignored.
+ *
+ * The live-route check runs on the RAW path, never on the normalized one:
+ * normalizeLegacyPath strips the category shells the legacy corpus used
+ * (`/movies/123` -> `/123`), which would hide the very routes the check
+ * is about.
+ */
+function pathSegments(input: string): string[] {
+  let p = typeof input === "string" ? input : "";
+  const cut = p.search(/[?#]/);
+  if (cut >= 0) p = p.slice(0, cut);
+  return p.split("/").filter(Boolean);
+}
+
+/**
+ * True when `segments` match one route pattern.
+ *
+ * ":" marks a single-segment parameter, a trailing "*" matches the rest of
+ * the path (including nothing). Matching is case-insensitive: Astro's
+ * router is case-sensitive, so `/About` is a miss — but a miss must end in
+ * the app's own answer (404), not in the archive's (410).
+ */
+function matchesPattern(pattern: string, segments: string[]): boolean {
+  const pat = pattern.split("/").filter(Boolean);
+  for (let i = 0; i < pat.length; i++) {
+    const p = pat[i]!;
+    if (p === "*") return true;
+    if (i >= segments.length) return false;
+    if (p.startsWith(":")) {
+      const name = p.slice(1);
+      if (NUMERIC_PARAMS.has(name) && !/^\d+$/.test(segments[i]!)) return false;
+      continue;
+    }
+    if (p.toLowerCase() !== segments[i]!.toLowerCase()) return false;
+  }
+  return pat.length === segments.length;
+}
+
+/**
+ * True when the path matches one of the app's routes (shape only — no
+ * store, no filesystem). Taxonomy paths match their pattern here; whether
+ * the site publishes that taxonomy page is decided by isLiveRoute.
+ */
+export function matchesLivePattern(pathname: string): boolean {
+  const segments = pathSegments(pathname);
+  return LIVE_ROUTE_PATTERNS.some((pattern) => matchesPattern(pattern, segments));
+}
+
+/**
+ * True when the app really serves this path — the live-route exemption.
+ *
+ * Taxonomy paths are content-aware: the site publishes a taxonomy page
+ * only for the entities it knows, so a slug with no page is NOT a served
+ * path and keeps the legacy answer. Everything else is a pure shape
+ * match against LIVE_ROUTE_PATTERNS.
+ */
+export function isLiveRoute(pathname: string): boolean {
+  const parsed = parseTaxonomyPath(pathname);
+  if (parsed) {
+    try {
+      return hasTaxonomyPage(parsed.kind, parsed.slug);
+    } catch {
+      // Fail-soft: a broken store must never turn a live route into a 410.
+      return true;
+    }
+  }
+  return matchesLivePattern(pathname);
 }
 
 export function normalizeLegacyPath(input: string): string {
@@ -261,6 +408,11 @@ export function createLegacyRouter(dir?: string) {
         if (isCanonicalTaxonomyPath(pathname, taxonomy)) return null;
         return new Response(null, { status: 301, headers: { Location: taxonomy } });
       }
+      // LIVE-ROUTE EXEMPTION: the app really serves this path, so the
+      // archive must not answer 410 for it — the route answers (200) or
+      // not (404). The mapped row still wins above; a genuinely dead
+      // legacy path (no map row, not a live route) still 410s below.
+      if (isLiveRoute(pathname)) return null;
       if (state?.unresolved.has(norm)) return new Response(null, { status: 410 });
       return null;
     },

@@ -2,7 +2,18 @@ import { describe, it, expect } from 'vitest';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { normalizeLegacyPath, parseCsv, buildTables, createLegacyRouter, isStaticAssetPath } from '../src/lib/legacy/router';
+import { experimental_AstroContainer } from 'astro/container';
+import AboutPage from '../src/pages/about.astro';
+import {
+  normalizeLegacyPath,
+  parseCsv,
+  buildTables,
+  createLegacyRouter,
+  isStaticAssetPath,
+  isLiveRoute,
+  matchesLivePattern,
+  LIVE_ROUTE_PATTERNS,
+} from '../src/lib/legacy/router';
 
 describe('normalizeLegacyPath', () => {
   it('lowercases, strips trailing slash and query', () => {
@@ -236,5 +247,239 @@ describe('createLegacyRouter (live assets are never legacy-scoped)', () => {
   it('leaves the normalisation of content paths untouched', () => {
     expect(normalizeLegacyPath('/18-Movies/The-Evil-Dead-1981-Hindi-Dubbed-480P-Full-Movie-Download/')).toBe('/the-evil-dead-1981-hindi-dubbed-480p-full-movie-download');
     expect(normalizeLegacyPath('/9xplay.php?url=abc')).toBe('/9xplay.php');
+  });
+});
+
+/**
+ * The live-route exemption (live bug, 2026-10-21).
+ *
+ * The old site's `/about` is in the on-box unresolved set, so the legacy
+ * middleware answered 410 Gone before the NEW About route could run: the
+ * page existed but was unreachable. The archive must never answer for a
+ * path the app serves.
+ */
+describe('createLegacyRouter (live-route exemption)', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'legacy-live-'));
+  fs.writeFileSync(
+    path.join(dir, 'redirect_map.csv'),
+    [
+      'legacy_path,target_path,tmdb_type,tmdb_id,confidence,title,year',
+      '/old-movie-2019-full-movie-download/,/movies/123,movie,123,1.0,Foo,2019',
+    ].join('\n'),
+  );
+  fs.writeFileSync(
+    path.join(dir, 'unresolved.csv'),
+    [
+      'legacy_url,reason',
+      'http://ww7.extramovies.org:80/about,about',
+      'http://ww7.extramovies.org:80/9xplay.php?url=abc,player',
+      'http://ww7.extramovies.org:80/2017/05/12/film.jpg,uploaded image',
+      'http://ww7.extramovies.org:80/2016/he-said-she-said-1991-720p/,unresolved',
+      'http://ww7.extramovies.org:80/series/old-series-2018-full-movie-download/,unresolved',
+      'http://ww7.extramovies.org:80/movies/old-hollywood-2016-full-movie-download/,unresolved',
+    ].join('\n'),
+  );
+  const r = createLegacyRouter(dir);
+
+  it('passes the old /about through instead of 410ing the new About page', () => {
+    expect(r.check('/about')).toBeNull();
+    expect(r.check('/about/')).toBeNull();
+    expect(r.check('/ABOUT')).toBeNull();
+  });
+
+  it('passes every live route through (the route answers, not the archive)', () => {
+    for (const p of [
+      '/',
+      '/about',
+      '/contact',
+      '/search',
+      '/login',
+      '/signup',
+      '/setup',
+      '/reviews',
+      '/reviews/dune-part-two',
+      '/movies',
+      '/movies/123',
+      '/series/1399',
+      '/llms.txt',
+      '/sitemap.xml',
+      '/robots.txt',
+      '/rss.xml',
+      '/u/some-handle',
+      '/admin',
+      '/admin/settings',
+      '/api/admin/settings',
+    ]) {
+      expect(r.check(p), p).toBeNull();
+    }
+  });
+
+  it('still 410s a genuinely dead legacy path', () => {
+    expect(r.check('/9xplay.php?url=abc')?.status).toBe(410);
+    expect(r.check('/2017/05/12/film.jpg')?.status).toBe(410);
+    expect(r.check('/2016/he-said-she-said-1991-720p/')?.status).toBe(410);
+  });
+
+  it('still 301s a mapped legacy path (the map wins over the exemption)', () => {
+    const moved = r.check('/18-movies/old-movie-2019-full-movie-download/');
+    expect(moved?.status).toBe(301);
+    expect(moved?.headers.get('Location')).toBe('/movies/123');
+  });
+
+  it('keeps the 410 for a legacy download slug that shares a live route prefix', () => {
+    // /series/<slug> and /movies/<slug> look like the live TMDB routes,
+    // but a TMDB id is an integer: these stay in the archive (410), they
+    // do not turn into a 404.
+    expect(r.check('/series/old-series-2018-full-movie-download/')?.status).toBe(410);
+    expect(r.check('/movies/old-hollywood-2016-full-movie-download/')?.status).toBe(410);
+  });
+
+  it('leaves a brand-new unknown path to the app (404 from Astro)', () => {
+    expect(r.check('/not-a-route-at-all')).toBeNull();
+    expect(r.check('/some-random-path/')).toBeNull();
+  });
+
+  it('lets the real About route answer (the page renders)', async () => {
+    const container = await experimental_AstroContainer.create();
+    const html = await container.renderToString(AboutPage as never, {
+      request: new Request('https://extramovies.test/about'),
+    });
+    expect(html).toContain('<h1');
+    expect(html.toLowerCase()).toContain('about');
+  });
+});
+
+describe('isLiveRoute', () => {
+  it('knows the routes the app serves', () => {
+    for (const p of [
+      '/',
+      '/about',
+      '/contact',
+      '/search',
+      '/login',
+      '/signup',
+      '/setup',
+      '/reviews',
+      '/reviews/dune-part-two',
+      '/movies',
+      '/movies/123',
+      '/series/1399',
+      '/u/handle',
+      '/admin',
+      '/admin/reviews/new',
+      '/api/admin/login',
+      '/uploads/hero.png',
+      '/llms.txt',
+      '/sitemap.xml',
+      '/robots.txt',
+      '/rss.xml',
+    ]) {
+      expect(isLiveRoute(p), p).toBe(true);
+    }
+  });
+  it('does not know the paths the app does not serve', () => {
+    for (const p of [
+      '/9xplay.php',
+      '/2017/05/12/film.jpg',
+      '/old-movie-2019-full-movie-download',
+      '/movies/not-an-id',
+      '/series/not-an-id',
+      '/some-random-path',
+    ]) {
+      expect(isLiveRoute(p), p).toBe(false);
+    }
+  });
+  it('matches case-insensitively (a miss must end in the app 404, not the archive 410)', () => {
+    expect(matchesLivePattern('/About')).toBe(true);
+    expect(matchesLivePattern('/ABOUT/')).toBe(true);
+  });
+  it('treats a taxonomy path as content-aware (no published page -> not served)', () => {
+    // The shape is a live route...
+    expect(matchesLivePattern('/cast/anyone')).toBe(true);
+    expect(matchesLivePattern('/director/anyone')).toBe(true);
+    expect(matchesLivePattern('/category/anyone')).toBe(true);
+    // ...but the site publishes a taxonomy page only for an entity it
+    // knows, so an unknown slug is not a served path.
+    expect(isLiveRoute('/cast/zzz-not-a-published-entity-9f3a')).toBe(false);
+    expect(isLiveRoute('/category/zzz-not-a-published-entity-9f3a')).toBe(false);
+  });
+});
+
+/**
+ * The live-route list is a constant in the router (the router stays
+ * dependency-free), so it is PINNED here against the routes that are
+ * actually on disk in src/pages/. Both directions matter: a route the app
+ * serves but the list misses would 410 again, and a list entry the app
+ * does not serve is drift that hides a real route later.
+ */
+describe('the live-route list is pinned to the routes on disk', () => {
+  const root = path.resolve(__dirname, '..');
+  const pagesDir = path.join(root, 'src', 'pages');
+
+  /** The Astro route of every page file under src/pages/. */
+  function deriveRoutes(dir: string, prefix = ''): string[] {
+    const out: string[] = [];
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      if (entry.name.startsWith('_') || entry.name.startsWith('.')) continue;
+      const full = path.join(dir, entry.name);
+      if (entry.isDirectory()) {
+        out.push(...deriveRoutes(full, `${prefix}/${entry.name}`));
+        continue;
+      }
+      const ext = path.extname(entry.name);
+      if (!['.astro', '.ts', '.js', '.md', '.mdx'].includes(ext)) continue;
+      const base = entry.name.slice(0, -ext.length);
+      let seg: string;
+      if (base === 'index') seg = '';
+      else if (base.startsWith('[') && base.endsWith(']')) {
+        const inner = base.slice(1, -1);
+        seg = inner.startsWith('...') ? '*' : `:${inner}`;
+      } else seg = base;
+      const route = `${prefix}/${seg}`.replace(/\/{2,}/g, '/').replace(/\/$/, '');
+      out.push(route || '/');
+    }
+    return out;
+  }
+
+  /** True when a live-route pattern covers a derived route (shape only). */
+  function patternCovers(pattern: string, route: string): boolean {
+    const p = pattern.split('/').filter(Boolean);
+    const r = route.split('/').filter(Boolean);
+    for (let i = 0; i < p.length; i++) {
+      const ps = p[i]!;
+      if (ps === '*') return true;
+      if (i >= r.length) return false;
+      if (ps.startsWith(':')) continue;
+      if (ps.toLowerCase() !== r[i]!.toLowerCase()) return false;
+    }
+    return p.length === r.length;
+  }
+
+  const routes = deriveRoutes(pagesDir);
+
+  it('covers every route the app serves', () => {
+    const uncovered = routes.filter((r) => !LIVE_ROUTE_PATTERNS.some((p) => patternCovers(p, r)));
+    expect(uncovered).toEqual([]);
+  });
+
+  it('has no entry the app does not serve (no stale patterns)', () => {
+    const stale = LIVE_ROUTE_PATTERNS.filter((p) => !routes.some((r) => patternCovers(p, r)));
+    expect(stale).toEqual([]);
+  });
+
+  it('derives the routes it thinks it does (the fixture reads real files)', () => {
+    // Guards the guard: if the derivation stopped finding pages, the two
+    // assertions above would pass on an empty set.
+    expect(routes).toContain('/about');
+    expect(routes).toContain('/contact');
+    expect(routes).toContain('/reviews/:slug');
+    expect(routes).toContain('/movies/:tmdbId');
+    expect(routes).toContain('/series/:tmdbId');
+    expect(routes).toContain('/cast/:slug');
+    expect(routes).toContain('/director/:slug');
+    expect(routes).toContain('/category/:slug');
+    expect(routes).toContain('/llms.txt');
+    expect(routes).toContain('/sitemap.xml');
+    expect(routes).toContain('/robots.txt');
   });
 });
