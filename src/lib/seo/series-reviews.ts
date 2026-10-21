@@ -138,13 +138,18 @@ export function seriesTitle(): string {
   return "Web series reviews";
 }
 
-/** The meta description source (length-banded by the meta builder). */
+/**
+ * The meta description source (length-banded by the meta builder).
+ *
+ * The sentence stands on its own inside the 150-160 char band, so the
+ * builder never has to pad it or cut it mid-phrase.
+ */
 export function seriesDescription(siteName: string, count = 0): string {
   const site = siteName.trim() || "the journal";
   if (count <= 0) {
-    return `Web and television series reviews on ${site}: our rating out of ten, our one-line verdict, and where to watch.`;
+    return `No web or television series review is published on ${site} yet. Every review we have published so far sits in the review archive, with our ratings.`;
   }
-  return `Every web and television series ${site} has reviewed, newest first: our rating out of ten, our one-line verdict, and where to watch.`;
+  return `Every web and television series ${site} has reviewed, newest first: our own rating out of ten, our one-line verdict, and where to watch, if it streams.`;
 }
 
 /**

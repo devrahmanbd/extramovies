@@ -219,6 +219,18 @@ describe("series index: the data source is the published store rows", () => {
     );
     expect(seriesDescription("Extramovies", 0)).not.toMatch(/has reviewed/i);
   });
+
+  it("the meta description lands in the 150-160 band, never cut mid-phrase", async () => {
+    const { seriesDescription } = await import("../src/lib/seo/series-reviews");
+    const withContent = seriesDescription("Extramovies", 3);
+    expect(withContent.length).toBeGreaterThanOrEqual(150);
+    expect(withContent.length).toBeLessThanOrEqual(160);
+    expect(withContent).not.toContain("…");
+    const empty = seriesDescription("Extramovies", 0);
+    expect(empty.length).toBeGreaterThanOrEqual(150);
+    expect(empty.length).toBeLessThanOrEqual(160);
+    expect(empty).not.toContain("…");
+  });
 });
 
 describe("series index: the empty state is honest and not indexed", () => {
