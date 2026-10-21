@@ -9,7 +9,6 @@ seo_title: "Spider-Man: Brand New Day Review (2026): Is It Worth It?"
 seo_description: "Destin Daniel Cretton's Spider-Man: Brand New Day (2026) stars Tom Holland and Zendaya. Our review of the reset, with our 7 out of 10 verdict."
 excerpt: "Tom Holland is 30 and lonely in Cretton's Spider-Man: Brand New Day (2026), and Zendaya rescues the film. Our verdict."
 managed_fields: "[\"seo_title\",\"seo_description\",\"excerpt\",\"featured\"]"
-featured: true
 movie_title: "Spider-Man: Brand New Day"
 movie_year: "2026"
 movie_genres: "[\"Science Fiction\", \"Action\", \"Adventure\"]"
