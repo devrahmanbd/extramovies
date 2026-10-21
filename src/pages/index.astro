@@ -18,6 +18,7 @@ import {
   listGenres,
   formatRuntime,
 } from "../lib/seo/content";
+import { reviewsPublishedWithin } from "../lib/seo/weekly";
 import DiscoverHome from "../components/discover/DiscoverHome.astro";
 import { displayAuthor } from "../lib/site-author";
 import { heroImagePreload, heroImageSize, selectHeroFirstUrl } from "../lib/seo/hero-image";
@@ -50,6 +51,16 @@ try {
 }
 const isDiscovery = theme === "discovery";
 const discoveryKey = isDiscovery ? hasTmdbKey() : false;
+/**
+ * Weekly refresh module — the reviews published in the last 7 days.
+ * Same published rows the archive reads (getLatestReviews), cut by the
+ * shared weekly window. Empty for the publication branch and empty when
+ * the week brought nothing, which hides the block entirely.
+ */
+const now = new Date();
+const thisWeek = isDiscovery
+  ? reviewsPublishedWithin(getLatestReviews(1000), now)
+  : [];
 // Discovery branch only — publication variables below stay untouched.
 const trending = isDiscovery ? await getTrending().catch(() => []) : [];
 const popular = isDiscovery ? await getPopular().catch(() => []) : [];
@@ -126,10 +137,12 @@ const publishedDate = featured
         tmdbGenres={tmdbGenres}
         localGenres={genres}
         localLatest={latest}
+        thisWeek={thisWeek}
         topRated={discoveryTop}
         featured={discoveryFeatured}
         hasTmdbKey={discoveryKey}
         heroFirstUrl={discoveryHeroFirstUrl}
+        now={now}
       />
     </div>
   ) : (

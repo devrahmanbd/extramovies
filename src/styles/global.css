@@ -5519,3 +5519,48 @@ a.d-shelf-see:hover { color: var(--color-accent); }
 }
 
 .d-search-more .d-guide-grid { margin-top: var(--space-4); }
+
+/* === DISCOVERY "new this week" module (2026-10-21, append-only) ===
+ * The weekly review list on the discovery home: one ruled row per review
+ * published in the last 7 days (poster thumb, title + year, freshness
+ * label, our verdict, our score). Row type reuses the shared .index-*
+ * classes (title/meta/verdict/thumb) and the .rating-mark score, so the
+ * typography is the discovery theme's own. Only the row grid is new —
+ * it mirrors .index-row without its numeral column, so the score always
+ * sits on the right and the text keeps the full width.
+ * Existing tokens only (--space-*, --color-*, --rule). Zero JS.
+ */
+.d-week-list { border-top: 1px solid var(--color-rule); }
+
+.d-week-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: var(--space-4);
+  align-items: start;
+  padding: var(--space-5) 0;
+  border-bottom: 1px solid var(--color-rule);
+  min-width: 0;
+}
+
+.d-week-row > .index-thumb { grid-column: 1; grid-row: 1; }
+.d-week-row > .index-main { grid-column: 2; grid-row: 1; min-width: 0; }
+.d-week-row > .rating-mark { grid-column: 3; grid-row: 1; justify-self: end; }
+
+/* 44px touch target on the title link (same rule as .index-row) */
+.d-week-row .index-title a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: var(--space-1) 0;
+}
+
+.d-week-row .index-verdict {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+@media (max-width: 30rem) {
+  .d-week-row > .index-thumb { display: none; }
+}

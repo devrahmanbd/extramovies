@@ -1,0 +1,99 @@
+---
+/**
+ * NewThisWeek — "new movie reviews this week" module (discovery home).
+ *
+ * Answers the weekly-refresh search intent with the reviews the site
+ * published in the last 7 days: title, year, our score, our one-line
+ * verdict and a freshness label, each row a real anchor to the review
+ * page. The rows come from the same published store the archive reads
+ * (the page passes them in), so nothing here can be a draft or a row the
+ * site does not publish.
+ *
+ * Rules:
+ *  - Renders NOTHING when the week brought no published review (no empty
+ *    heading, no empty list).
+ *  - One row per slug — a review is never listed twice, even if the
+ *    caller passes it twice.
+ *  - A review with no score yet shows a dash, never a "0.0/10" claim.
+ *  - Zero client JS: real anchors, server-rendered, keyboard reachable.
+ */
+import type { PublicReview } from "../../lib/seo/content";
+import { freshnessLabel, publishDateLabel } from "../../lib/seo/weekly";
+
+interface Props {
+  /** Reviews published inside the weekly window, newest first. */
+  reviews: PublicReview[];
+  /** Reference moment for the freshness labels (the page render time). */
+  now?: Date;
+}
+
+const { reviews, now = new Date() } = Astro.props;
+
+/** One row per slug — the block never shows the same review twice. */
+const rows = [
+  ...new Map(
+    (Array.isArray(reviews) ? reviews : [])
+      .filter((r) => r && typeof r.slug === "string" && r.slug.trim())
+      .map((r) => [r.slug, r]),
+  ).values(),
+];
+
+const countText = (n: number, one: string, many: string) =>
+  n === 1 ? `1 ${one}` : `${n} ${many}`;
+
+const band = (rating: number) => (rating >= 7 ? "high" : rating >= 5 ? "mid" : "low");
+---
+{rows.length > 0 ? (
+  <section class="band--alt section--sm d-guide-section" aria-labelledby="d-new-this-week-heading">
+    <div class="d-shelf-head">
+      <h2 id="d-new-this-week-heading" class="d-shelf-label">New movie reviews this week</h2>
+      <span class="d-shelf-rule" aria-hidden="true"></span>
+      <span class="d-shelf-count tnum">{countText(rows.length, "review", "reviews")}</span>
+      <a class="d-shelf-see" href="/reviews">See all →</a>
+    </div>
+    <ol class="index-list d-guide-top d-week-list">
+      {rows.map((r) => {
+        const fresh = freshnessLabel(r.publishedAt, now);
+        const dateLabel = publishDateLabel(r.publishedAt);
+        const scored = typeof r.rating === "number" && r.rating > 0;
+        return (
+          <li class="d-week-row">
+            {r.posterUrl ? (
+              <img
+                class="index-thumb"
+                src={r.posterUrl}
+                alt={`Poster for ${r.movieTitle}`}
+                width="88"
+                height="132"
+                loading="lazy"
+                decoding="async"
+              />
+            ) : null}
+            <div class="index-main">
+              <h3 class="index-title">
+                <a href={`/reviews/${r.slug}`}>{r.movieTitle}{r.year ? ` (${r.year})` : ""}</a>
+              </h3>
+              <p class="index-meta tnum">
+                <span>{fresh}</span>
+                {dateLabel ? <span aria-hidden="true"> · </span> : null}
+                {dateLabel ? <time datetime={r.publishedAt}>{dateLabel}</time> : null}
+              </p>
+              {r.verdict ? <p class="index-verdict">{r.verdict}</p> : null}
+            </div>
+            {scored ? (
+              <span class="rating-mark tnum" data-band={band(r.rating)}>
+                <span class="rating-value">{r.rating.toFixed(1)}</span>
+                <span class="rating-scale">/10</span>
+              </span>
+            ) : (
+              <span class="rating-mark tnum" data-band="low">
+                <span class="rating-value">–</span>
+                <span class="sr-only">Not scored yet</span>
+              </span>
+            )}
+          </li>
+        );
+      })}
+    </ol>
+  </section>
+) : null}

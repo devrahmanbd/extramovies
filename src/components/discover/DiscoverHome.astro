@@ -11,6 +11,7 @@
  * Single h1. Plain language only. No technical labels.
  */
 import MovieTile from "./MovieTile.astro";
+import NewThisWeek from "./NewThisWeek.astro";
 import type { DiscoverTile, SiteTheme } from "../../lib/tmdb/discover";
 import { COLLECTIONS, buildListHref } from "../../lib/tmdb/discover";
 import type { Genre } from "../../lib/tmdb/types";
@@ -28,6 +29,12 @@ interface Props {
   tmdbGenres: Genre[];
   localGenres: string[];
   localLatest: PublicReview[];
+  /**
+   * Reviews published inside the weekly window (the "new movie reviews
+   * this week" module). The page owns the window; the component only
+   * renders what it is handed, and renders nothing when it is empty.
+   */
+  thisWeek?: PublicReview[];
   topRated: PublicReview[];
   featured: PublicReview | null;
   hasTmdbKey: boolean;
@@ -38,6 +45,12 @@ interface Props {
    * preload href and slide 0's <img src> are the same string.
    */
   heroFirstUrl?: string | null;
+  /**
+   * Reference moment for the weekly freshness labels — the same instant
+   * the page used to cut the window, so the labels never disagree with
+   * the rows they label.
+   */
+  now?: Date;
 }
 const {
   trending,
@@ -50,10 +63,12 @@ const {
   tmdbGenres,
   localGenres,
   localLatest,
+  thisWeek,
   topRated,
   featured,
   hasTmdbKey,
   heroFirstUrl,
+  now,
 } = Astro.props;
 const safe = <T,>(v: T | undefined | null, fallback: T): T =>
   Array.isArray(v) ? (v as T) : (v ?? fallback);
@@ -65,6 +80,7 @@ const freeTiles = safe(free, []);
 const streamTiles = safe(stream, []);
 const rentTiles = safe(rent, []);
 const latest = safe(localLatest, []);
+const thisWeekReviews = safe(thisWeek, []);
 const top = safe(topRated, []);
 const genreRail = tmdbGenres.length > 0
   ? tmdbGenres.map((g) => ({ label: g.name, href: `/movies?genre=${g.id}` }))
@@ -276,6 +292,10 @@ const countText = (n: number, singular: string, plural: string) =>
     </div>
   </section>
 )}
+
+{/* Weekly refresh module — the reviews published in the last 7 days.
+   Renders nothing when the week brought no published review. */}
+<NewThisWeek reviews={thisWeekReviews} now={now} />
 
 {trendingTiles.length > 0 ? (
   <section class="band section--sm d-guide-section" aria-labelledby="d-trending-heading">
