@@ -9,6 +9,7 @@ data/*.db
 data/*.db-*
 data/settings.json
 data/reviews.json
+data/seed-refresh.json
 data/uploads/
 data/legacy/
 

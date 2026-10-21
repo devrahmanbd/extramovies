@@ -61,6 +61,14 @@ planned. Read this whole file before acting. Short hard-rules version: `.rules`.
   draft rows only; rows the owner published from /admin are never
   overwritten). Seeds without `published_at` arrive unpublished as drafts for
   the owner to adjust/publish in that site's `/admin`.
+- ONE exception to "a published row is never overwritten": a seed may declare
+  `managed_fields` in its frontmatter and then a deploy refreshes ONLY those
+  fields on its own published row. Allowlist: `seo_title`, `seo_description`,
+  `excerpt`, `body` — nothing else, ever. Rating, `published_at`, status,
+  title, id and the row's `sites` tag stay untouched; an unknown field name is
+  reported and ignored, never written. A seed without the key behaves exactly
+  as before. Frontmatter: `managed_fields: "[\"seo_title\", \"seo_description\"]"`.
+  Deploy log: `SEED OK <slug> (status=published, seo refreshed: seo_title, seo_description)`.
 
 ## 3. Content model (core shared, content per site)
 

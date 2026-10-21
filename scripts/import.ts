@@ -5,9 +5,23 @@
  */
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
-import { markdownToReview, validatePortableReview } from '../src/lib/portability.js';
-import { defaultSites } from '../src/lib/seo/store-merge.js';
+import {
+  markdownToReview,
+  validatePortableReview,
+  type PortableReview,
+} from '../src/lib/portability.js';
+import { defaultSites, rowSites, siteId, visibleHere } from '../src/lib/seo/store-merge.js';
 import { checkPublishRating } from '../src/lib/publish-guard.js';
+import {
+  MANAGED_FIELDS_KEY,
+  MANAGED_FIELD_NAMES,
+  applyManagedRefresh,
+  planManagedRefresh,
+  resolveManagedFields,
+  type ManagedField,
+  type ManagedFields,
+  type ManagedRefreshPlan,
+} from '../src/lib/seed-managed-fields.js';
 import {
   indexNowOrigin,
   notifyIndexNowSoon,
@@ -15,6 +29,9 @@ import {
 } from '../src/lib/seo/indexnow.js';
 
 const DB = process.env.REVIEWS_DB_PATH ?? path.join(process.cwd(), 'data', 'reviews.json');
+
+/** Per-run report of the repo-managed fields the import refreshed. */
+const REFRESH_REPORT_FILE = 'seed-refresh.json';
 
 async function readStore(dbFile: string = DB): Promise<Record<string, unknown>[]> {
   try {
@@ -92,10 +109,26 @@ function unratedPublishWarning(slug: string, suffix: string): string {
   );
 }
 
+export interface SeedRefresh {
+  /** Slug whose published row got repo-managed fields refreshed. */
+  slug: string;
+  /** The fields that actually changed (and were written). */
+  fields: ManagedField[];
+}
+
 export async function importMarkdown(
   target: string,
   opts: { dry?: boolean; dbPath?: string; skipExisting?: boolean; refresh?: boolean } = {},
-): Promise<{ imported: number; skipped: number; errors: string[]; refused: string[] }> {
+): Promise<{
+  imported: number;
+  skipped: number;
+  errors: string[];
+  refused: string[];
+  /** Loud-but-harmless notices (unknown managed field, empty value, ...). */
+  warnings: string[];
+  /** Repo-managed fields refreshed on published rows this run. */
+  refreshed: SeedRefresh[];
+}> {
   const stat = await fs.stat(target);
   const files: string[] = [];
   if (stat.isDirectory()) {
@@ -107,22 +140,30 @@ export async function importMarkdown(
   }
   const dbFile = opts.dbPath ?? DB;
   const store = await readStore(dbFile);
+  if (!opts.dry) {
+    // Clear any report from an earlier run BEFORE touching the store, so a
+    // stale report can never be read as this run's result.
+    await fs.mkdir(path.dirname(dbFile), { recursive: true });
+    await writeRefreshReport(dbFile, []);
+  }
   let imported = 0;
   let skipped = 0;
   const errors: string[] = [];
   const refused: string[] = [];
+  const warnings: string[] = [];
+  const refreshed: SeedRefresh[] = [];
   /** Slugs this run published (announced to IndexNow once, at the end). */
   const publishedSlugs: string[] = [];
   for (const f of files) {
     const raw = await fs.readFile(f, 'utf8');
-    const { review, warnings } = markdownToReview(raw, path.basename(f, '.md'));
+    const { review, warnings: parseWarnings } = markdownToReview(raw, path.basename(f, '.md'));
     const problems = validatePortableReview(review);
     if (problems.length > 0) {
       skipped++;
       errors.push(`${f}: ${problems.join('; ')}`);
       continue;
     }
-    for (const w of warnings) console.warn(`[import] ${f}: ${w}`);
+    for (const w of parseWarnings) console.warn(`[import] ${f}: ${w}`);
     // A seed may publish itself (published_at in frontmatter), but an
     // UNRATED review must never go live: it would ship a public
     // "rated 0/10" claim (meta description + JSON-LD reviewRating).
@@ -136,22 +177,59 @@ export async function importMarkdown(
       refused.push(`${review.slug}: ${refusal}`);
       console.error(unratedPublishWarning(review.slug, ' (dry run: nothing written)'));
     }
+    const extras = review as unknown as Record<string, unknown>;
+    // A seed may declare which fields the REPO owns (SEO/meta surface only).
+    // This is the one exception to "a published row is never overwritten".
+    const managed = resolveManagedFields(strArray(extras[MANAGED_FIELDS_KEY]));
+    if (managed.unknown.length > 0) {
+      const notice =
+        `[import] WARN slug "${review.slug}" ${MANAGED_FIELDS_KEY}: unknown field(s) ` +
+        `${managed.unknown.join(', ')} ignored (never written). ` +
+        `Allowed: ${MANAGED_FIELD_NAMES.join(', ')}.`;
+      console.warn(notice);
+      warnings.push(notice);
+    }
+    const existing = store.findIndex(
+      (r) => (r as { slug?: string }).slug === review.slug,
+    );
+    const existingRow =
+      existing >= 0 ? (store[existing] as Record<string, unknown>) : undefined;
+    // Dry run: report what a live run WOULD refresh (nothing is written).
+    if (opts.dry && existingRow) {
+      const plan = planPublishedRowRefresh(existingRow, review, managed);
+      if (plan && plan.changed.length > 0) {
+        console.log(
+          `[import] DRY RUN ${review.slug} would refresh: ${plan.changed.join(', ')} (nothing written)`,
+        );
+      }
+    }
     if (!opts.dry) {
       const now = new Date().toISOString();
-      const existing = store.findIndex(
-        (r) => (r as { slug?: string }).slug === review.slug,
-      );      // Safe re-runs for automation: leave present rows untouched.
+      // Safe re-runs for automation: leave present rows untouched.
       // --refresh is a targeted exception: it rescues DRAFT rows only
       // (seed files may have gained published_at / content edits), while
       // rows the owner published from /admin are never overwritten.
       if (existing >= 0) {
         const prev = store[existing] as { status?: string };
         if (opts.skipExisting && !(opts.refresh && prev.status === 'draft')) {
+          // The row stands — UNLESS the seed declared repo-managed fields.
+          // Then the import writes ONLY those fields and nothing else.
+          const done = refreshManagedFields({
+            row: store[existing] as Record<string, unknown>,
+            review,
+            managed,
+            now,
+            warnings,
+            refreshed,
+          });
+          if (done) {
+            imported++;
+            continue;
+          }
           skipped++;
           continue;
         }
       }
-      const extras = review as unknown as Record<string, unknown>;
       const movie = buildMovieMeta(extras);
       if (refusal) {
         refused.push(`${review.slug}: ${refusal}`);
@@ -202,9 +280,107 @@ export async function importMarkdown(
   if (!opts.dry) {
     await fs.mkdir(path.dirname(dbFile), { recursive: true });
     await fs.writeFile(dbFile, JSON.stringify(store, null, 2) + '\n', 'utf8');
+    await writeRefreshReport(dbFile, refreshed);
     if (publishedSlugs.length > 0) await announcePublished(publishedSlugs);
   }
-  return { imported, skipped, errors, refused };
+  return { imported, skipped, errors, refused, warnings, refreshed };
+}
+
+/**
+ * Plan the repo-managed refresh of an EXISTING row.
+ *
+ * Eligible rows only: a PUBLISHED row on THIS site. A draft row is already
+ * refreshed wholesale by --refresh; a row tagged for another brand is never
+ * ours to touch. Returns null when the row is not eligible.
+ */
+function planPublishedRowRefresh(
+  row: Record<string, unknown>,
+  review: PortableReview,
+  managed: ManagedFields,
+): ManagedRefreshPlan | null {
+  if (!managed.fields.length) return null;
+  if ((row.status as string | undefined) !== 'published') return null;
+  if (!visibleHere(rowSites(row as { sites?: unknown }))) return null;
+  return planManagedRefresh(row, review, managed.fields);
+}
+
+/**
+ * Refresh ONLY the repo-managed fields of a published row.
+ *
+ * Everything else on the row is left exactly as the owner left it: rating,
+ * published_at, status, title, id, sites, movie, redirects. Returns true
+ * when the seed was handled here (the import counts it as imported).
+ */
+function refreshManagedFields(args: {
+  row: Record<string, unknown>;
+  review: PortableReview;
+  managed: ManagedFields;
+  now: string;
+  warnings: string[];
+  refreshed: SeedRefresh[];
+}): boolean {
+  const { row, review, managed, now, warnings, refreshed } = args;
+  if (!managed.declared || !managed.fields.length) return false;
+  if ((row.status as string | undefined) !== 'published') return false;
+  if (!visibleHere(rowSites(row as { sites?: unknown }))) {
+    const notice =
+      `[import] WARN slug "${review.slug}" ${MANAGED_FIELDS_KEY} ignored: the row is ` +
+      `tagged for another site (sites: ${JSON.stringify(rowSites(row as { sites?: unknown }) ?? [])}).`;
+    console.warn(notice);
+    warnings.push(notice);
+    return false;
+  }
+  const plan = planManagedRefresh(row, review, managed.fields);
+  if (plan.empty.length > 0) {
+    const notice =
+      `[import] WARN slug "${review.slug}" ${MANAGED_FIELDS_KEY}: the seed carries no value for ` +
+      `${plan.empty.join(', ')} — skipped (the row keeps its current value).`;
+    console.warn(notice);
+    warnings.push(notice);
+  }
+  if (plan.changed.length === 0) {
+    console.log(
+      `[import] SEED OK ${review.slug} (status=published, seo in sync: ` +
+        `${plan.writable.length > 0 ? plan.writable.join(', ') : 'nothing to write'})`,
+    );
+    return true;
+  }
+  applyManagedRefresh(row, review, plan);
+  // A substantive edit bumps updatedAt (sitemap lastmod follows it).
+  row.updatedAt = now;
+  refreshed.push({ slug: review.slug, fields: plan.changed });
+  console.log(
+    `[import] SEED OK ${review.slug} (status=published, seo refreshed: ${plan.changed.join(', ')})`,
+  );
+  return true;
+}
+
+/**
+ * Per-run report of the repo-managed fields the import refreshed. The deploy
+ * verification step reads it so the log shows what each seed refreshed.
+ *
+ * Always written (empty when nothing was refreshed) so a stale report can
+ * never outlive the run that produced it.
+ */
+async function writeRefreshReport(dbFile: string, refreshed: SeedRefresh[]): Promise<void> {
+  const file = path.join(path.dirname(dbFile), REFRESH_REPORT_FILE);
+  const bySlug: Record<string, string[]> = {};
+  for (const r of refreshed) bySlug[r.slug] = r.fields;
+  try {
+    await fs.writeFile(
+      file,
+      JSON.stringify(
+        { site: siteId(), runAt: new Date().toISOString(), refreshed: bySlug },
+        null,
+        2,
+      ) + '\n',
+      'utf8',
+    );
+  } catch (err) {
+    console.warn(
+      `[import] refresh report not written: ${err instanceof Error ? err.message : err}`,
+    );
+  }
 }
 
 /**
@@ -256,7 +432,8 @@ export async function runImport(
     `[import] imported=${r.imported} skipped=${r.skipped}` +
       `${opts.dry ? ' (dry run)' : ''}` +
       `${opts.skipExisting ? ' (skip-existing)' : ''}` +
-      `${opts.refresh ? ' (refresh)' : ''}`,
+      `${opts.refresh ? ' (refresh)' : ''}` +
+      `${r.refreshed.length > 0 ? ` (seo refreshed=${r.refreshed.length})` : ''}`,
   );
   for (const e of r.errors) console.error(`[import] SKIP ${e}`);
   if (r.refused.length > 0) {

@@ -273,6 +273,14 @@ Health check after any deploy: public page renders, `/api/backup/status`
 (admin) returns counts, streaming section hides when TMDB is down,
 exported Markdown re-imports cleanly (`--dry` first).
 
+Content seeds (`seeds/<site>/*.md`) import on every deploy
+(`--skip-existing --refresh`). A row the owner published from `/admin` is
+never overwritten — the one exception is a seed that declares
+`managed_fields` in its frontmatter (`seo_title`, `seo_description`,
+`excerpt`, `body` only): then the deploy refreshes exactly those fields on
+that seed's published row and the log shows `SEED OK <slug> (status=published,
+seo refreshed: …)`. See AGENTS.md §2.
+
 ## CI automation (everything runs here — no manual SSH deploys)
 
 | Workflow | Trigger | Does |
