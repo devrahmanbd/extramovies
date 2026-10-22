@@ -1,14 +1,18 @@
 # Google indexing worklist - 2026-10-22
 
-Search Console URL Inspection sweep over the live sitemap: **104 URLs** checked, **10 known to Google**, **94 unknown**.
+Search Console URL Inspection sweep over the live sitemap: **126 URLs** checked, **10 known to Google**, **116 unknown**.
 
-The sitemap was re-submitted (GSC now reads 104 URLs). What is left is the manual step:
+The sitemap was re-submitted (GSC now reads 126 URLs). What is left is the manual step:
 Search Console -> URL Inspection -> paste the URL -> Enter -> wait for the live test -> **Request indexing**.
 There is no bulk submit for articles on Google (the Indexing API covers job postings and live events only),
 so this list is the route. Work it in this order: review pages first (they are the pages that earn impressions),
 then the hubs, then the taxonomy pages.
 
-## review (31)
+Rows 57 and up come from a second pass over the 22 URLs that entered the sitemap after the first
+sweep: the eight new reviews plus the per-title and cast pages created with them. All 22 came back
+"URL is unknown to Google". Rows 1 to 56 are the first pass and are unchanged.
+
+## review (39)
 
 1. https://extramovies.org/reviews/ang-probinsyano-2015-review
 2. https://extramovies.org/reviews/animals-2026-review
@@ -41,8 +45,27 @@ then the hubs, then the taxonomy pages.
 29. https://extramovies.org/reviews/unfreedom-2015-review
 30. https://extramovies.org/reviews/whalefall-2026-review
 31. https://extramovies.org/reviews/you-can-see-everything-2026-review
+57. https://extramovies.org/reviews/a-nice-indian-boy-2025-review
+58. https://extramovies.org/reviews/deadpool-2016-review
+59. https://extramovies.org/reviews/dhruva-2016-review
+60. https://extramovies.org/reviews/gandhi-talks-2026-review
+61. https://extramovies.org/reviews/light-of-the-world-2025-review
+62. https://extramovies.org/reviews/mayday-2026-review
+63. https://extramovies.org/reviews/pati-patni-aur-woh-do-2026-review
+64. https://extramovies.org/reviews/peddi-2026-review
 
-## taxonomy (23)
+## hub (8)
+
+65. https://extramovies.org/movies/1057265
+66. https://extramovies.org/movies/1128614
+67. https://extramovies.org/movies/1137844
+68. https://extramovies.org/movies/1320660
+69. https://extramovies.org/movies/1374686
+70. https://extramovies.org/movies/293660
+71. https://extramovies.org/movies/410994
+72. https://extramovies.org/movies/786567
+
+## taxonomy (29)
 
 32. https://extramovies.org/cast/austin-abrams
 33. https://extramovies.org/cast/eric-bauza
@@ -67,6 +90,12 @@ then the hubs, then the taxonomy pages.
 52. https://extramovies.org/category/romance
 53. https://extramovies.org/category/science-fiction
 54. https://extramovies.org/category/thriller
+73. https://extramovies.org/cast/arvind-swamy
+74. https://extramovies.org/cast/karan-soni
+75. https://extramovies.org/cast/michael-benyaer
+76. https://extramovies.org/cast/rakul-preet-singh
+77. https://extramovies.org/cast/ram-charan
+78. https://extramovies.org/cast/ryan-reynolds
 
 ## site (2)
 
