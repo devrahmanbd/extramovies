@@ -49,6 +49,11 @@ export const GET: APIRoute = async ({ url }) => {
     // corroboration the brand SERP needs.
     { loc: `${origin}/about`, changefreq: "monthly", priority: 0.6 },
     { loc: `${origin}/contact`, changefreq: "monthly", priority: 0.4 },
+    // The upcoming-release list: a site page, not a review page, so the
+    // review-driven rule does not apply to it. It is always live (TMDB
+    // answers it or the page renders its honest empty state), so it joins
+    // the sitemap on every deploy.
+    { loc: `${origin}/upcoming`, changefreq: "daily", priority: 0.8 },
     ...(theme === "publication"
       ? []
       : [{ loc: `${origin}/movies`, changefreq: "daily" as const, priority: 0.8, ...(newest ? { lastmod: newest } : {}) }]),

@@ -1,0 +1,316 @@
+---
+/**
+ * /upcoming — the editorial "what is coming" list: the films with a release
+ * date in the next eight months, grouped by month, oldest first.
+ *
+ * WHY THE PAGE EXISTS: the site had an "upcoming" rail on the discovery
+ * front, which is a scrolling strip and not a landing page, so it could
+ * never answer the "upcoming movies" query family. This page is the answer:
+ * a real URL, server-rendered, indexable, and in the sitemap.
+ *
+ * THE DATA: TMDB, through the site's own discovery layer (getUpcoming with
+ * a release-date window, plus one details read per film for the credits
+ * TMDB states). Nothing is invented and no film carries a number: an
+ * unreleased film gets its date, its credits and its coverage marker, and
+ * that is all (house rule: previews have no rating and no verdict).
+ *
+ * COVERAGE: what we have already written about the film, and nothing else.
+ * A film we have reviewed links to our review and to its hub; a film we
+ * have not says so in plain words.
+ *
+ * FAIL-SOFT: no TMDB key, no network or a TMDB error renders an honest
+ * empty state. The page still answers 200 and stays indexable, because a
+ * calendar page that exists but is empty is a thinner page than a 404, not
+ * a broken one.
+ */
+import Base from "../layouts/Base.astro";
+import { breadcrumbJsonLd } from "../lib/seo/jsonld";
+import { siteOrigin } from "../lib/seo/meta";
+import { getLatestReviews, formatRuntime } from "../lib/seo/content";
+import {
+  coverageFor,
+  formatReleaseDate,
+  groupByMonth,
+  laterNote,
+  NO_REVIEW_MARKER,
+  upcomingDescription,
+  upcomingIntro,
+  upcomingTitle,
+  upcomingWindow,
+  type UpcomingFilmFacts,
+} from "../lib/seo/upcoming";
+import { getLaterFilms, getUpcomingFilms } from "../lib/tmdb/upcoming";
+import { hasTmdbKey } from "../lib/tmdb/discover";
+
+const origin = siteOrigin(Astro.url.origin);
+const path = "/upcoming";
+
+const now = new Date();
+const window = upcomingWindow(now);
+const keyPresent = hasTmdbKey();
+
+/** The films TMDB has in the window, and the ones announced further out. */
+const [windowFilms, laterFilms] = await Promise.all([
+  getUpcomingFilms(now).catch(() => []),
+  getLaterFilms().catch(() => []),
+]);
+
+/** Our own published reviews — the only source of a coverage marker. */
+const reviews = getLatestReviews(5000);
+
+const months = groupByMonth(
+  windowFilms.map(
+    (f): UpcomingFilmFacts => ({
+      tmdbId: f.tmdbId,
+      title: f.title,
+      releaseDate: f.releaseDate,
+      director: f.director,
+      cast: f.cast,
+      runtimeMinutes: f.runtimeMinutes,
+      certificate: f.certificate,
+    }),
+  ),
+);
+
+const filmCount = months.reduce((n, m) => n + m.films.length, 0);
+const titleText = upcomingTitle();
+const intro = upcomingIntro(window);
+const isLong = titleText.length > 40;
+
+/**
+ * The JSON-LD: the breadcrumb and the list itself. No rating node, no
+ * verdict, no aggregate of any kind (AGENTS.md §4.6).
+ */
+const jsonld = [
+  breadcrumbJsonLd(origin, [
+    { name: "Home", path: "/" },
+    { name: "Upcoming movies", path },
+  ]),
+];
+
+if (filmCount > 0) {
+  jsonld.push({
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: titleText,
+    url: `${origin}${path}`,
+    mainEntity: {
+      "@type": "ItemList",
+      numberOfItems: filmCount,
+      itemListElement: months.flatMap((month) =>
+        month.films.map((film, i) => {
+          const coverage = coverageFor(film, reviews);
+          return {
+            "@type": "ListItem",
+            position: i + 1,
+            name: film.title,
+            ...(coverage ? { url: `${origin}${coverage.hubPath}` } : {}),
+          };
+        }),
+      ),
+    },
+  });
+}
+
+/** The facts a film line carries, in the order the page prints them. */
+function factsOf(film: UpcomingFilmFacts): string[] {
+  const parts: string[] = [];
+  if (film.director) parts.push(`Dir. ${film.director}`);
+  if (film.cast && film.cast.length) parts.push(film.cast.join(", "));
+  const runtime = formatRuntime(film.runtimeMinutes ?? null);
+  if (runtime) parts.push(runtime);
+  if (film.certificate) parts.push(film.certificate);
+  return parts;
+}
+---
+<Base
+  title={titleText}
+  description={upcomingDescription()}
+  path={path}
+  robots="index, follow"
+  jsonld={jsonld}
+  current="upcoming"
+>
+  <div class="wrap">
+    <section class="band section--lg up-head" aria-labelledby="upcoming-title">
+      <nav class="d-crumb" aria-label="Breadcrumb">
+        <a href="/">Home</a><span aria-hidden="true"> / </span><span aria-current="page">Upcoming movies</span>
+      </nav>
+      <p class="d-kicker">Coming soon</p>
+      <h1 id="upcoming-title" class={isLong ? "display--long" : undefined}>{titleText}</h1>
+      <p class="d-lede">{intro}</p>
+    </section>
+
+    {filmCount > 0 ? (
+      <section class="band section--md up-list-band" aria-labelledby="upcoming-list-heading">
+        <div class="section-head">
+          <h2 id="upcoming-list-heading">
+            {filmCount} {filmCount === 1 ? "film" : "films"}, month by month
+          </h2>
+          <p>Release dates as the studios have them. Where we have written about a film, it is linked.</p>
+        </div>
+
+        {months.map((month) => (
+          <section class="up-month" aria-labelledby={`up-month-${month.key}`}>
+            <h3 id={`up-month-${month.key}`} class="up-month-label">{month.label}</h3>
+            <ol class="up-list">
+              {month.films.map((film) => {
+                const coverage = coverageFor(film, reviews);
+                const facts = factsOf(film);
+                return (
+                  <li class="up-item">
+                    <p class="up-date tnum">
+                      <time datetime={film.releaseDate ?? undefined}>{formatReleaseDate(film.releaseDate)}</time>
+                    </p>
+                    <div class="up-main">
+                      <h4 class="up-title">{film.title}</h4>
+                      {facts.length > 0 ? <p class="up-facts tnum">{facts.join("  ·  ")}</p> : null}
+                      <p class="up-coverage">
+                        {coverage ? (
+                          <>
+                            Our <a href={coverage.reviewPath}>review</a> and <a href={coverage.hubPath}>film guide</a>.
+                          </>
+                        ) : (
+                          <>{NO_REVIEW_MARKER}</>
+                        )}
+                      </p>
+                    </div>
+                  </li>
+                );
+              })}
+            </ol>
+          </section>
+        ))}
+      </section>
+    ) : (
+      <section class="band section--md" aria-label="No release dates to show">
+        <div class="section-head">
+          <h2>No release dates to show</h2>
+          <p>The calendar is empty right now. Nothing has been listed, and nothing has been guessed.</p>
+        </div>
+        <p class="d-empty">
+          {!keyPresent
+            ? "The release calendar needs a TMDB key. Add your TMDB key in setup and the list comes back."
+            : "We could not load the release calendar from TMDB right now. Please try again later."}
+          {" "}<a href="/reviews">Browse the review archive</a> in the meantime.
+        </p>
+      </section>
+    )}
+
+    {laterFilms.length > 0 ? (
+      <section class="band band--alt section--md up-later" aria-labelledby="up-later-heading">
+        <div class="section-head">
+          <h2 id="up-later-heading">Later, further out</h2>
+          <p>{laterNote()}</p>
+        </div>
+        <ol class="up-list">
+          {laterFilms.map((film) => {
+            const coverage = coverageFor(film, reviews);
+            const facts = factsOf({
+              tmdbId: film.tmdbId,
+              title: film.title,
+              releaseDate: film.releaseDate,
+              director: film.director,
+              cast: film.cast,
+              runtimeMinutes: film.runtimeMinutes,
+              certificate: film.certificate,
+            });
+            return (
+              <li class="up-item">
+                <p class="up-date tnum">
+                  <time datetime={film.releaseDate ?? undefined}>{formatReleaseDate(film.releaseDate)}</time>
+                </p>
+                <div class="up-main">
+                  <h3 class="up-title">{film.title}</h3>
+                  {facts.length > 0 ? <p class="up-facts tnum">{facts.join("  ·  ")}</p> : null}
+                  <p class="up-coverage">
+                    {coverage ? (
+                      <>
+                        Our <a href={coverage.reviewPath}>review</a> and <a href={coverage.hubPath}>film guide</a>.
+                      </>
+                    ) : (
+                      <>{NO_REVIEW_MARKER}</>
+                    )}
+                  </p>
+                </div>
+              </li>
+            );
+          })}
+        </ol>
+      </section>
+    ) : null}
+  </div>
+</Base>
+
+<style>
+  .up-head h1 {
+    margin-top: 0;
+    font-size: var(--text-display);
+    line-height: var(--leading-display);
+    letter-spacing: var(--tracking-display);
+  }
+  .up-month {
+    margin-top: var(--space-10);
+  }
+  .up-month-label {
+    margin: 0 0 var(--space-3);
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+  }
+  .up-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-top: 1px solid var(--color-rule);
+  }
+  .up-item {
+    display: grid;
+    grid-template-columns: minmax(0, 10rem) minmax(0, 1fr);
+    gap: var(--space-4);
+    align-items: start;
+    border-bottom: 1px solid var(--color-rule);
+    padding: var(--space-5) 0;
+  }
+  .up-date {
+    margin: 0;
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    color: var(--color-ink-2);
+  }
+  .up-main {
+    min-width: 0;
+  }
+  .up-title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: var(--text-xl);
+    line-height: var(--leading-display);
+    letter-spacing: var(--tracking-display);
+    overflow-wrap: anywhere;
+  }
+  .up-facts {
+    margin: var(--space-1) 0 0;
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    color: var(--color-ink-2);
+  }
+  .up-coverage {
+    margin: var(--space-2) 0 0;
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    color: var(--color-ink-2);
+  }
+  .up-coverage a {
+    min-height: 44px;
+  }
+  @media (max-width: 640px) {
+    .up-item {
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--space-2);
+    }
+  }
+</style>

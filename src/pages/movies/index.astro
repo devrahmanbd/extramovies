@@ -161,6 +161,10 @@ const isLong = h1Text.length > 40;
           {filters.hasFilters ? <p>Filtered view — not indexed. <a href="/movies">Clear filters</a> for the full browse.</p> : <p>Lead pick first, then the compact flow.</p>}
         </div>
       </div>
+      {/* The films that have not come out yet live on their own page. */}
+      <p class="d-section-link">
+        <a href="/upcoming">Not out yet? See the upcoming release dates</a>
+      </p>
       {!keyPresent ? (
         <p class="d-empty">Discovery needs a TMDB key. <a href="/admin/settings">Add your TMDB key in setup</a> to browse films.</p>
       ) : tiles.length > 0 ? (

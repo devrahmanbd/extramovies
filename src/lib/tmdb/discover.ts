@@ -85,6 +85,8 @@ export interface DiscoverTile {
   tmdbId: number;
   title: string;
   year: number | null;
+  /** Exact release date (YYYY-MM-DD) when TMDB states one. */
+  releaseDate: string | null;
   posterUrl: string | null;
   rating: number | null;
   /** w1280 backdrop for hero slides; null when TMDB has none. */
@@ -107,6 +109,7 @@ export function mapToTile(raw: TmdbMovieDetails): DiscoverTile {
         ? raw.title
         : "Untitled",
     year: Number.isFinite(year) ? (year as number) : null,
+    releaseDate,
     posterUrl: imageUrl(raw.poster_path ?? null, "w342"),
     rating:
       typeof raw.vote_average === "number" && Number.isFinite(raw.vote_average)
@@ -526,21 +529,77 @@ export async function getNowPlaying(
   }
 }
 
-/** TMDB upcoming (coming soon — no providers implied), cached 1h, fail-soft []. */
+/**
+ * A release-date window for the upcoming list (ISO YYYY-MM-DD bounds).
+ *
+ * TMDB's own /movie/upcoming only reaches a few weeks ahead and mixes in
+ * re-releases, so the editorial "what is coming" page asks for a window
+ * instead: every film with a primary release date inside it.
+ */
+export interface UpcomingWindow {
+  /** Earliest release date, inclusive (YYYY-MM-DD). */
+  from: string;
+  /** Latest release date, inclusive (YYYY-MM-DD). */
+  to: string;
+  /** How many films to keep (one TMDB page is 20). */
+  limit?: number;
+}
+
+/** True when a value looks like an ISO date (YYYY-MM-DD). */
+function isIsoDate(value: unknown): value is string {
+  return typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value);
+}
+
+/**
+ * TMDB upcoming (coming soon — no providers implied), cached 1h, fail-soft [].
+ *
+ * WITHOUT a window this is the discovery front's rail: TMDB's /movie/upcoming,
+ * byte for byte what it always returned.
+ *
+ * WITH a window it asks /discover/movie for the films whose primary release
+ * date falls inside it, in TMDB's own popularity order. The region decides
+ * which release date TMDB answers with (US by default), which is why the
+ * window path carries `region` and the plain path does not.
+ */
 export async function getUpcoming(
-  region: RegionCode = defaultRegion()
+  region: RegionCode = defaultRegion(),
+  window?: UpcomingWindow
 ): Promise<DiscoverTile[]> {
-  try {
-    return await cached<DiscoverTile[]>(
-      `discover:upcoming:${region}`,
-      async () => {
+  const r = String(region ?? defaultRegion()).toUpperCase();
+  if (!window || !isIsoDate(window.from) || !isIsoDate(window.to)) {
+    try {
+      return await cached<DiscoverTile[]>(`discover:upcoming:${r}`, async () => {
         const res = await tmdbGet<{ results?: TmdbMovieDetails[] }>(
           "/movie/upcoming",
-          { language: "en-US", region: String(region).toUpperCase() }
+          { language: "en-US", region: String(r) }
         );
         return (res.results ?? []).map(mapToTile);
-      }
-    );
+      });
+    } catch {
+      return [];
+    }
+  }
+  const limit =
+    typeof window.limit === "number" && window.limit > 0
+      ? Math.floor(window.limit)
+      : 20;
+  const cacheKey = `discover:upcoming-window:${r}:${window.from}:${window.to}:${limit}`;
+  try {
+    return await cached<DiscoverTile[]>(cacheKey, async () => {
+      const res = await tmdbGet<{ results?: TmdbMovieDetails[] }>(
+        "/discover/movie",
+        {
+          language: "en-US",
+          region: String(r),
+          include_adult: "false",
+          sort_by: "popularity.desc",
+          "primary_release_date.gte": window.from,
+          "primary_release_date.lte": window.to,
+          page: "1",
+        }
+      );
+      return (res.results ?? []).map(mapToTile).slice(0, limit);
+    });
   } catch {
     return [];
   }
