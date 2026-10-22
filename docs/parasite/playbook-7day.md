@@ -145,9 +145,17 @@ Owner actions are manual account work; agent actions are commands I run here.
       bio, website field with the UTM link, profile photo, the 20 diary entries, 3
       lists. Source: `profile-kit/letterboxd-profile.md` +
       `profile-kit/letterboxd-diary-entries.md`.
-- [ ] **Clear the Bing blocked-URL list** in Bing Webmaster Tools (URL Index ->
-      Blocked URLs). Until this is done, every IndexNow ping we send is wasted on
-      pages Bing refuses to show. This is the single biggest unlock in the week.
+- [x] **Bing index block cleared** (done 2026-10-23, automated in the owner's
+      Bing Webmaster session). Finding: the Block URLs list was already empty —
+      the real block was a stale index verdict ("Blocked / URL cannot appear")
+      left over from the pre-rebrand era, while the live test says "URL can be
+      indexed by Bing" (robots.txt permissive, meta `index,follow`, no
+      x-robots-tag). Actions taken: re-submitted the sitemap (Bing had only
+      discovered **17 of 126** URLs from its 10/20 crawl) and spent the 10/day
+      manual quota on the 9 demand-ranked reviews (list 13 -> 22). IndexNow
+      verified landing: 158 URLs in 23h, source Self. Remaining owner lever:
+      create the Bing Webmaster API key (`BING_API_KEY`) for 10,000 URL/day
+      bulk submission — the 10/day UI quota is the bottleneck until then.
 - [ ] Create the **Medium account** (`@extramoviesreviews`) per the consistency matrix.
 - [ ] Create the **Reddit account** (`u/extramoviesmag`) and spend 15 minutes
       commenting in film subs, no links.
@@ -298,8 +306,11 @@ python3 scripts/seo/gsc_index_audit.py --max 130 --out data/legacy/gsc-index-aud
   property). The UTM links from `profile-kit/consistency-matrix.md` arrive tagged
   `utm_source=profile&utm_medium=parasite&utm_campaign=brand-2026`, so campaign
   traffic separates from organic in the referrer and campaign views.
-- **Bing:** after the blocked-URL cleanup, Bing Webmaster's URL Index shows what
-  IndexNow actually delivered.
+- **Bing:** two pages answer this. URL Submission (submitted list, quota counter)
+  shows manual submissions; IndexNow page shows what the automatic pings
+  delivered ("URLs submitted in last 23 hours"). Sitemaps page's "URLs
+  discovered" should read the full sitemap count once the 2026-10-22 re-crawl
+  finishes (was 17 before).
 
 ---
 
@@ -310,6 +321,7 @@ Append one row per day. No row, no claim.
 | Date | Indexed (of sitemap total) | Search clicks 7d | Sessions 7d | DA/PA | Referring domains | Notes |
 |---|---|---|---|---|---|---|
 | 2026-10-23 | 10 known (pre-week) | 13 / 28d baseline | to read | to read | 321 (Semrush) | baseline before day 1 |
+| 2026-10-23 | — | — | — | — | — | Bing fixed via owner session: Block URLs already empty; real block = stale verdict, live test clean; sitemap re-submitted (17 -> 126 pending); 9 demand-ranked reviews + coyote submitted (list 13 -> 22); IndexNow 158/23h confirmed |
 
 ---
 

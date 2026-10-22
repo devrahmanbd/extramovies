@@ -38,9 +38,12 @@ demand, not for tidiness:
 3. **Everything below is backlog.** Submit it only after the week's release is handled, and treat the rest as
    opportunistic. Do not let a queue of old catalog URLs consume the quota that a new release needs.
 
-Bing matters more than usual here: IndexNow reaches it instantly and its blocked-URL list is the thing
-standing between those pings and visibility. Clearing it in Bing Webmaster is worth more than 100 Google
-submissions for the first three days after release.
+Bing matters more than usual here: IndexNow reaches it instantly. The block that was standing between
+those pings and visibility is **cleared as of 2026-10-23** — the Block URLs list was already empty; the
+real block was a stale index verdict from the pre-rebrand era (live test said "URL can be indexed" all
+along). Fixed by re-submitting the sitemap (Bing had discovered only 17 of 126 URLs) and spending the
+10/day manual quota on the demand-ranked reviews. Bing is now a working same-day channel; the only
+remaining lever is the API key (`BING_API_KEY`) for 10,000 URL/day bulk submission.
 
 ## Request Indexing cannot be automated (tested 2026-10-22)
 
