@@ -21,6 +21,27 @@ through internal links anyway, so they are last on purpose.
 **Daily routine:** Search Console -> paste a URL into the URL Inspection box -> Enter -> wait for the live
 test -> **Request indexing** -> next URL. Stop when the quota message appears; continue the next day.
 
+## Hype window first (2026-10-23): stop treating this as a backlog
+
+A film's search demand peaks in the first 72 hours after release. Grinding this 116-URL list top to bottom
+means the pages you submit get crawled after the moment has passed. The list is therefore re-prioritised for
+demand, not for tidiness:
+
+1. **One URL per publish: the review you just shipped.** Spend the day's first Request Indexing click on the
+   newest review and nothing else. That is the only submission with a demand window attached, and it usually
+   gets crawled within a day or two.
+2. **`python3 scripts/seo/notify_publish.py --url <new review>`** after every publish. It pings IndexNow
+   (Bing, Yandex, Seznam — same-day, no quota) and re-submits the sitemap to Search Console through the API.
+   The sitemap PUT is the sanctioned notification path and is not gated by reCAPTCHA, so this part IS
+   automatable and runs in one command. Verified 2026-10-23: IndexNow HTTP 200, sitemap `lastSubmitted`
+   moved immediately.
+3. **Everything below is backlog.** Submit it only after the week's release is handled, and treat the rest as
+   opportunistic. Do not let a queue of old catalog URLs consume the quota that a new release needs.
+
+Bing matters more than usual here: IndexNow reaches it instantly and its blocked-URL list is the thing
+standing between those pings and visibility. Clearing it in Bing Webmaster is worth more than 100 Google
+submissions for the first three days after release.
+
 ## Request Indexing cannot be automated (tested 2026-10-22)
 
 An attempt was made to drive the URL Inspection UI over the Chrome DevTools Protocol against a signed-in
