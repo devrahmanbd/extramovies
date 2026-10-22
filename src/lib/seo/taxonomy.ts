@@ -14,13 +14,17 @@
  *    current site publishes. Slugging matches WordPress' sanitize_title
  *    (accents folded, apostrophes dropped) because that is what produced
  *    the legacy URLs.
+ *  - A LEGACY SPELLING still resolves: the 2016-2025 site misspelled a
+ *    director's name and 18 inbound links point at that misspelled path,
+ *    so the resolver falls back to the canonical slug (LEGACY_TAXONOMY_
+ *    ALIASES in ../legacy/taxonomy-path). An alias never invents a page.
  *  - The module is pure with respect to the store: it reads published
  *    reviews through the existing loader and never writes anything.
  */
 import type { PublicReview } from "./content";
 import { getLatestReviews } from "./content";
 import type { TaxonomyPath, TaxonomyPathKind } from "../legacy/taxonomy-path";
-import { TAXONOMY_SEGMENTS } from "../legacy/taxonomy-path";
+import { TAXONOMY_SEGMENTS, resolveLegacyTaxonomySlug } from "../legacy/taxonomy-path";
 
 export type { TaxonomyPath };
 
@@ -172,6 +176,31 @@ export function getTaxonomyEntry(kind: TaxonomyKind, slug: string): TaxonomyEntr
 }
 
 /**
+ * The entry that serves a taxonomy slug, LEGACY-ALIAS TOLERANT.
+ *
+ * The exact slug wins first: a page the site publishes today always beats
+ * an alias row, so the alias stays inert until the credit is actually
+ * corrected. Only then does the legacy spelling fall through to the
+ * canonical slug (see LEGACY_TAXONOMY_ALIASES in ../legacy/taxonomy-path
+ * — the 2016-2025 site misspelled "Surender Reddy", and 18 inbound links
+ * point at that misspelled path).
+ *
+ * An alias NEVER invents a page: when neither the exact slug nor the
+ * canonical target is published, this answers null and the route 404s.
+ */
+export function resolveTaxonomyEntry(
+  kind: TaxonomyKind,
+  slug: string,
+): TaxonomyEntry | null {
+  const direct = getTaxonomyEntry(kind, slug);
+  if (direct) return direct;
+  if (!kind || !slug) return null;
+  const canonical = resolveLegacyTaxonomySlug(slug);
+  if (!canonical || canonical === slug) return null;
+  return getTaxonomyEntry(kind, canonical);
+}
+
+/**
  * Every live entry of one axis, ordered by label (stable, readable).
  */
 export function taxonomyEntries(kind: TaxonomyKind): TaxonomyEntry[] {
@@ -183,12 +212,16 @@ export function taxonomyEntries(kind: TaxonomyKind): TaxonomyEntry[] {
 /**
  * True when the site publishes a page for this taxonomy slug.
  *
+ * Alias-tolerant: a legacy spelling that maps to a canonical slug the
+ * site publishes answers true, so the legacy router never 410s a path
+ * that resolves to a live page.
+ *
  * Fail-soft by contract (AGENTS.md §6): any failure answers false, so the
  * legacy router passes the request through exactly as it does today.
  */
 export function hasTaxonomyPage(kind: TaxonomyKind, slug: string): boolean {
   try {
-    return getTaxonomyEntry(kind, slug) !== null;
+    return resolveTaxonomyEntry(kind, slug) !== null;
   } catch {
     return false;
   }
@@ -268,13 +301,17 @@ export interface TaxonomyPageMeta {
 /**
  * Everything a taxonomy route needs. Returns null when the site publishes
  * no such entity — the route then answers 404 (never a padded page).
+ *
+ * Alias-tolerant: a legacy spelling resolves to the canonical entry, and
+ * the meta it returns carries the CANONICAL path — so a page ever served
+ * under a legacy slug still points its canonical link at the live URL.
  */
 export function taxonomyPageMeta(
   kind: TaxonomyKind,
   slug: string,
   siteName: string,
 ): TaxonomyPageMeta | null {
-  const entry = getTaxonomyEntry(kind, slug);
+  const entry = resolveTaxonomyEntry(kind, slug);
   if (!entry) return null;
   return {
     entry,

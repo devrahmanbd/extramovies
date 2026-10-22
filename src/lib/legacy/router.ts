@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { parseTaxonomyPath } from "./taxonomy-path";
-import { hasTaxonomyPage } from "../seo/taxonomy";
+import { hasTaxonomyPage, resolveTaxonomyEntry } from "../seo/taxonomy";
 
 // Legacy piracy-archive URL router (AGENTS.md §5). Serves the per-server
 // redirect map produced by scripts/legacy/archive_recover.py into the
@@ -14,6 +14,14 @@ import { hasTaxonomyPage } from "../seo/taxonomy";
 // link equity behind them was dead. When the site now publishes a page for
 // one of those slugs, the router answers 301 to it — computed here, with no
 // edit to the on-box CSV.
+//
+// Taxonomy alias (spelling tolerance): the legacy archive also indexed
+// slugs the site spells differently today — the 2016-2025 site wrote
+// "Surrender Reddy" where the credit says "Surender Reddy", and 18
+// inbound links point at that misspelled path. The redirect target is
+// resolved through LEGACY_TAXONOMY_ALIASES (./taxonomy-path), so the old
+// spelling 301s to the canonical page instead of 404ing and dropping the
+// links.
 //
 // Live-route exemption (added with the /about fix, 2026-10-21): the old
 // site's `/about` is in the archive's unresolved set, so the router answered
@@ -357,6 +365,12 @@ export function createLegacyRouter(dir?: string) {
   /**
    * Taxonomy redirect target for a legacy path, or null.
    *
+   * Alias-tolerant: a legacy spelling (LEGACY_TAXONOMY_ALIASES in
+   * ./taxonomy-path) resolves to the page that publishes the canonical
+   * slug, and the target is that page's OWN canonical path — so the
+   * misspelled path 301s to `/director/surender-reddy` and never to
+   * itself (no loop).
+   *
    * Fail-soft by contract: a broken store, a missing file or any other
    * failure answers null, so the caller passes the request through exactly
    * as it does today.
@@ -365,8 +379,9 @@ export function createLegacyRouter(dir?: string) {
     try {
       const parsed = parseTaxonomyPath(norm);
       if (!parsed) return null;
-      if (!hasTaxonomyPage(parsed.kind, parsed.slug)) return null;
-      return `/${parsed.kind}/${parsed.slug}`;
+      const entry = resolveTaxonomyEntry(parsed.kind, parsed.slug);
+      if (!entry) return null;
+      return entry.path;
     } catch {
       return null;
     }
@@ -382,6 +397,10 @@ export function createLegacyRouter(dir?: string) {
    * slashed legacy form still 301s to the canonical one. The live page
    * also wins over the legacy corpus' unresolved set — a resurrected slug
    * must not 410.
+   *
+   * The comparison is against the RESOLVED target, so a legacy alias
+   * spelling (which resolves to a different, canonical slug) always
+   * redirects and can never point at itself.
    */
   function isCanonicalTaxonomyPath(pathname: string, target: string): boolean {
     const raw = pathname.split("?")[0]?.split("#")[0] ?? "";

@@ -92,7 +92,10 @@ describe("taxonomy: path shape + slugs", () => {
     const { slugifyTaxonomy } = await import("../src/lib/seo/taxonomy");
     expect(slugifyTaxonomy("Robert De Niro")).toBe("robert-de-niro");
     expect(slugifyTaxonomy("Rakul Preet Singh")).toBe("rakul-preet-singh");
-    expect(slugifyTaxonomy("Surrender Reddy")).toBe("surrender-reddy");
+    // The corrected credit: the film's director is "Surender Reddy" (one r).
+    // The legacy site spelled it "Surrender Reddy" — that old slug is kept
+    // alive by LEGACY_TAXONOMY_ALIASES, not by the slugifier.
+    expect(slugifyTaxonomy("Surender Reddy")).toBe("surender-reddy");
     expect(slugifyTaxonomy("Timothée Chalamet")).toBe("timothee-chalamet");
     expect(slugifyTaxonomy("Science Fiction")).toBe("science-fiction");
   });
@@ -421,6 +424,161 @@ describe("legacy router: taxonomy paths 301 to the live page", () => {
     expect(router.check("/cast/unknown-person/")?.status).toBe(410);
     // With no legacy entry at all it simply passes through.
     expect(router.check("/cast/also-unknown/")).toBeNull();
+  });
+});
+
+describe("taxonomy: legacy slug aliases (spelling tolerance)", () => {
+  it("keeps every legacy spelling in one named map", async () => {
+    const { LEGACY_TAXONOMY_ALIASES, resolveLegacyTaxonomySlug } = await import(
+      "../src/lib/legacy/taxonomy-path"
+    );
+    // The 2016-2025 site wrote "Surrender Reddy"; the credit (TMDB, Rotten
+    // Tomatoes, Wikipedia, Letterboxd, the film itself) says "Surender
+    // Reddy", and 18 inbound links point at the misspelled path.
+    expect(LEGACY_TAXONOMY_ALIASES["surrender-reddy"]).toBe("surender-reddy");
+    // The resolver follows the map and leaves every other slug alone.
+    expect(resolveLegacyTaxonomySlug("surrender-reddy")).toBe("surender-reddy");
+    expect(resolveLegacyTaxonomySlug("surender-reddy")).toBe("surender-reddy");
+    expect(resolveLegacyTaxonomySlug("tim-miller")).toBe("tim-miller");
+    expect(resolveLegacyTaxonomySlug("")).toBe("");
+  });
+
+  it("the alias resolves to the canonical page", async () => {
+    useFixtureStore([
+      row({
+        id: "al1",
+        slug: "alias-film",
+        title: "Alias Film",
+        publishedAt: "2026-04-01T00:00:00.000Z",
+        director: "Surender Reddy",
+      }),
+    ]);
+    const { resolveTaxonomyEntry, getTaxonomyEntry } = await import("../src/lib/seo/taxonomy");
+    // The strict lookup knows nothing about the legacy spelling...
+    expect(getTaxonomyEntry("director", "surrender-reddy")).toBeNull();
+    // ...the alias-tolerant one resolves it to the canonical page.
+    const entry = resolveTaxonomyEntry("director", "surrender-reddy");
+    expect(entry?.label).toBe("Surender Reddy");
+    expect(entry?.slug).toBe("surender-reddy");
+    expect(entry?.path).toBe("/director/surender-reddy");
+    // The canonical slug resolves to itself.
+    expect(resolveTaxonomyEntry("director", "surender-reddy")?.path).toBe(
+      "/director/surender-reddy",
+    );
+  });
+
+  it("a live page wins over the alias row", async () => {
+    // Until the credit is corrected the store still holds the legacy
+    // spelling, and that page must keep its own URL — the alias row stays
+    // inert until the exact slug stops matching.
+    useFixtureStore([
+      row({
+        id: "al2",
+        slug: "alias-film-old",
+        title: "Alias Film Old",
+        publishedAt: "2026-04-01T00:00:00.000Z",
+        director: "Surrender Reddy",
+      }),
+    ]);
+    const { resolveTaxonomyEntry } = await import("../src/lib/seo/taxonomy");
+    const entry = resolveTaxonomyEntry("director", "surrender-reddy");
+    expect(entry?.label).toBe("Surrender Reddy");
+    expect(entry?.path).toBe("/director/surrender-reddy");
+  });
+
+  it("an unknown alias 404s — an alias never invents a page", async () => {
+    useFixtureStore([
+      row({
+        id: "al3",
+        slug: "alias-film-3",
+        title: "Alias Film 3",
+        publishedAt: "2026-04-01T00:00:00.000Z",
+        director: "Someone Else",
+      }),
+    ]);
+    const { resolveTaxonomyEntry, taxonomyPageMeta } = await import("../src/lib/seo/taxonomy");
+    // The alias target is not published -> no page.
+    expect(resolveTaxonomyEntry("director", "surrender-reddy")).toBeNull();
+    expect(taxonomyPageMeta("director", "surrender-reddy", "Extramovies")).toBeNull();
+    // A slug that is not an alias at all -> no page either.
+    expect(taxonomyPageMeta("director", "not-a-real-director", "Extramovies")).toBeNull();
+  });
+});
+
+describe("legacy router: a misspelled taxonomy path 301s to the canonical page", () => {
+  // The 2016-2025 site spelled the director "Surrender Reddy" (two r's);
+  // the credit says "Surender Reddy" (one r). The two paths differ by ONE
+  // character, so the tests name them instead of trusting the eye.
+  const LEGACY_DIRECTOR_PATH = "/director/surrender-reddy";
+  const CANONICAL_DIRECTOR_PATH = "/director/surender-reddy";
+
+  it("the legacy misspelled path 301s to the canonical URL", async () => {
+    useFixtureStore([
+      row({
+        id: "ar1",
+        slug: "alias-router-film",
+        title: "Alias Router Film",
+        publishedAt: "2026-04-01T00:00:00.000Z",
+        director: "Surender Reddy",
+      }),
+    ]);
+    const dir = useLegacyDir("legacy_path,target_path\n", "legacy_url,reason\n");
+    const { createLegacyRouter } = await import("../src/lib/legacy/router");
+    const router = createLegacyRouter(dir);
+
+    // The legacy archive's spelling (two r's) -> 301 to the canonical page.
+    const res = router.check(`${LEGACY_DIRECTOR_PATH}/`);
+    expect(res?.status).toBe(301);
+    expect(res?.headers.get("Location")).toBe(CANONICAL_DIRECTOR_PATH);
+    // The bare legacy spelling redirects too.
+    const bare = router.check(LEGACY_DIRECTOR_PATH);
+    expect(bare?.status).toBe(301);
+    expect(bare?.headers.get("Location")).toBe(CANONICAL_DIRECTOR_PATH);
+  });
+
+  it("the redirect never loops — the canonical URL is served", async () => {
+    useFixtureStore([
+      row({
+        id: "ar2",
+        slug: "alias-router-film-2",
+        title: "Alias Router Film 2",
+        publishedAt: "2026-04-01T00:00:00.000Z",
+        director: "Surender Reddy",
+      }),
+    ]);
+    const dir = useLegacyDir("legacy_path,target_path\n", "legacy_url,reason\n");
+    const { createLegacyRouter } = await import("../src/lib/legacy/router");
+    const router = createLegacyRouter(dir);
+
+    // Following the redirect must land on a path the router passes through
+    // (the route answers it) — no 301 to itself.
+    const location = router.check(`${LEGACY_DIRECTOR_PATH}/`)?.headers.get("Location") ?? "";
+    expect(location).toBe(CANONICAL_DIRECTOR_PATH);
+    expect(router.check(location)).toBeNull();
+    // The canonical URL itself is served by the route, never redirected.
+    expect(router.check(CANONICAL_DIRECTOR_PATH)).toBeNull();
+    // The canonical URL with a trailing slash still normalises to it.
+    expect(router.check(`${CANONICAL_DIRECTOR_PATH}/`)?.headers.get("Location")).toBe(
+      CANONICAL_DIRECTOR_PATH,
+    );
+  });
+
+  it("an alias whose target is not published is not redirected", async () => {
+    useFixtureStore([
+      row({
+        id: "ar3",
+        slug: "alias-router-film-3",
+        title: "Alias Router Film 3",
+        publishedAt: "2026-04-01T00:00:00.000Z",
+        director: "Someone Else",
+      }),
+    ]);
+    const dir = useLegacyDir("legacy_path,target_path\n", "legacy_url,reason\n");
+    const { createLegacyRouter } = await import("../src/lib/legacy/router");
+    const router = createLegacyRouter(dir);
+
+    // No canonical page -> no redirect to a page that does not exist.
+    expect(router.check(`${LEGACY_DIRECTOR_PATH}/`)).toBeNull();
   });
 });
 
