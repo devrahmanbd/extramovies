@@ -21,6 +21,22 @@ through internal links anyway, so they are last on purpose.
 **Daily routine:** Search Console -> paste a URL into the URL Inspection box -> Enter -> wait for the live
 test -> **Request indexing** -> next URL. Stop when the quota message appears; continue the next day.
 
+## Request Indexing cannot be automated (tested 2026-10-22)
+
+An attempt was made to drive the URL Inspection UI over the Chrome DevTools Protocol against a signed-in
+Owner session. The clicks land, and Google refuses the request:
+
+- `REQUEST INDEXING` fires `recaptcha/api2/clr`, then the `Fj3Owf` validation RPC, which answers `null` with
+  error code `[7]`.
+- The UI then shows "Oops! Something went wrong. We had a problem submitting your indexing request."
+- Identical for six URLs across two properties, including the already-indexed homepage.
+- The click path itself is sound: trusted CDP mouse events reach the button (verified with capture-phase
+  listeners), and the same mechanism successfully triggers `TEST LIVE URL` on the same page. `navigator.webdriver`
+  is `false` and the user agent is a normal desktop Chrome string.
+
+Conclusion: this is Google's anti-abuse control on a human-only action, not a UI-automation gap. The remaining
+116 submissions are manual. Do not spend more time on automation, and do not attempt to defeat the captcha.
+
 ## Review pages (39)
 
 1. https://extramovies.org/reviews/a-nice-indian-boy-2025-review  <- first ten
