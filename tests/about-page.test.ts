@@ -260,7 +260,7 @@ describe("homepage: the brand block is there and the h1 did not move", () => {
   });
 });
 
-describe("entity signal: one Organization node, brand name, empty sameAs", () => {
+describe("entity signal: one Organization node, brand name, real sameAs", () => {
   it("the Organization node uses the brand name, not the domain", async () => {
     const brand = await getSiteBrand((k) => getSetting(getDb({}), k));
     const node = organizationJsonLd(brand);
@@ -270,12 +270,17 @@ describe("entity signal: one Organization node, brand name, empty sameAs", () =>
     expect(node["description"]).toBeTruthy();
   });
 
-  it("sameAs is empty by default", () => {
-    expect(BRAND_SAME_AS).toEqual([]);
+  it("sameAs lists only profiles that exist and are ours", () => {
+    // The Letterboxd profile exists and belongs to this brand; a sameAs that
+    // points at a missing page would be a false claim to a crawler, so every
+    // entry must be a live https profile URL (see docs/parasite/ for the kit).
+    expect(BRAND_SAME_AS).toContain("https://letterboxd.com/extramovies/");
+    for (const url of BRAND_SAME_AS) {
+      expect(url).toMatch(/^https:\/\/[a-z0-9.-]+\//);
+    }
     const brand = { name: "Extramovies", origin: "https://extramovies.org", logo: null };
     const node = organizationJsonLd(brand as never);
-    const sameAs = node["sameAs"];
-    expect(sameAs === undefined || (Array.isArray(sameAs) && sameAs.length === 0)).toBe(true);
+    expect(node["sameAs"]).toEqual(BRAND_SAME_AS);
   });
 
   it("the About page emits an AboutPage node and exactly one Organization node", async () => {

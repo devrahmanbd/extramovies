@@ -61,19 +61,19 @@ export function websiteJsonLd(brand: Brand): JsonLd {
 /**
  * sameAs profiles for the Organization node.
  *
- * EMPTY ON PURPOSE: this brand has no Letterboxd, YouTube, Medium, Reddit or
- * X profile yet, and a sameAs pointing at a page that does not exist is a
- * false claim to a crawler.
+ * One array, one place, every page that emits the Organization node. A URL
+ * goes here ONLY when the profile exists and is ours: a sameAs pointing at a
+ * page that does not exist is a false claim to a crawler. The link has to be
+ * reciprocal for the claim to hold, so each profile's website field carries
+ * https://extramovies.org?utm_source=profile&utm_medium=parasite&utm_campaign=brand-2026
+ * (the fixed values live in docs/parasite/profile-kit/consistency-matrix.md).
  *
- * When the owner publishes those profiles (the parasite drafts live under
- * docs/parasite/), add the URLs here, one per line. One array, one place,
- * every page that emits the Organization node:
+ * Add new profiles one per line when the owner creates them:
  *
- *   export const BRAND_SAME_AS: string[] = [
- *     "https://letterboxd.com/<user>",
- *   ];
+ *   "https://www.youtube.com/@<handle>",
+ *   "https://medium.com/@<handle>",
  */
-export const BRAND_SAME_AS: string[] = [];
+export const BRAND_SAME_AS: string[] = ["https://letterboxd.com/extramovies/"];
 
 /** The site's ONE Organization node (the entity behind the brand). */
 export function organizationJsonLd(brand: Brand): JsonLd {
