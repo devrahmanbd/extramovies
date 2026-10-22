@@ -6,9 +6,11 @@ import { experimental_AstroContainer } from "astro/container";
 import NewThisWeek from "../src/components/discover/NewThisWeek.astro";
 import { getLatestReviews } from "../src/lib/seo/content";
 import {
+  MAX_MODULE_ROWS,
   WEEK_WINDOW_DAYS,
   daysSince,
   freshnessLabel,
+  moduleRows,
   publishDateLabel,
   reviewsPublishedWithin,
   weeklyCutoff,
@@ -29,6 +31,17 @@ const NOW = new Date("2026-10-21T12:00:00.000Z");
 async function render(props: Record<string, unknown>): Promise<string> {
   const container = await experimental_AstroContainer.create();
   return container.renderToString(NewThisWeek as never, { props });
+}
+
+/** The rows the rendered module shows (one <li> per review). */
+function renderedRows(html: string): number {
+  return (html.match(/class="d-week-row"/g) ?? []).length;
+}
+
+/** The count badge next to the module heading. */
+function badgeText(html: string): string {
+  const match = html.match(/class="d-shelf-count tnum"[^>]*>([^<]*)</);
+  return match ? match[1].trim() : "";
 }
 
 /** A published review row as the store holds it. */
@@ -128,6 +141,41 @@ describe("weekly window (pure)", () => {
   });
 });
 
+describe("module rows (the shelf cap)", () => {
+  const rows = (n: number) =>
+    Array.from({ length: n }, (_, i) =>
+      review({ slug: `film-${i}`, publishedAt: new Date(NOW.getTime() - i * 3_600_000).toISOString() }),
+    );
+
+  it("caps the module at the shelf cap", () => {
+    expect(MAX_MODULE_ROWS).toBe(5);
+    expect(moduleRows(rows(23))).toHaveLength(MAX_MODULE_ROWS);
+    expect(moduleRows(rows(5))).toHaveLength(MAX_MODULE_ROWS);
+  });
+
+  it("keeps every row when the week brought fewer than the cap", () => {
+    expect(moduleRows(rows(3))).toHaveLength(3);
+    expect(moduleRows(rows(0))).toHaveLength(0);
+    expect(moduleRows(undefined as never)).toHaveLength(0);
+  });
+
+  it("keeps the newest rows, in order", () => {
+    expect(moduleRows(rows(8)).map((r) => r.slug)).toEqual([
+      "film-0",
+      "film-1",
+      "film-2",
+      "film-3",
+      "film-4",
+    ]);
+  });
+
+  it("lists a repeated slug once", () => {
+    const once = review({ slug: "masaan-2015-review" });
+    const twice = review({ slug: "masaan-2015-review" });
+    expect(moduleRows([once, twice]).map((r) => r.slug)).toEqual(["masaan-2015-review"]);
+  });
+});
+
 describe("weekly window over the store", () => {
   let dir = "";
   let dbFile = "";
@@ -192,7 +240,7 @@ describe("weekly window over the store", () => {
     expect(inWindow.map((r) => r.slug)).not.toContain("future-film");
   });
 
-  it("links every review the week brought from the homepage module", async () => {
+  it("keeps the whole week in the archive and shows only the newest on the homepage", async () => {
     const rows = Array.from({ length: 20 }, (_, i) =>
       storeRow({
         id: `batch-${i}`,
@@ -207,17 +255,29 @@ describe("weekly window over the store", () => {
     const inWindow = reviewsPublishedWithin(getLatestReviews(1000), NOW);
     expect(inWindow).toHaveLength(20);
 
+    // The archive keeps the week; the homepage shelf shows the newest few.
     const html = await render({ reviews: inWindow, now: NOW });
-    for (const r of inWindow) {
+    expect(renderedRows(html)).toBe(MAX_MODULE_ROWS);
+    for (const r of inWindow.slice(0, MAX_MODULE_ROWS)) {
       expect(html).toContain(`href="/reviews/${r.slug}"`);
     }
-    // Every new review is one click from the homepage, not only the archive.
-    const hrefs = html.match(/href="\/reviews\/[^"]+"/g) ?? [];
-    expect(hrefs).toHaveLength(20);
+    // The rows past the cap stay on the site, not on the homepage.
+    for (const r of inWindow.slice(MAX_MODULE_ROWS)) {
+      expect(html).not.toContain(`href="/reviews/${r.slug}"`);
+    }
   });
 });
 
 describe("new this week module (rendered)", () => {
+  const recent = (n: number) =>
+    Array.from({ length: n }, (_, i) =>
+      review({
+        slug: `film-${i}`,
+        movieTitle: `Film ${i}`,
+        publishedAt: new Date(NOW.getTime() - i * 3_600_000).toISOString(),
+      }),
+    );
+
   it("renders title, year, score, verdict and a freshness label", async () => {
     const html = await render({ reviews: [review()], now: NOW });
 
@@ -258,5 +318,54 @@ describe("new this week module (rendered)", () => {
     expect(html).not.toContain("0.0");
     expect(html).not.toContain("/10");
     expect(html).toContain("Not scored yet");
+  });
+
+  it("shows at most five rows when the week brought more", async () => {
+    const html = await render({ reviews: recent(23), now: NOW });
+
+    expect(renderedRows(html)).toBe(MAX_MODULE_ROWS);
+    expect(renderedRows(html)).toBeLessThanOrEqual(5);
+    // The five shown are the newest five.
+    expect(html).toContain('href="/reviews/film-0"');
+    expect(html).toContain('href="/reviews/film-4"');
+    expect(html).not.toContain('href="/reviews/film-5"');
+    // Nothing hints at a longer list: no scroll container, no "more" clutter.
+    expect(html).not.toMatch(/and \d+ more/i);
+    expect(html).not.toContain("overflow");
+  });
+
+  it("shows every review when the week brought fewer than five", async () => {
+    const html = await render({ reviews: recent(3), now: NOW });
+
+    expect(renderedRows(html)).toBe(3);
+    expect(html).toContain('href="/reviews/film-0"');
+    expect(html).toContain('href="/reviews/film-1"');
+    expect(html).toContain('href="/reviews/film-2"');
+  });
+
+  it("orders the rows newest first", async () => {
+    const html = await render({ reviews: recent(4), now: NOW });
+
+    const order = [...html.matchAll(/href="\/reviews\/(film-\d+)"/g)].map((m) => m[1]);
+    expect(order).toEqual(["film-0", "film-1", "film-2", "film-3"]);
+  });
+
+  it("counts the rows it shows in the badge", async () => {
+    const many = await render({ reviews: recent(23), now: NOW });
+    expect(badgeText(many)).toBe("5 reviews");
+    expect(badgeText(many)).not.toBe("23 reviews");
+
+    const few = await render({ reviews: recent(3), now: NOW });
+    expect(badgeText(few)).toBe("3 reviews");
+
+    const one = await render({ reviews: [review()], now: NOW });
+    expect(badgeText(one)).toBe("1 review");
+  });
+
+  it("keeps the See all link to the archive", async () => {
+    const html = await render({ reviews: recent(23), now: NOW });
+
+    expect(html).toContain('href="/reviews"');
+    expect(html).toContain("See all");
   });
 });

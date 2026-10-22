@@ -9,6 +9,11 @@
  * (the page passes them in), so nothing here can be a draft or a row the
  * site does not publish.
  *
+ * The module is a SHELF, not a list: it shows at most MAX_MODULE_ROWS
+ * (5) reviews — the newest ones — and the badge counts exactly the rows
+ * it shows. The rest of the week lives in the archive, one quiet
+ * "See all →" away.
+ *
  * Rules:
  *  - Renders NOTHING when the week brought no published review (no empty
  *    heading, no empty list).
@@ -18,7 +23,7 @@
  *  - Zero client JS: real anchors, server-rendered, keyboard reachable.
  */
 import type { PublicReview } from "../../lib/seo/content";
-import { freshnessLabel, publishDateLabel } from "../../lib/seo/weekly";
+import { freshnessLabel, moduleRows, publishDateLabel } from "../../lib/seo/weekly";
 
 interface Props {
   /** Reviews published inside the weekly window, newest first. */
@@ -29,14 +34,12 @@ interface Props {
 
 const { reviews, now = new Date() } = Astro.props;
 
-/** One row per slug — the block never shows the same review twice. */
-const rows = [
-  ...new Map(
-    (Array.isArray(reviews) ? reviews : [])
-      .filter((r) => r && typeof r.slug === "string" && r.slug.trim())
-      .map((r) => [r.slug, r]),
-  ).values(),
-];
+/**
+ * The shelf rows: one per slug, newest first, capped at MAX_MODULE_ROWS.
+ * The count badge below counts these same rows, so the badge can never
+ * claim more reviews than the shelf shows.
+ */
+const rows = moduleRows(reviews);
 
 const countText = (n: number, one: string, many: string) =>
   n === 1 ? `1 ${one}` : `${n} ${many}`;
@@ -45,13 +48,13 @@ const band = (rating: number) => (rating >= 7 ? "high" : rating >= 5 ? "mid" : "
 ---
 {rows.length > 0 ? (
   <section class="band--alt section--sm d-guide-section" aria-labelledby="d-new-this-week-heading">
-    <div class="d-shelf-head">
+    <div class="d-shelf-head d-week-head">
       <h2 id="d-new-this-week-heading" class="d-shelf-label">New movie reviews this week</h2>
       <span class="d-shelf-rule" aria-hidden="true"></span>
       <span class="d-shelf-count tnum">{countText(rows.length, "review", "reviews")}</span>
       <a class="d-shelf-see" href="/reviews">See all →</a>
     </div>
-    <ol class="index-list d-guide-top d-week-list">
+    <ol class="index-list d-week-list">
       {rows.map((r) => {
         const fresh = freshnessLabel(r.publishedAt, now);
         const dateLabel = publishDateLabel(r.publishedAt);
@@ -63,23 +66,21 @@ const band = (rating: number) => (rating >= 7 ? "high" : rating >= 5 ? "mid" : "
                 class="index-thumb"
                 src={r.posterUrl}
                 alt={`Poster for ${r.movieTitle}`}
-                width="88"
-                height="132"
+                width="342"
+                height="513"
                 loading="lazy"
                 decoding="async"
               />
             ) : null}
-            <div class="index-main">
-              <h3 class="index-title">
-                <a href={`/reviews/${r.slug}`}>{r.movieTitle}{r.year ? ` (${r.year})` : ""}</a>
-              </h3>
-              <p class="index-meta tnum">
-                <span>{fresh}</span>
-                {dateLabel ? <span aria-hidden="true"> · </span> : null}
-                {dateLabel ? <time datetime={r.publishedAt}>{dateLabel}</time> : null}
-              </p>
-              {r.verdict ? <p class="index-verdict">{r.verdict}</p> : null}
-            </div>
+            <h3 class="index-title">
+              <a href={`/reviews/${r.slug}`}>{r.movieTitle}{r.year ? ` (${r.year})` : ""}</a>
+            </h3>
+            <p class="index-meta tnum">
+              <span>{fresh}</span>
+              {dateLabel ? <span aria-hidden="true"> · </span> : null}
+              {dateLabel ? <time datetime={r.publishedAt}>{dateLabel}</time> : null}
+            </p>
+            {r.verdict ? <p class="index-verdict">{r.verdict}</p> : null}
             {scored ? (
               <span class="rating-mark tnum" data-band={band(r.rating)}>
                 <span class="rating-value">{r.rating.toFixed(1)}</span>

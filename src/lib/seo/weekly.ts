@@ -24,6 +24,17 @@ import type { PublicReview } from "./content";
 /** The window length in days (weekly refresh intent). */
 export const WEEK_WINDOW_DAYS = 7;
 
+/**
+ * The homepage module's shelf cap — how many rows the "new movie reviews
+ * this week" module shows at most. One number to change.
+ *
+ * The cap is the SHELF's shape, not the week's shape: a busy week shows
+ * its newest few reviews on the homepage, and /reviews keeps the full
+ * archive. The badge in the module counts the rows it shows, so the two
+ * can never disagree.
+ */
+export const MAX_MODULE_ROWS = 5;
+
 /** Milliseconds in one day. */
 const DAY_MS = 86_400_000;
 
@@ -77,6 +88,34 @@ export function reviewsPublishedWithin(
     if (seen.has(review.slug)) continue;
     seen.add(review.slug);
     out.push(review);
+  }
+  return out;
+}
+
+/**
+ * The rows the homepage module shows: one row per slug, newest first,
+ * capped at MAX_MODULE_ROWS.
+ *
+ * The input order is trusted (the page hands over the window, already
+ * sorted newest first), so the FIRST occurrence of a slug wins the slot.
+ * The cap is applied last: a busy week shows its newest reviews and the
+ * rest stays on /reviews. Never throws.
+ */
+export function moduleRows(
+  reviews: PublicReview[],
+  max: number = MAX_MODULE_ROWS,
+): PublicReview[] {
+  if (!Array.isArray(reviews) || reviews.length === 0) return [];
+  const limit =
+    Number.isFinite(max) && max > 0 ? Math.floor(max) : MAX_MODULE_ROWS;
+  const seen = new Set<string>();
+  const out: PublicReview[] = [];
+  for (const review of reviews) {
+    if (!review || typeof review.slug !== "string" || !review.slug.trim()) continue;
+    if (seen.has(review.slug)) continue;
+    seen.add(review.slug);
+    out.push(review);
+    if (out.length >= limit) break;
   }
   return out;
 }

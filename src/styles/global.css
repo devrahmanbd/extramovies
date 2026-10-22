@@ -5644,3 +5644,126 @@ a.d-shelf-see:hover { color: var(--color-accent); }
   background: var(--color-accent);
   margin-bottom: var(--space-4);
 }
+
+/* === DISCOVERY "new this week" module — the five-item shelf (2026-10-22, append-only) ===
+ * The weekly module is a SHELF, not a wall of rows: at most five reviews
+ * (MAX_MODULE_ROWS, src/lib/seo/weekly.ts), one per slug, newest first.
+ * Wide screens read as a five-across poster shelf — the same rhythm as the
+ * "Reviewed by us" grid — with the title as the link, our score beside it,
+ * the freshness line under it and the verdict clipped to two lines. Narrow
+ * screens keep the compact row (title, freshness, verdict, score) so the
+ * block stays short instead of turning into a wall of rows. Existing
+ * tokens only (--space-*, --text-*, --color-*, --radius-*). Zero JS.
+ */
+
+/* Card anatomy — shared by both layouts. */
+.d-week-row > .index-title,
+.d-week-row > .index-meta,
+.d-week-row > .index-verdict {
+  margin: 0;
+}
+
+.d-week-row > .rating-mark {
+  align-self: start;
+  margin-top: var(--space-2);
+}
+
+.d-week-row .index-verdict {
+  font-size: var(--text-sm);
+  line-height: var(--leading-body);
+}
+
+.d-week-row .rating-value {
+  font-size: var(--text-lg);
+}
+
+/* Wide: the five-across poster shelf. */
+@media (min-width: 48rem) {
+  .d-week-list {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: var(--space-4);
+    border-top: 0;
+  }
+
+  .d-week-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "thumb   thumb"
+      "title   score"
+      "meta    meta"
+      "verdict verdict";
+    gap: var(--space-1) var(--space-3);
+    align-items: start;
+    padding: 0;
+    border-bottom: 0;
+  }
+
+  .d-week-row > .index-thumb {
+    grid-area: thumb;
+    width: 100%;
+  }
+
+  .d-week-row > .index-title { grid-area: title; }
+  .d-week-row > .index-meta { grid-area: meta; }
+  .d-week-row > .index-verdict { grid-area: verdict; }
+
+  .d-week-row > .rating-mark {
+    grid-area: score;
+    justify-self: end;
+    margin-top: var(--space-3);
+  }
+
+  .d-week-row .index-title {
+    font-size: var(--text-base);
+    line-height: 1.15;
+  }
+}
+
+/* Narrow: the compact row, tightened so five of them stay short. */
+@media (max-width: 47.99rem) {
+  .d-week-row {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-areas:
+      "thumb   title    score"
+      "thumb   meta     meta"
+      "thumb   verdict  verdict";
+    gap: var(--space-1) var(--space-3);
+    align-items: start;
+    padding: var(--space-4) 0;
+  }
+
+  .d-week-row > .index-thumb {
+    grid-area: thumb;
+    align-self: start;
+  }
+
+  .d-week-row > .index-title {
+    grid-area: title;
+    font-size: var(--text-lg);
+  }
+
+  .d-week-row > .index-meta { grid-area: meta; }
+  .d-week-row > .index-verdict { grid-area: verdict; }
+
+  .d-week-row > .rating-mark {
+    grid-area: score;
+    justify-self: end;
+  }
+}
+
+/* The module label is the longest on the page ("New movie reviews this week"),
+   so on a narrow screen it takes its own line and the count + See all sit
+   under it. Without this the label and the count collide. */
+@media (max-width: 30rem) {
+  .d-week-head {
+    flex-wrap: wrap;
+    row-gap: var(--space-2);
+  }
+
+  .d-week-head .d-shelf-label {
+    flex: 1 0 100%;
+    white-space: normal;
+  }
+}
