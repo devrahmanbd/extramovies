@@ -37,6 +37,11 @@ Owner session. The clicks land, and Google refuses the request:
 Conclusion: this is Google's anti-abuse control on a human-only action, not a UI-automation gap. The remaining
 116 submissions are manual. Do not spend more time on automation, and do not attempt to defeat the captcha.
 
+Retried on 2026-10-23 against an untouched review URL: same reCAPTCHA error, so it is not a one-day Google
+outage. The automation ran on a copy of the signed-in profile (Chrome 156 refuses a debugging port on the
+default profile directory), which cannot be ruled out as a contributing factor; a click from the real browser
+does not share that condition.
+
 ## Review pages (39)
 
 1. https://extramovies.org/reviews/a-nice-indian-boy-2025-review  <- first ten
