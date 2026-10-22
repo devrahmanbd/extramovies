@@ -9,6 +9,7 @@
 import type { PublicReview } from "../../lib/seo/content";
 import { formatRuntime } from "../../lib/seo/content";
 import RatingMark from "./RatingMark.astro";
+import { tmdbSrcSet, TMDB_CARD_SIZES, TMDB_POSTER_SIZES } from "../../lib/seo/images";
 
 interface Props {
   review: PublicReview;
@@ -55,6 +56,14 @@ const thumbAlt = review.posterUrl
   ? `Poster for ${review.movieTitle}`
   : `Still from ${review.movieTitle}`;
 const titleClass = isLong ? "is-long" : undefined;
+/**
+ * Responsive artwork candidates. Small thumbs stop at w500 (their slots are
+ * 56–112px); large card art keeps w780 on top of the w185/w342/w500 ladder
+ * because a 7/12 slot is ~700px wide at 1200px and 2x of that on DPR2.
+ * Non-TMDB art yields null, which keeps the plain src.
+ */
+const thumbSrcSet = tmdbSrcSet(thumbArt, TMDB_POSTER_SIZES);
+const largeSrcSet = tmdbSrcSet(thumbArt, TMDB_CARD_SIZES);
 ---
 {v === "mosaic-lead" || v === "archive-lead" ? (
   <li class={v === "archive-lead" ? "glam-item glam-arch-lead" : "glam-item glam-lead"}>
@@ -95,6 +104,8 @@ const titleClass = isLong ? "is-long" : undefined;
         <a class="glam-art-link glam-diptych-art" href={url} tabindex="-1" aria-hidden="true">
           <img
             src={thumbArt}
+            srcset={largeSrcSet ?? undefined}
+            sizes={largeSrcSet ? "(min-width: 48rem) 58vw, 92vw" : undefined}
             alt=""
             width="600"
             height="900"
@@ -127,6 +138,8 @@ const titleClass = isLong ? "is-long" : undefined;
         <a class="glam-art-link" href={url} tabindex="-1" aria-hidden="true">
           <img
             src={thumbArt}
+            srcset={largeSrcSet ?? undefined}
+            sizes={largeSrcSet ? "(min-width: 48rem) 50vw, 92vw" : undefined}
             alt=""
             width="600"
             height="900"
@@ -173,6 +186,8 @@ const titleClass = isLong ? "is-long" : undefined;
         <img
           class="glam-shelf-thumb"
           src={thumbArt}
+          srcset={thumbSrcSet ?? undefined}
+          sizes={thumbSrcSet ? "64px" : undefined}
           alt=""
           width="120"
           height="180"
@@ -199,6 +214,8 @@ const titleClass = isLong ? "is-long" : undefined;
         <a class="glam-art-link" href={url} tabindex="-1" aria-hidden="true">
           <img
             src={thumbArt}
+            srcset={largeSrcSet ?? undefined}
+            sizes={largeSrcSet ? "(min-width: 48rem) 58vw, 92vw" : undefined}
             alt=""
             width="600"
             height="900"
@@ -230,6 +247,8 @@ const titleClass = isLong ? "is-long" : undefined;
         <img
           class="glam-result-thumb"
           src={thumbArt}
+          srcset={thumbSrcSet ?? undefined}
+          sizes={thumbSrcSet ? "(min-width: 48rem) 112px, 56px" : undefined}
           alt=""
           width="88"
           height="132"

@@ -22,6 +22,7 @@ import { reviewsPublishedWithin } from "../lib/seo/weekly";
 import DiscoverHome from "../components/discover/DiscoverHome.astro";
 import { displayAuthor } from "../lib/site-author";
 import { heroImagePreload, heroImageSize, selectHeroFirstUrl } from "../lib/seo/hero-image";
+import { tmdbSrcSet, TMDB_BACKDROP_SIZES } from "../lib/seo/images";
 import {
   currentTheme,
   discoverBy,
@@ -62,14 +63,34 @@ const thisWeek = isDiscovery
   ? reviewsPublishedWithin(getLatestReviews(1000), now)
   : [];
 // Discovery branch only — publication variables below stay untouched.
-const trending = isDiscovery ? await getTrending().catch(() => []) : [];
-const popular = isDiscovery ? await getPopular().catch(() => []) : [];
-const nowPlaying = isDiscovery ? await getNowPlaying().catch(() => []) : [];
-const upcoming = isDiscovery ? await getUpcoming().catch(() => []) : [];
-const freeTiles = isDiscovery ? await discoverBy("free", "US").catch(() => []) : [];
-const streamTiles = isDiscovery ? await discoverBy("stream").catch(() => []) : [];
-const rentTiles = isDiscovery ? await discoverBy("rent").catch(() => []) : [];
-const tmdbGenres = isDiscovery ? await listTmdbGenres().catch(() => []) : [];
+/**
+ * Discovery feeds. These eight TMDB calls are independent, so they are
+ * awaited TOGETHER: sequentially, a cold in-memory cache cost eight round
+ * trips before the first byte of HTML. Order inside the tuple is fixed (it
+ * feeds the sections below), and every call keeps its own fail-soft — a
+ * failing endpoint still yields an empty list for its section and never
+ * rejects the batch.
+ */
+const discoveryFeeds = isDiscovery
+  ? await Promise.all([
+      getTrending().catch(() => []),
+      getPopular().catch(() => []),
+      getNowPlaying().catch(() => []),
+      getUpcoming().catch(() => []),
+      discoverBy("free", "US").catch(() => []),
+      discoverBy("stream").catch(() => []),
+      discoverBy("rent").catch(() => []),
+      listTmdbGenres().catch(() => []),
+    ])
+  : null;
+const trending = discoveryFeeds?.[0] ?? [];
+const popular = discoveryFeeds?.[1] ?? [];
+const nowPlaying = discoveryFeeds?.[2] ?? [];
+const upcoming = discoveryFeeds?.[3] ?? [];
+const freeTiles = discoveryFeeds?.[4] ?? [];
+const streamTiles = discoveryFeeds?.[5] ?? [];
+const rentTiles = discoveryFeeds?.[6] ?? [];
+const tmdbGenres = discoveryFeeds?.[7] ?? [];
 const discoveryTop = isDiscovery ? getTopRated(5) : [];
 const discoveryFeatured = isDiscovery
   ? (getTopRated(1)[0] ?? getFeaturedReview())
@@ -87,6 +108,12 @@ const discoveryFeatured = isDiscovery
  */
 const discoveryHeroFirstUrl = selectHeroFirstUrl([...trending, ...popular]);
 const coverSize = heroImageSize(featured?.backdropUrl ?? null, "backdrop");
+/**
+ * Publication cover srcset (full-bleed 16:9 artwork): the browser picks
+ * w780 or w1280 for the real slot instead of always fetching w1280.
+ * Non-TMDB artwork yields null, which keeps the plain src.
+ */
+const coverSrcSet = tmdbSrcSet(featured?.backdropUrl ?? null, TMDB_BACKDROP_SIZES);
 const coverPreload = isDiscovery
   ? heroImagePreload(discoveryHeroFirstUrl, "backdrop")
   : heroImagePreload(featured?.backdropUrl ?? null, "backdrop");
@@ -162,6 +189,8 @@ const publishedDate = featured
       <img
         class="glam-cover-bg"
         src={featured.backdropUrl}
+        srcset={coverSrcSet ?? undefined}
+        sizes={coverSrcSet ? "100vw" : undefined}
         alt={`Still from ${featured.movieTitle}`}
         width={coverSize?.width}
         height={coverSize?.height}

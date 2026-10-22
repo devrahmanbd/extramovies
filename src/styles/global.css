@@ -5767,3 +5767,40 @@ a.d-shelf-see:hover { color: var(--color-accent); }
     white-space: normal;
   }
 }
+
+/* === CWV 2026-10-22 — hero dot tap targets (append-only) ===
+ * Lighthouse `target-size` failed the ten hero dots: 12px visual + 1px border
+ * = a 14x14 target against a 24x24 minimum. The link box becomes 24x24 (the
+ * clickable rect Lighthouse measures) while the dot itself is drawn by
+ * ::before at its original 14x14, so the visual size and colours are
+ * unchanged. The 8px flex gap is dropped because two 24px boxes plus a gap
+ * would read as a much wider dot row; at 24px boxes the rendered gap between
+ * dots is 12px, the tightest a compliant row allows.
+ */
+.d-hero-dots { gap: 0; }
+.d-hero-dots a,
+.d-hero-dots a:hover,
+.d-hero-dots a[aria-current="true"] {
+  display: inline-grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+.d-hero-dots a::before {
+  content: "";
+  display: block;
+  box-sizing: border-box;
+  width: 14px;
+  height: 14px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--color-line-strong);
+}
+.d-hero-dots a:hover::before,
+.d-hero-dots a[aria-current="true"]::before {
+  border-color: var(--color-accent);
+  background: var(--color-accent);
+}

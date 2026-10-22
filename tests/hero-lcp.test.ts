@@ -183,7 +183,10 @@ describe('hero image preload (CWV task 2)', () => {
     expect(heroImagePreload('   ', 'backdrop')).toBeNull();
   });
 
-  it('the preload link carries exactly rel/as/href/width/height/fetchpriority', () => {
+  it('the preload link carries exactly rel/as/href/width/height/fetchpriority + the responsive pair', () => {
+    // CWV task 4: TMDB artwork adds imagesrcset/imagesizes so the head
+    // preloads the candidate the hero will paint (w780 on a DPR2 phone),
+    // while href stays w1280 for browsers without imagesrcset support.
     expect(
       heroPreloadLinkAttrs({
         href: 'https://image.tmdb.org/t/p/w1280/eZ239CUp1d6OryZEBPnO2n87gMG.jpg',
@@ -197,6 +200,10 @@ describe('hero image preload (CWV task 2)', () => {
       width: 1280,
       height: 720,
       fetchpriority: 'high',
+      imagesrcset:
+        'https://image.tmdb.org/t/p/w780/eZ239CUp1d6OryZEBPnO2n87gMG.jpg 780w, ' +
+        'https://image.tmdb.org/t/p/w1280/eZ239CUp1d6OryZEBPnO2n87gMG.jpg 1280w',
+      imagesizes: '100vw',
     });
   });
 
@@ -211,7 +218,20 @@ describe('hero image preload (CWV task 2)', () => {
       width: undefined,
       height: undefined,
       fetchpriority: 'high',
+      // The source variant is unmappable but the FILE is TMDB art, so the
+      // responsive candidates are still addressable at known widths.
+      imagesrcset:
+        'https://image.tmdb.org/t/p/w780/eZ239CUp1d6OryZEBPnO2n87gMG.jpg 780w, ' +
+        'https://image.tmdb.org/t/p/w1280/eZ239CUp1d6OryZEBPnO2n87gMG.jpg 1280w',
+      imagesizes: '100vw',
     });
+  });
+
+  it('a non-TMDB hero (local upload) gets no responsive preload pair', () => {
+    const attrs = heroPreloadLinkAttrs({ href: '/uploads/cover-backdrop.jpg' });
+    expect(attrs?.imagesrcset).toBeUndefined();
+    expect(attrs?.imagesizes).toBeUndefined();
+    expect(attrs?.href).toBe('/uploads/cover-backdrop.jpg');
   });
 
   it('no preload descriptor: no link attributes at all', () => {
@@ -331,6 +351,10 @@ describe('hero slide selection: the shared derivation (CWV fix round 1)', () => 
       width: 1280,
       height: 720,
       fetchpriority: 'high',
+      imagesrcset:
+        'https://image.tmdb.org/t/p/w780/9PFonBhy4cQy7Jz20NpMygczOkv.jpg 780w, ' +
+        'https://image.tmdb.org/t/p/w1280/9PFonBhy4cQy7Jz20NpMygczOkv.jpg 1280w',
+      imagesizes: '100vw',
     });
   });
 });

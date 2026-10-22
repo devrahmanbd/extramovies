@@ -24,6 +24,15 @@
  */
 import type { PublicReview } from "../../lib/seo/content";
 import { freshnessLabel, moduleRows, publishDateLabel } from "../../lib/seo/weekly";
+import { tmdbSrcSet, TMDB_POSTER_SIZES } from "../../lib/seo/images";
+
+/**
+ * Shelf artwork slot (CSS owns the box): the five-across shelf at >=64rem
+ * gives each card roughly 210px, the 48rem shelf roughly 140px, and the
+ * narrow row falls back to the 56px `.index-thumb` default. Sizes mirror
+ * those boxes so the browser never downloads a w780 poster for a 56px slot.
+ */
+const WEEK_THUMB_SIZES = "(min-width: 64rem) 210px, (min-width: 48rem) 140px, 56px";
 
 interface Props {
   /** Reviews published inside the weekly window, newest first. */
@@ -59,12 +68,16 @@ const band = (rating: number) => (rating >= 7 ? "high" : rating >= 5 ? "mid" : "
         const fresh = freshnessLabel(r.publishedAt, now);
         const dateLabel = publishDateLabel(r.publishedAt);
         const scored = typeof r.rating === "number" && r.rating > 0;
+        /* TMDB poster -> responsive candidates; non-TMDB keeps the plain src. */
+        const thumbSrcSet = tmdbSrcSet(r.posterUrl, TMDB_POSTER_SIZES);
         return (
           <li class="d-week-row">
             {r.posterUrl ? (
               <img
                 class="index-thumb"
                 src={r.posterUrl}
+                srcset={thumbSrcSet ?? undefined}
+                sizes={thumbSrcSet ? WEEK_THUMB_SIZES : undefined}
                 alt={`Poster for ${r.movieTitle}`}
                 width="342"
                 height="513"

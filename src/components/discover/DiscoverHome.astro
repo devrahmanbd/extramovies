@@ -18,6 +18,7 @@ import { COLLECTIONS, buildListHref } from "../../lib/tmdb/discover";
 import type { Genre } from "../../lib/tmdb/types";
 import type { PublicReview } from "../../lib/seo/content";
 import { selectHeroSlides } from "../../lib/seo/hero-image";
+import { tmdbSrcSet, TMDB_BACKDROP_SIZES, TMDB_POSTER_SIZES } from "../../lib/seo/images";
 
 interface Props {
   trending: DiscoverTile[];
@@ -135,11 +136,16 @@ const countText = (n: number, singular: string, plural: string) =>
         /* Slide 0 is the eager/high-priority image (the LCP element): its src
            is the very same URL the page preloaded in the head. */
         const slideUrl = i === 0 ? heroImageUrl : t.backdropUrl;
+        /* Full-bleed artwork: w780 for most phones, w1280 when the device
+           deserves it. Non-TMDB artwork yields no srcset (plain src). */
+        const slideSrcSet = tmdbSrcSet(slideUrl, TMDB_BACKDROP_SIZES);
         return (
           <article class="d-hero-slide" id={`hero-slide-${i}`} aria-roledescription="slide" aria-label={`${i + 1} of ${heroSlides.length}`}>
             <img
               class="d-hero-bg"
               src={slideUrl!}
+              srcset={slideSrcSet ?? undefined}
+              sizes={slideSrcSet ? "100vw" : undefined}
               alt=""
               width="1280"
               height="720"
@@ -174,7 +180,6 @@ const countText = (n: number, singular: string, plural: string) =>
     </div>
     {heroSlides.length > 1 ? (
       <script>
-        import { gsap } from "gsap";
         (() => {
           const root = document.querySelector(".d-hero-slider");
           if (!root) return;
@@ -196,8 +201,17 @@ const countText = (n: number, singular: string, plural: string) =>
             const left = index * track.clientWidth;
             if (instant) {
               track.scrollLeft = left;
+            } else if (typeof track.scrollTo === "function") {
+              /* Native smooth scroll: the browser animates it on the
+                 compositor instead of tweening scrollLeft on the main
+                 thread, so the page ships no animation library at all. */
+              try {
+                track.scrollTo({ left, behavior: "smooth" });
+              } catch {
+                track.scrollLeft = left;
+              }
             } else {
-              gsap.to(track, { scrollLeft: left, duration: 1, ease: "power3.inOut" });
+              track.scrollLeft = left;
             }
             mark(index);
           };
@@ -448,13 +462,18 @@ const countText = (n: number, singular: string, plural: string) =>
       <a class="d-shelf-see" href="/reviews">See all →</a>
     </div>
     <ol class="index-list d-top-ranked d-guide-top">
-      {top.map((r, i) => (
+      {top.map((r, i) => {
+        /* 56px CSS row thumb; candidates cap the download at the slot size. */
+        const thumbSrcSet = tmdbSrcSet(r.posterUrl, TMDB_POSTER_SIZES);
+        return (
         <li class="index-row">
           <span class="index-num" aria-hidden="true">{String(i + 1).padStart(2, "0")}</span>
           {r.posterUrl ? (
             <img
               class="index-thumb"
               src={r.posterUrl}
+              srcset={thumbSrcSet ?? undefined}
+              sizes={thumbSrcSet ? "56px" : undefined}
               alt={`Poster for ${r.movieTitle}`}
               width="88"
               height="132"
@@ -470,7 +489,8 @@ const countText = (n: number, singular: string, plural: string) =>
             <span class="rating-value">{r.rating !== null ? r.rating.toFixed(1) : "–"}</span><span class="rating-scale">/10</span>
           </span>
         </li>
-      ))}
+        );
+      })}
     </ol>
   </section>
 ) : null}

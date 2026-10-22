@@ -23,6 +23,7 @@
  *
  * Pure module: no DB, no network, no framework — safe to unit test.
  */
+import { TMDB_BACKDROP_SIZES, tmdbSrcSet } from "./images";
 
 /** Which field the artwork came from — decides the aspect, not the width. */
 export type HeroImageKind = "backdrop" | "poster";
@@ -46,6 +47,13 @@ export interface HeroPreloadLinkAttrs {
   width?: number;
   height?: number;
   fetchpriority: "high";
+  /**
+   * Responsive preload (CWV task 4): the browser preloads the candidate it
+   * will actually paint instead of always the largest one. Absent for
+   * non-TMDB artwork, where no candidate list exists.
+   */
+  imagesrcset?: string;
+  imagesizes?: string;
 }
 
 /** TMDB variant → delivered width in pixels. */
@@ -106,15 +114,24 @@ export function heroImagePreload(
   return size ? { href, width: size.width, height: size.height } : { href };
 }
 
+/** Full-bleed hero artwork: the viewport is the slot. */
+export const HERO_IMAGESIZES = "100vw";
+
 /**
  * Attribute bag for the head preload link. Kept here (not inline in the
  * layout) so the exact emitted attribute set is unit-testable, and so the
  * layout has a single call site that cannot be bypassed by a hardcoded link.
+ *
+ * TMDB artwork also gets `imagesrcset`/`imagesizes`, so a DPR2 phone preloads
+ * the w780 candidate it will paint instead of the w1280 file. `href` stays
+ * the caller's URL (w1280 on the discovery home) for browsers that ignore
+ * `imagesrcset`, and the width/height pair is unchanged.
  */
 export function heroPreloadLinkAttrs(
   preload: HeroImagePreload | null,
 ): HeroPreloadLinkAttrs | null {
   if (!preload) return null;
+  const imagesrcset = tmdbSrcSet(preload.href, TMDB_BACKDROP_SIZES);
   return {
     rel: "preload",
     as: "image",
@@ -122,6 +139,8 @@ export function heroPreloadLinkAttrs(
     width: preload.width,
     height: preload.height,
     fetchpriority: "high",
+    imagesrcset: imagesrcset ?? undefined,
+    imagesizes: imagesrcset ? HERO_IMAGESIZES : undefined,
   };
 }
 

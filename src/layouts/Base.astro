@@ -8,6 +8,7 @@ import { buildPageMeta, siteOrigin } from "../lib/seo/meta";
 import type { JsonLd } from "../lib/seo/jsonld";
 import type { HeroImagePreload } from "../lib/seo/hero-image";
 import { heroPreloadLinkAttrs } from "../lib/seo/hero-image";
+import { tmdbOriginHints } from "../lib/seo/asset-hints";
 import { withFontDisplaySwap } from "../lib/seo/fonts";
 import SiteHeader from "../components/public/SiteHeader.astro";
 import { getSession, getSessionToken, sessionDbFromAstro } from "../lib/auth/session";
@@ -91,6 +92,11 @@ const ogImage =
   rawOgImage && !/^https?:\/\//i.test(rawOgImage)
     ? `${origin.replace(/\/$/, "")}${rawOgImage.startsWith("/") ? rawOgImage : `/${rawOgImage}`}`
     : rawOgImage;
+/**
+ * Image-origin resource hints (CWV): only pages that reference TMDB artwork
+ * open the connection. Null on every other page — the head stays unchanged.
+ */
+const imageHints = tmdbOriginHints([preloadImage?.href, image]);
 const brandVars = [
   `--brand-accent:${brand.colors.accent}`,
   `--brand-accent-ink:${brand.colors.accentInk}`,
@@ -133,6 +139,15 @@ try {
     <link rel="canonical" href={meta.canonical} />
     <meta name="robots" content={robots} />
     <meta name="theme-color" content={brand.themeColor} />
+    {imageHints ? (
+      /* TMDB artwork origin: preconnect opens the DNS/TCP/TLS handshake on
+         the critical path, dns-prefetch is the older-browser fallback. It
+         must precede the LCP preload below to buy anything. */
+      <>
+        <link {...imageHints.preconnect} />
+        <link {...imageHints.dnsPrefetch} />
+      </>
+    ) : null}
     {preloadImage ? (
       /* Single call site: the attribute bag (rel/as/href/width/height/
          fetchpriority) lives in src/lib/seo/hero-image.ts so the exact

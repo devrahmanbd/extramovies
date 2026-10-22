@@ -1,5 +1,6 @@
 ---
 import { getTileBadge } from "../../lib/badges";
+import { tmdbSrcSet, TMDB_POSTER_SIZES } from "../../lib/seo/images";
 /** Poster tile — links to the discovery detail page. Zero JS.
  * Streaming-guide rebuild: full 2:3 posters (w342, object-fit contain via
  * global), small neutral title/year/score, 44px link targets (CSS), lazy art
@@ -35,12 +36,26 @@ const ratingText =
 const metaLine = [year !== null ? String(year) : null, ratingText]
   .filter((s): s is string => s !== null)
   .join("  ·  ");
+/**
+ * Responsive poster candidates (w185/w342/w500). The rail slot is a fixed
+ * ~120px track (`.d-guide-rail`, global.css); the compact slot is the 3/5/6
+ * column guide grid (117px → 182px → 154px). The lead variant renders at
+ * 780px wide, so it is excluded: w500 would soften it.
+ * A non-TMDB or missing poster yields null, which keeps the plain src.
+ */
+const posterSrcSet = isLead ? null : tmdbSrcSet(posterUrl, TMDB_POSTER_SIZES);
+const posterSizes =
+  variant === "compact"
+    ? "(min-width: 64rem) 154px, (min-width: 48rem) 182px, 117px"
+    : "120px";
 ---
 <li class={`d-tile is-${variant}`}>
   <a href={link}>
     {posterUrl ? (
       <img
         src={posterUrl}
+        srcset={posterSrcSet ?? undefined}
+        sizes={posterSrcSet ? posterSizes : undefined}
         alt={`Poster for ${title}`}
         width={isLead ? "780" : "342"}
         height={isLead ? "1170" : "513"}
