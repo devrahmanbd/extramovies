@@ -126,7 +126,11 @@ planned. Read this whole file before acting. Short hard-rules version: `.rules`.
   or request origin). Sitemaps list only own-domain URLs.
 - SEO baseline: `docs/seo/baseline-*.json` — re-capture + diff around
   homepage/H1/schema changes. Homepage with no overrides must render
-  byte-identical (modulo dev instrumentation).
+  byte-identical (modulo dev instrumentation). Capture the baseline from
+  PRODUCTION (`--base https://extramovies.org`), not from localhost: the
+  2026-10-20 snapshot was taken against a local dev server, so diffing it
+  against a production capture reports 18 false differences (sitemap count,
+  member pages, the robots.txt origin). Compare like with like.
 - AI slop policy: original criticism only; no scaled content abuse.
 - Legacy archive URLs (pre-rebrand piracy corpus, 2016–2025): recover the
   demand offline, never 200-serve a legacy path. Tooling:
