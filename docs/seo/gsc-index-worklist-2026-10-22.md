@@ -240,3 +240,19 @@ does not share that condition.
   "incorrect pages found in sitemap.xml" is gone from the issue list entirely; anchor-text
   issue still absent. Warning wobble (113 -> 115) is crawl page-set noise inside the
   accepted set (word count 47, text/HTML 68 — the crawl now reads an 84-URL sitemap).
+
+## Bing URL Submission API — full-sitemap pass (2026-10-23)
+
+- Submitted-so-far list pulled live from the Bing UI (authoritative): **25 URLs** —
+  10 via API that morning, 10 via UI, 5 older. One alias (`/reviews/dune-part-two`)
+  301s to the canonical, so the canonical stays in the pending set.
+- Pending = sitemap 84 − submitted 24 (one submitted URL, `/movies/414906`, is not in
+  the sitemap) = **60 URLs**, ordered root → series → reviews → categories → cast.
+- Hard API cap (Bing's, shared with the UI): **10/day, 80/month left** (monthly covers
+  the 60). Daily quota resets ~18h after check (next window 2026-10-24 morning).
+- IndexNow re-pinged all 84 sitemap URLs: **HTTP 200, quota-free** — that is the
+  same-day bulk channel; the Submission API is the daily priority nudge on top.
+- A local driver (20-min cycles) submits `min(daily, monthly, 10, remaining)` per
+  window and pops only URLs Bing acknowledged (`submitted : N`), logging to
+  `bing_driver_log.txt`. If the machine was off across a window, re-run it — the
+  queue file is the state; nothing is lost or double-spent.
