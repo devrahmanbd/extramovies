@@ -60,7 +60,6 @@ if (!Number.isSafeInteger(tmdbId)) {
 const brand = await getSiteBrand((k) => getSetting(getDb({}), k));
 const origin = siteOrigin(Astro.url.origin);
 const path = `/movies/${tmdbId}`;
-const canonical = `${origin}${path}`;
 const region = defaultRegion();
 
 const [{ movie, ok }, providersRes] = await Promise.all([
@@ -74,6 +73,12 @@ if (!ok) {
 
 const providers = toContentProviders(providersRes.providers);
 const review = ok ? findReviewForTmdbId(getLatestReviews(100), tmdbId) : null;
+/* When a linked journal review exists this hub canonicalizes to the review's
+ * /reviews/<slug> URL: the film page stays browsable for users while search
+ * signals consolidate onto the canonical (review-driven sitemap) page.
+ * Unreviewed film pages keep their self-canonical /movies/<tmdbId> URL. */
+const seoPath = review ? `/reviews/${review.slug}` : path;
+const canonical = `${origin}${seoPath}`;
 
 // Member reviews (public slice): best-effort, never breaks the film page.
 let memberReviews: Awaited<ReturnType<typeof listMemberReviews>> = [];
@@ -146,7 +151,9 @@ const publishedDate = review
     })
   : "";
 const titleText = ok
-  ? `${movie.title}${movie.year ? ` (${movie.year})` : ""} review — verdict & where to watch`
+  ? review
+    ? `${movie.title}${movie.year ? ` (${movie.year})` : ""} review — verdict & where to watch`
+    : `${movie.title}${movie.year ? ` (${movie.year})` : ""} — details & where to watch`
   : "Movie not available";
 const isLong = ok ? movie.title.length > 40 : false;
 const headMeta = ok
@@ -162,9 +169,11 @@ const headMeta = ok
 <Base
   title={titleText}
   description={ok && movie.overview
-    ? `${movie.overview} Read our ${movie.title} review: verdict, rating, and where to watch.`
+    ? review
+      ? `${movie.overview} Read our ${movie.title} review: verdict, rating, and where to watch.`
+      : `${movie.overview} ${movie.title} details and where to watch — data by TMDB.`
     : "Look up streaming availability for this film — data by TMDB."}
-  path={path}
+  path={seoPath}
   image={ok ? (movie.backdropUrl ?? movie.posterUrl ?? null) : null}
   imageAlt={ok ? `${movie.title} artwork` : undefined}
   robots={ok ? "index, follow" : "noindex, follow"}

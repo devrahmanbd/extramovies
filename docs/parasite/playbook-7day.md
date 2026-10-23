@@ -322,6 +322,7 @@ Append one row per day. No row, no claim.
 |---|---|---|---|---|---|---|
 | 2026-10-23 | 10 known (pre-week) | 13 / 28d baseline | to read | to read | 321 (Semrush) | baseline before day 1 |
 | 2026-10-23 | — | — | — | — | — | Bing fixed via owner session: Block URLs already empty; real block = stale verdict, live test clean; sitemap re-submitted (17 -> 126 pending); 9 demand-ranked reviews + coyote submitted (list 13 -> 22); IndexNow 158/23h confirmed |
+| 2026-10-23 | — | — | — | — | — | Semrush project live (31709043): Site Audit 98% health, 0 errors / 114 warnings; Position Tracking India-Google-Desktop, 19 active keywords gathering. On-site fixes committed: hero-dot anchor text, reviewed /movies/[tmdbId] canonicalizes to /reviews/<slug>, honest titles on unreviewed movie/series pages |
 
 ---
 

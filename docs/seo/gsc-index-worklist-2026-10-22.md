@@ -210,3 +210,19 @@ does not share that condition.
 - https://extramovies.org/reviews/the-batman (Discovered - currently not indexed)
 - https://extramovies.org/reviews/transcendence-2014-review (Submitted and indexed)
 
+
+## Semrush tracking (project 31709043, live 2026-10-23)
+
+- Dashboard: https://www.semrush.com/seo/31709043/ — Authority Score 2, 324 ref. domains,
+  organic (IN) ~128 visits / 10-25 keywords. Location set to India to match GSC (85% IN clicks).
+- Site Audit: 98% health, 0 errors, 114 warnings (100-page free cap). Triaged 2026-10-23:
+  - Fixed in repo (this commit): hero-slide dots lacked anchor text (10), reviewed
+    /movies/<tmdbId> now canonicalizes to /reviews/<slug> (duplicate-intent consolidation,
+    ~30 hubs), unreviewed movie/series pages no longer promise "review — verdict" in titles.
+  - Accepted by design: 76 external 403s are themoviedb.org blocking Semrush's crawler;
+    19 blocked URLs are robots.txt-disallowed filter pages (?genre=, /signup); 62 nofollow
+    outbound links are policy; low text/HTML ratio is JSON-LD weight (improves as content grows).
+  - Server-side (owner): HSTS headers on apex + www are the only panel-level item.
+- Position Tracking: India • Google • English • Desktop, 19 active keywords (all non-template
+  rows from keywords-extramovies.csv), gathering started 2026-10-23, weekly email on.
+- Re-audit after the next prod-extra release to measure warning deltas.

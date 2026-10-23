@@ -124,7 +124,7 @@ const countText = (n: number, singular: string, plural: string) =>
       {heroSlides.length > 1 ? (
         <nav class="d-hero-dots" aria-label="Choose slide">
           {heroSlides.map((t, i) => (
-            <a href={`#hero-slide-${i}`} aria-label={`Show slide ${i + 1}: ${t.title}`}></a>
+            <a href={`#hero-slide-${i}`} aria-label={`Show slide ${i + 1}: ${t.title}`}><span class="sr-only">{`Slide ${i + 1}: ${t.title}`}</span></a>
           ))}
         </nav>
       ) : null}

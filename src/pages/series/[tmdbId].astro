@@ -135,7 +135,7 @@ if (ok) {
 }
 
 const titleText = ok
-  ? `${show.title}${show.year ? ` (${show.year})` : ""} — reviews, verdict & where to watch`
+  ? `${show.title}${show.year ? ` (${show.year})` : ""} — details & where to watch`
   : "Series not available";
 const isLong = ok ? show.title.length > 40 : false;
 const headMeta = ok
@@ -151,7 +151,7 @@ const headMeta = ok
 <Base
   title={titleText}
   description={ok && show.overview
-    ? `${show.overview} Read our ${show.title} series review: verdict, rating, and where to watch.`
+    ? `${show.overview} ${show.title} details, seasons and where to watch — data by TMDB.`
     : "Look up streaming availability for this series — data by TMDB."}
   path={path}
   image={ok ? (show.backdropUrl ?? show.posterUrl ?? null) : null}
