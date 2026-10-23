@@ -225,4 +225,14 @@ does not share that condition.
   - Server-side (owner): HSTS headers on apex + www are the only panel-level item.
 - Position Tracking: India • Google • English • Desktop, 19 active keywords (all non-template
   rows from keywords-extramovies.csv), gathering started 2026-10-23, weekly email on.
-- Re-audit after the next prod-extra release to measure warning deltas.
+- Re-audit 2026-10-23, after the a5637af release: **94% health, 18 errors, 113 warnings**
+  (from 98% / 0 / 114) — the delta splits cleanly:
+  - Confirmed fixed: "links have no anchor text" (10) is gone (AI Search issues 2 -> 1),
+    low word count 47 -> 46.
+  - The 18 errors were self-inflicted: the same release canonicalized reviewed
+    /movies/<tmdbId> hubs to /reviews/<slug> while the sitemap still listed those hubs
+    ("non-canonical URL in sitemap.xml"). Fixed next commit: the sitemap lists no film
+    hubs at all (the review-driven rule only ever produced canonicalized ones; unreviewed
+    hubs were never listed). Series hubs stay — a series page never renders a review, so
+    /series/<tmdbId> is self-canonical. Expect 0 errors on the next crawl.
+  - The remaining 113 warnings are the accepted-by-design set above.

@@ -163,7 +163,7 @@ describe("store tmdb id fallback", () => {
     expect(node.isBasedOn).toBe("https://www.themoviedb.org/movie/336203");
   });
 
-  it("sitemap lists the /movies hub for a store-backed review with a tmdbId", async () => {
+  it("sitemap keeps the /movies hub out: the hub canonicalizes to the review", async () => {
     await writeRows([
       storeRow({ tmdbId: 336203, movie: { title: "Masaan", year: "2015" } }),
     ]);
@@ -172,7 +172,8 @@ describe("store tmdb id fallback", () => {
       url: new URL("https://example.com/sitemap.xml"),
     } as never)) as Response;
     const xml = await res.text();
-    expect(xml).toContain("<loc>https://example.com/movies/336203</loc>");
+    expect(xml).not.toContain("<loc>https://example.com/movies/336203</loc>");
+    expect(xml).toContain("<loc>https://example.com/reviews/store-only-film</loc>");
   });
 });
 

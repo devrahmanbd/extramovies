@@ -295,7 +295,7 @@ describe("series index: the empty state is honest and not indexed", () => {
   });
 });
 
-describe("series hubs in the sitemap: review-driven, like the film hubs", () => {
+describe("series hubs in the sitemap: review-driven, and self-canonical", () => {
   it("lists the hub of a published series review, not a film hub for it", async () => {
     useFixtureStore([
       row({
@@ -333,7 +333,7 @@ describe("series hubs in the sitemap: review-driven, like the film hubs", () => 
     expect(xml).not.toMatch(/<loc>https:\/\/example\.com\/series\/\d+<\/loc>/);
   });
 
-  it("keeps the film hub for a film review", async () => {
+  it("keeps the film hub out of the sitemap: a reviewed hub canonicalizes to its review", async () => {
     useFixtureStore([
       row({
         id: "f1",
@@ -345,7 +345,12 @@ describe("series hubs in the sitemap: review-driven, like the film hubs", () => 
       }),
     ]);
     const xml = await sitemapXml();
-    expect(xml).toContain("<loc>https://example.com/movies/693134</loc>");
+    // The page canonicalizes to /reviews/<slug> when a review is linked, and
+    // the review-driven rule only ever produces reviewed film hubs — so no
+    // /movies/<tmdbId> may appear. The review itself is the canonical URL
+    // and is listed.
+    expect(xml).not.toContain("<loc>https://example.com/movies/693134</loc>");
+    expect(xml).toContain("<loc>https://example.com/reviews/a-film-review</loc>");
     expect(xml).not.toContain("<loc>https://example.com/series/693134</loc>");
   });
 });

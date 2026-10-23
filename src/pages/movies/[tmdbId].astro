@@ -75,8 +75,15 @@ const providers = toContentProviders(providersRes.providers);
 const review = ok ? findReviewForTmdbId(getLatestReviews(100), tmdbId) : null;
 /* When a linked journal review exists this hub canonicalizes to the review's
  * /reviews/<slug> URL: the film page stays browsable for users while search
- * signals consolidate onto the canonical (review-driven sitemap) page.
- * Unreviewed film pages keep their self-canonical /movies/<tmdbId> URL. */
+ * signals consolidate onto the canonical. The review page is the richer
+ * surface (full prose + KeyFacts + QuickAnswer + WhereToWatch), so it is the
+ * one that should rank for "X review", "is X worth watching" and "where to
+ * watch X". Unreviewed film pages keep their self-canonical /movies/<tmdbId>
+ * URL. Consequence for the sitemap: a reviewed hub is NOT a canonical URL,
+ * and the review-driven rule only ever lists reviewed film hubs — so
+ * src/pages/sitemap.xml.ts deliberately lists no /movies/<tmdbId> at all
+ * (Semrush flags non-canonical sitemap entries as errors). Do not re-add
+ * them without reverting this canonical. */
 const seoPath = review ? `/reviews/${review.slug}` : path;
 const canonical = `${origin}${seoPath}`;
 

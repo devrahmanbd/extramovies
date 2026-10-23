@@ -40,12 +40,14 @@ describe('pub (A): /movies redirects to /reviews only under publication', () => 
 });
 
 describe('pub (A): sitemap gates the /movies hub per theme', () => {
-  it('sitemap resolves theme via currentTheme (never throws) and keeps detail entries', () => {
+  it('sitemap resolves theme via currentTheme (never throws) and excludes canonicalized detail entries', () => {
     const src = read('src/pages/sitemap.xml.ts');
     expect(src).toContain('currentTheme()');
     expect(src).toMatch(/theme === ["']publication["']/);
-    // Detail /movies/[id] entries stay in both themes.
-    expect(src).toContain('/movies/${');
+    // Detail /movies/[id] entries are excluded in BOTH themes: a reviewed
+    // hub canonicalizes to its /reviews/<slug> URL, so only canonical URLs
+    // belong in the sitemap (the theme-gated /movies index above stays).
+    expect(src).not.toContain('/movies/${');
   });
 
   it('publication omits the /movies hub entry', async () => {
