@@ -325,6 +325,7 @@ Append one row per day. No row, no claim.
 | 2026-10-23 | — | — | — | — | — | Semrush project live (31709043): Site Audit 98% health, 0 errors / 114 warnings; Position Tracking India-Google-Desktop, 19 active keywords gathering. On-site fixes committed: hero-dot anchor text, reviewed /movies/[tmdbId] canonicalizes to /reviews/<slug>, honest titles on unreviewed movie/series pages |
 | 2026-10-23 | — | — | — | — | — | Released a5637af to prod-extra (deploy green, canonicals/titles verified live); Bing API daily quota used on next-tier demand: peddi, pati-patni-aur-woh-do, practical-magic-2, insidious, matchbox, mayday, buddy, dune-part-two, deadpool, dhruva (10/10 accepted, monthly 80/90 left) |
 | 2026-10-23 | — | — | — | — | — | Semrush re-audit after release: 94% / 18 errors / 113 warnings — hero-dot anchor-text issue gone, word count 47->46; the 18 errors were the release's own canonicalization leaving reviewed film hubs in the sitemap -> film hubs dropped from sitemap (canonical URLs only), 3 tests inverted, gates 676/676 + build green |
+| 2026-10-23 | — | — | — | — | — | Released cbb0f59 (sitemap = canonical URLs only): live sitemap 126 -> 84 URLs, 0 film hubs; Semrush re-crawl confirms **98% health / 0 errors**, sitemap issue gone; GSC sitemap re-submit accepted; Bing sitemap re-submitted (Processing) |
 
 ---
 

@@ -236,3 +236,7 @@ does not share that condition.
     hubs were never listed). Series hubs stay — a series page never renders a review, so
     /series/<tmdbId> is self-canonical. Expect 0 errors on the next crawl.
   - The remaining 113 warnings are the accepted-by-design set above.
+- **Re-audit 2 after the sitemap fix (same day): 98% health, 0 errors, 115 warnings** —
+  "incorrect pages found in sitemap.xml" is gone from the issue list entirely; anchor-text
+  issue still absent. Warning wobble (113 -> 115) is crawl page-set noise inside the
+  accepted set (word count 47, text/HTML 68 — the crawl now reads an 84-URL sitemap).
