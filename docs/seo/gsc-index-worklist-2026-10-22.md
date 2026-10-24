@@ -66,6 +66,31 @@ outage. The automation ran on a copy of the signed-in profile (Chrome 156 refuse
 default profile directory), which cannot be ruled out as a contributing factor; a click from the real browser
 does not share that condition.
 
+Third attempt (2026-10-25, owner-directed): the real-browser variable above is now closed. The run used a
+copied instance of the owner's active Chrome profile (Profile 6, Chrome 156, headed, separate user-data-dir,
+no automation flags; `navigator.webdriver` false) driven over CDP with the tab foregrounded via
+`Page.bringToFront`. That last part mattered: a non-foregrounded tab silently drops input events, which made
+the first runs look dead (typing and clicks did nothing). With the tab foregrounded:
+
+- URL Inspection works end to end through the harness: the search box accepts the URL, the `/inspect` route
+  loads, and `REQUEST INDEXING` is present and clickable (click verified by a capture-phase counter and by
+  `elementFromPoint` landing on the button itself).
+- The click fires the full chain, all HTTP 200: `recaptcha/api.js` (invisible widget), `api2/anchor`,
+  `api2/reload` (a 2361-char token is obtained client-side), then the `Fj3Owf` validation RPC and `api2/clr`
+  -- the same two calls attempts #1 and #2 recorded.
+- The UI then shows the same toast: "Oops! Something went wrong. We had a problem submitting your indexing
+  request."
+- Three URLs attempted: /reviews/the-batman, /movies, /movies/414906. Refused identically.
+- Mid-session quirk worth knowing: after repeated failures the invisible reCAPTCHA widget decays and further
+  clicks become silent no-ops (zero network); a page reload restores the widget and the next click fails
+  exactly as before.
+
+A real Chrome, a real signed-in session, trusted clicks, and a freshly minted reCAPTCHA token still produce
+the refusal, so the block is server-side on this account/property, not an automation artifact. This closes
+the one-shot owner authorization to retry: Request Indexing stays manual-only for this property, the
+sanctioned bulk paths remain the sitemap resubmit (HTTP 204 on 2026-10-24) and normal recrawl, and no
+further CDP attempts should be made.
+
 ## Review pages (39)
 
 1. https://extramovies.org/reviews/a-nice-indian-boy-2025-review  <- first ten
