@@ -224,6 +224,16 @@ is the community-proven one.)
    until reloaded. Verify with a theme marker, not just status codes (two
    same-branded apps are visually identical — confirm the RIGHT backend
    answers): `curl -s https://<domain>/ | grep -o "discover-title\|featured-title"`.
+
+   **Canonical-host redirect (CI-managed).** `deploy.yml` step 6b writes the
+   http→https + non-apex→apex `301` block into `<docroot>/.htaccess` on every
+   deploy, prepended above whatever else the file contains. The file is
+   gitignored: it is server state (a tracked copy would collide with a
+   panel-written one and abort `git pull`), so CI owns it and re-installs
+   it idempotently — marker `BEGIN canonical-host-redirect`. Verify after
+   any deploy: `curl -sI https://<domain>/htaccess-canary` must answer
+   `301` (OLS reads the file); the app's own `404` page means OLS ignored
+   it and the redirect still depends on the panel-level rule.
 5. Same Step 5 smoke test as §2 (homepage, movie page, member flow, admin).
    Ownership: root-run npm/build/git leave root-owned paths that break
    panel-side ops — finish with

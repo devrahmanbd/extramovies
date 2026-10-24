@@ -186,6 +186,41 @@ jobs:
           done
           test -n "$ok" || { echo "FATAL: app never answered on ${APP_PORT}"; pm2 logs "$PM2_NAME" --lines 20 --nostream; exit 1; }
 
+          # 6b. Canonical-host redirect at the web-server edge (owner
+          # decision 2026-10-25): http:// and any non-apex host must 301
+          # to the apex https origin, independent of panel settings.
+          # CI-managed on purpose: the file is NOT tracked in git (a
+          # tracked .htaccess would collide with a panel-written one and
+          # abort `git pull`), the block is PREPENDED so it runs before
+          # any proxy/deny rules a panel editor left in the file, and
+          # existing content is preserved. htaccess-canary is the
+          # verification probe — curl -sI https://<domain>/htaccess-canary
+          # answers 301 = OLS is reading this file, app 404 = it is not.
+          APEX_HOST="${SITE_URL#https://}"
+          HT="$APP_DIR/.htaccess"
+          if [ -z "$APEX_HOST" ]; then
+            echo "HTACCESS WARN: SITE_URL empty - canonical redirect not installed"
+          elif [ -f "$HT" ] && grep -q "BEGIN canonical-host-redirect" "$HT"; then
+            echo "HTACCESS canonical redirect already present ($APEX_HOST)"
+          else
+            TMP=$(mktemp)
+            {
+              printf '%s\n' '# BEGIN canonical-host-redirect (CI-managed by deploy.yml; do not edit)'
+              printf '%s\n' 'RewriteEngine On'
+              printf '%s\n' 'RewriteCond %{HTTP_HOST} !^'"$APEX_HOST"'$ [NC]'
+              printf '%s\n' 'RewriteRule ^ https://'"$APEX_HOST"'%{REQUEST_URI} [R=301,L]'
+              printf '%s\n' 'RewriteCond %{HTTPS} !=on'
+              printf '%s\n' 'RewriteRule ^ https://'"$APEX_HOST"'%{REQUEST_URI} [R=301,L]'
+              printf '%s\n' 'RewriteRule ^htaccess-canary$ https://'"$APEX_HOST"'/ [R=301,L]'
+              printf '%s\n' '# END canonical-host-redirect'
+              if [ -f "$HT" ]; then cat "$HT"; fi
+            } > "$TMP"
+            cat "$TMP" > "$HT"
+            rm -f "$TMP"
+            systemctl restart lsws || lswsctrl restart || echo "HTACCESS WARN: could not restart lsws - redirect inactive until a manual restart"
+            echo "HTACCESS canonical redirect installed ($APEX_HOST)"
+          fi
+
           # 7. Hand files back to the site user (root-run steps leave
           # root-owned paths that break panel-side ops)
           chown -R "$OWNER" "$APP_DIR"
@@ -340,6 +375,41 @@ jobs:
             sleep 5
           done
           test -n "$ok" || { echo "FATAL: app never answered on ${APP_PORT}"; pm2 logs "$PM2_NAME" --lines 20 --nostream; exit 1; }
+
+          # 6b. Canonical-host redirect at the web-server edge (owner
+          # decision 2026-10-25): http:// and any non-apex host must 301
+          # to the apex https origin, independent of panel settings.
+          # CI-managed on purpose: the file is NOT tracked in git (a
+          # tracked .htaccess would collide with a panel-written one and
+          # abort `git pull`), the block is PREPENDED so it runs before
+          # any proxy/deny rules a panel editor left in the file, and
+          # existing content is preserved. htaccess-canary is the
+          # verification probe — curl -sI https://<domain>/htaccess-canary
+          # answers 301 = OLS is reading this file, app 404 = it is not.
+          APEX_HOST="${SITE_URL#https://}"
+          HT="$APP_DIR/.htaccess"
+          if [ -z "$APEX_HOST" ]; then
+            echo "HTACCESS WARN: SITE_URL empty - canonical redirect not installed"
+          elif [ -f "$HT" ] && grep -q "BEGIN canonical-host-redirect" "$HT"; then
+            echo "HTACCESS canonical redirect already present ($APEX_HOST)"
+          else
+            TMP=$(mktemp)
+            {
+              printf '%s\n' '# BEGIN canonical-host-redirect (CI-managed by deploy.yml; do not edit)'
+              printf '%s\n' 'RewriteEngine On'
+              printf '%s\n' 'RewriteCond %{HTTP_HOST} !^'"$APEX_HOST"'$ [NC]'
+              printf '%s\n' 'RewriteRule ^ https://'"$APEX_HOST"'%{REQUEST_URI} [R=301,L]'
+              printf '%s\n' 'RewriteCond %{HTTPS} !=on'
+              printf '%s\n' 'RewriteRule ^ https://'"$APEX_HOST"'%{REQUEST_URI} [R=301,L]'
+              printf '%s\n' 'RewriteRule ^htaccess-canary$ https://'"$APEX_HOST"'/ [R=301,L]'
+              printf '%s\n' '# END canonical-host-redirect'
+              if [ -f "$HT" ]; then cat "$HT"; fi
+            } > "$TMP"
+            cat "$TMP" > "$HT"
+            rm -f "$TMP"
+            systemctl restart lsws || lswsctrl restart || echo "HTACCESS WARN: could not restart lsws - redirect inactive until a manual restart"
+            echo "HTACCESS canonical redirect installed ($APEX_HOST)"
+          fi
 
           # 7. Hand files back to the site user (root-run steps leave
           # root-owned paths that break panel-side ops)

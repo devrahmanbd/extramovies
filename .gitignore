@@ -29,3 +29,8 @@ scripts/seo/__pycache__/
 
 # GSC service-account key safety net (never commit a key)
 *.gsc-sa*.json
+
+# Server edge config, CI-managed (deploy.yml step 6b). Never tracked: a
+# tracked .htaccess would collide with any panel-written file on the
+# server and abort `git pull` mid-deploy.
+.htaccess

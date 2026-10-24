@@ -1,0 +1,675 @@
+{
+  "status": "ok",
+  "reason": "",
+  "date": "2026-10-24",
+  "generatedAt": "2026-10-24T17:45:13+00:00",
+  "site": "sc-domain:extramovies.org",
+  "days": 28,
+  "sitemaps": [
+    {
+      "path": "https://extramovies.org/sitemap.xml",
+      "lastSubmitted": "2026-10-23T02:21:49.201Z",
+      "isPending": false,
+      "errors": "0",
+      "warnings": "0"
+    }
+  ],
+  "totals": {
+    "clicks": 13,
+    "impressions": 328
+  },
+  "host_variants": {
+    "canonical": 7,
+    "noncanonical": 1
+  },
+  "pages": [
+    {
+      "path": "/",
+      "url": "https://extramovies.org/",
+      "host": "extramovies.org",
+      "noncanonical_host": false,
+      "clicks": 10,
+      "impressions": 250,
+      "ctr": 0.04,
+      "position": 45.74,
+      "classification": "modern",
+      "reason": ""
+    },
+    {
+      "path": "/",
+      "url": "http://extramovies.org/",
+      "host": "extramovies.org",
+      "noncanonical_host": true,
+      "clicks": 3,
+      "impressions": 60,
+      "ctr": 0.05,
+      "position": 41.55,
+      "classification": "modern",
+      "reason": ""
+    },
+    {
+      "path": "/reviews/jupiter-ascending-2015-review",
+      "url": "https://extramovies.org/reviews/jupiter-ascending-2015-review",
+      "host": "extramovies.org",
+      "noncanonical_host": false,
+      "clicks": 0,
+      "impressions": 4,
+      "ctr": 0.0,
+      "position": 5.5,
+      "classification": "modern",
+      "reason": ""
+    },
+    {
+      "path": "/reviews",
+      "url": "https://extramovies.org/reviews",
+      "host": "extramovies.org",
+      "noncanonical_host": false,
+      "clicks": 0,
+      "impressions": 3,
+      "ctr": 0.0,
+      "position": 2.0,
+      "classification": "modern",
+      "reason": ""
+    },
+    {
+      "path": "/reviews/fire-and-ice-1983-review",
+      "url": "https://extramovies.org/reviews/fire-and-ice-1983-review",
+      "host": "extramovies.org",
+      "noncanonical_host": false,
+      "clicks": 0,
+      "impressions": 3,
+      "ctr": 0.0,
+      "position": 5.33,
+      "classification": "modern",
+      "reason": ""
+    },
+    {
+      "path": "/reviews/jailer-2-2026-review",
+      "url": "https://extramovies.org/reviews/jailer-2-2026-review",
+      "host": "extramovies.org",
+      "noncanonical_host": false,
+      "clicks": 0,
+      "impressions": 3,
+      "ctr": 0.0,
+      "position": 5.0,
+      "classification": "modern",
+      "reason": ""
+    },
+    {
+      "path": "/reviews/transcendence-2014-review",
+      "url": "https://extramovies.org/reviews/transcendence-2014-review",
+      "host": "extramovies.org",
+      "noncanonical_host": false,
+      "clicks": 0,
+      "impressions": 3,
+      "ctr": 0.0,
+      "position": 2.33,
+      "classification": "modern",
+      "reason": ""
+    },
+    {
+      "path": "/reviews/masaan-2015-review",
+      "url": "https://extramovies.org/reviews/masaan-2015-review",
+      "host": "extramovies.org",
+      "noncanonical_host": false,
+      "clicks": 0,
+      "impressions": 2,
+      "ctr": 0.0,
+      "position": 4.0,
+      "classification": "modern",
+      "reason": ""
+    }
+  ],
+  "queries": [
+    {
+      "query": "extramovies",
+      "clicks": 7,
+      "impressions": 141,
+      "ctr": 0.049645,
+      "position": 50.7
+    },
+    {
+      "query": "extramovies cc",
+      "clicks": 0,
+      "impressions": 6,
+      "ctr": 0.0,
+      "position": 38.17
+    },
+    {
+      "query": "extramovies com",
+      "clicks": 0,
+      "impressions": 5,
+      "ctr": 0.0,
+      "position": 25.8
+    },
+    {
+      "query": "moremovies",
+      "clicks": 0,
+      "impressions": 5,
+      "ctr": 0.0,
+      "position": 76.8
+    },
+    {
+      "query": "extra movie",
+      "clicks": 0,
+      "impressions": 4,
+      "ctr": 0.0,
+      "position": 70.0
+    },
+    {
+      "query": "extra movie in",
+      "clicks": 0,
+      "impressions": 4,
+      "ctr": 0.0,
+      "position": 44.0
+    },
+    {
+      "query": "extramovi",
+      "clicks": 0,
+      "impressions": 4,
+      "ctr": 0.0,
+      "position": 32.0
+    },
+    {
+      "query": "extramovie",
+      "clicks": 0,
+      "impressions": 4,
+      "ctr": 0.0,
+      "position": 62.0
+    },
+    {
+      "query": "extramovies.org",
+      "clicks": 0,
+      "impressions": 4,
+      "ctr": 0.0,
+      "position": 22.75
+    },
+    {
+      "query": "extra movie cc",
+      "clicks": 0,
+      "impressions": 3,
+      "ctr": 0.0,
+      "position": 38.33
+    },
+    {
+      "query": "extra movies",
+      "clicks": 0,
+      "impressions": 3,
+      "ctr": 0.0,
+      "position": 69.0
+    },
+    {
+      "query": "extramovies 2026",
+      "clicks": 0,
+      "impressions": 3,
+      "ctr": 0.0,
+      "position": 35.67
+    },
+    {
+      "query": "extramovies casa",
+      "clicks": 0,
+      "impressions": 3,
+      "ctr": 0.0,
+      "position": 33.33
+    },
+    {
+      "query": "extramovies web series",
+      "clicks": 0,
+      "impressions": 3,
+      "ctr": 0.0,
+      "position": 36.67
+    },
+    {
+      "query": "extramovies.",
+      "clicks": 0,
+      "impressions": 3,
+      "ctr": 0.0,
+      "position": 37.67
+    },
+    {
+      "query": "extramovies.com 2022",
+      "clicks": 0,
+      "impressions": 3,
+      "ctr": 0.0,
+      "position": 27.33
+    },
+    {
+      "query": "www extramovies",
+      "clicks": 0,
+      "impressions": 3,
+      "ctr": 0.0,
+      "position": 29.0
+    },
+    {
+      "query": "ext movies",
+      "clicks": 0,
+      "impressions": 2,
+      "ctr": 0.0,
+      "position": 22.0
+    },
+    {
+      "query": "exteramovie",
+      "clicks": 0,
+      "impressions": 2,
+      "ctr": 0.0,
+      "position": 7.5
+    },
+    {
+      "query": "extra movie fun",
+      "clicks": 0,
+      "impressions": 2,
+      "ctr": 0.0,
+      "position": 71.0
+    },
+    {
+      "query": "extra movie hd",
+      "clicks": 0,
+      "impressions": 2,
+      "ctr": 0.0,
+      "position": 39.0
+    },
+    {
+      "query": "extra movies in",
+      "clicks": 0,
+      "impressions": 2,
+      "ctr": 0.0,
+      "position": 33.5
+    },
+    {
+      "query": "extramovie in",
+      "clicks": 0,
+      "impressions": 2,
+      "ctr": 0.0,
+      "position": 40.5
+    },
+    {
+      "query": "extramovies 2019",
+      "clicks": 0,
+      "impressions": 2,
+      "ctr": 0.0,
+      "position": 52.0
+    },
+    {
+      "query": "extramoviez",
+      "clicks": 0,
+      "impressions": 2,
+      "ctr": 0.0,
+      "position": 28.5
+    },
+    {
+      "query": "extrmovies",
+      "clicks": 0,
+      "impressions": 2,
+      "ctr": 0.0,
+      "position": 62.5
+    },
+    {
+      "query": "movies.org",
+      "clicks": 0,
+      "impressions": 2,
+      "ctr": 0.0,
+      "position": 4.0
+    },
+    {
+      "query": "exramovies",
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0.0,
+      "position": 43.0
+    },
+    {
+      "query": "exrtamovies",
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0.0,
+      "position": 60.0
+    },
+    {
+      "query": "extra geography film reviews",
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0.0,
+      "position": 91.0
+    },
+    {
+      "query": "extra mile movie",
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0.0,
+      "position": 38.0
+    },
+    {
+      "query": "extra moveis",
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0.0,
+      "position": 44.0
+    },
+    {
+      "query": "extra movie com",
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0.0,
+      "position": 38.0
+    },
+    {
+      "query": "extramoviehd",
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0.0,
+      "position": 53.0
+    },
+    {
+      "query": "extramovies 2022",
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0.0,
+      "position": 29.0
+    },
+    {
+      "query": "extramovies 4k",
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0.0,
+      "position": 17.0
+    },
+    {
+      "query": "extramovies download",
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0.0,
+      "position": 30.0
+    },
+    {
+      "query": "extramovies new domain",
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0.0,
+      "position": 37.0
+    },
+    {
+      "query": "extramovies org",
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0.0,
+      "position": 3.0
+    },
+    {
+      "query": "extramovies pink",
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0.0,
+      "position": 32.0
+    },
+    {
+      "query": "extramovies where quality matters",
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0.0,
+      "position": 45.0
+    },
+    {
+      "query": "extramovies.com",
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0.0,
+      "position": 133.0
+    },
+    {
+      "query": "extramovies.in 2022",
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0.0,
+      "position": 21.0
+    },
+    {
+      "query": "extramvies",
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0.0,
+      "position": 27.0
+    },
+    {
+      "query": "orgmovies",
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0.0,
+      "position": 22.0
+    }
+  ],
+  "byDate": [
+    {
+      "date": "2026-10-06",
+      "clicks": 0,
+      "impressions": 0,
+      "ctr": 0.0,
+      "position": 0.0
+    },
+    {
+      "date": "2026-10-07",
+      "clicks": 0,
+      "impressions": 0,
+      "ctr": 0.0,
+      "position": 0.0
+    },
+    {
+      "date": "2026-10-08",
+      "clicks": 0,
+      "impressions": 7,
+      "ctr": 0.0,
+      "position": 53.0
+    },
+    {
+      "date": "2026-10-09",
+      "clicks": 1,
+      "impressions": 26,
+      "ctr": 0.038462,
+      "position": 42.92
+    },
+    {
+      "date": "2026-10-10",
+      "clicks": 2,
+      "impressions": 30,
+      "ctr": 0.066667,
+      "position": 42.23
+    },
+    {
+      "date": "2026-10-11",
+      "clicks": 1,
+      "impressions": 12,
+      "ctr": 0.083333,
+      "position": 75.58
+    },
+    {
+      "date": "2026-10-12",
+      "clicks": 1,
+      "impressions": 19,
+      "ctr": 0.052632,
+      "position": 37.63
+    },
+    {
+      "date": "2026-10-13",
+      "clicks": 0,
+      "impressions": 14,
+      "ctr": 0.0,
+      "position": 33.07
+    },
+    {
+      "date": "2026-10-14",
+      "clicks": 1,
+      "impressions": 12,
+      "ctr": 0.083333,
+      "position": 42.42
+    },
+    {
+      "date": "2026-10-15",
+      "clicks": 0,
+      "impressions": 17,
+      "ctr": 0.0,
+      "position": 42.71
+    },
+    {
+      "date": "2026-10-16",
+      "clicks": 1,
+      "impressions": 30,
+      "ctr": 0.033333,
+      "position": 42.23
+    },
+    {
+      "date": "2026-10-17",
+      "clicks": 1,
+      "impressions": 25,
+      "ctr": 0.04,
+      "position": 39.2
+    },
+    {
+      "date": "2026-10-18",
+      "clicks": 2,
+      "impressions": 19,
+      "ctr": 0.105263,
+      "position": 53.79
+    },
+    {
+      "date": "2026-10-19",
+      "clicks": 1,
+      "impressions": 23,
+      "ctr": 0.043478,
+      "position": 47.65
+    },
+    {
+      "date": "2026-10-20",
+      "clicks": 2,
+      "impressions": 23,
+      "ctr": 0.086957,
+      "position": 42.65
+    },
+    {
+      "date": "2026-10-21",
+      "clicks": 0,
+      "impressions": 29,
+      "ctr": 0.0,
+      "position": 40.66
+    },
+    {
+      "date": "2026-10-22",
+      "clicks": 0,
+      "impressions": 25,
+      "ctr": 0.0,
+      "position": 48.24
+    }
+  ],
+  "legacy": {
+    "count": 0,
+    "top": []
+  },
+  "pagesLongWindow": [
+    {
+      "path": "/",
+      "url": "https://extramovies.org/",
+      "host": "extramovies.org",
+      "noncanonical_host": false,
+      "clicks": 10,
+      "impressions": 250,
+      "ctr": 0.04,
+      "position": 45.74,
+      "classification": "modern",
+      "reason": ""
+    },
+    {
+      "path": "/",
+      "url": "http://extramovies.org/",
+      "host": "extramovies.org",
+      "noncanonical_host": true,
+      "clicks": 3,
+      "impressions": 60,
+      "ctr": 0.05,
+      "position": 41.55,
+      "classification": "modern",
+      "reason": ""
+    },
+    {
+      "path": "/reviews/jupiter-ascending-2015-review",
+      "url": "https://extramovies.org/reviews/jupiter-ascending-2015-review",
+      "host": "extramovies.org",
+      "noncanonical_host": false,
+      "clicks": 0,
+      "impressions": 4,
+      "ctr": 0.0,
+      "position": 5.5,
+      "classification": "modern",
+      "reason": ""
+    },
+    {
+      "path": "/reviews",
+      "url": "https://extramovies.org/reviews",
+      "host": "extramovies.org",
+      "noncanonical_host": false,
+      "clicks": 0,
+      "impressions": 3,
+      "ctr": 0.0,
+      "position": 2.0,
+      "classification": "modern",
+      "reason": ""
+    },
+    {
+      "path": "/reviews/fire-and-ice-1983-review",
+      "url": "https://extramovies.org/reviews/fire-and-ice-1983-review",
+      "host": "extramovies.org",
+      "noncanonical_host": false,
+      "clicks": 0,
+      "impressions": 3,
+      "ctr": 0.0,
+      "position": 5.33,
+      "classification": "modern",
+      "reason": ""
+    },
+    {
+      "path": "/reviews/jailer-2-2026-review",
+      "url": "https://extramovies.org/reviews/jailer-2-2026-review",
+      "host": "extramovies.org",
+      "noncanonical_host": false,
+      "clicks": 0,
+      "impressions": 3,
+      "ctr": 0.0,
+      "position": 5.0,
+      "classification": "modern",
+      "reason": ""
+    },
+    {
+      "path": "/reviews/transcendence-2014-review",
+      "url": "https://extramovies.org/reviews/transcendence-2014-review",
+      "host": "extramovies.org",
+      "noncanonical_host": false,
+      "clicks": 0,
+      "impressions": 3,
+      "ctr": 0.0,
+      "position": 2.33,
+      "classification": "modern",
+      "reason": ""
+    },
+    {
+      "path": "/reviews/masaan-2015-review",
+      "url": "https://extramovies.org/reviews/masaan-2015-review",
+      "host": "extramovies.org",
+      "noncanonical_host": false,
+      "clicks": 0,
+      "impressions": 2,
+      "ctr": 0.0,
+      "position": 4.0,
+      "classification": "modern",
+      "reason": ""
+    }
+  ],
+  "queue": {
+    "rows": 0,
+    "dropped": 0,
+    "capped": false,
+    "path": "/Users/rahman/Documents/Movie Review/data/legacy/gsc_inspect_queue.csv"
+  },
+  "inspect": {
+    "requested": 20,
+    "inspected": 0,
+    "cap": 100,
+    "results": []
+  }
+}
