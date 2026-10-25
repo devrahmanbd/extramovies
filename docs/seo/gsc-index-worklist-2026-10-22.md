@@ -91,6 +91,25 @@ the one-shot owner authorization to retry: Request Indexing stays manual-only fo
 sanctioned bulk paths remain the sitemap resubmit (HTTP 204 on 2026-10-24) and normal recrawl, and no
 further CDP attempts should be made.
 
+## Index count check (2026-10-25)
+
+The owner asked how many URLs Google has actually indexed. Verdict: **7 of the 84 sitemap URLs**
+(URL Inspection, authoritative per URL): `/`, `/reviews`, plus the fire-and-ice-1983,
+jupiter-ascending-2015, transcendence-2014, masaan-2015 and jailer-2-2026 reviews (the four
+older ones show last crawl 2026-10-20). The indexed set is unchanged 10-22 -> 10-25; what moved is
+discovery: "Discovered - currently not indexed" went from 3 to 23 after the sitemap resubmit, with
+54 of 84 still "URL is unknown".
+
+Two different "7"s were being conflated: a host-level `site:` sample also returns 7 URLs but only
+3 overlap the API set, and it includes stale legacy entries still in the index while serving
+errors (`/Thriller` 410, `/Musical` 410, `/view/5562` 404, `/view/11611`) that will drop when
+Google recrawls them. Whole-domain estimate today: at least 11 distinct URLs (7 current + 4 stale
+legacy). `site:` under-reports known-indexed pages; track the audit CSV number, not the sample.
+
+Also: `/movies/414906` (film hub, outside the review-driven sitemap since the hub purge) regressed
+from "Discovered" (10-22) to "URL is unknown" (10-25). Expected under the sitemap policy, not part
+of the 7.
+
 ## Review pages (39)
 
 1. https://extramovies.org/reviews/a-nice-indian-boy-2025-review  <- first ten
