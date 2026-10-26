@@ -91,6 +91,48 @@ the one-shot owner authorization to retry: Request Indexing stays manual-only fo
 sanctioned bulk paths remain the sitemap resubmit (HTTP 204 on 2026-10-24) and normal recrawl, and no
 further CDP attempts should be made.
 
+## Attempt 4 (2026-10-26, owner-directed): same refusal, first fully working run
+
+Owner instruction: "Use chrome CDP as per previous conversation ... to submit 10 more new URLs." The
+attempt 3 harness was gone (temp dir cleaned), so it was rebuilt with three fixes learned from that
+run's notes and today's own failures:
+
+- Entry point is the property overview URL the owner supplied:
+  `https://search.google.com/search-console?resource_id=sc-domain:extramovies.org`. A hard navigation to
+  `/search-console/inspect?resource_id=...&id=...` returns Google's 404 page; the route only resolves
+  client-side after the header box submits.
+- The header box was targeted with the owner's selector
+  `#gb > div.gb_Vd.gb_Zd.gb_ae > ... > div.d1dlne > input.Ax4B8.ZAGvjd`. Google's obfuscated classes
+  rotated on our load (that chain returned no match), so the harness tries the owner's selector first and
+  falls back to `input[aria-label^="Inspect any URL"]`, which resolves the same box
+  (`aria: "Inspect any URL in extramovies.org"`).
+- After Enter, the live-URL test runs "a minute or two" before Google evaluates the request; the first
+  probe's 45s outcome window cut off during that test and looked like a hang. The completed run waited
+  it out (50s to the dialog).
+
+Probe result (the run stops at the first adverse outcome, so 9 of the 10 were skipped):
+
+- URL: `https://extramovies.org/reviews/avengers-endgame-2019-review`, never attempted in runs 1-3.
+- Flow verified end to end: the box accepts the URL, `/inspect` loads with `REQUEST INDEXING` present,
+  the trusted click lands, the live test completes.
+- Then the same dialog as runs 1-3: "Oops! Something went wrong. We had a problem submitting your indexing
+  request. Please try again later."
+- Evidence: `data/legacy/gsc-cdp-attempt4-refusal.png` (dialog in frame) and
+  `data/legacy/gsc-cdp-attempt4.log`.
+
+Verdict: the refusal is server-side and account/property-scoped, reproduced on four attempts across five
+days (2026-10-22, 10-23, 10-25, 10-26) with a fresh URL and a completed live test. Request Indexing stays
+manual-only for this property; the harness is not run again without a fresh owner instruction.
+
+The same 10 URLs went through both sanctioned API channels on 2026-10-26: Bing URL Submission API 10/10
+accepted (daily quota now 0/10, monthly 50/60 left), IndexNow HTTP 200 for the same batch, GSC sitemap
+resubmit accepted. Batch (title demand + 2026 windows; the-batman excluded as already attempted):
+`/reviews/avengers-endgame-2019-review`, `/reviews/joker`, `/reviews/deadpool-2016-review`,
+`/reviews/dune-part-two`, `/reviews/toy-story-5-2026-review`,
+`/reviews/spider-man-brand-new-day-2026-review`, `/reviews/the-odyssey-2026-review`,
+`/reviews/street-fighter-2026-review`, `/reviews/peddi-2026-review`,
+`/reviews/pati-patni-aur-woh-do-2026-review`.
+
 ## Index count check (2026-10-25)
 
 The owner asked how many URLs Google has actually indexed. Verdict: **7 of the 84 sitemap URLs**
