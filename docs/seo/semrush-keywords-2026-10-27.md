@@ -88,11 +88,34 @@ fully reversible via git (diff = 10 difficulty values, 5 `new_priority` swaps, 2
    `charlie 777 story ending explained` (P0, same target page).
 4. Tumbbad's now-false "No Semrush API access" opportunity note replaced with the measured figures.
 
+## Batch 2 — remaining estimated active rows measured (2026-10-27)
+
+Same day, same method: 16 keyword+db jobs (~11 update units; 32/250 used, 218 left). Every US KD
+re-measured today matches the 2026-10-21 numbers exactly (41 / 21 / 22 / 16 / 33), so the IN side
+is trustworthy alongside them. US volumes in the notes column are unchanged (10-21 figures still stand).
+
+| keyword (active) | estimate was | KD IN | KD US | vol IN | verdict → CSV change |
+|---|---|---|---|---|---|
+| avengers endgame review | Medium | 30 Possible | 21 Easy | 480 | best volume-to-KD ratio in the batch → **P1→P0** |
+| upcoming movies 2027 | High | 33 Possible | 34 Possible | 720 | best IN-market opportunity of the batch → **P1→P0** |
+| toy story 5 review | High | 42 Possible | 41 Possible | 210 | stays P0 (upper edge of Possible) |
+| spiderman brand new day review | High | 35 Possible | 33 Possible | ~0 IN | stays P0; US side carries the query |
+| resident evil review | Medium | 28 Easy | 22 Easy | 20 | stays P1 — easy KD but flat trend + tiny IN volume |
+| the odyssey 2026 review | Unmeasured | 76 Hard | 34 Possible | 0 | difficulty finally published; US-only play, stays P1 |
+| whalefall review | Low-Medium | 55 Difficult | 16 Easy | ~0 | **P1→P2** — US is easy but the ceiling is 50/mo |
+| new movie reviews this week | Medium | 70 Hard | 80 Hard | 260 | **P1→P2** — too hard for a new domain |
+
+APPLIED same day under the standing autonomy mandate: 8 difficulty cells + 4 `new_priority` swaps,
+an exact 8-line diff in `keywords-extramovies.csv`, reversible via git. Two structural reads:
+`new movie reviews this week` at 70/80 retires the weekly-discovery-module-as-rank-target idea (the
+module stays, nothing hangs on ranking for it), and `upcoming movies 2027` at 33 with 720/mo IN is
+the strongest P0 outside the ending-explained set.
+
 ## Next actions
 
 1. ✅ CSV updated with measured KD (2026-10-27).
 2. Writer batch: pages still 404 — order by P0 first (777 Charlie, Magadheera, Tumbbad).
 3. Per publish: `notify_publish.py --url <new review>` (IndexNow + GSC sitemap); Bing submit at quota reset
    (~06:00, 50 monthly left); manual GSC Request Indexing ~10/day, demand-ordered.
-4. Re-run this batch for the 20 `active` P0/P1 rows still on estimates + compute KD for the six variations
-   above (229 units left) when the second content batch lands.
+4. ✅ Batch 2 run and applied (2026-10-27): all 8 estimated active P0/P1 rows measured; variation
+   keywords captured in the same run's results.jsonl (218 update units left).
