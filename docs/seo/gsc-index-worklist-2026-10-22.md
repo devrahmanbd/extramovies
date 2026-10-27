@@ -152,6 +152,28 @@ Also: `/movies/414906` (film hub, outside the review-driven sitemap since the hu
 from "Discovered" (10-22) to "URL is unknown" (10-25). Expected under the sitemap policy, not part
 of the 7.
 
+## Full sitemap audit (2026-10-27, weekly sweep)
+
+Note first: the numbered lists below predate the sitemap hub purge — the live sitemap is **84 URLs**
+(review-driven), not the 116 listed here. The audit below is the current truth.
+
+- All 84 sitemap URLs re-verified live: **HTTP 200 on every one** — no draft leaks, no 404s in the
+  sitemap, so sitemap hygiene is not what is blocking indexing.
+- URL Inspection sweep (`gsc_index_audit.py`, 84/84 inspected, 0 errors; CSV at
+  `data/legacy/gsc-index-audit-2026-10-27.csv`):
+  - **7 indexed** (unchanged since 10-25): `/`, `/reviews`, plus the fire-and-ice-1983,
+    jupiter-ascending-2015, transcendence-2014, masaan-2015 and jailer-2-2026 reviews.
+  - **21 known but not indexed** ("Discovered - currently not indexed"), **56 unknown to Google**.
+  - Worklist: **77 URLs** still not in the index.
+- Discovery went 30 → 28 known versus the 10-25 check: Google's crawl of this property has **stalled,
+  not grown**, despite the sitemap being clean.
+- Channels run today: IndexNow **HTTP 200 for all 84 URLs**; GSC sitemap PUT **HTTP 204** (owner-override
+  variant). Bing daily quota is 0 today (resets ~06:00), 50 monthly units left.
+- Read: with Request Indexing refused server-side, the remaining levers are the sanctioned notifications
+  (done today), Bing's 10/day at reset, and crawl priority via internal links from the two pages Google
+  does crawl (`/` and `/reviews`). The 56 unknown URLs are 200 and self-canonical — they wait on crawl
+  priority, not access.
+
 ## Review pages (39)
 
 1. https://extramovies.org/reviews/a-nice-indian-boy-2025-review  <- first ten

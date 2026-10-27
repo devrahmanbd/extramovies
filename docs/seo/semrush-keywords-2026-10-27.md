@@ -74,19 +74,24 @@ KD scale: 0–14 Very easy, 15–29 Easy, 30–49 Possible, 50–69 Difficult (S
 - `kaithi`: wikipedia + thehindu 6 own the SERP; eega: wikipedia 52 + screenanarchy 18 — matches the KD flags
 - AI Overview sits on 5 of the 10 SERPs; `Discussions and forums` on 4 → E-E-A-T + quotable-facts framing matters
 
-## Proposed `keywords-extramovies.csv` updates — NOT applied, needs owner sign-off
+## `keywords-extramovies.csv` updates — APPLIED 2026-10-27
 
-1. `difficulty` column: replace estimates with measured KD, e.g.
+Applied under the owner's "go autonomous" mandate the same day the proposal was published;
+fully reversible via git (diff = 10 difficulty values, 5 `new_priority` swaps, 2 added rows,
+1 header note).
+
+1. `difficulty` column: estimates replaced with measured KD, e.g.
    `tumbbad ending explained` → `Easy (25 IN / 14 US)`, `kaithi ending explained` → `Possible 38 IN / Difficult 54 US`,
    `eega ending explained` → `Difficult 53 IN / 38 US` (all 10 rows).
 2. `new_priority`: magadheera P2→P0, 777 charlie P1→P0, eega P1→P2, kaithi P1→P2, kumbalangi P0→P2.
-3. Optional 2 new active rows: `magadheera movie review` (P0, same target page) and
+3. 2 new active rows: `magadheera movie review` (P0, same target page) and
    `charlie 777 story ending explained` (P0, same target page).
+4. Tumbbad's now-false "No Semrush API access" opportunity note replaced with the measured figures.
 
 ## Next actions
 
-1. Owner signs off (or edits) the CSV proposal above.
-2. Writer batch: pages still 404 — order by proposed P0 first (777 Charlie, Magadheera, Tumbbad).
+1. ✅ CSV updated with measured KD (2026-10-27).
+2. Writer batch: pages still 404 — order by P0 first (777 Charlie, Magadheera, Tumbbad).
 3. Per publish: `notify_publish.py --url <new review>` (IndexNow + GSC sitemap); Bing submit at quota reset
    (~06:00, 50 monthly left); manual GSC Request Indexing ~10/day, demand-ordered.
 4. Re-run this batch for the 20 `active` P0/P1 rows still on estimates + compute KD for the six variations
