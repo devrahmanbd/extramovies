@@ -143,6 +143,29 @@ planned. Read this whole file before acting. Short hard-rules version: `.rules`.
   (`18-movies/`, `300mb-movies/`, …) and trailing `/feed/`/`/page/N/`
   are normalized away before matching. Never mass-index TMDB-only pages
   or sitemap legacy targets; sitemap stays review-driven.
+- GSC Request Indexing (owner-supplied CDP setup, recorded 2026-10-29):
+  server-side API submission is refused for this property, and CDP automation
+  is now equally refused — attempt 5 (2026-10-29) drove the full flow with the
+  owner's real signed-in profile and got the same "Oops! Something went
+  wrong" server refusal as attempts 1-4 (2026-10-22/23/25/26, evidence in
+  `docs/seo/gsc-index-worklist-2026-10-22.md`). Google submission = the
+  owner's in-person manual clicks (~10/day; not disproven by these tests, all
+  five refusals were CDP-driven) + sitemap resubmit + normal recrawl. Never
+  re-run the CDP harness without a fresh owner instruction. The owner's fixed
+  values for any future authorized attempt, use exactly:
+  - Executable: `/Applications/Google Chrome.app/Contents/MacOS/Google Chrome`
+  - Profile: `/Users/rahman/Library/Application Support/Google/Chrome/Profile 6`
+  - Entry URL: `https://search.google.com/search-console?utm_source=about-page&resource_id=sc-domain:extramovies.org`
+  Mechanics: Chrome ≥136 refuses `--remote-debugging-port` on the default
+  user-data-dir and Profile 6 may be in daily use — NEVER launch the profile
+  in place; copy it to a work dir (exclude `Cache*/`, `Code Cache/`, `Service
+  Worker/`), launch the copy with the debug port, drive via the entry URL
+  (hard-navigating to `/inspect` 404s), `Page.bringToFront` + OS-activate
+  before input events, verify the header box value before pressing Enter,
+  stop on the first refusal/duplicate, delete the copy after the run.
+  Bing uses the URL-submission API (`scripts/seo/bing_submit.py --url …`
+  literal args, 10/day, ~40/month) — the two channels are independent, spend
+  both. Never print cookie values; never commit a profile copy.
 
 ## 6. Development rules (additive, fallback-first)
 

@@ -133,6 +133,51 @@ resubmit accepted. Batch (title demand + 2026 windows; the-batman excluded as al
 `/reviews/street-fighter-2026-review`, `/reviews/peddi-2026-review`,
 `/reviews/pati-patni-aur-woh-do-2026-review`.
 
+## Attempt 5 (2026-10-29, owner-directed): same refusal, instrumented end to end
+
+Owner instruction: "submit url using CDP for google and use bing url" plus
+the fixed setup values (executable path, Profile 6, entry URL with
+`utm_source=about-page`), recorded in AGENTS.md §5. That is the fresh owner
+authorization attempts 1-4 required.
+
+Harness rebuilt as `gsc_index_cdp.py` (temp dir, not committed) with the
+attempt-4 lessons plus hard instrumentation — a capture-phase click counter,
+a `performance` resource watermark, and a screenshot on every outcome:
+
+- Profile 6 copied (24M, caches stripped), Chrome 156 headed on port 9223,
+  tab foregrounded via `Page.bringToFront` and OS-activated via AppleScript.
+- Target: `https://extramovies.org/reviews/joker` (in sitemap, HTTP 200,
+  never attempted in runs 1-4).
+- Entry URL loads signed in; header box accepts the URL (value verified
+  before Enter — an earlier run's Enter was swallowed by a still-hydrating
+  SPA); client-side route to `/inspect` resolves; inspection renders
+  "URL is not on Google — URL is unknown to Google"; `REQUEST INDEXING`
+  found (rect), `elementFromPoint` lands on the button itself.
+- Trusted click evidence: DOM click counter = 1, target "Request indexing",
+  9 new network resources fired (the recaptcha chain, as in attempts 1-4).
+- Outcome 50-90s later: **"Oops! Something went wrong. We had a problem
+  submitting your indexing request. Please try again later."**
+
+Evidence: `data/legacy/gsc-cdp-attempt5-refusal.png` (dialog in frame),
+`data/legacy/gsc-cdp-attempt5.log`.
+
+Verdict: the refusal reproduces on a fifth day with the owner's exact
+requested setup. Server-side, account/property-scoped, not an automation
+artifact and not a one-day outage: five attempts across eight days
+(2026-10-22, 10-23, 10-25, 10-26, 10-29), every one reaching a completed
+click plus a fresh reCAPTCHA token before the refusal. Request Indexing
+stays manual-only for this property; the harness is not run again without a
+fresh owner instruction.
+
+The Bing half of the same instruction went through: URL Submission API
+10/10 accepted (daily 0, monthly 20 left). Batch (2026 windows first, then
+remaining backlog): `/reviews/masterplan-2026-review`,
+`/reviews/other-mommy-2026-review`, `/reviews/runner-2026-review`,
+`/reviews/the-social-reckoning-2026-review`,
+`/reviews/you-can-see-everything-2026-review`, `/reviews/buddy-2026-review`,
+`/reviews/light-of-the-world-2025-review`, `/reviews/neverland-2011-review`,
+`/reviews/unfreedom-2015-review`, `/reviews/ang-probinsyano-2015-review`.
+
 ## Index count check (2026-10-25)
 
 The owner asked how many URLs Google has actually indexed. Verdict: **7 of the 84 sitemap URLs**
