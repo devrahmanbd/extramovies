@@ -122,6 +122,20 @@ planned. Read this whole file before acting. Short hard-rules version: `.rules`.
 
 - `docs/seo/keywords-extramovies.csv` is authoritative for extramovies;
   cinemavilla needs its own CSV before targeted writing there.
+- Semrush SEO research: two owner-sanctioned session choices, either works
+  (indexed 2026-10-29). Never print cookie/header values in chat, logs, or
+  files — only the paths below:
+  1. Cookie/header file: `/Users/rahman/Downloads/www.semrush.com_header_string_1793250912271.txt`
+     — inject into a fresh headless Chrome (the `semrush_ko.py` pattern:
+     `Network.setCookie` from the file, then drive the keyword-DB UI). When
+     it expires, ask the owner for a fresh capture; do not read the file
+     into chat.
+  2. Live browser: Executable `/Applications/Google Chrome.app/Contents/MacOS/Google Chrome`
+     + Profile `/Users/rahman/Library/Application Support/Google/Chrome/Profile 6`
+     — the logged-in Semrush session itself. Same rule as the GSC entry:
+     copy the profile to a work dir (never launch in place), drive the copy
+     over CDP, delete the copy after the run.
+  Use choice 1 by default; fall back to choice 2 when the cookie is dead.
 - No query-param URLs in sitemap; canonicals via `siteOrigin()` (SITE_URL env
   or request origin). Sitemaps list only own-domain URLs.
 - SEO baseline: `docs/seo/baseline-*.json` — re-capture + diff around
