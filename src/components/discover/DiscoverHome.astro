@@ -93,8 +93,8 @@ const top = safe(topRated, []);
 const genreRail = tmdbGenres.length > 0
   ? tmdbGenres.map((g) => ({ label: g.name, href: `/movies?genre=${g.id}` }))
   : localGenres.map((g) => ({ label: g, href: `/movies?genre=${encodeURIComponent(g)}` }));
-const reviewHref = (r: PublicReview) =>
-  r.tmdbId ? `/movies/${r.tmdbId}` : `/reviews/${r.slug}`;
+/** Reviewed films always link to the review, never the thin movie gateway. */
+const reviewHref = (r: PublicReview) => `/reviews/${r.slug}`;
 const ratingBand = (rating: number | null) =>
   rating !== null && rating >= 7 ? "high" : rating !== null && rating >= 5 ? "mid" : "low";
 /** Rent rail is thin by nature — skip silently when fewer than 4 tiles. */
@@ -107,6 +107,13 @@ const carousel = [featuredPick, ...latest].filter(
 );
 /** Hero slider: trending (then popular) titles carrying backdrop art, max 10. */
 const heroSlides = selectHeroSlides([...trendingTiles, ...popularTiles]);
+/** The homepage H1 names the publication's job; "Trending this week" is a label, not a promise. */
+const homeHeading = "Movie reviews, argued from the viewing";
+/** Reviewed films by TMDB id: the hero can send a reader to the review. */
+const reviewByTmdb = new Map<number, PublicReview>();
+for (const r of carousel) {
+  if (typeof r.tmdbId === "number" && r.tmdbId > 0) reviewByTmdb.set(r.tmdbId, r);
+}
 /**
  * LCP element: slide 0 is the only eager / fetchpriority=high image in the
  * markup. Its URL comes from the page (the same one the head preload was
@@ -117,10 +124,18 @@ const heroImageUrl = heroFirstUrl ?? heroSlides[0]?.backdropUrl ?? null;
 const countText = (n: number, singular: string, plural: string) =>
   n === 1 ? `1 ${singular}` : `${n} ${plural}`;
 ---
+{heroSlides.length === 0 ? (
+  <section class="d-guide-hero band section--sm" aria-labelledby="discover-title">
+    <div class="d-guide-hero-inner">
+      <h1 id="discover-title">{homeHeading}</h1>
+      <p class="d-lede">Reviews land here first — the latest criticism, newest first.</p>
+    </div>
+  </section>
+) : null}
 {heroSlides.length > 0 ? (
   <section class="d-hero-slider" aria-label="Trending titles">
     <div class="d-hero-head">
-      <h1 id="discover-title">Trending this week</h1>
+      <h1 id="discover-title">{homeHeading}</h1>
       {heroSlides.length > 1 ? (
         <nav class="d-hero-dots" aria-label="Choose slide">
           {heroSlides.map((t, i) => (
@@ -136,6 +151,7 @@ const countText = (n: number, singular: string, plural: string) =>
         /* Slide 0 is the eager/high-priority image (the LCP element): its src
            is the very same URL the page preloaded in the head. */
         const slideUrl = i === 0 ? heroImageUrl : t.backdropUrl;
+        const heroReview = t.tmdbId ? reviewByTmdb.get(t.tmdbId) : undefined;
         /* Full-bleed artwork: w780 for most phones, w1280 when the device
            deserves it. Non-TMDB artwork yields no srcset (plain src). */
         const slideSrcSet = tmdbSrcSet(slideUrl, TMDB_BACKDROP_SIZES);
@@ -156,7 +172,7 @@ const countText = (n: number, singular: string, plural: string) =>
             <span class="d-hero-vignette" aria-hidden="true"></span>
             <div class="d-hero-copy">
               <p class="d-hero-eyebrow">Trending this week</p>
-              <h2 class="d-hero-title"><a href={`/movies/${t.tmdbId}`}>{t.title}</a></h2>
+              <h2 class="d-hero-title"><a href={heroReview ? `/reviews/${heroReview.slug}` : `/movies/${t.tmdbId}`}>{t.title}</a></h2>
               <p class="d-hero-meta tnum">
                 {t.rating !== null ? <><span aria-hidden="true">★ </span>{t.rating.toFixed(1)}<span aria-hidden="true"> · </span></> : null}
                 {t.year ?? ""}
@@ -164,8 +180,17 @@ const countText = (n: number, singular: string, plural: string) =>
               </p>
               {t.overview ? <p class="d-hero-overview">{t.overview}</p> : null}
               <div class="d-hero-actions">
-                <a class="d-btn-primary" href={`/movies/${t.tmdbId}#watch-movie-${t.tmdbId}`}>Where to watch</a>
-                <a class="d-btn-secondary" href={`/movies/${t.tmdbId}`}><span aria-hidden="true">ⓘ </span>Details</a>
+                {heroReview ? (
+                  <>
+                    <a class="d-btn-primary" href={`/reviews/${heroReview.slug}`}>Read review</a>
+                    <a class="d-btn-secondary" href={`/reviews/${heroReview.slug}#watch-${heroReview.slug}`}>Where to watch</a>
+                  </>
+                ) : (
+                  <>
+                    <a class="d-btn-primary" href={`/movies/${t.tmdbId}#watch-movie-${t.tmdbId}`}>Where to watch</a>
+                    <a class="d-btn-secondary" href={`/movies/${t.tmdbId}`}><span aria-hidden="true">ⓘ </span>Details</a>
+                  </>
+                )}
               </div>
             </div>
             {heroSlides.length > 1 ? (
@@ -309,14 +334,7 @@ const countText = (n: number, singular: string, plural: string) =>
       })}
     </div>
   </section>
-) : (
-  <section class="d-guide-hero band section--sm" aria-labelledby="discover-title">
-    <div class="d-guide-hero-inner">
-      <h1 id="discover-title">Find your next movie</h1>
-      <p class="d-lede">Reviews land here first — add a TMDB key in setup to unlock streaming rows.</p>
-    </div>
-  </section>
-)}
+) : null}
 {/* No hero slides: the brand note follows the head block instead. */}
 {heroSlides.length === 0 ? <BrandNote name={brandName} /> : null}
 

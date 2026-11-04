@@ -23,6 +23,11 @@ node_modules/
 
 # OS
 .DS_Store
+session-*.md
+
+# Local agent session artifacts (not config)
+.opencode/opencode-loop/
+.opencode/shots/
 
 scripts/legacy/__pycache__/
 scripts/seo/__pycache__/

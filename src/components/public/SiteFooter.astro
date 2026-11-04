@@ -4,6 +4,8 @@
  * + fine print (.footer-fine). No inline styles; global.css owns the paint. */
 import TmdbAttribution from "./TmdbAttribution.astro";
 import type { Brand } from "../../lib/seo/brand";
+import { slugifyTaxonomy } from "../../lib/seo/taxonomy";
+import { displayAuthor } from "../../lib/site-author";
 
 interface Props {
   brand: Brand;
@@ -12,6 +14,7 @@ interface Props {
 
 const { brand, genres = [] } = Astro.props;
 const year = new Date().getUTCFullYear();
+const editor = displayAuthor("");
 ---
 <footer class="site-footer">
   <div class="wrap">
@@ -32,7 +35,7 @@ const year = new Date().getUTCFullYear();
         <h2>Genres</h2>
         <ul>
           {genres.slice(0, 5).map((g) => (
-            <li><a href={`/reviews?genre=${encodeURIComponent(g)}`}>{g}</a></li>
+            <li><a href={`/category/${slugifyTaxonomy(g)}`}>{g}</a></li>
           ))}
         </ul>
       </section>
@@ -40,6 +43,8 @@ const year = new Date().getUTCFullYear();
         <h2>About</h2>
         <ul>
           <li><a href="/about">About {brand.name}</a></li>
+          <li><a href={`/author/${slugifyTaxonomy(editor)}`}>Byline: {editor}</a></li>
+          <li><a href="/editorial-policy">Editorial policy</a></li>
           <li><a href="/contact">Contact</a></li>
           <li><a href="/sitemap.xml">Sitemap</a></li>
         </ul>

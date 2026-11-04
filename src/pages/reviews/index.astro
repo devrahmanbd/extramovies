@@ -1,5 +1,5 @@
 ---
-/** Archive — full review index with optional ?genre= filter. */
+/** Archive — full review index. Genre filters 301 to their category hub. */
 import Base from "../../layouts/Base.astro";
 import ReviewCard from "../../components/public/ReviewCard.astro";
 import GenreNav from "../../components/public/GenreNav.astro";
@@ -8,7 +8,8 @@ import { getSiteBrand } from "../../lib/seo/brand";
 import { getDb, getSetting } from "../../lib/db/adapter";
 import { breadcrumbJsonLd } from "../../lib/seo/jsonld";
 import { siteOrigin } from "../../lib/seo/meta";
-import { getLatestReviews, getReviewsByGenre, listGenres } from "../../lib/seo/content";
+import { getLatestReviews, listGenres } from "../../lib/seo/content";
+import { slugifyTaxonomy } from "../../lib/seo/taxonomy";
 import { currentTheme } from "../../lib/tmdb/discover";
 
 let theme: string = "publication";
@@ -19,19 +20,31 @@ try {
 }
 const isDiscovery = theme === "discovery";
 
-const brand = await getSiteBrand((k) => getSetting(getDb({}), k));
-const origin = siteOrigin(Astro.url.origin);
 const genre = Astro.url.searchParams.get("genre")?.trim() || null;
 const genres = listGenres();
-const reviews = genre ? getReviewsByGenre(genre) : getLatestReviews(100);
-const heading = genre ? `${genre} reviews` : "Every film review in the journal, newest first";
-const titleText = genre ? `${genre} movie reviews` : "Movie reviews";
-const descSource = genre
-  ? `Every ${genre.toLowerCase()} review in the journal, newest first.`
-  : `The complete review archive, newest first — every film covered in the journal.`;
-// Filtered views canonicalize to /reviews to avoid duplicate-content drift.
-const reviewHref = (r: (typeof reviews)[number]) =>
-  r.tmdbId ? `/movies/${r.tmdbId}` : `/reviews/${r.slug}`;
+/**
+ * One URL per genre. The old ?genre= view duplicated /category/<slug> with a
+ * different title and no canonical of its own, so it now 301s to the hub.
+ * An unknown value falls back to the archive rather than inventing a page.
+ */
+if (genre) {
+  const slug = slugifyTaxonomy(genre);
+  const known = genres.some((g) => slugifyTaxonomy(g) === slug);
+  return Astro.redirect(known ? `/category/${slug}` : "/reviews", 301);
+}
+const brand = await getSiteBrand((k) => getSetting(getDb({}), k));
+const origin = siteOrigin(Astro.url.origin);
+const reviews = getLatestReviews(100);
+const heading = "Every film review in the journal, newest first";
+const titleText = "Movie reviews";
+const descSource =
+  "The complete review archive, newest first — every film covered in the journal.";
+/**
+ * The archive is a review index, so every tile points at the review's own
+ * canonical URL. The /movies/<tmdbId> hub stays one click away from the
+ * review page and from the homepage rails.
+ */
+const reviewHref = (r: (typeof reviews)[number]) => `/reviews/${r.slug}`;
 const jsonld = [
   breadcrumbJsonLd(origin, [{ name: "Home", path: "/" }, { name: "Reviews", path: "/reviews" }]),
   {
@@ -57,7 +70,7 @@ const countText =
 <Base
   title={titleText}
   description={descSource}
-  descriptionExtra="Browse the full collection by genre — horror, drama, comedy, and more, every entry an honest review argued from a real viewing."
+  descriptionExtra="Browse the full collection by genre — horror, drama, comedy, and more, every entry rated by the editor out of ten."
   path="/reviews"
   jsonld={jsonld}
   current="reviews"
@@ -71,10 +84,9 @@ const countText =
       <p class="d-kicker">The archive</p>
       <h1 id="archive-title" class={headingIsLong ? "display--long" : undefined}>{heading}</h1>
       <p class="d-lede tnum">
-        {countText}
-        {genre ? ` filed under ${genre}` : ", newest first"}.
+        {countText}, newest first.
       </p>
-      <GenreNav genres={genres} active={genre} />
+      <GenreNav genres={genres} />
     </section>
 
     {reviews.length > 0 ? (
@@ -117,11 +129,10 @@ const countText =
         <p class="glam-kicker tnum">The archive</p>
         <h1 id="archive-title" class={headingIsLong ? "display--long" : undefined}>{heading}</h1>
         <p class="tnum glam-archive-dek">
-          {reviews.length} {reviews.length === 1 ? "review" : "reviews"}
-          {genre ? ` filed under ${genre}` : ", newest first"}.
+          {reviews.length} {reviews.length === 1 ? "review" : "reviews"}, newest first.
         </p>
       </div>
-      <GenreNav genres={genres} active={genre} />
+      <GenreNav genres={genres} />
     </section>
   </div>
 

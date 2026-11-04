@@ -1,0 +1,129 @@
+---
+/**
+ * Editorial policy — the public standards page.
+ *
+ * Statements here are limited to what the public code paths already do: one
+ * editorial rating out of ten (src/lib/seo/jsonld.ts), TMDB as the film record
+ * (src/lib/tmdb), the checked date on the where-to-watch block
+ * (src/components/public/WhereToWatch.astro), and separate member reviews
+ * (src/lib/members/reviews.ts). No credentials, funding claims or review
+ * process steps are invented.
+ */
+import Base from "../layouts/Base.astro";
+import { getSiteBrand } from "../lib/seo/brand";
+import { getDb, getSetting } from "../lib/db/adapter";
+import { siteOrigin } from "../lib/seo/meta";
+import { breadcrumbJsonLd, organizationJsonLd } from "../lib/seo/jsonld";
+import { slugifyTaxonomy } from "../lib/seo/taxonomy";
+import { displayAuthor } from "../lib/site-author";
+
+const brand = await getSiteBrand((k) => getSetting(getDb({}), k));
+const origin = siteOrigin(Astro.url.origin);
+const path = "/editorial-policy";
+const canonical = `${origin}${path}`;
+const editor = displayAuthor("");
+const title = "Editorial policy";
+const description = `How ${brand.name} reviews films: the rating, the sourcing, corrections, and the line between editorial and member reviews.`;
+
+const jsonld = [
+  {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    name: title,
+    description,
+    url: canonical,
+    inLanguage: brand.locale.replace("_", "-"),
+  },
+  organizationJsonLd({ ...brand, origin }),
+  breadcrumbJsonLd(origin, [
+    { name: "Home", path: "/" },
+    { name: "Editorial policy", path },
+  ]),
+];
+---
+<Base
+  title={title}
+  description={description}
+  descriptionExtra="The standards behind every review: one rating out of ten, a checked film record, and a clear correction path."
+  path={path}
+  jsonld={jsonld}
+  current="about"
+>
+  <div class="wrap">
+    <section aria-labelledby="policy-title" class="band section--lg about-head">
+      <div class="section-head">
+        <p class="glam-kicker">Standards</p>
+        <h1 id="policy-title">Editorial policy</h1>
+        <p>{description}</p>
+      </div>
+      <div class="prose">
+        <p>
+          {brand.name} is an independent film-review magazine. Every review is
+          published under a byline; the current byline is
+          <a href={`/author/${slugifyTaxonomy(editor)}`}>{editor}</a>. This page
+          sets out what the rating means, where the facts come from, and how
+          corrections work.
+        </p>
+      </div>
+    </section>
+  </div>
+
+  <div class="band section--md">
+    <div class="wrap">
+      <div class="prose">
+        <h2>The rating</h2>
+        <p>
+          Every review carries one rating out of ten, set before publication.
+          It is the editorial desk's own number. It is not an average of other
+          critics, a user score, or a studio figure, and it is never folded
+          into a reader aggregate. A title hub may show an aggregate of
+          signed-in readers' scores, clearly separate from the editorial rating.
+        </p>
+
+        <h2>Where the facts come from</h2>
+        <p>
+          Film facts (release year, runtime, director, cast and genres) come
+          from the film's TMDB record. Where-to-watch rows name the legal
+          services that carry the film and print the date the availability was
+          checked. When a fact is missing, the row is left out rather than
+          guessed.
+        </p>
+
+        <h2>Independence</h2>
+        <p>
+          Ratings and verdicts are not for sale. A review is not sponsored,
+          and no payment changes a score or a verdict. Where the site links to
+          a streaming, rental or purchase service, the link is there to help a
+          reader watch the film, not to change the criticism. Where a service
+          link earns a commission, the watch block says so.
+        </p>
+
+        <h2>What the site does not do</h2>
+        <p>
+          It does not invent ratings, votes, quotes, scenes or awards. It does
+          not publish a review of a film nobody has seen, and an unreleased
+          film is marked as a preview rather than given a verdict. It does not
+          scrape another critic's review and present it as its own.
+        </p>
+
+        <h2>Corrections</h2>
+        <p>
+          If a fact is wrong, tell us through the
+          <a href="/contact">contact page</a>. A substantive correction updates
+          the review's modified date. A corrected review keeps its original
+          publication date so the record stays honest about when the criticism
+          was written.
+        </p>
+
+        <h2>Editorial and member reviews</h2>
+        <p>
+          Editorial reviews are the ones published under the site's byline and
+          rated by the desk. Signed-in readers can publish a separate member
+          review on a film's title hub. A member review carries the reader's
+          name and the reader's own score, and it is never mixed into the
+          editorial rating.
+        </p>
+      </div>
+    </div>
+  </div>
+</Base>

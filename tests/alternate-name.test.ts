@@ -15,7 +15,7 @@ import { websiteJsonLd } from "../src/lib/seo/jsonld";
  *   1. the WebSite JSON-LD carries `alternateName` (the other spellings of
  *      this site) INSIDE the one existing node;
  *   2. the discovery homepage carries the brand name in a heading (the h1
- *      stays "Trending this week" — the hero owns it).
+ *      is the publication proposition, not the brand name — the hero owns it).
  *
  * Everything is asserted against the real render / the real resolver, never
  * against a mock, and the per-site rule is asserted too: the second brand
@@ -189,9 +189,12 @@ describe("the discovery homepage: the brand name is a heading", () => {
     );
   });
 
-  it("the h1 is still 'Trending this week'", async () => {
+  it("the h1 is the publication proposition, not the brand name", async () => {
     const html = await renderHome();
-    expect(html).toMatch(/<h1 id="discover-title"[^>]*>Trending this week<\/h1>/);
+    expect(html).toMatch(
+      /<h1 id="discover-title"[^>]*>Movie reviews, argued from the viewing<\/h1>/,
+    );
+    expect(html).not.toMatch(/<h1[^>]*>\s*Extramovies\s*<\/h1>/);
   });
 
   it("the brand heading comes AFTER the hero, so the hero never moves down", async () => {

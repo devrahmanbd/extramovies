@@ -1,0 +1,125 @@
+---
+/**
+ * /author/<slug> — the byline entity.
+ *
+ * One page per byline the site actually publishes, resolved from the
+ * published review corpus (never an invented person). The page gives the
+ * Person node a canonical URL, a description and a `worksFor` organization,
+ * and lists every review that carries the byline. A slug that no published
+ * review uses answers 404.
+ */
+import Base from "../../layouts/Base.astro";
+import { getSiteBrand } from "../../lib/seo/brand";
+import { getDb, getSetting } from "../../lib/db/adapter";
+import { siteOrigin } from "../../lib/seo/meta";
+import {
+  authorProfileJsonLd,
+  breadcrumbJsonLd,
+  organizationJsonLd,
+} from "../../lib/seo/jsonld";
+import { getLatestReviews } from "../../lib/seo/content";
+import { slugifyTaxonomy } from "../../lib/seo/taxonomy";
+import { displayAuthor } from "../../lib/site-author";
+
+const { slug } = Astro.params;
+const latest = getLatestReviews(5000);
+const names = [...new Set(latest.map((r) => displayAuthor(r.authorName)))];
+const name = names.find((n) => slugifyTaxonomy(n) === (slug ?? "")) ?? null;
+if (!name) {
+  return new Response("Author not found", { status: 404 });
+}
+const reviews = latest.filter((r) => displayAuthor(r.authorName) === name);
+
+const brand = await getSiteBrand((k) => getSetting(getDb({}), k));
+const origin = siteOrigin(Astro.url.origin);
+const path = `/author/${slugifyTaxonomy(name)}`;
+const canonical = `${origin}${path}`;
+const isDesk = name === "The Editor";
+const bio = isDesk
+  ? `The Editor is the byline used by the ${brand.name} editorial desk. The desk sets each rating out of ten, checks the film record against TMDB, and prints the date the where-to-watch data was checked.`
+  : `${name} writes film reviews for ${brand.name}. Every review carries one rating out of ten, set before publication, and the date the where-to-watch data was checked.`;
+const description = `${name}: ${reviews.length} film ${reviews.length === 1 ? "review" : "reviews"} published by ${brand.name}.`;
+const title = `${name} — film reviews`;
+const jsonld = [
+  authorProfileJsonLd(name, { ...brand, origin }, canonical, description),
+  organizationJsonLd({ ...brand, origin }),
+  breadcrumbJsonLd(origin, [
+    { name: "Home", path: "/" },
+    { name: "Reviews", path: "/reviews" },
+    { name, path },
+  ]),
+];
+---
+<Base
+  title={title}
+  description={description}
+  descriptionExtra="Every review on this page, newest first."
+  path={path}
+  jsonld={jsonld}
+  current="about"
+>
+  <div class="wrap">
+    <section aria-labelledby="author-title" class="band section--lg about-head">
+      <div class="section-head">
+        <p class="glam-kicker">Byline</p>
+        <h1 id="author-title">{name}</h1>
+        <p>{description}</p>
+      </div>
+      <div class="prose">
+        <p>
+          {bio} The standards behind every review are published in the
+          <a href="/editorial-policy">editorial policy</a>. Corrections and
+          questions go through the <a href="/contact">contact page</a>.
+        </p>
+      </div>
+    </section>
+  </div>
+
+  {reviews.length > 0 ? (
+    <div class="band--alt section--md">
+      <div class="wrap">
+        <div class="section-head">
+          <h2>Reviews by {name}</h2>
+          <p class="tnum">
+            {reviews.length} {reviews.length === 1 ? "review" : "reviews"}, newest first.
+          </p>
+        </div>
+        <ul class="author-reviews">
+          {reviews.map((r) => (
+            <li>
+              <a href={`/reviews/${r.slug}`}>{r.movieTitle}</a>
+              <span class="tnum">
+                {r.year ? `${r.year} · ` : ""}
+                {r.rating}/10
+              </span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  ) : null}
+</Base>
+
+<style>
+  .author-reviews {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-top: 1px solid var(--rule, #d9d2c4);
+  }
+  .author-reviews li {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.85rem 0;
+    border-bottom: 1px solid var(--rule, #d9d2c4);
+  }
+  .author-reviews a {
+    font-weight: 600;
+  }
+  .author-reviews span {
+    color: var(--muted, #6b6459);
+    white-space: nowrap;
+  }
+</style>

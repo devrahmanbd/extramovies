@@ -4,6 +4,8 @@
  * Single ruled line above/below, slash separators aria-hidden, active gold.
  * Restrained by design: few links, plain uppercase text. No JS.
  */
+import { slugifyTaxonomy } from "../../lib/seo/taxonomy";
+
 interface Props {
   genres: string[];
   active?: string | null;
@@ -19,7 +21,7 @@ const truncated = typeof limit === "number" && genres.length > limit;
       {visible.map((g, i) => (
         <li>
           <a
-            href={`/reviews?genre=${encodeURIComponent(g)}`}
+            href={`/category/${slugifyTaxonomy(g)}`}
             aria-current={active === g ? "true" : undefined}
           >
             {g}

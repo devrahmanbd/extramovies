@@ -8,6 +8,7 @@
 import { BRAND_ALTERNATE_NAMES, type Brand } from "./brand";
 import type { PublicReview } from "./content";
 import { displayAuthor } from "../site-author";
+import { slugifyTaxonomy } from "./taxonomy";
 
 export type JsonLd = Record<string, unknown>;
 
@@ -15,6 +16,49 @@ export type JsonLd = Record<string, unknown>;
 function absolutize(origin: string, p: string): string {
   if (/^https?:\/\//i.test(p)) return p;
   return `${origin.replace(/\/$/, "")}${p.startsWith("/") ? p : `/${p}`}`;
+}
+
+/**
+ * One Person node per credited director. A combined credit ("Anthony Russo,
+ * Joe Russo") is two people, not one person with a comma in their name.
+ */
+function directorNodes(director: string | null | undefined): JsonLd[] {
+  if (!director) return [];
+  return director
+    .split(",")
+    .map((d) => d.replace(/\s+/g, " ").trim())
+    .filter(Boolean)
+    .map((name) => ({ "@type": "Person", name }));
+}
+
+/** `director` field: a single Person, or an array when the credit is shared. */
+function directorField(director: string | null | undefined): JsonLd {
+  const nodes = directorNodes(director);
+  if (nodes.length === 0) return {};
+  return { director: nodes.length === 1 ? nodes[0] : nodes };
+}
+
+/**
+ * Author node shared by Article and Review. The `url` points at the byline's
+ * own profile page; `worksFor` names the publication. Both are omitted when
+ * the caller supplies no origin (unit tests build nodes with a bare brand).
+ */
+function authorNode(review: PublicReview, brand: Brand): JsonLd {
+  const name = displayAuthor(review.authorName);
+  const origin =
+    typeof brand?.origin === "string" ? brand.origin.replace(/\/+$/, "") : "";
+  const node: JsonLd = { "@type": "Person", name };
+  if (origin) {
+    node.url = `${origin}/author/${slugifyTaxonomy(name)}`;
+    if (brand.name) {
+      node.worksFor = {
+        "@type": "Organization",
+        name: brand.name,
+        url: `${origin}/`,
+      };
+    }
+  }
+  return node;
 }
 
 /**
@@ -88,6 +132,9 @@ export function organizationJsonLd(brand: Brand): JsonLd {
     ...(brand.logo ? { logo: absolutize(brand.origin, brand.logo) } : {}),
     // Emitted only when the owner has real profiles (see BRAND_SAME_AS).
     ...(BRAND_SAME_AS.length > 0 ? { sameAs: [...BRAND_SAME_AS] } : {}),
+    // The public standards page: a verifiable signal that the entity has a
+    // published editorial process, not just a claim on an About page.
+    publishingPrinciples: absolutize(brand.origin, "/editorial-policy"),
   };
 }
 
@@ -137,7 +184,7 @@ export function movieJsonLd(review: PublicReview, origin: string): JsonLd {
     name: review.movieTitle,
     ...(review.year ? { dateCreated: String(review.year) } : {}),
     ...(review.genres.length > 0 ? { genre: review.genres } : {}),
-    ...(review.director ? { director: { "@type": "Person", name: review.director } } : {}),
+    ...directorField(review.director),
     ...(review.posterUrl ? { image: review.posterUrl } : {}),
   };
   return movie;
@@ -156,10 +203,11 @@ export function articleJsonLd(
     image: review.backdropUrl ?? review.posterUrl ?? undefined,
     datePublished: review.publishedAt,
     dateModified: review.updatedAt,
-    author: { "@type": "Person", name: displayAuthor(review.authorName) },
+    author: authorNode(review, brand),
     publisher: {
       "@type": "Organization",
       name: brand.name,
+      url: `${brand.origin.replace(/\/+$/, "")}/`,
       ...(brand.logo ? { logo: { "@type": "ImageObject", url: absolutize(brand.origin, brand.logo) } } : {}),
     },
     mainEntityOfPage: { "@type": "WebPage", "@id": canonical },
@@ -176,7 +224,6 @@ export function myReviewJsonLd(
   brand: Brand,
   canonical: string
 ): JsonLd {
-  void brand;
   // Authority claim: the review is grounded in the film's TMDB record.
   // Review node only (never the itemReviewed Movie — see tmdbSourceUrl).
   // Emitted only when a valid TMDB id exists.
@@ -184,7 +231,7 @@ export function myReviewJsonLd(
   return {
     "@context": "https://schema.org",
     "@type": "Review",
-    author: { "@type": "Person", name: displayAuthor(review.authorName) },
+    author: authorNode(review, brand),
     datePublished: review.publishedAt,
     reviewBody: review.excerpt,
     reviewRating: {
@@ -199,11 +246,47 @@ export function myReviewJsonLd(
       name: review.movieTitle,
       ...(review.year ? { dateCreated: String(review.year) } : {}),
       ...(review.genres.length > 0 ? { genre: review.genres } : {}),
-      ...(review.director ? { director: { "@type": "Person", name: review.director } } : {}),
+      ...directorField(review.director),
       ...(review.posterUrl ? { image: review.posterUrl } : {}),
     },
     mainEntityOfPage: { "@type": "WebPage", "@id": canonical },
     inLanguage: "en",
+  };
+}
+
+/**
+ * ProfilePage for a byline. The Person node carries the canonical byline URL,
+ * the description, and the publication it works for; no credentials or
+ * sameAs claims are invented.
+ */
+export function authorProfileJsonLd(
+  name: string,
+  brand: Brand,
+  canonical: string,
+  description: string,
+): JsonLd {
+  const origin =
+    typeof brand?.origin === "string" ? brand.origin.replace(/\/+$/, "") : "";
+  const person: JsonLd = {
+    "@type": "Person",
+    name,
+    url: canonical,
+    description,
+  };
+  if (origin && brand.name) {
+    person.worksFor = {
+      "@type": "Organization",
+      name: brand.name,
+      url: `${origin}/`,
+    };
+  }
+  return {
+    "@context": "https://schema.org",
+    "@type": "ProfilePage",
+    name: `${name} | ${brand.name}`,
+    url: canonical,
+    description,
+    mainEntity: person,
   };
 }
 

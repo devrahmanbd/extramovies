@@ -4,6 +4,8 @@ import { siteOrigin } from "../lib/seo/meta";
 import { getLatestReviews } from "../lib/seo/content";
 import { withMediaTypes } from "../lib/seo/series-reviews";
 import { currentTheme } from "../lib/tmdb/discover";
+import { displayAuthor } from "../lib/site-author";
+import { slugifyTaxonomy } from "../lib/seo/taxonomy";
 import {
   TAXONOMY_KINDS,
   taxonomyEntries,
@@ -15,6 +17,8 @@ export const GET: APIRoute = async ({ url }) => {
   const latest = getLatestReviews(5000);
   const newest = latest[0]?.updatedAt;
   const theme = await currentTheme();
+  // One profile page per byline the published corpus actually uses.
+  const authors = [...new Set(latest.map((r) => displayAuthor(r.authorName)))];
   // Taxonomy pages (cast / director / category) join the sitemap only when
   // the site publishes two or more reviews for them (AGENTS.md §5). A
   // one-review taxonomy page stays `noindex, follow` and is never listed.
@@ -49,6 +53,12 @@ export const GET: APIRoute = async ({ url }) => {
     // corroboration the brand SERP needs.
     { loc: `${origin}/about`, changefreq: "monthly", priority: 0.6 },
     { loc: `${origin}/contact`, changefreq: "monthly", priority: 0.4 },
+    { loc: `${origin}/editorial-policy`, changefreq: "monthly", priority: 0.5 },
+    ...authors.map((name) => ({
+      loc: `${origin}/author/${slugifyTaxonomy(name)}`,
+      changefreq: "monthly" as const,
+      priority: 0.4,
+    })),
     // The upcoming-release list: a site page, not a review page, so the
     // review-driven rule does not apply to it. It is always live (TMDB
     // answers it or the page renders its honest empty state), so it joins

@@ -38,6 +38,7 @@ import {
 import { relatedReviews } from "../../lib/related";
 import { renderMarkdown, readingMinutes } from "../../lib/markdown";
 import { displayAuthor } from "../../lib/site-author";
+import { slugifyTaxonomy } from "../../lib/seo/taxonomy";
 
 export function getStaticPaths() {
   return getLatestReviews(100).map((r) => ({ params: { slug: r.slug } }));
@@ -65,6 +66,15 @@ const publishedDate = new Date(review.publishedAt).toLocaleDateString("en-US", {
   year: "numeric", month: "long", day: "numeric", timeZone: "UTC",
 });
 const related = relatedReviews(review, getLatestReviews(100), 3);
+/**
+ * Credit rows are entity links, not plain text: every genre, director and
+ * cast page is a review-driven hub, and the review is where the hub earns
+ * its first inbound link.
+ */
+const directorLinks = (review.director ?? "")
+  .split(",")
+  .map((d) => d.replace(/\s+/g, " ").trim())
+  .filter(Boolean);
 const isLong = review.reviewTitle.length > 40;
 const jsonld = [
   articleJsonLd(review, { ...brand, origin }, canonical),
@@ -160,12 +170,35 @@ const seoTitle = typeof review.seoTitle === "string" ? review.seoTitle : null;
           <div><dt>Title</dt><dd>{review.movieTitle}</dd></div>
           {review.year ? <div><dt>Year</dt><dd class="tnum">{review.year}</dd></div> : null}
           {review.genres.length > 0 ? (
-            <div><dt>Genres</dt><dd>{review.genres.join(", ")}</dd></div>
+            <div>
+              <dt>Genres</dt>
+              <dd>
+                {review.genres.map((g, i) => (
+                  <>{i > 0 ? ", " : ""}<a href={`/category/${slugifyTaxonomy(g)}`}>{g}</a></>
+                ))}
+              </dd>
+            </div>
           ) : null}
           {runtime ? <div><dt>Runtime</dt><dd>{runtime}</dd></div> : null}
-          {review.director ? <div><dt>Director</dt><dd>{review.director}</dd></div> : null}
+          {review.director ? (
+            <div>
+              <dt>Director</dt>
+              <dd>
+                {directorLinks.map((d, i) => (
+                  <>{i > 0 ? ", " : ""}<a href={`/director/${slugifyTaxonomy(d)}`}>{d}</a></>
+                ))}
+              </dd>
+            </div>
+          ) : null}
           {review.cast.length > 0 ? (
-            <div><dt>Cast</dt><dd>{review.cast.join(", ")}</dd></div>
+            <div>
+              <dt>Cast</dt>
+              <dd>
+                {review.cast.map((c, i) => (
+                  <>{i > 0 ? ", " : ""}<a href={`/cast/${slugifyTaxonomy(c)}`}>{c}</a></>
+                ))}
+              </dd>
+            </div>
           ) : null}
           {review.tmdbId ? (
             <div>

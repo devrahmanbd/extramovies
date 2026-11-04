@@ -233,9 +233,12 @@ describe("homepage: the brand block is there and the h1 did not move", () => {
     });
   }
 
-  it("the h1 is still 'Trending this week'", async () => {
+  it("the h1 names the publication's job, not the weekly label", async () => {
     const html = await renderHome();
-    expect(html).toMatch(/<h1 id="discover-title"[^>]*>Trending this week<\/h1>/);
+    expect(html).toMatch(
+      /<h1 id="discover-title"[^>]*>Movie reviews, argued from the viewing<\/h1>/,
+    );
+    expect(html).toContain("Trending this week");
   });
 
   it("the brand block is present and says what the site is", async () => {

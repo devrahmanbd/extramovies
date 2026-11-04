@@ -111,6 +111,8 @@ export const LIVE_ROUTE_PATTERNS: readonly string[] = [
   "/cast/:slug",
   "/director/:slug",
   "/category/:slug",
+  "/author/:slug",
+  "/editorial-policy",
   "/u/:handle",
   "/admin/*",
   "/api/*",

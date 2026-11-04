@@ -17,6 +17,7 @@
 import RatingMark from "./RatingMark.astro";
 import MyRating from "./MyRating.astro";
 import TmdbAttribution from "./TmdbAttribution.astro";
+import { slugifyTaxonomy } from "../../lib/seo/taxonomy";
 
 interface Props {
   movieTitle: string;
@@ -110,7 +111,7 @@ const editLine = [
         <div class="cine-verdict-block">
           <p class="showcase-verdict cine-verdict"><strong>Our verdict — </strong>{p.verdict}</p>
           <p class="byline cine-byline">
-            <span>By {displayAuthor}</span>
+            <span>By <a href={`/author/${slugifyTaxonomy(displayAuthor)}`}>{displayAuthor}</a></span>
             <time datetime={p.publishedAt}>{p.publishedDate}</time>
             <span>{p.minutes} min read</span>
           </p>
