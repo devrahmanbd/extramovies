@@ -101,8 +101,10 @@ describe('SEO meta + JSON-LD + sitemap + RSS', () => {
     // (a) The source claim belongs to the Review node...
     expect(node.isBasedOn).toBe('https://www.themoviedb.org/movie/693134');
     // (b) ...and never to the reviewed Movie: `isBasedOn` there would claim the
-    // film is based on itself (the TMDB page for the same film).
+    // film is based on itself (the TMDB page for the same film). The Movie
+    // carries `sameAs` instead, which is the correct identity claim.
     expect('isBasedOn' in movie).toBe(false);
+    expect(movie.sameAs).toBe('https://www.themoviedb.org/movie/693134');
   });
 
   it('review JSON-LD omits isBasedOn without a valid TMDB id', async () => {
@@ -120,6 +122,7 @@ describe('SEO meta + JSON-LD + sitemap + RSS', () => {
       undefined,
       undefined,
     ]);
+    expect(item.sameAs).toBeUndefined();
   });
 
   it('review JSON-LD uses TVSeries and /tv/ for a series', async () => {
@@ -137,11 +140,13 @@ describe('SEO meta + JSON-LD + sitemap + RSS', () => {
     const item = node.itemReviewed as Record<string, unknown>;
     expect(item['@type']).toBe('TVSeries');
     expect(node.isBasedOn).toBe('https://www.themoviedb.org/tv/95480');
+    expect(item.sameAs).toBe('https://www.themoviedb.org/tv/95480');
     // The row's `director` is the series' credited creator/director, not a
     // per-episode Movie director: do not claim it on a TVSeries node.
     expect('director' in item).toBe(false);
     const title = movieJsonLd(series, 'https://reviews.example.com', 'tv');
     expect(title['@type']).toBe('TVSeries');
+    expect(title.sameAs).toBe('https://www.themoviedb.org/tv/95480');
     expect('director' in title).toBe(false);
   });
 

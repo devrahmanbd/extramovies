@@ -1,4 +1,10 @@
-/** Related-review scoring: shared genres first, same director bonus, newest wins ties. */
+/**
+ * Related-review scoring: shared genres first, same director next, shared cast
+ * last, newest wins ties. Only a review that shares at least one of those axes
+ * is related; the strip returns fewer than `limit` rows (or none) rather than
+ * topping up with unrelated latest reviews. An honest empty state beats a
+ * recency-filled block that teaches a crawler the wrong internal-link graph.
+ */
 import type { PublicReview } from "./seo/content";
 
 export function relatedReviews(
@@ -7,13 +13,15 @@ export function relatedReviews(
   limit = 3
 ): PublicReview[] {
   const currentGenres = new Set(current.genres.map((g) => g.toLowerCase()));
+  const currentCast = new Set(current.cast.map((c) => c.toLowerCase()));
   const scored = all
     .filter((r) => r.slug !== current.slug)
     .map((r) => {
       const shared = r.genres.filter((g) => currentGenres.has(g.toLowerCase())).length;
       const directorBonus =
         current.director && r.director === current.director ? 3 : 0;
-      return { r, score: shared * 2 + directorBonus };
+      const sharedCast = r.cast.filter((c) => currentCast.has(c.toLowerCase())).length;
+      return { r, score: shared * 2 + directorBonus + sharedCast };
     })
     .filter((x) => x.score > 0)
     .sort((a, b) => {
@@ -21,12 +29,5 @@ export function relatedReviews(
       return +new Date(b.r.publishedAt) - +new Date(a.r.publishedAt);
     })
     .map((x) => x.r);
-  if (scored.length >= limit) return scored.slice(0, limit);
-  // Small-corpus fallback: top up with latest reviews so the strip (and its
-  // internal links) never renders empty. Scored matches always come first.
-  const picked = new Set([current.slug, ...scored.map((r) => r.slug)]);
-  const fallback = [...all]
-    .filter((r) => !picked.has(r.slug))
-    .sort((a, b) => +new Date(b.publishedAt) - +new Date(a.publishedAt));
-  return [...scored, ...fallback].slice(0, limit);
+  return scored.slice(0, limit);
 }

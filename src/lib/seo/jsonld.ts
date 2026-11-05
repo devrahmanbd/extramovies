@@ -188,12 +188,17 @@ export function movieJsonLd(
 ): JsonLd {
   void origin;
   const isSeries = mediaType === "tv";
+  const source = tmdbSourceUrl(review.tmdbId, mediaType);
   const movie: JsonLd = {
     "@context": "https://schema.org",
     "@type": isSeries ? "TVSeries" : "Movie",
     name: review.movieTitle,
     ...(review.year ? { dateCreated: String(review.year) } : {}),
     ...(review.genres.length > 0 ? { genre: review.genres } : {}),
+    // The TMDB record is the same title, not a source the title is based on.
+    // `sameAs` is the disambiguating identifier; `isBasedOn` stays on the
+    // Review node (see tmdbSourceUrl).
+    ...(source ? { sameAs: source } : {}),
     // A series row's `director` field is the show's credited creator/director
     // as the editor stored it, not a per-episode director. Do not claim it as
     // a Movie director on a TVSeries node.
@@ -261,6 +266,7 @@ export function myReviewJsonLd(
       name: review.movieTitle,
       ...(review.year ? { dateCreated: String(review.year) } : {}),
       ...(review.genres.length > 0 ? { genre: review.genres } : {}),
+      ...(source ? { sameAs: source } : {}),
       ...(isSeries ? {} : directorField(review.director)),
       ...(review.posterUrl ? { image: review.posterUrl } : {}),
     },

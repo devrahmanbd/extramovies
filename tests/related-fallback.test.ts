@@ -36,12 +36,30 @@ describe('relatedReviews', () => {
     expect(out[0]?.slug).toBe('same');
   });
 
-  it('tops up with latest when nothing shares genres (never empty)', () => {
+  it('returns nothing rather than topping up with unrelated latest reviews', () => {
     const current = row({ slug: 'x', genres: ['Horror'] });
     const a = row({ slug: 'a', genres: ['Comedy'], publishedAt: '2026-10-05T00:00:00.000Z' });
     const b = row({ slug: 'b', genres: ['Drama'], publishedAt: '2026-10-01T00:00:00.000Z' });
     const out = relatedReviews(current, [current, a, b], 3);
-    expect(out.map((r) => r.slug)).toEqual(['a', 'b']);
+    expect(out).toEqual([]);
+  });
+
+  it('ranks a shared cast member as related even when genres differ', () => {
+    const current = row({ slug: 'x', genres: ['Horror'], cast: ['Ana de Armas'] });
+    const sharedCast = row({
+      slug: 'shared-cast',
+      genres: ['Comedy'],
+      cast: ['Ana de Armas'],
+      publishedAt: '2026-09-01T00:00:00.000Z',
+    });
+    const unrelated = row({
+      slug: 'unrelated',
+      genres: ['Comedy'],
+      cast: ['Someone Else'],
+      publishedAt: '2026-10-05T00:00:00.000Z',
+    });
+    const out = relatedReviews(current, [current, sharedCast, unrelated], 3);
+    expect(out.map((r) => r.slug)).toEqual(['shared-cast']);
   });
 
   it('never includes the current review and respects the limit', () => {
