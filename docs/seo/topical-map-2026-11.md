@@ -6,7 +6,9 @@ Companion documents: `docs/seo/holisticseo-harness.md`, `docs/seo/traffic-diagno
 
 Two corpora are named separately in this document:
 
-- **Published** — the 53 review URLs, 7 series hubs, and 34 taxonomy hubs in the live `https://extramovies.org/sitemap.xml` on 2026-11-05.
+- **Published** — the 53 review URLs, 7 series hubs, 34 taxonomy hubs, the
+  author profile, the editorial policy, and the index/static pages in the
+  live `https://extramovies.org/sitemap.xml` on 2026-11-06 (103 URLs).
 - **Draft** — seed reviews that exist in `seeds/extramovies/` but are not in the live sitemap yet. Drafts are marked and never presented as live URLs.
 
 ---
@@ -60,7 +62,7 @@ Two corpora are named separately in this document:
 
 ## 3. Published Corpus Mapping
 
-The live sitemap on 2026-11-05 lists 53 review URLs, 7 series hubs, 14 category hubs, 19 cast hubs, and 1 director hub. Every published review below belongs to one cluster; the few one-review hubs are intentionally `noindex` until a second review lands.
+The live sitemap on 2026-11-06 lists 53 review URLs, 7 series hubs, 14 category hubs, 19 cast hubs, 1 director hub, the author profile, the editorial policy, and the index/static pages (103 URLs). Every published review below belongs to one cluster; the few one-review hubs are intentionally `noindex` until a second review lands.
 
 ### Cluster 1: Espionage, Tactical Thrillers & Geopolitics
 - **Live hubs:** `/category/thriller`, `/category/crime`, `/category/action-adventure`
@@ -159,7 +161,7 @@ The live sitemap on 2026-11-05 lists 53 review URLs, 7 series hubs, 14 category 
 
 ### Series Hubs (Live)
 
-The series page is `/series/<tmdbId>`; the editorial review is `/reviews/<slug>`. Both are in the sitemap, and both need to link to each other (see §6, gap 2).
+The series page is `/series/<tmdbId>`; the editorial review is `/reviews/<slug>`. Both are in the sitemap and link to each other: the hub surfaces "Our review", and the review shows "Series guide" plus TMDB `/tv/` links.
 
 | Series hub | Title | Review |
 |---|---|---|
@@ -229,27 +231,38 @@ These seeds exist but are not in the live sitemap. Publishing them is an owner a
 | Homepage | Canonical review | Review shelf and hero CTA point at `/reviews/<slug>` | Live: `reviewHref` |
 | `/reviews` archive | Canonical review | Every tile points at `/reviews/<slug>` | Live |
 | Film hub | Canonical review | "Read the full review" | Live on `/movies/<tmdbId>` |
-| Series hub | Canonical review | Series page should surface its review | **Gap** |
-| Review page | Series hub | Series review should link to `/series/<tmdbId>` | **Gap** |
-| Taxonomy hub | Sibling taxonomy hub | Shared-film cross-links (cast ↔ director ↔ category) | **Gap** |
+| Series hub | Canonical review | "Our review" excerpt + link on `/series/<tmdbId>` | Live: `reviewForSeriesHub` |
+| Review page | Series hub | "Series guide" link to `/series/<tmdbId>` | Live: `seriesHub` |
+| Taxonomy hub | Sibling taxonomy hub | Shared-film cross-links (cast ↔ director ↔ category) | Live: `TaxonomyRelated`, capped at 4/3/3 |
 
 ---
 
 ## 6. Review Cadence & Gap Analysis
 
-**Live counts (2026-11-05 sitemap):** 53 reviews, 7 series hubs, 14 category hubs, 19 cast hubs, 1 director hub, 5 static pages (home, reviews, about, contact, upcoming) plus `/movies` and `/series` indexes. Google had indexed roughly 7 of 101 URLs at the 2026-11-01 audit.
+**Live counts (2026-11-06 sitemap):** 53 reviews, 7 series hubs, 14 category hubs, 19 cast hubs, 1 director hub, 1 author profile, 1 editorial policy, and the index/static pages (103 URLs). Google had indexed 7 of 103 URLs at the 2026-11-06 audit; 42 are known, 61 unknown.
+
+**Completed since the first map (2026-11-05):**
+
+- **Series link gap closed.** `/series/<tmdbId>` surfaces "Our review" when a
+  published series review is attached; the review shows "Series guide" and
+  TMDB `/tv/` links.
+- **Sibling taxonomy links added.** Cast, director and category hubs cross-link
+  by shared reviews, capped at 4 categories, 3 directors and 3 cast names.
+- **Archive and filter links canonical.** `/reviews` links `/reviews/<slug>`;
+  `?genre=` filters 301 to `/category/<slug>`.
+- **Trust pages live.** `/author/the-editor` and `/editorial-policy` are in the
+  sitemap and linked from the byline, footer and About page.
 
 **Immediate priorities:**
 
 1. **Publish the 12 drafts** (owner action in `/admin`), starting with `tenzing-2026-review`. The map already assigns each draft a cluster; publishing turns a draft row into a live URL and a new internal-link target.
-2. **Close the series link gap.** `/series/<tmdbId>` currently says "No review yet" even when a review exists, and the review does not link back. Add a "Read the review" link on the series hub and a "Series guide" link on the review when `mediaType` is `tv`.
-3. **Add sibling taxonomy links.** Cast, director, and category pages list reviews but do not cross-link on shared films. One contextual link per shared credit is enough; no link farm.
-4. **Build second reviews for one-review hubs.** `TAXONOMY_MIN_INDEXABLE = 2` is correct. Do not index a cast or director page with one review; give it a second credit first.
-5. **Keep the author entity honest.** `/author/the-editor` is a desk byline, not a named human. A named critic, real `sameAs` profiles, and any AI-assistance disclosure remain owner decisions.
-6. **Request indexing manually.** The CDP route was refused server-side five times; the remaining channel is the owner's manual Request Indexing clicks (about 10/day) plus the sitemap. Do not re-run the CDP harness without a fresh instruction.
+2. **Add a supporting content type.** `/blog`, `/guides`, `/lists` and `/explainers` are still 404. A curated list (for example, the espionage cluster) or one explainer would close the last open P0 in the holisticseo harness. Owner editorial decision.
+3. **Build second reviews for one-review hubs.** `TAXONOMY_MIN_INDEXABLE = 2` is correct. Do not index a cast or director page with one review; give it a second credit first.
+4. **Keep the author entity honest.** `/author/the-editor` is a desk byline, not a named human. A named critic, real `sameAs` profiles, and any AI-assistance disclosure remain owner decisions.
+5. **Request indexing manually.** The CDP route was refused server-side five times; the remaining channel is the owner's manual Request Indexing clicks (about 10/day) plus the sitemap. Do not re-run the CDP harness without a fresh instruction.
 
 **Deliberately deferred:**
 
 - **Local SEO:** no Google Business Profile, no NAP, no service area; the publication is global.
-- **Programmatic SEO:** do not scale template pages until at least half of the current 101 URLs are indexed.
+- **Programmatic SEO:** do not scale template pages until at least half of the current 103 URLs are indexed.
 - **Backlink rescue:** pending a Semrush referring-domain export; the legacy archive recovery is a redirect map, not a content plan.

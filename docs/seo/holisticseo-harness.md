@@ -267,14 +267,14 @@ total. A total that holds still while IL rises and TM falls is not progress.
 | Generic concept | Film-site form | Where it lives here |
 |---|---|---|
 | Source Context | An independent review magazine: one editor, one rating, legal streaming links, no piracy | `/about` |
-| Topical map | Genre, decade, franchise, industry/language, and director clusters, each with a hub and supporting explainers | missing; taxonomy is auto-derived in `src/lib/seo/taxonomy.ts` |
+| Topical map | Genre, decade, franchise, industry/language, and director clusters, each with a hub and supporting explainers | `docs/seo/topical-map-2026-11.md`; taxonomy is derived in `src/lib/seo/taxonomy.ts` |
 | Contextual vector | Verdict, then what the film is, then craft, then where to watch | review bodies, 8 `##` sections in 44 of 62 seeds |
-| Contextual bridge | "This is the third Villeneuve film we have reviewed" style prose linking a review to its director hub | missing; genre links are query URLs |
-| Entity | Film, person, studio, franchise, award, festival | film and person only |
-| Attribute | Runtime, certification, release date, studio, budget, box office, awards, franchise position | partial; year, runtime (42/62), cast, director, genre |
+| Contextual bridge | "This is the third Villeneuve film we have reviewed" style prose linking a review to its director hub | review pages link category, director and cast hubs; taxonomy hubs cross-link siblings |
+| Entity | Film, person, studio, franchise, award, festival | film, series, person and organization; no studio, franchise or award pages |
+| Attribute | Runtime, certification, release date, studio, budget, box office, awards, franchise position | partial; year, runtime (42/62), cast, director, genre, IMDb id, TMDB `sameAs` |
 | Value | The specific fact, for example 94 percent from 553 critics | in body prose, absent from frontmatter |
-| Query semantics | Review, where to watch, ending explained, cast, films like this, best of year | review and where-to-watch only |
-| E-E-A-T | Critic methodology, viewing basis, sourcing, correction log, dated availability | policy on `/about`, no named critic |
+| Query semantics | Review, where to watch, ending explained, cast, films like this, best of year | review, where-to-watch, cast, director, category and series; no lists or explainers |
+| E-E-A-T | Critic methodology, viewing basis, sourcing, correction log, dated availability | `/editorial-policy`, `/author/the-editor`, dated availability; no named critic |
 
 Three real frontmatters show what the model carries.
 `seeds/extramovies/avengers-endgame-2019-review.md` has `tmdb_id: 299534`,
@@ -344,6 +344,42 @@ Review pages have a median in-degree of 5; taxonomy pages have 0.
 
 ---
 
-## 7. Change log
+## 7. Second run, 2026-11-06
+
+Live site after the P0/P1/P2 fixes. Sitemap snapshot: 103 URLs (54 reviews,
+19 cast, 14 category, 8 series, 1 director, 1 author, 1 editorial policy, and
+7 static/index pages). The crawl found 3,571 internal links between sitemap
+URLs, 0 orphans (was 35). URL Inspection: 103/103 inspected, 7 indexed,
+42 known, 61 unknown, 0 non-self Google canonicals.
+
+| Section | Earned | Weight |
+|---|---|---|
+| Topical map and coverage | 10 | 20 |
+| Contextual relevance | 13 | 15 |
+| Entity coverage | 11 | 15 |
+| Query semantics | 11 | 15 |
+| Internal linking | 15 | 15 |
+| Page segmentation | 8 | 10 |
+| E-E-A-T | 6 | 10 |
+| **Total** | **74** | **100** |
+
+**Score: 74/100 (Developing), up from 42/100 (Weak).** HF1, HF2 and HF3
+are closed. HF4 is not formally triggered because EE-2 is PARTIAL (the
+author node carries `url` and `worksFor`), but EE-1 still FAILs: the byline
+is "The Editor", not a named human. The run is not a pass: TM-3 is an open
+P0, and TM-4, EN-2, QS-3, PS-3 and EE-1 are open P1s (TM-4 and QS-3
+PARTIAL; EN-2, PS-3 and EE-1 FAIL).
+
+The full run, including the diff by section and the traffic/index evidence,
+is in `data/legacy/holisticseo-audit-2026-11-06.md` (untracked). The open
+items that need an owner decision are the named critic / `sameAs` profiles,
+the supporting content type (a list, guide or explainer), and the 12 draft
+seeds.
+
+---
+
+## 8. Change log
 
 - 2026-11-02: first version, baseline 42/100.
+- 2026-11-06: second run, 74/100 (Developing); HF1-HF3 closed, TM-3 remains
+  the only open P0, EE-1 remains the only open hard-fail substance.

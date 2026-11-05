@@ -157,18 +157,51 @@ indexing and traffic; Semrush stays useful for keyword and competitor research.
 
 ## 7. Baseline to carry forward
 
-| Metric | Value on 2026-11-02 |
-|---|---|
-| GSC clicks, 28 days | 15 |
-| GSC impressions, 28 days | 354 |
-| Brand query position | 50.8 for "extramovies" |
-| Non-brand clicks | 0 |
-| Indexed URLs | about 7 of 101 |
-| Harness score | 42/100, Weak, hard fails HF1 to HF4 |
+| Metric | 2026-11-02 | 2026-11-06 |
+|---|---|---|
+| GSC clicks, 28 days | 15 | 21 |
+| GSC impressions, 28 days | 354 | 472 |
+| Brand query position | 50.8 for "extramovies" | not re-pulled |
+| Non-brand clicks | 0 | not re-pulled |
+| Indexed URLs | about 7 of 101 | 7 of 103 |
+| Harness score | 42/100, Weak, HF1 to HF4 open | 74/100, Developing, TM-3 open P0 |
 
 Weekly: `python3 scripts/seo/gsc_index_audit.py`. Monthly: the four-metric
 report from GSC and Bing. Compare like with like; do not mix Semrush US numbers
 with GSC India numbers.
+
+## 7a. Post-fix verification, 2026-11-06
+
+The P0/P1/P2 items that were agent-doable shipped to `prod-extra` in four
+deploys (`063a507`, `5696f14`, `f773a46`, `5178e9a`). Production checks:
+
+- `/reviews` links canonical `/reviews/<slug>` URLs; `?genre=` 301s to the
+  matching `/category/<slug>`.
+- Review pages link category, director and cast hubs; taxonomy hubs cross-link
+  relevant siblings (capped at 4 categories, 3 directors, 3 cast names).
+- Series hubs surface "Our review"; series reviews show "Series guide" and
+  TMDB `/tv/` links. The film hub for a colliding TMDB id keeps the film.
+- Homepage H1 is "Movie reviews, argued from the viewing"; the hero CTA points
+  at the review, not a TMDB gateway.
+- `/author/the-editor` and `/editorial-policy` are live, in the sitemap, and
+  linked from the byline, footer and About page.
+- Movie/TVSeries JSON-LD carries `sameAs` to TMDB; co-directors are separate
+  Person nodes; related links are relevance-only (no latest-review top-up).
+- Sitemap: 103 URLs. Link graph: 3,571 internal links, 0 orphans.
+- URL Inspection: 103/103 inspected; 7 indexed, 42 known, 61 unknown; 0
+  non-self Google canonicals. The 12 draft seeds remain 404.
+- GSC 28d: 21 clicks / 472 impressions (up from 15 / 354). The last three days
+  with data are 2026-11-01 (1 click / 21 impressions), 2026-11-02 (4 / 25)
+  and 2026-11-03 (0 / 19). The "72 hours zero" was click noise at roughly
+  0.5 clicks/day, not a new collapse.
+- Harness: 74/100, Developing (up from 42/100, Weak). HF1-HF3 closed; TM-3
+  (supporting content type) is the only open P0; EE-1 (named human critic)
+  remains an owner decision.
+
+The remaining work is owner-gated or content-gated: publish the 12 drafts,
+add a supporting content type, decide the named critic / `sameAs` profiles,
+request indexing manually, and provide a Semrush referring-domain export for
+the backlink rescue.
 
 ## 8. What not to do
 
