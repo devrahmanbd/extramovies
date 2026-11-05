@@ -161,3 +161,45 @@ export function seriesHubPath(review: PublicReview): string | null {
   if (typeof id !== "number" || !Number.isSafeInteger(id) || id <= 0) return null;
   return `/series/${id}`;
 }
+
+/** The published row with this TMDB id, or null when the site has none. */
+function reviewByTmdbId(tmdbId: number): PublicReview | null {
+  if (typeof tmdbId !== "number" || !Number.isSafeInteger(tmdbId) || tmdbId <= 0) {
+    return null;
+  }
+  return getLatestReviews(5000).find((r) => r.tmdbId === tmdbId) ?? null;
+}
+
+/**
+ * The published review attached to a SERIES hub, or null when the row is a
+ * film or the site cannot classify it.
+ *
+ * Only a KNOWN series is attached. An unknown row never gets moved to a
+ * series hub it may not deserve (src/lib/tmdb/media-type.ts), so a TMDB
+ * outage fails soft to "no link" rather than a wrong link.
+ */
+export async function reviewForSeriesHub(
+  tmdbId: number,
+): Promise<PublicReview | null> {
+  const candidate = reviewByTmdbId(tmdbId);
+  if (!candidate) return null;
+  return (await resolveMediaType(candidate)) === "tv" ? candidate : null;
+}
+
+/**
+ * The published review attached to a FILM hub, or null when the row is a
+ * known series.
+ *
+ * TMDB keeps film and TV ids in separate namespaces and the same number can
+ * exist in both (src/lib/tmdb/media-type.ts). A KNOWN series row must not be
+ * attached to the film hub for the same number. A row the site cannot
+ * classify keeps today's behaviour: it stays on the film hub, so a TMDB
+ * outage never removes a film review.
+ */
+export async function reviewForMovieHub(
+  tmdbId: number,
+): Promise<PublicReview | null> {
+  const candidate = reviewByTmdbId(tmdbId);
+  if (!candidate) return null;
+  return (await resolveMediaType(candidate)) === "tv" ? null : candidate;
+}

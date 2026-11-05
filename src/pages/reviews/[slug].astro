@@ -39,6 +39,7 @@ import { relatedReviews } from "../../lib/related";
 import { renderMarkdown, readingMinutes } from "../../lib/markdown";
 import { displayAuthor } from "../../lib/site-author";
 import { slugifyTaxonomy } from "../../lib/seo/taxonomy";
+import { resolveMediaType } from "../../lib/seo/series-reviews";
 
 export function getStaticPaths() {
   return getLatestReviews(100).map((r) => ({ params: { slug: r.slug } }));
@@ -54,6 +55,22 @@ if (resolved.type === "not-found") {
   return new Response("Review not found", { status: 404 });
 }
 const review = resolved.review;
+/**
+ * The row's media type decides three visible things: the TMDB links
+ * (/movie/ vs /tv/), the "Movie info" vs "Series info" label, and whether
+ * the title hub is /movies/<id> or /series/<id>. `resolveMediaType` is
+ * fail-soft: null keeps today's film behaviour rather than guessing.
+ */
+const mediaType = await resolveMediaType(review);
+const isSeries = mediaType === "tv";
+const seriesHub =
+  isSeries &&
+  typeof review.tmdbId === "number" &&
+  Number.isSafeInteger(review.tmdbId) &&
+  review.tmdbId > 0
+    ? `/series/${review.tmdbId}`
+    : null;
+const tmdbMediaPath = isSeries ? "tv" : "movie";
 
 const brand = await getSiteBrand((k) => getSetting(getDb({}), k));
 const origin = siteOrigin(Astro.url.origin);
@@ -78,8 +95,8 @@ const directorLinks = (review.director ?? "")
 const isLong = review.reviewTitle.length > 40;
 const jsonld = [
   articleJsonLd(review, { ...brand, origin }, canonical),
-  myReviewJsonLd(review, { ...brand, origin }, canonical),
-  movieJsonLd(review, origin),
+  myReviewJsonLd(review, { ...brand, origin }, canonical, mediaType),
+  movieJsonLd(review, origin, mediaType),
   breadcrumbJsonLd(origin, [
     { name: "Home", path: "/" },
     { name: "Reviews", path: "/reviews" },
@@ -131,6 +148,7 @@ const seoTitle = typeof review.seoTitle === "string" ? review.seoTitle : null;
         publishedDate={publishedDate}
         minutes={minutes}
         tmdbId={review.tmdbId}
+        mediaType={mediaType}
       />
     </div>
 
@@ -164,7 +182,7 @@ const seoTitle = typeof review.seoTitle === "string" ? review.seoTitle : null;
 
       <section aria-labelledby="movie-info" class="band section--sm pub-info pub-info--compact pub-info--glam">
         <div class="section-head">
-          <h2 id="movie-info">Movie info</h2>
+          <h2 id="movie-info">{isSeries ? "Series info" : "Movie info"}</h2>
         </div>
         <dl class="fact-list">
           <div><dt>Title</dt><dd>{review.movieTitle}</dd></div>
@@ -203,10 +221,15 @@ const seoTitle = typeof review.seoTitle === "string" ? review.seoTitle : null;
           {review.tmdbId ? (
             <div>
               <dt>More data</dt>
-              <dd><a href={`https://www.themoviedb.org/movie/${review.tmdbId}`} rel="noopener">View on TMDB</a></dd>
+              <dd><a href={`https://www.themoviedb.org/${tmdbMediaPath}/${review.tmdbId}`} rel="noopener">View on TMDB</a></dd>
             </div>
           ) : null}
-          {review.tmdbId ? (
+          {seriesHub ? (
+            <div>
+              <dt>Series guide</dt>
+              <dd><a href={seriesHub}>Seasons, cast &amp; where to watch</a></dd>
+            </div>
+          ) : review.tmdbId ? (
             <div>
               <dt>Title hub</dt>
               <dd><a href={`/movies/${review.tmdbId}`}>Streaming options, details &amp; member reviews</a></dd>

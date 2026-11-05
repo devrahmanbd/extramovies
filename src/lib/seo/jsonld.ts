@@ -8,6 +8,7 @@
 import { BRAND_ALTERNATE_NAMES, type Brand } from "./brand";
 import type { PublicReview } from "./content";
 import { displayAuthor } from "../site-author";
+import type { ReviewMediaType } from "../tmdb/media-type";
 import { slugifyTaxonomy } from "./taxonomy";
 
 export type JsonLd = Record<string, unknown>;
@@ -70,11 +71,15 @@ function authorNode(review: PublicReview, brand: Brand): JsonLd {
  * based on itself (the TMDB page for the same film) — a self-referential
  * false claim to a crawler.
  */
-function tmdbSourceUrl(tmdbId: number | null | undefined): string | null {
+function tmdbSourceUrl(
+  tmdbId: number | null | undefined,
+  mediaType: ReviewMediaType | null = "movie",
+): string | null {
   if (typeof tmdbId !== "number" || !Number.isSafeInteger(tmdbId) || tmdbId <= 0) {
     return null;
   }
-  return `https://www.themoviedb.org/movie/${tmdbId}`;
+  const path = mediaType === "tv" ? "tv" : "movie";
+  return `https://www.themoviedb.org/${path}/${tmdbId}`;
 }
 
 export function websiteJsonLd(brand: Brand): JsonLd {
@@ -176,15 +181,23 @@ export function breadcrumbJsonLd(
   };
 }
 
-export function movieJsonLd(review: PublicReview, origin: string): JsonLd {
+export function movieJsonLd(
+  review: PublicReview,
+  origin: string,
+  mediaType: ReviewMediaType | null = "movie",
+): JsonLd {
   void origin;
+  const isSeries = mediaType === "tv";
   const movie: JsonLd = {
     "@context": "https://schema.org",
-    "@type": "Movie",
+    "@type": isSeries ? "TVSeries" : "Movie",
     name: review.movieTitle,
     ...(review.year ? { dateCreated: String(review.year) } : {}),
     ...(review.genres.length > 0 ? { genre: review.genres } : {}),
-    ...directorField(review.director),
+    // A series row's `director` field is the show's credited creator/director
+    // as the editor stored it, not a per-episode director. Do not claim it as
+    // a Movie director on a TVSeries node.
+    ...(isSeries ? {} : directorField(review.director)),
     ...(review.posterUrl ? { image: review.posterUrl } : {}),
   };
   return movie;
@@ -222,12 +235,14 @@ export function articleJsonLd(
 export function myReviewJsonLd(
   review: PublicReview,
   brand: Brand,
-  canonical: string
+  canonical: string,
+  mediaType: ReviewMediaType | null = "movie",
 ): JsonLd {
-  // Authority claim: the review is grounded in the film's TMDB record.
-  // Review node only (never the itemReviewed Movie — see tmdbSourceUrl).
+  // Authority claim: the review is grounded in the title's TMDB record.
+  // Review node only (never the itemReviewed node — see tmdbSourceUrl).
   // Emitted only when a valid TMDB id exists.
-  const source = tmdbSourceUrl(review.tmdbId);
+  const isSeries = mediaType === "tv";
+  const source = tmdbSourceUrl(review.tmdbId, mediaType);
   return {
     "@context": "https://schema.org",
     "@type": "Review",
@@ -242,11 +257,11 @@ export function myReviewJsonLd(
     },
     ...(source ? { isBasedOn: source } : {}),
     itemReviewed: {
-      "@type": "Movie",
+      "@type": isSeries ? "TVSeries" : "Movie",
       name: review.movieTitle,
       ...(review.year ? { dateCreated: String(review.year) } : {}),
       ...(review.genres.length > 0 ? { genre: review.genres } : {}),
-      ...directorField(review.director),
+      ...(isSeries ? {} : directorField(review.director)),
       ...(review.posterUrl ? { image: review.posterUrl } : {}),
     },
     mainEntityOfPage: { "@type": "WebPage", "@id": canonical },

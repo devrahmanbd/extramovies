@@ -25,6 +25,7 @@ import {
   hasTmdbKey,
   toContentProviders,
 } from "../../lib/tmdb/discover";
+import { reviewForSeriesHub } from "../../lib/seo/series-reviews";
 import {
   emptyProviders,
   normalizeWatchProviders,
@@ -71,6 +72,11 @@ const providers = toContentProviders(
     ? normalizeWatchProviders(tvProvidersRaw, tmdbId, region)
     : emptyProviders(tmdbId, region)
 );
+
+// The editorial review attached to this hub, only when the row is a KNOWN
+// series. TMDB keeps film and TV ids in separate namespaces; the media-type
+// resolver is what prevents a film with the same number from being attached.
+const seriesReview = ok ? await reviewForSeriesHub(tmdbId) : null;
 
 // Member reviews (public slice): best-effort, never breaks the series page.
 let memberReviews: Awaited<ReturnType<typeof listMemberReviews>> = [];
@@ -213,9 +219,23 @@ const headMeta = ok
                 <div><dt>TMDB score</dt><dd class="tnum">{show.voteAverage.toFixed(1)}/10{show.voteCount ? ` (${show.voteCount} votes)` : ""}</dd></div>
               ) : null}
             </dl>
-            <p class="d-empty">No review yet — <a href="/reviews">browse the journal</a>.</p>
+            {seriesReview ? null : (
+              <p class="d-empty">No review yet — <a href="/reviews">browse the journal</a>.</p>
+            )}
           </div>
         </div>
+
+        {seriesReview ? (
+          <section class="band--alt section--sm d-journal-slot" aria-labelledby="series-review-heading">
+            <div class="section-head">
+              <h2 id="series-review-heading">Our review</h2>
+            </div>
+            <p class="d-journal-excerpt">{seriesReview.excerpt}</p>
+            <p class="d-journal-link">
+              <a href={`/reviews/${seriesReview.slug}`}>Read the review: {seriesReview.reviewTitle}</a>
+            </p>
+          </section>
+        ) : null}
 
         <WhereToWatch
           providers={providers}

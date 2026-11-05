@@ -209,6 +209,83 @@ export function taxonomyEntries(kind: TaxonomyKind): TaxonomyEntry[] {
     .sort((a, b) => a.label.localeCompare(b.label));
 }
 
+/** One sibling hub: another taxonomy page built from the same reviews. */
+export interface TaxonomySibling {
+  kind: TaxonomyKind;
+  slug: string;
+  label: string;
+  path: string;
+  /** Number of the current entry's reviews that also belong to this hub. */
+  shared: number;
+}
+
+/** Categories first, then directors, then cast — the most useful context. */
+const SIBLING_KIND_ORDER: Record<TaxonomyKind, number> = {
+  category: 0,
+  director: 1,
+  cast: 2,
+};
+
+/**
+ * The other taxonomy hubs built from the SAME reviews as `entry`.
+ *
+ * Relevance-scored, never a link farm: a candidate's score is the number of
+ * the current entry's reviews that also belong to it. The current entry is
+ * never returned, and a candidate with no shared review is never returned.
+ * Ties break toward the page with more published reviews, then toward
+ * categories before directors before cast, then alphabetically, so the
+ * block is stable across renders.
+ *
+ * The full index is the default because a candidate's total review count is
+ * part of the ranking; a caller that already holds an index can pass it.
+ * Fail-soft: if the store cannot be read, the page's own reviews are enough
+ * to build a smaller index.
+ */
+export function siblingTaxonomies(
+  entry: TaxonomyEntry,
+  index?: Map<string, TaxonomyEntry>,
+): TaxonomySibling[] {
+  let live: Map<string, TaxonomyEntry>;
+  try {
+    live = index ?? taxonomyIndex();
+  } catch {
+    live = buildTaxonomyIndex(entry.reviews);
+  }
+  const own = `${entry.kind}/${entry.slug}`;
+  const ownSlugs = new Set(entry.reviews.map((r) => r.slug));
+  const out: Array<TaxonomySibling & { total: number }> = [];
+  for (const [key, candidate] of live) {
+    if (key === own) continue;
+    let shared = 0;
+    for (const review of candidate.reviews) {
+      if (ownSlugs.has(review.slug)) shared += 1;
+    }
+    if (shared === 0) continue;
+    out.push({
+      kind: candidate.kind,
+      slug: candidate.slug,
+      label: candidate.label,
+      path: candidate.path,
+      shared,
+      total: candidate.reviews.length,
+    });
+  }
+  out.sort(
+    (a, b) =>
+      b.shared - a.shared ||
+      b.total - a.total ||
+      SIBLING_KIND_ORDER[a.kind] - SIBLING_KIND_ORDER[b.kind] ||
+      a.label.localeCompare(b.label),
+  );
+  return out.map((s) => ({
+    kind: s.kind,
+    slug: s.slug,
+    label: s.label,
+    path: s.path,
+    shared: s.shared,
+  }));
+}
+
 /**
  * True when the site publishes a page for this taxonomy slug.
  *

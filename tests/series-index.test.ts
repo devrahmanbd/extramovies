@@ -379,6 +379,62 @@ describe("series index: the chrome links to /series in both themes", () => {
   });
 });
 
+describe("hub review attachment: film and TV ids never cross", () => {
+  it("a known series is attached to /series and never to /movies", async () => {
+    useFixtureStore([
+      row({
+        id: "s1",
+        slug: "neverland-2011-review",
+        title: "Neverland Review",
+        publishedAt: "2026-10-21T09:00:00.000Z",
+        mediaType: "tv",
+        tmdbId: 43720,
+      }),
+    ]);
+    const { reviewForMovieHub, reviewForSeriesHub } = await import(
+      "../src/lib/seo/series-reviews"
+    );
+    expect((await reviewForSeriesHub(43720))?.slug).toBe("neverland-2011-review");
+    // The same number in the film namespace is a different title: never attach.
+    expect(await reviewForMovieHub(43720)).toBeNull();
+  });
+
+  it("a known film is attached to /movies and never to /series", async () => {
+    useFixtureStore([
+      row({
+        id: "f1",
+        slug: "a-film-review",
+        title: "A Film Review",
+        publishedAt: "2026-10-22T09:00:00.000Z",
+        mediaType: "movie",
+        tmdbId: 43720,
+      }),
+    ]);
+    const { reviewForMovieHub, reviewForSeriesHub } = await import(
+      "../src/lib/seo/series-reviews"
+    );
+    expect((await reviewForMovieHub(43720))?.slug).toBe("a-film-review");
+    expect(await reviewForSeriesHub(43720)).toBeNull();
+  });
+
+  it("an unclassifiable row stays on the film hub (today's behaviour) and never invents a series", async () => {
+    useFixtureStore([
+      row({
+        id: "u1",
+        slug: "unknown-media-review",
+        title: "Unknown Media Review",
+        publishedAt: "2026-10-23T09:00:00.000Z",
+        tmdbId: 43720,
+      }),
+    ]);
+    const { reviewForMovieHub, reviewForSeriesHub } = await import(
+      "../src/lib/seo/series-reviews"
+    );
+    expect((await reviewForMovieHub(43720))?.slug).toBe("unknown-media-review");
+    expect(await reviewForSeriesHub(43720)).toBeNull();
+  });
+});
+
 describe("media type: the row's own tag wins, and the lookup never guesses", () => {
   it("a pinned media type is the answer, with no lookup at all", async () => {
     const { resolveMediaType, pinnedMediaType } = await import("../src/lib/seo/series-reviews");

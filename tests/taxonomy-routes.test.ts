@@ -223,6 +223,71 @@ describe("taxonomy: a category page lists the matching published reviews", () =>
   });
 });
 
+describe("taxonomy: sibling hubs", () => {
+  it("links only hubs built from the same reviews, never itself", async () => {
+    useFixtureStore([
+      row({
+        id: "sb1",
+        slug: "sib-film-a",
+        title: "Sib Film A",
+        publishedAt: "2026-08-01T00:00:00.000Z",
+        director: "Sib Director",
+        cast: ["Sib Actor", "Solo Actor A"],
+        genres: ["Sib Drama", "Sib Comedy"],
+      }),
+      row({
+        id: "sb2",
+        slug: "sib-film-b",
+        title: "Sib Film B",
+        publishedAt: "2026-08-02T00:00:00.000Z",
+        director: "Sib Director",
+        cast: ["Sib Actor"],
+        genres: ["Sib Drama"],
+      }),
+    ]);
+    const { getTaxonomyEntry, siblingTaxonomies } = await import("../src/lib/seo/taxonomy");
+    const entry = getTaxonomyEntry("category", "sib-drama");
+    expect(entry).not.toBeNull();
+    const siblings = siblingTaxonomies(entry!);
+    const keys = siblings.map((s) => `${s.kind}/${s.slug}`);
+    // Shared by both reviews: the strongest links come first.
+    expect(keys[0]).toBe("director/sib-director");
+    expect(keys).toContain("cast/sib-actor");
+    expect(siblings.find((s) => s.kind === "director")?.shared).toBe(2);
+    // Shared by one review: still relevant, still a real page.
+    expect(keys).toContain("category/sib-comedy");
+    expect(keys).toContain("cast/solo-actor-a");
+    // The current hub is never a sibling of itself.
+    expect(keys).not.toContain("category/sib-drama");
+  });
+
+  it("returns no sibling when the reviews share no other credit", async () => {
+    useFixtureStore([
+      row({
+        id: "solo1",
+        slug: "solo-sib-film",
+        title: "Solo Sib Film",
+        publishedAt: "2026-08-03T00:00:00.000Z",
+        genres: ["Solo Drama"],
+      }),
+    ]);
+    const { getTaxonomyEntry, siblingTaxonomies } = await import("../src/lib/seo/taxonomy");
+    const entry = getTaxonomyEntry("category", "solo-drama");
+    expect(entry).not.toBeNull();
+    expect(siblingTaxonomies(entry!)).toEqual([]);
+  });
+
+  it("the shared taxonomy page renders the sibling strip", () => {
+    const page = read("src/components/public/TaxonomyPage.astro");
+    expect(page).toContain("siblingTaxonomies");
+    expect(page).toContain("<TaxonomyRelated");
+    const related = read("src/components/public/TaxonomyRelated.astro");
+    expect(related).toContain("Related hubs");
+    expect(related).toContain('aria-label="Related hubs"');
+    expect(related).toContain("s.kind === \"category\"");
+  });
+});
+
 describe("taxonomy: indexing policy (fewer than two reviews = noindex, follow)", () => {
   it("a one-review taxonomy page is noindex and says so in the intro", async () => {
     useFixtureStore([

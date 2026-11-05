@@ -14,8 +14,9 @@
  */
 import Base from "../../layouts/Base.astro";
 import TaxonomyReviewItem from "./TaxonomyReviewItem.astro";
+import TaxonomyRelated from "./TaxonomyRelated.astro";
 import { breadcrumbJsonLd } from "../../lib/seo/jsonld";
-import type { TaxonomyPageMeta } from "../../lib/seo/taxonomy";
+import { siblingTaxonomies, type TaxonomyPageMeta } from "../../lib/seo/taxonomy";
 
 interface Props {
   meta: TaxonomyPageMeta;
@@ -31,6 +32,7 @@ const kicker = entry.kind === "cast" ? "Cast" : entry.kind === "director" ? "Dir
 const headingIsLong = meta.title.length > 40;
 const lead = reviews[0];
 const image = lead?.posterUrl ?? lead?.backdropUrl ?? null;
+const siblings = siblingTaxonomies(entry);
 
 const jsonld = [
   breadcrumbJsonLd(origin, [
@@ -68,6 +70,7 @@ const jsonld = [
   current="reviews"
 >
   {isDiscovery ? (
+  <>
   <div class="wrap">
     <section class="band section--md d-browse-head" aria-labelledby="taxonomy-title">
       <nav class="d-crumb" aria-label="Breadcrumb">
@@ -92,6 +95,8 @@ const jsonld = [
       </ol>
     </section>
   </div>
+  <TaxonomyRelated siblings={siblings} />
+  </>
   ) : (
   <>
   <div class="wrap">
@@ -111,6 +116,7 @@ const jsonld = [
       </ol>
     </div>
   </div>
+  <TaxonomyRelated siblings={siblings} />
   </>
   )}
 </Base>

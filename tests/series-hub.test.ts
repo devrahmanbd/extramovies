@@ -6,7 +6,8 @@ import path from 'node:path';
 // Does NOT retest the lib (mapTvDetails / safeShowDefaults / member store
 // all have their own suites). Asserts the page composition the spec
 // requires: TV data + TV providers + tv-scoped member UI + TVSeries SEO,
-// with no editorial slot and no sitemap entries.
+// with a contextual link to the attached review (never a full editorial
+// embed) and no sitemap entries of its own.
 
 const PAGE = path.join(process.cwd(), 'src', 'pages', 'series', '[tmdbId].astro');
 
@@ -50,9 +51,12 @@ describe('series hub page (S1) contract', () => {
     expect(s).toContain('/^\\d+$/');
   });
 
-  it('has no editorial slot and adds no sitemap entry of its own', async () => {
+  it('links to the attached review without embedding it or adding a sitemap entry', async () => {
     const s = await src();
-    expect(s).not.toContain('findReviewForTmdbId');
+    // The link is contextual and media-type guarded, never a full editorial
+    // block and never the film showcase.
+    expect(s).toContain('reviewForSeriesHub');
+    expect(s).toContain('href={`/reviews/${seriesReview.slug}`}');
     expect(s).not.toContain('MovieShowcase');
     // The hub page never lists itself. A /series/<tmdbId> entry joins the
     // sitemap only when a PUBLISHED series review is attached to it, the

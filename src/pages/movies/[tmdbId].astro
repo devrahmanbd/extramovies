@@ -24,15 +24,12 @@ import { getMovieMetaSafe } from "../../lib/tmdb/client";
 import {
   currentTheme,
   defaultRegion,
-  findReviewForTmdbId,
   hasTmdbKey,
   toContentProviders,
 } from "../../lib/tmdb/discover";
 import { getStreamingAvailability } from "../../lib/streaming";
-import {
-  formatRuntime,
-  getLatestReviews,
-} from "../../lib/seo/content";
+import { formatRuntime } from "../../lib/seo/content";
+import { reviewForMovieHub } from "../../lib/seo/series-reviews";
 import { readingMinutes } from "../../lib/markdown";
 import MemberReviewList from "../../components/member/MemberReviewList.astro";
 import MemberReviewForm from "../../components/member/MemberReviewForm.astro";
@@ -72,7 +69,7 @@ if (!ok) {
 }
 
 const providers = toContentProviders(providersRes.providers);
-const review = ok ? findReviewForTmdbId(getLatestReviews(100), tmdbId) : null;
+const review = ok ? await reviewForMovieHub(tmdbId) : null;
 /* When a linked journal review exists this hub canonicalizes to the review's
  * /reviews/<slug> URL: the film page stays browsable for users while search
  * signals consolidate onto the canonical. The review page is the richer

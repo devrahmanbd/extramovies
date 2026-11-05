@@ -1,0 +1,57 @@
+---
+/**
+ * Sibling hub strip — the other taxonomy pages built from the same reviews.
+ *
+ * The list is relevance-scored by siblingTaxonomies(): shared-review count,
+ * then total reviews, then category -> director -> cast. The component caps
+ * each axis so a page never turns into a link farm: at most 4 categories,
+ * 3 directors and 3 cast names, and only when at least one sibling exists.
+ *
+ * Anchor text names the destination, not "click here": a category link says
+ * "Action reviews", a director link says "Reviews directed by X", a cast link
+ * says "Reviews with X". Every link points at a page the site actually
+ * publishes for one of the reviews already on this page.
+ */
+import type { TaxonomySibling } from "../../lib/seo/taxonomy";
+
+interface Props {
+  siblings: TaxonomySibling[];
+}
+
+const { siblings } = Astro.props;
+const cap = (kind: TaxonomySibling["kind"], limit: number) =>
+  siblings.filter((s) => s.kind === kind).slice(0, limit);
+const visible = [
+  ...cap("category", 4),
+  ...cap("director", 3),
+  ...cap("cast", 3),
+];
+
+function anchor(s: TaxonomySibling): string {
+  if (s.kind === "category") return `${s.label} reviews`;
+  if (s.kind === "director") return `Reviews directed by ${s.label}`;
+  return `Reviews with ${s.label}`;
+}
+---
+{visible.length > 0 ? (
+  <section class="band section--sm taxonomy-related" aria-labelledby="related-hubs-heading">
+    <div class="wrap">
+      <div class="section-head">
+        <h2 id="related-hubs-heading">Related hubs</h2>
+        <p>Other pages built from the same reviews.</p>
+      </div>
+      <nav class="glam-genres" aria-label="Related hubs">
+        <ul>
+          {visible.map((s, i) => (
+            <li>
+              <a href={s.path}>{anchor(s)}</a>
+              {i < visible.length - 1 ? (
+                <span class="glam-genres-sep" aria-hidden="true">/</span>
+              ) : null}
+            </li>
+          ))}
+        </ul>
+      </nav>
+    </div>
+  </section>
+) : null}

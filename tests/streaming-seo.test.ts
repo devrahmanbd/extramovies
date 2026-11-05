@@ -122,6 +122,29 @@ describe('SEO meta + JSON-LD + sitemap + RSS', () => {
     ]);
   });
 
+  it('review JSON-LD uses TVSeries and /tv/ for a series', async () => {
+    const { movieJsonLd, myReviewJsonLd } = await import('../src/lib/seo/jsonld');
+    const { DEMO_REVIEWS } = await import('../src/lib/seo/content');
+    const dune = DEMO_REVIEWS[0]!;
+    const series = {
+      ...dune,
+      movieTitle: 'Slow Horses',
+      tmdbId: 95480,
+      director: 'Mick Herron',
+    };
+    const canonical = 'https://reviews.example.com/reviews/slow-horses-2022-review';
+    const node = myReviewJsonLd(series, {} as never, canonical, 'tv');
+    const item = node.itemReviewed as Record<string, unknown>;
+    expect(item['@type']).toBe('TVSeries');
+    expect(node.isBasedOn).toBe('https://www.themoviedb.org/tv/95480');
+    // The row's `director` is the series' credited creator/director, not a
+    // per-episode Movie director: do not claim it on a TVSeries node.
+    expect('director' in item).toBe(false);
+    const title = movieJsonLd(series, 'https://reviews.example.com', 'tv');
+    expect(title['@type']).toBe('TVSeries');
+    expect('director' in title).toBe(false);
+  });
+
   it('sitemap escapes + includes lastmod', async () => {
     const { buildSitemapXml } = await import('../src/lib/portability');
     const xml = buildSitemapXml(
