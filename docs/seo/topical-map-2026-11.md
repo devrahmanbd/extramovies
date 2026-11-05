@@ -74,7 +74,7 @@ The live sitemap on 2026-11-06 lists 53 review URLs, 7 series hubs, 14 category 
   - `/reviews/the-night-agent-2023-review` (Shawn Ryan)
   - `/reviews/the-night-manager-2016-review` (David Farr)
   - `/reviews/the-americans-2013-review` (Joe Weisberg)
-  - `/reviews/slow-horses-2022-review` (Mick Herron, Gary Oldman)
+  - `/reviews/slow-horses-2022-review` (Gary Oldman; the stored `movie_director` credit still says Mick Herron and needs correction)
   - `/reviews/hitler-the-rise-of-evil-2003-review` (Christian Duguay)
   - `/reviews/masterplan-2026-review` (Thomas Vincent)
   - `/reviews/the-fix-2026-review` (Guy Moshe)

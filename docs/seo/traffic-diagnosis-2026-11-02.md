@@ -187,6 +187,10 @@ deploys (`063a507`, `5696f14`, `f773a46`, `5178e9a`). Production checks:
   linked from the byline, footer and About page.
 - Movie/TVSeries JSON-LD carries `sameAs` to TMDB; co-directors are separate
   Person nodes; related links are relevance-only (no latest-review top-up).
+- Series review fact cards omit the stored `movie_director` row (it is a
+  creator/director credit, not a reliable per-episode director); films keep
+  the row. The Slow Horses seed still stores Mick Herron in `movie_director`;
+  correct that data if a creator field is added.
 - Sitemap: 103 URLs. Link graph: 3,571 internal links, 0 orphans.
 - URL Inspection: 103/103 inspected; 7 indexed, 42 known, 61 unknown; 0
   non-self Google canonicals. The 12 draft seeds remain 404.
