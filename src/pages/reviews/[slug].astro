@@ -153,7 +153,11 @@ const seoTitle = typeof review.seoTitle === "string" ? review.seoTitle : null;
     </div>
 
     <div class="wrap">
-      <KeyFacts review={review} authorName={displayAuthor(review.authorName)} />
+      <KeyFacts
+        review={review}
+        authorName={displayAuthor(review.authorName)}
+        includeDirector={!isSeries}
+      />
       <QuickAnswer review={review} />
 
       {review.providers || review.customWatch ? (
@@ -198,7 +202,7 @@ const seoTitle = typeof review.seoTitle === "string" ? review.seoTitle : null;
             </div>
           ) : null}
           {runtime ? <div><dt>Runtime</dt><dd>{runtime}</dd></div> : null}
-          {review.director ? (
+          {!isSeries && review.director ? (
             <div>
               <dt>Director</dt>
               <dd>

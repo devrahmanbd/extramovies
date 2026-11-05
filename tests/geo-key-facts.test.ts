@@ -143,6 +143,16 @@ describe('key facts card', () => {
     }
   });
 
+  it('omits the director row when the page asks (series rows)', async () => {
+    const html = await render(KeyFacts, {
+      review: FULL_REVIEW,
+      includeDirector: false,
+    });
+    const labels = rows(html).map((r) => r.label);
+    expect(labels).not.toContain('Director');
+    expect(labels).toContain('Cast');
+  });
+
   it('prints the runtime the store row carries when there are no minutes', () => {
     const labelled: PublicReview = {
       ...FULL_REVIEW,

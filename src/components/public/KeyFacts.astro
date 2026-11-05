@@ -20,10 +20,16 @@ interface Props {
   review: PublicReview;
   /** Display byline (settings-aware); falls back to the row's own author. */
   authorName?: string | null;
+  /**
+   * Films show the stored director. Series pass false: the same field holds a
+   * creator/director credit, not a reliable per-episode director, and the
+   * JSON-LD already omits it.
+   */
+  includeDirector?: boolean;
 }
 
-const { review, authorName = null } = Astro.props;
-const rows = keyFactRows(review, { authorName });
+const { review, authorName = null, includeDirector = true } = Astro.props;
+const rows = keyFactRows(review, { authorName, includeDirector });
 ---
 {rows.length > 0 ? (
   <section class="keyfacts" aria-labelledby="key-facts">

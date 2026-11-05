@@ -149,7 +149,7 @@ export function watchSummary(review: PublicReview): WatchSummary | null {
  */
 export function keyFactRows(
   review: PublicReview,
-  opts?: { authorName?: string | null },
+  opts?: { authorName?: string | null; includeDirector?: boolean },
 ): KeyFactRow[] {
   const rows: KeyFactRow[] = [];
   const add = (label: string, value: string | null | undefined) => {
@@ -162,7 +162,10 @@ export function keyFactRows(
   add("Year", review.year ? String(review.year) : null);
   add("Released", factDate(review.releaseDate));
   add("Runtime", runtimeFact(review));
-  add("Director", review.director);
+  // A series row's `movie_director` is the stored creator/director credit,
+  // not a reliable per-episode director. The review page drops the row for
+  // TV rows (the JSON-LD already omits it); films keep today's behaviour.
+  if (opts?.includeDirector ?? true) add("Director", review.director);
   add("Cast", castFact(review.cast));
   add("Genres", (review.genres ?? []).map(oneLine).filter(Boolean).join(", "));
   add("Our rating", ratingFact(review.rating));
