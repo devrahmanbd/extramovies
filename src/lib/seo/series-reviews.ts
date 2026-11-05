@@ -162,12 +162,19 @@ export function seriesHubPath(review: PublicReview): string | null {
   return `/series/${id}`;
 }
 
-/** The published row with this TMDB id, or null when the site has none. */
-function reviewByTmdbId(tmdbId: number): PublicReview | null {
+/**
+ * Every published row carrying this TMDB id, newest first.
+ *
+ * TMDB keeps film and TV ids in separate namespaces, so the same number can
+ * legitimately identify two different titles. A caller that picks the first
+ * row would let one namespace shadow the other; callers must resolve each
+ * candidate and choose by media type instead.
+ */
+function reviewsByTmdbId(tmdbId: number): PublicReview[] {
   if (typeof tmdbId !== "number" || !Number.isSafeInteger(tmdbId) || tmdbId <= 0) {
-    return null;
+    return [];
   }
-  return getLatestReviews(5000).find((r) => r.tmdbId === tmdbId) ?? null;
+  return getLatestReviews(5000).filter((r) => r.tmdbId === tmdbId);
 }
 
 /**
@@ -181,9 +188,10 @@ function reviewByTmdbId(tmdbId: number): PublicReview | null {
 export async function reviewForSeriesHub(
   tmdbId: number,
 ): Promise<PublicReview | null> {
-  const candidate = reviewByTmdbId(tmdbId);
-  if (!candidate) return null;
-  return (await resolveMediaType(candidate)) === "tv" ? candidate : null;
+  for (const candidate of reviewsByTmdbId(tmdbId)) {
+    if ((await resolveMediaType(candidate)) === "tv") return candidate;
+  }
+  return null;
 }
 
 /**
@@ -199,7 +207,11 @@ export async function reviewForSeriesHub(
 export async function reviewForMovieHub(
   tmdbId: number,
 ): Promise<PublicReview | null> {
-  const candidate = reviewByTmdbId(tmdbId);
-  if (!candidate) return null;
-  return (await resolveMediaType(candidate)) === "tv" ? null : candidate;
+  let fallback: PublicReview | null = null;
+  for (const candidate of reviewsByTmdbId(tmdbId)) {
+    const mediaType = await resolveMediaType(candidate);
+    if (mediaType === "movie") return candidate;
+    if (mediaType === null && !fallback) fallback = candidate;
+  }
+  return fallback;
 }

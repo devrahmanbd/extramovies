@@ -417,6 +417,55 @@ describe("hub review attachment: film and TV ids never cross", () => {
     expect(await reviewForSeriesHub(43720)).toBeNull();
   });
 
+  it("a film and a series published under the same TMDB id each attach to their own hub", async () => {
+    useFixtureStore([
+      row({
+        id: "s1",
+        slug: "shared-series-review",
+        title: "Shared Series Review",
+        publishedAt: "2026-10-23T09:00:00.000Z",
+        mediaType: "tv",
+        tmdbId: 43720,
+      }),
+      row({
+        id: "f1",
+        slug: "shared-film-review",
+        title: "Shared Film Review",
+        publishedAt: "2026-10-22T09:00:00.000Z",
+        mediaType: "movie",
+        tmdbId: 43720,
+      }),
+    ]);
+    const { reviewForMovieHub, reviewForSeriesHub } = await import(
+      "../src/lib/seo/series-reviews"
+    );
+    // The series is newer, so a first-match lookup would shadow the film.
+    expect((await reviewForSeriesHub(43720))?.slug).toBe("shared-series-review");
+    expect((await reviewForMovieHub(43720))?.slug).toBe("shared-film-review");
+  });
+
+  it("a known film wins over an unclassifiable row for the same TMDB id", async () => {
+    useFixtureStore([
+      row({
+        id: "u1",
+        slug: "unknown-media-review",
+        title: "Unknown Media Review",
+        publishedAt: "2026-10-23T09:00:00.000Z",
+        tmdbId: 43720,
+      }),
+      row({
+        id: "f1",
+        slug: "known-film-review",
+        title: "Known Film Review",
+        publishedAt: "2026-10-22T09:00:00.000Z",
+        mediaType: "movie",
+        tmdbId: 43720,
+      }),
+    ]);
+    const { reviewForMovieHub } = await import("../src/lib/seo/series-reviews");
+    expect((await reviewForMovieHub(43720))?.slug).toBe("known-film-review");
+  });
+
   it("an unclassifiable row stays on the film hub (today's behaviour) and never invents a series", async () => {
     useFixtureStore([
       row({
