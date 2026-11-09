@@ -2,6 +2,7 @@
 title: "Tenzing Review: Ending, Release Date, Where to Watch"
 slug: tenzing-2026-review
 rating: 8.3
+published_at: "2026-11-09T09:00:00.000Z"
 tmdb_id: 1288069
 imdb_id: tt6262770
 seo_title: "Tenzing Review: Ending, Release Date, Where to Watch"

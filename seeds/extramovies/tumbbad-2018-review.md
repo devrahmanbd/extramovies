@@ -2,6 +2,7 @@
 title: Tumbbad Ending Explained and Full Movie Review
 slug: tumbbad-2018-review
 rating: 7.6
+published_at: "2026-11-09T09:00:00.000Z"
 tmdb_id: 538858
 imdb_id: tt8239946
 seo_title: "Tumbbad Ending Explained: Hastar, the Curse and Vinayak"

@@ -2,6 +2,7 @@
 title: "Condor Review: The Smart CIA Thriller Nobody Could Find"
 slug: condor-2018-review
 rating: 7.9
+published_at: "2026-11-09T09:00:00.000Z"
 tmdb_id: 71146
 imdb_id: tt6510950
 seo_title: "Condor (2018) Review: Worth Watching This CIA Thriller?"

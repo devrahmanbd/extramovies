@@ -2,6 +2,7 @@
 title: "13 Hours Review: Michael Bay's Benghazi Film Is His Most Restrained War Drama"
 slug: 13-hours-the-secret-soldiers-of-benghazi-2016-review
 rating: 6.7
+published_at: "2026-11-09T09:00:00.000Z"
 tmdb_id: 300671
 imdb_id: tt4172430
 seo_title: "13 Hours (2016) Review: Is This Michael Bay Benghazi Film Worth Watching?"

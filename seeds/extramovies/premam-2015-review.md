@@ -2,6 +2,7 @@
 title: Premam Ending Explained and Full Movie Review
 slug: premam-2015-review
 rating: 7.6
+published_at: "2026-11-09T09:00:00.000Z"
 tmdb_id: 341895
 imdb_id: tt4679210
 seo_title: "Premam Ending Explained: Malar's Memory, George's Last Look"

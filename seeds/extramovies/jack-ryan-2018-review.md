@@ -2,6 +2,7 @@
 title: "Tom Clancy's Jack Ryan Review: Amazon's Franchise Machine at Its Most Watchable"
 slug: jack-ryan-2018-review
 rating: 7.8
+published_at: "2026-11-09T09:00:00.000Z"
 tmdb_id: 73375
 imdb_id: tt5057054
 seo_title: "Jack Ryan (2018) Review: Worth Watching on Prime Video?"

@@ -2,6 +2,7 @@
 title: 777 Charlie Ending Explained and Movie Review
 slug: 777-charlie-2022-review
 rating: 7.6
+published_at: "2026-11-09T09:00:00.000Z"
 tmdb_id: 634120
 imdb_id: tt7466810
 seo_title: "777 Charlie Ending Explained: What Happens to Charlie"

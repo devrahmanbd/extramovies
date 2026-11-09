@@ -2,6 +2,7 @@
 title: The Lunchbox Ending Explained and Movie Review
 slug: the-lunchbox-2013-review
 rating: 7.4
+published_at: "2026-11-09T09:00:00.000Z"
 tmdb_id: 191714
 imdb_id: tt2350496
 seo_title: "The Lunchbox Ending Explained: Did the Letter Arrive?"

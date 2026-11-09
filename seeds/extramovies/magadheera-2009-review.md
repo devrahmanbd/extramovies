@@ -2,6 +2,7 @@
 title: "Magadheera Review: Ram Charan's Epic, Story and Ending"
 slug: magadheera-2009-review
 rating: 7.3
+published_at: "2026-11-09T09:00:00.000Z"
 tmdb_id: 23790
 imdb_id: tt1447500
 seo_title: "Magadheera Review: Rajamouli's Epic, Story and Ending"

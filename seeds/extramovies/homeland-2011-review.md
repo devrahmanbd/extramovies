@@ -2,6 +2,7 @@
 title: "Homeland Review: The CIA Drama That Made Unlikability a Superpower"
 slug: homeland-2011-review
 rating: 8.2
+published_at: "2026-11-09T09:00:00.000Z"
 tmdb_id: 1407
 imdb_id: tt1796960
 seo_title: "Homeland (2011) Review: Worth Watching on Netflix?"

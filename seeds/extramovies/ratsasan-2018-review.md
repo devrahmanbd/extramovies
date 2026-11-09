@@ -2,6 +2,7 @@
 title: Ratsasan Ending Explained and Full Movie Review
 slug: ratsasan-2018-review
 rating: 7.4
+published_at: "2026-11-09T09:00:00.000Z"
 tmdb_id: 412862
 imdb_id: tt7060344
 seo_title: "Ratsasan Ending Explained: Christopher and the Twist"

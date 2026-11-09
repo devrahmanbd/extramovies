@@ -2,6 +2,7 @@
 title: Grave of the Fireflies Ending Explained and Full Review
 slug: grave-of-the-fireflies-1988-review
 rating: 8.45
+published_at: "2026-11-09T09:00:00.000Z"
 tmdb_id: 12477
 imdb_id: tt0095327
 seo_title: "Grave of the Fireflies Ending Explained: Why Seita Dies"
