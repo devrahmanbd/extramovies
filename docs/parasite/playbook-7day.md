@@ -335,6 +335,8 @@ Append one row per day. No row, no claim.
 
 | 2026-11-09 | 7 indexed (of 107; +4 list URLs unknown, recrawl lag) | to read | to read | to read | to read | deployed 07a7b13 (prod-extra green, extramovies only): /lists content type + taxonomy At a glance + TMDB facts (seeds enriched, re-import pending); sitemap 103 -> 107; GSC sitemap re-submit 204; Bing URL Submission API 4/4 accepted (/lists, best-films-2026, indian-cinema, best-action-movies), monthly 220 left; per-URL GSC Request Indexing still manual-only, no CDP attempt |
 
+| 2026-11-09 | 7 indexed (of 129; sitemap grew 107 -> 129: 12 published drafts + 10 hubs crossing the 2-review threshold) | to read | to read | to read | to read | owner asked to publish the 12 drafts: added published_at to all 12 seeds (777 Charlie, 13 Hours, Condor, Grave of the Fireflies, Homeland, Jack Ryan, Magadheera, Premam, Ratsasan, Tenzing, The Lunchbox, Tumbbad), deployed 133e8fc (prod-extra green, extramovies only); deploy log SEED OK status=published for all 12, all 12 URLs live 200; Bing 6/6 accepted (tenzing, premam, ratsasan, grave-of-the-fireflies, the-lunchbox, magadheera), 6 quota left tomorrow for the other 6 drafts; GSC sitemap re-submit 204; per-URL GSC Request Indexing still manual-only, no CDP attempt |
+
 ---
 
 ## Appendix: decision summary
