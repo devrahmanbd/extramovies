@@ -152,6 +152,25 @@ function storeToPublic(r: Review): PublicReview | null {
     cast: Array.isArray(movie.cast) ? movie.cast.filter((c): c is string => typeof c === "string") : [],
     runtimeLabel: typeof movie.runtime === "string" ? movie.runtime : null,
     releaseDate: typeof movie.releaseDate === "string" ? movie.releaseDate : null,
+    studios: Array.isArray(movie.studios)
+      ? movie.studios.filter((s): s is string => typeof s === "string")
+      : [],
+    countries: Array.isArray(movie.countries)
+      ? movie.countries.filter((s): s is string => typeof s === "string")
+      : [],
+    languages: Array.isArray(movie.languages)
+      ? movie.languages.filter((s): s is string => typeof s === "string")
+      : [],
+    certification: typeof movie.certification === "string" ? movie.certification : null,
+    collection: typeof movie.collection === "string" ? movie.collection : null,
+    budget:
+      typeof movie.budget === "number" && Number.isFinite(movie.budget) && movie.budget > 0
+        ? movie.budget
+        : null,
+    revenue:
+      typeof movie.revenue === "number" && Number.isFinite(movie.revenue) && movie.revenue > 0
+        ? movie.revenue
+        : null,
     publishedAt: r.publishedAt ?? r.updatedAt,
     updatedAt: r.updatedAt,
     authorName: "The Editor",
@@ -187,6 +206,8 @@ function mergeDemo(demo: PublicReview, r: Review): PublicReview {
     Array.isArray(v)
       ? v.filter((x): x is string => typeof x === "string")
       : null;
+  const positiveNum = (v: unknown): number | null =>
+    typeof v === "number" && Number.isFinite(v) && v > 0 ? v : null;
   const tmdbId = positiveTmdbId(movie.movieId, r.tmdbId);
   return {
     ...demo,
@@ -203,6 +224,13 @@ function mergeDemo(demo: PublicReview, r: Review): PublicReview {
     cast: strs(movie.cast) ?? demo.cast,
     runtimeLabel: str(movie.runtime) ?? demo.runtimeLabel ?? null,
     releaseDate: str(movie.releaseDate) ?? demo.releaseDate ?? null,
+    studios: strs(movie.studios) ?? demo.studios ?? [],
+    countries: strs(movie.countries) ?? demo.countries ?? [],
+    languages: strs(movie.languages) ?? demo.languages ?? [],
+    certification: str(movie.certification) ?? demo.certification ?? null,
+    collection: str(movie.collection) ?? demo.collection ?? null,
+    budget: positiveNum(movie.budget) ?? demo.budget ?? null,
+    revenue: positiveNum(movie.revenue) ?? demo.revenue ?? null,
     publishedAt: r.publishedAt ?? demo.publishedAt,
     updatedAt: r.updatedAt ?? demo.updatedAt,
     seoTitle: str(r.seo?.seoTitle) ?? demo.seoTitle ?? null,

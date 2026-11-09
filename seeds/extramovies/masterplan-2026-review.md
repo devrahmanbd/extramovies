@@ -1,27 +1,32 @@
 ---
 title: "Masterplan Review: Stanley Tucci Deserves a Better Heist Film"
-slug: "masterplan-2026-review"
-rating: 5.0
+slug: masterplan-2026-review
+rating: 5
 published_at: "2026-10-21T09:00:00.000Z"
 tmdb_id: 1561726
-imdb_id: "tt38672588"
+imdb_id: tt38672588
 seo_title: "Masterplan (2026) Review: Is It Worth Watching?"
 seo_description: "Thomas Vincent's Masterplan (2026) stars Stanley Tucci in a Mona Lisa heist. Our caper review, with our 5 out of 10 verdict."
-excerpt: "Tucci is a delight and the first hour has momentum. The last stretch is nonsense. Our Masterplan (2026) verdict."
+excerpt: Tucci is a delight and the first hour has momentum. The last stretch is nonsense. Our Masterplan (2026) verdict.
 managed_fields: "[\"seo_description\",\"excerpt\"]"
-movie_title: "Masterplan"
-movie_year: "2026"
+movie_title: Masterplan
+movie_year: 2026
 movie_genres: "[\"Action\", \"Thriller\"]"
-movie_runtime: "110 min"
-movie_director: "Thomas Vincent"
+movie_runtime: 110 min
+movie_director: Thomas Vincent
 movie_cast: "[\"Stanley Tucci\", \"Simona Tabasco\", \"Victor Belmondo\", \"Mark Ivanir\", \"Philippe Uchan\", \"Etienne Guillou-Kervern\"]"
 movie_overview: "A veteran thief with a decade-old plan to steal the Mona Lisa needs a cybersecurity expert and an explosives specialist, and the three of them turn a job into something messier than a heist."
 movie_poster: "https://image.tmdb.org/t/p/w500/5xmXVd7nCK3tAo34XkO58SxUCip.jpg"
-movie_imdb: "tt38672588"
-region: "US"
+movie_imdb: tt38672588
+region: US
 sites: "[\"extramovies\"]"
+movie_release_date: 2026-10-16
+movie_studio: "[\"Amazon MGM Studios\", \"Gaumont\"]"
+movie_country: "[\"France\", \"United States of America\"]"
+movie_language: "[\"English\", \"French\", \"Italian\", \"German\"]"
+movie_certification: R
+media_type: movie
 ---
-
 Masterplan is worth watching if you are here for Stanley Tucci and light pulpy heist business, and not worth much else. Thomas Vincent's film arrived on Amazon Prime Video in the United States on October 16, 2026, runs 110 minutes, and puts a heist caper on your screen in place of a theatrical run. Critics have been cold so far. Rotten Tomatoes has nine critic reviews on it, three of them positive, and Metacritic will not publish a score until it has four. Every figure in this review was checked on October 21, 2026.
 
 The audience side is small but not empty. Letterboxd's member average is 2.4 from 4,235 ratings and 1,325 written reviews, TMDB has 7.08 from 118 votes, and JustWatch's own score is 66 percent from 136 ratings. The first hour of the film is decent pulpy fun, and the last stretch is where it stops working.

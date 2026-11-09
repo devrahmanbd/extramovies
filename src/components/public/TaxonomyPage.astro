@@ -15,8 +15,13 @@
 import Base from "../../layouts/Base.astro";
 import TaxonomyReviewItem from "./TaxonomyReviewItem.astro";
 import TaxonomyRelated from "./TaxonomyRelated.astro";
+import TaxonomyAtAGlance from "./TaxonomyAtAGlance.astro";
 import { breadcrumbJsonLd } from "../../lib/seo/jsonld";
-import { siblingTaxonomies, type TaxonomyPageMeta } from "../../lib/seo/taxonomy";
+import {
+  siblingTaxonomies,
+  taxonomyGlance,
+  type TaxonomyPageMeta,
+} from "../../lib/seo/taxonomy";
 
 interface Props {
   meta: TaxonomyPageMeta;
@@ -33,6 +38,7 @@ const headingIsLong = meta.title.length > 40;
 const lead = reviews[0];
 const image = lead?.posterUrl ?? lead?.backdropUrl ?? null;
 const siblings = siblingTaxonomies(entry);
+const glance = taxonomyGlance(entry);
 
 const jsonld = [
   breadcrumbJsonLd(origin, [
@@ -81,6 +87,7 @@ const jsonld = [
       <p class="d-lede tnum">
         {meta.countText}{reviews.length > 1 ? ", newest first" : ""}.
       </p>
+      <TaxonomyAtAGlance glance={glance} />
     </section>
 
     <section class="band--alt section--md d-results" aria-labelledby="taxonomy-list-heading">
@@ -105,6 +112,7 @@ const jsonld = [
         <p class="glam-kicker tnum">{kicker}</p>
         <h1 id="taxonomy-title" class={headingIsLong ? "display--long" : undefined}>{meta.title}</h1>
         <p class="tnum glam-archive-dek">{meta.intro}</p>
+        <TaxonomyAtAGlance glance={glance} />
       </div>
     </section>
   </div>

@@ -1,0 +1,67 @@
+---
+/**
+ * /lists/<slug> — one curated editorial list (TM-3, QS-3).
+ *
+ * The list definition is code (src/lib/seo/lists.ts); the reviews are the
+ * site's own published rows. A slug with no list definition answers 404. A
+ * list whose reviews are all unpublished or unscored also answers 404,
+ * because there is nothing honest to rank. A list with one or two reviews
+ * still renders, but its robots value is `noindex, follow` and the hub and
+ * sitemap leave it out.
+ */
+import EditorialList from "../../components/public/EditorialList.astro";
+import { getLatestReviews } from "../../lib/seo/content";
+import { siteOrigin } from "../../lib/seo/meta";
+import { getTaxonomyEntry, type TaxonomyEntry } from "../../lib/seo/taxonomy";
+import { currentTheme } from "../../lib/tmdb/discover";
+import {
+  getEditorialList,
+  resolveListItems,
+  type EditorialList as EditorialListDefinition,
+} from "../../lib/seo/lists";
+
+const slug = (Astro.params.slug ?? "").trim().toLowerCase();
+const list = getEditorialList(slug);
+if (!list) return new Response("List not found", { status: 404 });
+
+const reviews = getLatestReviews(5000);
+const items = resolveListItems(list, reviews);
+if (items.length === 0) return new Response("List not found", { status: 404 });
+
+let theme: string = "publication";
+try {
+  theme = await currentTheme();
+} catch {
+  theme = "publication";
+}
+
+const relatedLists = list.relatedLists
+  .map((relatedSlug) => getEditorialList(relatedSlug))
+  .filter((related): related is EditorialListDefinition => related !== null)
+  .map((related) => ({ list: related, items: resolveListItems(related, reviews) }))
+  .filter(({ items: relatedItems }) => relatedItems.length > 0)
+  .map(({ list: related, items: relatedItems }) => ({
+    title: related.title,
+    path: `/lists/${related.slug}`,
+    count: relatedItems.length,
+  }));
+
+const relatedCategories = list.relatedCategories
+  .map((categorySlug) => getTaxonomyEntry("category", categorySlug))
+  .filter((entry): entry is TaxonomyEntry => entry !== null)
+  .map((entry) => ({
+    label: entry.label,
+    path: entry.path,
+    count: entry.reviews.length,
+  }));
+
+const origin = siteOrigin(Astro.url.origin);
+---
+<EditorialList
+  list={list}
+  items={items}
+  relatedLists={relatedLists}
+  relatedCategories={relatedCategories}
+  origin={origin}
+  theme={theme}
+/>

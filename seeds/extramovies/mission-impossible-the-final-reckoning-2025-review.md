@@ -1,24 +1,32 @@
 ---
 title: "Mission: Impossible - The Final Reckoning Review: Cruise Lands the Plane, Slowly"
-slug: "mission-impossible-the-final-reckoning-2025-review"
+slug: mission-impossible-the-final-reckoning-2025-review
 rating: 7.4
 tmdb_id: 575265
-imdb_id: "tt9603208"
+imdb_id: tt9603208
 seo_title: "Mission: Impossible - The Final Reckoning (2025) Review: Worth Watching?"
 seo_description: "Our Mission Impossible Final Reckoning review: Cruise's last outing as Ethan Hunt, 80% RT, the stunts, the pacing issue, and our verdict."
 excerpt: "Gargantuan stunts, a saggy first half, and a finale that earns the goodbye. Our Mission: Impossible - The Final Reckoning review with scores."
 movie_title: "Mission: Impossible - The Final Reckoning"
-movie_year: "2025"
+movie_year: 2025
 movie_genres: "[\"Action\", \"Thriller\", \"Adventure\"]"
-movie_director: "Christopher McQuarrie"
+movie_director: Christopher McQuarrie
 movie_cast: "[\"Tom Cruise\", \"Hayley Atwell\", \"Ving Rhames\", \"Simon Pegg\", \"Esai Morales\", \"Pom Klementieff\", \"Henry Czerny\"]"
 movie_overview: "Ethan Hunt and team continue their search for the terrifying AI known as the Entity, which has infiltrated intelligence networks all over the globe, with the world's governments and a mysterious ghost from Hunt's past on their trail. Joined by new allies and armed with the means to shut the Entity down for good, Hunt is in a race against time to prevent the world as we know it from changing forever."
 movie_poster: "https://image.tmdb.org/t/p/w500/iKPsC9EFUafRP9SrUznI61getVP.jpg"
-movie_imdb: "tt9603208"
-region: "US"
+movie_imdb: tt9603208
+region: US
 sites: "[\"extramovies\"]"
+movie_release_date: 2025-05-17
+movie_studio: "[\"Paramount Pictures\", \"Skydance Media\", \"TC Productions\"]"
+movie_country: "[\"United States of America\"]"
+movie_language: "[\"English\", \"French\", \"Inuktitut\", \"Russian\"]"
+movie_certification: PG-13
+movie_collection: "Mission: Impossible Collection"
+movie_budget: 400000000
+movie_revenue: 598767057
+media_type: movie
 ---
-
 Mission: Impossible - The Final Reckoning is a great finale attached to a long wind-up. Christopher McQuarrie's 2025 film closes Tom Cruise's run as Ethan Hunt across eight outings, with the IMF chasing the rogue AI called the Entity while a figure from Hunt's past closes in. Rotten Tomatoes has it Certified Fresh at 80% with an 89% verified audience score, and IMDb users rate it 7.1/10 from 238,000 votes, checked October 24, 2026. The stunts are real, the send-off works, and the two hours before the third act test your patience. Cruise reportedly finishes here, and he goes out with the best skydive ever filmed.
 
 > **Spoiler-free verdict:** Watch it, but know the first half is a recital. The underwater and biplane sequences are among the series' best, the emotional landing sticks, and a 170-minute runtime is the real antagonist. Recommended for the finale and the craft.

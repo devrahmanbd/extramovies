@@ -1,27 +1,35 @@
 ---
 title: "Avengers: Endgame Review: A Near-Perfect Goodbye Back for the 2026 Encore"
-slug: "avengers-endgame-2019-review"
+slug: avengers-endgame-2019-review
 rating: 8.4
 published_at: "2026-10-21T09:00:00.000Z"
 tmdb_id: 299534
-imdb_id: "tt4154796"
+imdb_id: tt4154796
 seo_title: "Avengers: Endgame Review (2019): Is It Worth Watching?"
 seo_description: "The Russo brothers' Avengers: Endgame (2019) is back in cinemas for the 2026 Encore edition. Our finale review, with our 8.4 out of 10 verdict."
 excerpt: "Back in cinemas as the 2026 Encore edition. Our Avengers: Endgame (2019) review of the Russo finale, with the verdict."
 managed_fields: "[\"seo_title\",\"seo_description\",\"excerpt\"]"
 movie_title: "Avengers: Endgame"
-movie_year: "2019"
+movie_year: 2019
 movie_genres: "[\"Adventure\", \"Science Fiction\", \"Action\"]"
-movie_runtime: "181 min"
+movie_runtime: 181 min
 movie_director: "Anthony Russo, Joe Russo"
 movie_cast: "[\"Robert Downey Jr.\", \"Chris Evans\", \"Mark Ruffalo\", \"Chris Hemsworth\", \"Scarlett Johansson\", \"Jeremy Renner\", \"Josh Brolin\", \"Don Cheadle\", \"Paul Rudd\", \"Benedict Cumberbatch\"]"
 movie_overview: "After the devastating events of Avengers: Infinity War, the universe is in ruins due to the efforts of the Mad Titan, Thanos. With the help of remaining allies, the Avengers must assemble once more in order to undo Thanos' actions and restore order to the universe once and for all, no matter what consequences may be in store."
 movie_poster: "https://image.tmdb.org/t/p/w500/bR8ISy1O9XQxqiy0fQFw2BX72RQ.jpg"
-movie_imdb: "tt4154796"
-region: "US"
+movie_imdb: tt4154796
+region: US
 sites: "[\"extramovies\"]"
+movie_release_date: 2019-04-24
+movie_studio: "[\"Marvel Studios\"]"
+movie_country: "[\"United States of America\"]"
+movie_language: "[\"English\", \"Japanese\", \"Xhosa\"]"
+movie_certification: PG-13
+movie_collection: The Avengers Collection
+movie_budget: 356000000
+movie_revenue: 2942186933
+media_type: movie
 ---
-
 Yes, Avengers: Endgame is worth watching, and the 2026 encore edition is the best excuse in seven years to put it back on a cinema screen. The verdict belongs to the 2019 film by Anthony and Joe Russo. Marvel is running it again as Avengers Endgame Encore from September 25, 2026, with new material attached and roughly four extra minutes of running time. The cut underneath has not been retooled, so the criticism of the film itself still applies exactly as it did in 2019.
 
 > **Spoiler-free verdict:** Watch it, and catch the encore edition if a cinema sits near you. An 181-minute finale that earns most of its length, carried by Robert Downey Jr. and Chris Evans. Rotten Tomatoes has the 2019 film at 94 percent from 553 critic reviews. Metacritic has it at 78 from 57 critic reviews, which tells you where the argument sits. You need no plot summary before pressing play.

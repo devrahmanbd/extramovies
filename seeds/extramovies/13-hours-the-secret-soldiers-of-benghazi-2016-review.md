@@ -1,24 +1,31 @@
 ---
 title: "13 Hours Review: Michael Bay's Benghazi Film Is His Most Restrained War Drama"
-slug: "13-hours-the-secret-soldiers-of-benghazi-2016-review"
+slug: 13-hours-the-secret-soldiers-of-benghazi-2016-review
 rating: 6.7
 tmdb_id: 300671
-imdb_id: "tt4172430"
+imdb_id: tt4172430
 seo_title: "13 Hours (2016) Review: Is This Michael Bay Benghazi Film Worth Watching?"
 seo_description: "Our 13 Hours review: Krasinski and Badge Dale in the Benghazi attack film, 52% critics vs 83% audience, box office, and our verdict."
 excerpt: "Critics were split, audiences were not. Our 13 Hours review of Michael Bay's Benghazi thriller: the RT split, cast, and where to watch."
 movie_title: "13 Hours: The Secret Soldiers of Benghazi"
-movie_year: "2016"
+movie_year: 2016
 movie_genres: "[\"Action\", \"War\", \"Thriller\"]"
-movie_director: "Michael Bay"
+movie_director: Michael Bay
 movie_cast: "[\"John Krasinski\", \"James Badge Dale\", \"Dominic Fumusa\", \"Max Martini\", \"Pablo Schreiber\", \"David Costabile\", \"Toby Stephens\"]"
-movie_overview: "An American Ambassador is killed during an attack at a U.S. compound in Libya as a security team struggles to make sense out of the chaos."
+movie_overview: An American Ambassador is killed during an attack at a U.S. compound in Libya as a security team struggles to make sense out of the chaos.
 movie_poster: "https://image.tmdb.org/t/p/w500/fZlAxZMo6BId1SiqyjLmkd7oUB7.jpg"
-movie_imdb: "tt4172430"
-region: "US"
+movie_imdb: tt4172430
+region: US
 sites: "[\"extramovies\"]"
+movie_release_date: 2016-01-14
+movie_studio: "[\"Paramount Pictures\", \"3 Arts Entertainment\", \"Bay Films\"]"
+movie_country: "[\"United States of America\"]"
+movie_language: "[\"Arabic\", \"English\"]"
+movie_certification: R
+movie_budget: 50000000
+movie_revenue: 69411370
+media_type: movie
 ---
-
 13 Hours is the Michael Bay film where the machinery serves the subject instead of the spectacle. His 2016 account of the September 11, 2012 attack on the CIA annex in Benghazi follows six security contractors, led by James Badge Dale's Rone Woods, who held the line while the compound around them fell. Rotten Tomatoes splits the verdict at 52% from critics against 83% from audiences, Metacritic sits at 48, and IMDb users rate it 7.3/10 from 178,000 votes, checked October 24, 2026. That gap is the story: the people who watch it rate it far higher than the critics who judged it, and Bay's usual habits are visibly reined in.
 
 > **Spoiler-free verdict:** War film first, Bay film second. A tense, grueling 144 minutes built on real suspense and a strong ensemble, with the political framing critics objected to. Worth watching for the performances.

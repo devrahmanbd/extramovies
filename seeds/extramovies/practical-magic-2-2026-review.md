@@ -1,27 +1,35 @@
 ---
 title: "Practical Magic 2 Review: The Stars Still Cast a Spell, the Script Does Not"
-slug: "practical-magic-2-2026-review"
+slug: practical-magic-2-2026-review
 rating: 4.5
 published_at: "2026-10-21T09:00:00.000Z"
 tmdb_id: 1302904
-imdb_id: "tt32588798"
+imdb_id: tt32588798
 seo_title: "Practical Magic 2 (2026) Review: Is It Worth Watching?"
 seo_description: "Sandra Bullock and Nicole Kidman return in Susanne Bier's Practical Magic 2 (2026). Our sequel review, with our 4.5 out of 10 verdict."
-excerpt: "Bullock and Kidman are still the best thing in the room and the script still cannot keep up with them. Our Practical Magic 2 (2026) verdict."
+excerpt: Bullock and Kidman are still the best thing in the room and the script still cannot keep up with them. Our Practical Magic 2 (2026) verdict.
 managed_fields: "[\"seo_description\",\"excerpt\"]"
-movie_title: "Practical Magic 2"
-movie_year: "2026"
+movie_title: Practical Magic 2
+movie_year: 2026
 movie_genres: "[\"Romance\", \"Fantasy\", \"Comedy\"]"
-movie_runtime: "130 min"
-movie_director: "Susanne Bier"
+movie_runtime: 130 min
+movie_director: Susanne Bier
 movie_cast: "[\"Sandra Bullock\", \"Nicole Kidman\", \"Joey King\", \"Maisie Williams\", \"Xolo Maridueña\", \"Lee Pace\", \"Dianne Wiest\", \"Stockard Channing\", \"Solly McLeod\", \"Ema Cavolli\"]"
-movie_overview: "The Owens sisters must confront the dark curse that threatens to unravel their family once and for all."
+movie_overview: The Owens sisters must confront the dark curse that threatens to unravel their family once and for all.
 movie_poster: "https://image.tmdb.org/t/p/w500/ogwQOLbCfncjvBhFb5l0OmQH8KC.jpg"
-movie_imdb: "tt32588798"
-region: "US"
+movie_imdb: tt32588798
+region: US
 sites: "[\"extramovies\"]"
+movie_release_date: 2026-09-09
+movie_studio: "[\"Di Novi Pictures\", \"Warner Bros. Pictures\", \"Blossom Films\", \"Fortis Films\", \"Domain Entertainment\", \"Alcon Entertainment\"]"
+movie_country: "[\"United States of America\"]"
+movie_language: "[\"English\"]"
+movie_certification: PG-13
+movie_collection: Practical Magic Collection
+movie_budget: 75000000
+movie_revenue: 105690022
+media_type: movie
 ---
-
 Practical Magic 2 is worth watching for two actresses in their sixties whom the camera is extremely kind to, and for a sequel that finally treats the family curse as something real. Everything between those two points is a 130-minute legacy-sequel machine that runs out of road. The audience loved it anyway. Critics did not. Rotten Tomatoes has the film at 36 percent from 170 reviews and Metacritic sits at 44 from 41 critic reviews, both checked on October 21, 2026, and the same platform's Popcornmeter is at 90 percent from more than 2,500 verified ratings.
 
 The film opened in US and Australian cinemas on September 10, 2026 and in the UK on September 11, runs 130 minutes and carries a PG-13 for brief strong language, suggestive material and some violent content. The Numbers, checked on October 21, 2026, has it at $68,281,338 domestic and $105,081,338 worldwide. Warner Bros. Pictures distributed it, and the picture is based on Alice Hoffman's 2021 novel The Book of Magic.

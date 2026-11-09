@@ -1,27 +1,34 @@
 ---
 title: "Whalefall Review: Unforgettable Set Pieces, Undone by Sad Dad Flashbacks"
-slug: "whalefall-2026-review"
+slug: whalefall-2026-review
 rating: 6.5
 published_at: "2026-10-21T09:00:00.000Z"
 tmdb_id: 1255833
-imdb_id: "tt28535715"
+imdb_id: tt28535715
 seo_title: "Whalefall Review (2026): Is It Worth Watching?"
 seo_description: "Brian Duffield's Whalefall (2026) stars Austin Abrams and Josh Brolin. A man swallowed by a sperm whale. Our thriller review, with our 6.5 out of 10 verdict."
 excerpt: "Austin Abrams is swallowed by a sperm whale in Duffield's Whalefall (2026). Unforgettable set pieces, undone by flashbacks. Our verdict."
 managed_fields: "[\"seo_title\",\"seo_description\",\"excerpt\"]"
-movie_title: "Whalefall"
-movie_year: "2026"
+movie_title: Whalefall
+movie_year: 2026
 movie_genres: "[\"Thriller\"]"
-movie_runtime: "106 min"
-movie_director: "Brian Duffield"
+movie_runtime: 106 min
+movie_director: Brian Duffield
 movie_cast: "[\"Austin Abrams\", \"Josh Brolin\", \"Elisabeth Shue\", \"John Ortiz\", \"Jane Levy\", \"Emily Rudd\", \"Kamy D. Bruder\", \"Mark Meloro Jr.\", \"Sam Franich\", \"Nicholas Gould\"]"
 movie_overview: "Following the death of his father, Jay Gardiner goes diving off the central Coast of California in search of his remains, but is swallowed by a massive sperm whale. While trapped inside its belly with only one hour of oxygen left, Jay comes to realize that the hard-earned lessons his father imparted may be the key to his escape."
 movie_poster: "https://image.tmdb.org/t/p/w500/vjTYUTgh9nO88i6HZ4YPRhiFL05.jpg"
-movie_imdb: "tt28535715"
-region: "US"
+movie_imdb: tt28535715
+region: US
 sites: "[\"extramovies\"]"
+movie_release_date: 2026-10-14
+movie_studio: "[\"Imagine Entertainment\", \"20th Century Studios\", \"Jurassic Party\"]"
+movie_country: "[\"United States of America\"]"
+movie_language: "[\"English\"]"
+movie_certification: PG-13
+movie_budget: 60000000
+movie_revenue: 36573424
+media_type: movie
 ---
-
 Yes, Whalefall is worth watching, and it is worth watching in a cinema with the sound turned up. Brian Duffield drops Austin Abrams into the stomach of a sperm whale and holds him there for 106 minutes, and for long stretches the film is so convincingly built that the whale stops being a trick. Then the flashbacks start pulling, and a survival thriller turns into a son having it out with his dead father. Rotten Tomatoes says 72 percent from 168 critic reviews and Metacritic says 59 from 37, checked October 21, 2026. Both numbers are right.
 
 > **Spoiler-free verdict:** Watch it. A 106-minute survival thriller carrying Austin Abrams, Josh Brolin, a practical 12-foot whale head and a sound mix doing half the directing. Rotten Tomatoes says 72 percent from 168 critic reviews and Metacritic says 59 from 37, checked October 21, 2026. The flashbacks drag. The whale does not.

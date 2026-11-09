@@ -13,6 +13,20 @@ export interface ReviewMovie {
   runtime?: string;
   /** Film release date (ISO, YYYY-MM-DD) when the editor records one. */
   releaseDate?: string;
+  /** Production companies from TMDB. */
+  studios?: string[];
+  /** Production countries from TMDB. */
+  countries?: string[];
+  /** Spoken languages from TMDB. */
+  languages?: string[];
+  /** Age rating for the row's region (TMDB). */
+  certification?: string;
+  /** Franchise / collection name (TMDB). */
+  collection?: string;
+  /** Production budget in USD (TMDB, positive only). */
+  budget?: number;
+  /** Worldwide box office in USD (TMDB, positive only). */
+  revenue?: number;
   director?: string;
   cast?: string[];
   overview?: string;

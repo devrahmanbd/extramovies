@@ -1,25 +1,30 @@
 ---
 title: "Masaan Review: A Patient Varanasi Drama That Earns Its Sadness"
-slug: "masaan-2015-review"
+slug: masaan-2015-review
 rating: 0
 tmdb_id: 336203
-imdb_id: "tt4635372"
+imdb_id: tt4635372
 seo_title: "Masaan (2015) Review: Is It Worth Watching?"
 seo_description: "Our Masaan review: Neeraj Ghaywan's Varanasi drama with Vicky Kaushal and Richa Chadda, its Cannes prizes, where to watch, and our verdict."
 excerpt: "Watch it. Ghaywan's Varanasi debut earns its sadness, with Kaushal and Chadda carrying it. Rotten Tomatoes says 95 percent from 19 critic reviews. Our verdict."
-movie_title: "Masaan"
-movie_year: "2015"
+movie_title: Masaan
+movie_year: 2015
 movie_genres: "[\"Drama\"]"
-movie_runtime: "109 min"
-movie_director: "Neeraj Ghaywan"
+movie_runtime: 109 min
+movie_director: Neeraj Ghaywan
 movie_cast: "[\"Richa Chadda\", \"Vicky Kaushal\", \"Shweta Tripathi\", \"Sanjay Mishra\", \"Pankaj Tripathi\", \"Rohit Saraf\", \"Bhagwan Tiwari\", \"Nikhil Sahni\"]"
 movie_overview: "Four lives intersect along the Ganges: a low caste boy in hopeless love, a daughter ridden with guilt of a sexual encounter ending in a tragedy, a hapless father with fading morality, and a spirited child yearning for a family, long to escape the moral constructs of a small-town."
 movie_poster: "https://image.tmdb.org/t/p/w500/wgcPR6Weth2yJDo5wBdNqW2TD6J.jpg"
-movie_imdb: "tt4635372"
-region: "US"
+movie_imdb: tt4635372
+region: US
 sites: "[\"extramovies\"]"
+movie_release_date: 2015-07-24
+movie_studio: "[\"Sikhya Entertainment\", \"Drishyam Films\", \"Phantom Films\", \"Macassar Productions\", \"ARTE France Cinéma\"]"
+movie_country: "[\"France\", \"India\"]"
+movie_language: "[\"Hindi\"]"
+movie_certification: PG-13
+media_type: movie
 ---
-
 Yes, Masaan is worth watching. Neeraj Ghaywan's debut feature, shot on the ghats of Varanasi, won the FIPRESCI Prize and the Prix de l'Avenir in Un Certain Regard at Cannes 2015, then the Indira Gandhi Award for Best Debut Film of a Director at the 63rd National Film Awards. At 109 minutes it is patient to a fault, and the patience is the point. Two lives run in parallel through the same city, both coming quietly apart.
 
 > **Spoiler-free verdict:** Watch it. A 109-minute Hindi drama with English subtitles, carried by Vicky Kaushal and Richa Chadda, photographed by Avinash Arun with a plainness you can feel. Rotten Tomatoes says 95 percent from 19 critic reviews. You need no plot summary before pressing play.

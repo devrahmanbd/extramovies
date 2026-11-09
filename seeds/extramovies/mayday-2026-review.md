@@ -1,27 +1,32 @@
 ---
 title: "Mayday Review: Two Great Actors, One Thin Story"
-slug: "mayday-2026-review"
+slug: mayday-2026-review
 rating: 6
 published_at: "2026-10-22T09:00:00.000Z"
 tmdb_id: 1137844
-imdb_id: "tt28014327"
+imdb_id: tt28014327
 seo_title: "Mayday (2026) Review: Is It Worth Watching?"
 seo_description: "Our Mayday review: Ryan Reynolds and Kenneth Branagh's Cold War buddy comedy for Apple TV, the critical verdict, where to watch, and our rating."
 excerpt: "Watch it for the pairing. Ryan Reynolds and Kenneth Branagh are good fun in Daley and Goldstein's Cold War buddy comedy, but the story behind them is thin."
 managed_fields: "[\"seo_title\",\"seo_description\",\"excerpt\"]"
-movie_title: "Mayday"
-movie_year: "2026"
+movie_title: Mayday
+movie_year: 2026
 movie_genres: "[\"Action\", \"Comedy\"]"
-movie_runtime: "111 min"
+movie_runtime: 111 min
 movie_director: "Jonathan Goldstein, John Francis Daley"
 movie_cast: "[\"Ryan Reynolds\", \"Kenneth Branagh\", \"Marcin Dorociński\", \"Maria Bakalova\", \"David Morse\", \"Clark Johnson\", \"Wendy Crewson\", \"Alex Mallari Jr.\"]"
 movie_overview: "When a U.S. Navy pilot on a top-secret mission during the Cold War gets trapped behind enemy lines, his only chance at survival is to form an alliance with an eccentric ex-KGB agent."
 movie_poster: "https://image.tmdb.org/t/p/w500/hVXjX1jLZ1ljFSNGXpjJfbTUOa7.jpg"
-movie_imdb: "tt28014327"
-region: "US"
+movie_imdb: tt28014327
+region: US
 sites: "[\"extramovies\"]"
+movie_release_date: 2026-09-03
+movie_studio: "[\"Skydance Media\", \"Maximum Effort\", \"GoldDay\"]"
+movie_country: "[\"United States of America\"]"
+movie_language: "[\"English\", \"Russian\"]"
+movie_certification: PG-13
+media_type: movie
 ---
-
 Yes, Mayday is worth watching, for the pairing. Ryan Reynolds and Kenneth Branagh are very good company in John Francis Daley and Jonathan Goldstein's Cold War buddy comedy, and the action is shot with a confidence the script does not deserve. The story underneath is thin, and the audience has noticed. Rotten Tomatoes has it at 83 percent from 106 reviews. Our rating is 6 out of 10.
 
 > **Spoiler-free verdict:** Watch it for the two of them. A 111-minute action comedy with Ryan Reynolds as a stranded US Navy pilot and Kenneth Branagh as the ex-KGB agent who picks him up, released by Apple TV in September 2026. Rotten Tomatoes has it at 83 percent from 106 critic reviews. You need no plot summary before pressing play.

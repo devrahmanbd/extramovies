@@ -1,27 +1,34 @@
 ---
 title: "Peddi Review: Ram Charan Carries a Script That Cannot Keep Up"
-slug: "peddi-2026-review"
+slug: peddi-2026-review
 rating: 6
 published_at: "2026-10-22T09:00:00.000Z"
 tmdb_id: 1057265
-imdb_id: "tt23865918"
+imdb_id: tt23865918
 seo_title: "Peddi (2026) Review: Is It Worth Watching?"
 seo_description: "Our Peddi review: Ram Charan's rural sports drama, A.R. Rahman's score, the uneven writing, the critical verdict, where to watch, and our rating."
 excerpt: "Watch it for Ram Charan. Buchi Babu Sana's 189-minute rural sports drama runs on his performance and A.R. Rahman's score, and stumbles on its own script."
 managed_fields: "[\"seo_title\",\"seo_description\",\"excerpt\"]"
-movie_title: "Peddi"
-movie_year: "2026"
+movie_title: Peddi
+movie_year: 2026
 movie_genres: "[\"Action\", \"Drama\"]"
-movie_runtime: "189 min"
-movie_director: "Buchi Babu Sana"
+movie_runtime: 189 min
+movie_director: Buchi Babu Sana
 movie_cast: "[\"Ram Charan\", \"Janhvi Kapoor\", \"Shiva Rajkumar\", \"Jagapati Babu\", \"Boman Irani\", \"Ravi Kishan\", \"Rao Ramesh\", \"Divyendu Sharma\"]"
 movie_overview: "In a village that doesn't officially exist, a laborer's unmatched athletic talent becomes his weapon to fight for his people's right to be recognized."
 movie_poster: "https://image.tmdb.org/t/p/w500/kJAJNNBYlbqAcpTDxBNnaILSMTy.jpg"
-movie_imdb: "tt23865918"
-region: "US"
+movie_imdb: tt23865918
+region: US
 sites: "[\"extramovies\"]"
+movie_release_date: 2026-06-03
+movie_studio: "[\"Sukumar Writings\", \"Vriddhi Cinemas\"]"
+movie_country: "[\"India\"]"
+movie_language: "[\"Telugu\"]"
+movie_certification: NR
+movie_budget: 36500000
+movie_revenue: 35700000
+media_type: movie
 ---
-
 Yes, Peddi is worth watching, and for one reason. Buchi Babu Sana's rural sports drama hands Ram Charan an 189-minute stage, and Charan fills it with a labourer who has nothing but his body and a village that does not exist on any map. The script around him is a cluttered pile of three sports, two rivalries and politics that will not land. Rotten Tomatoes, checked on October 22, 2026, has eight critic reviews and no score yet. The criticism splits down the middle. Audiences have been harder. Our rating is 6 out of 10.
 
 > **Spoiler-free verdict:** Watch it for the lead. An 189-minute Telugu sports drama with A.R. Rahman's score, carried by Ram Charan as Peddi, a daily wage labourer who fights for a railway station, a wage, and a name of his own. Rotten Tomatoes had 8 critic reviews and no score when we checked on October 22, 2026. You need no plot summary before pressing play.

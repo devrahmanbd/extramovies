@@ -1,27 +1,34 @@
 ---
 title: "Light of the World Review: Beautiful Animation, Blunt Lesson"
-slug: "light-of-the-world-2025-review"
+slug: light-of-the-world-2025-review
 rating: 6.5
 published_at: "2026-10-22T09:00:00.000Z"
 tmdb_id: 1374686
-imdb_id: "tt33235979"
+imdb_id: tt33235979
 seo_title: "Light of the World (2025) Review: Is It Worth Watching?"
 seo_description: "Our Light of the World review: the animated Jesus film with Michael Benyaer, the critical verdict, where to watch in the US, and our rating."
 excerpt: "Watch it if the family will sit still. The animation is lovely, the story is the Gospel, and the film is never subtle. Rotten Tomatoes has it at 80 percent."
 managed_fields: "[\"seo_title\",\"seo_description\",\"excerpt\"]"
-movie_title: "Light of the World"
-movie_year: "2025"
+movie_title: Light of the World
+movie_year: 2025
 movie_genres: "[\"Animation\", \"Drama\", \"Family\"]"
-movie_runtime: "84 min"
+movie_runtime: 84 min
 movie_director: "Tom Bancroft, John J. Schafer"
 movie_cast: "[\"Ian Hanlin\", \"Benjamin Jacobson\", \"Vincent Tong\", \"Michael Benyaer\", \"David A. Kaye\", \"Peter New\", \"Richard Newman\", \"Sam Darkoh\"]"
 movie_overview: "It's 30 AD and everyone is expectantly awaiting the coming Messiah. While Jesus isn't exactly what they imagined, there is something special about this man. Soon, John, James, Andrew, Peter, and others begin to follow Jesus on an unexpected adventure. This beautifully animated story of Jesus is told through the eyes of his beloved young friend, the Apostle John."
 movie_poster: "https://image.tmdb.org/t/p/w500/lngk84juVGt3BuxcNEwP74JmX7b.jpg"
-movie_imdb: "tt33235979"
-region: "US"
+movie_imdb: tt33235979
+region: US
 sites: "[\"extramovies\"]"
+movie_release_date: 2025-09-04
+movie_studio: "[\"Salvation Poem Project\", \"Epipheo\", \"Lighthouse Studios\", \"Combo Studio\"]"
+movie_country: "[\"United States of America\", \"Ireland\", \"Brazil\"]"
+movie_language: "[\"English\"]"
+movie_certification: PG
+movie_budget: 20000000
+movie_revenue: 2595702
+media_type: movie
 ---
-
 Yes, Light of the World is worth watching, if your household can sit still for a sermon told in pictures. Tom Bancroft and John J. Schafer's animated telling of the Gospel, seen through the eyes of the young apostle John, is handsome, well made and completely uninterested in subtlety. The animation is the best in the frame. Rotten Tomatoes has it at 80 percent from 15 reviews. Our rating is 6.5 out of 10.
 
 > **Spoiler-free verdict:** Watch it with the family. An 84-minute hand-drawn animated film about the life of Jesus, with Ian Hanlin as Jesus and Michael Benyaer as Nicodemus, told from the point of view of John. Rotten Tomatoes has it at 80 percent from 15 critic reviews and a 97 percent Popcornmeter. You need no plot summary before pressing play.

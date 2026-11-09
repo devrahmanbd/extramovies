@@ -1,27 +1,34 @@
 ---
 title: "Buddy Review: The Sweetest Kids' Show With the Worst Host"
-slug: "buddy-2026-review"
+slug: buddy-2026-review
 rating: 6.5
 published_at: "2026-10-21T09:00:00.000Z"
 tmdb_id: 1514026
-imdb_id: "tt37281055"
+imdb_id: tt37281055
 seo_title: "Buddy Review (2026): Is It Worth Watching?"
 seo_description: "Casper Kelly's Buddy (2026) stars Keegan-Michael Key and Cristin Milioti in a 96-minute horror comedy. Our review, with our 6.5 out of 10 verdict."
 excerpt: "A singing orange unicorn turns into a tyrant in Casper Kelly's Buddy (2026). Gross, funny and uneven. Our review, with the verdict."
 managed_fields: "[\"seo_title\",\"seo_description\",\"excerpt\"]"
-movie_title: "Buddy"
-movie_year: "2026"
+movie_title: Buddy
+movie_year: 2026
 movie_genres: "[\"Horror\", \"Comedy\", \"Fantasy\"]"
-movie_runtime: "96 min"
-movie_director: "Casper Kelly"
+movie_runtime: 96 min
+movie_director: Casper Kelly
 movie_cast: "[\"Keegan-Michael Key\", \"Cristin Milioti\", \"Delaney Quinn\", \"Caleb Williams\", \"Madison Skyy Polan\", \"Tristan Borders\", \"Patton Oswalt\", \"Jimmica Collins\", \"Eric Bauza\", \"Topher Grace\", \"Bryson JonSteele\", \"Seamus Flynn\", \"Luke Speakman\", \"Bennie Taylor\"]"
 movie_overview: "A magical, singing orange unicorn holds his cast hostage in a surreal TV-show dimension, as he becomes more and more demented."
 movie_poster: "https://image.tmdb.org/t/p/w500/1BdZbNvl1SfrrX8J9X5tQzN6Ivu.jpg"
-movie_imdb: "tt37281055"
-region: "US"
+movie_imdb: tt37281055
+region: US
 sites: "[\"extramovies\"]"
+movie_release_date: 2026-08-27
+movie_studio: "[\"BoulderLight Pictures\", \"Low Spark Films\", \"SIPUR\", \"Substance\"]"
+movie_country: "[\"United States of America\", \"Israel\"]"
+movie_language: "[\"English\", \"Spanish\"]"
+movie_certification: R
+movie_budget: 3000000
+movie_revenue: 26973941
+media_type: movie
 ---
-
 Yes, Buddy is worth watching, and it is worth watching after midnight with the lights off, because Casper Kelly's horror comedy takes the one thing that always felt wrong about children's television and turns it into a body count. Keegan-Michael Key plays a singing orange unicorn who becomes a tyrant, the child actors around him are better than the concept deserves, and the jokes stop working about halfway through. Critics split on it. Rotten Tomatoes has it at 88 percent from 138 critic reviews and Metacritic at 67 from 22, both checked on October 22, 2026.
 
 > **Spoiler-free verdict:** Watch it if you grew up on kids' shows and you want them back in a worse shape. A 96-minute, R-rated horror comedy with puppetry, gore and a cast of children who are genuinely good. Rotten Tomatoes says 88 percent from 138 critic reviews and Metacritic says 67 from 22, checked October 22, 2026. You need no plot summary before pressing play.

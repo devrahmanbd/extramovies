@@ -1,24 +1,29 @@
 ---
 title: "The Night Agent Review: Netflix's Biggest Spy Thriller Earns Its Third Season"
-slug: "the-night-agent-2023-review"
+slug: the-night-agent-2023-review
 rating: 7.7
 tmdb_id: 129552
-imdb_id: "tt13918776"
+imdb_id: tt13918776
 seo_title: "The Night Agent (2023) Review: Worth Watching on Netflix?"
 seo_description: "Our The Night Agent review: Gabriel Basso, Shawn Ryan's Netflix spy series, why season 3 is its best, RT scores by season, and our verdict."
 excerpt: "Beach-read plotting, escalating set pieces, and Gabriel Basso growing into the lead. Our The Night Agent review with RT scores and where it stands."
-movie_title: "The Night Agent"
-movie_year: "2023"
+movie_title: The Night Agent
+movie_year: 2023
 movie_genres: "[\"Action & Adventure\", \"Drama\", \"Mystery\"]"
-movie_director: "Shawn Ryan"
+movie_director: Shawn Ryan
 movie_cast: "[\"Gabriel Basso\", \"Fola Evans-Akingbola\", \"Louis Herthum\", \"Genesis Rodriguez\", \"Albert Jones\", \"Ward Horton\"]"
 movie_overview: "Brought together by a midnight phone call, an FBI agent and a cybersecurity expert must unravel an ever-growing web of political conspiracies."
 movie_poster: "https://image.tmdb.org/t/p/w500/4c5yUNcaff4W4aPrkXE6zr7papX.jpg"
-movie_imdb: "tt13918776"
-region: "US"
+movie_imdb: tt13918776
+region: US
 sites: "[\"extramovies\"]"
+movie_release_date: 2023-03-23
+movie_studio: "[\"Sony Pictures Television\", \"MiddKid Productions\", \"Exhibit A\", \"Project X Entertainment\", \"Sunset Lane Media\"]"
+movie_country: "[\"United States of America\"]"
+movie_language: "[\"English\"]"
+movie_certification: TV-MA
+media_type: tv
 ---
-
 Watch The Night Agent for the momentum, not the nuance. Shawn Ryan's Netflix series is the streamer's answer to the Jack Ryan playbook: a low-level government man, a conspiracy that reaches the Oval Office, and season after season of escalating chase machinery. Gabriel Basso plays Peter Sutherland, the FBI agent who mans the night action phone in the White House basement, and three seasons in he has grown from blank functionary into the show's steadiest asset. Rotten Tomatoes has the series at 82% overall, and the audience keeps showing up: this is one of Netflix's most-watched dramas of 2023 and it has not slowed down since.
 
 > **Spoiler-free verdict:** Fast, watchable, and honest about what it is. The Night Agent is comfort-food espionage with real action craft. Season 3 is the show's sharpest run yet.

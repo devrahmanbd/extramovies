@@ -47,6 +47,20 @@ export async function exportReviews(outDir: string, dbPath = DB): Promise<string
       seo_title: (r.seo?.seoTitle ?? null) as string | null,
       seo_description: (r.seo?.metaDesc ?? null) as string | null,
       body: (r.markdown ?? r.body ?? '') as string,
+      excerpt: r.excerpt,
+      director: r.movie?.director,
+      year: r.movie?.year,
+      genres: r.movie?.genres,
+      status: r.status,
+      ...(r.movie?.releaseDate ? { movie_release_date: r.movie.releaseDate } : {}),
+      ...(r.movie?.studios ? { movie_studio: JSON.stringify(r.movie.studios) } : {}),
+      ...(r.movie?.countries ? { movie_country: JSON.stringify(r.movie.countries) } : {}),
+      ...(r.movie?.languages ? { movie_language: JSON.stringify(r.movie.languages) } : {}),
+      ...(r.movie?.certification ? { movie_certification: r.movie.certification } : {}),
+      ...(r.movie?.collection ? { movie_collection: r.movie.collection } : {}),
+      ...(r.movie?.budget ? { movie_budget: r.movie.budget } : {}),
+      ...(r.movie?.revenue ? { movie_revenue: r.movie.revenue } : {}),
+      ...(r.mediaType ? { media_type: r.mediaType } : {}),
     });
     const file = path.join(outDir, `${r.slug}.md`);
     await fs.writeFile(file, md, 'utf8');

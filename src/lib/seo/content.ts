@@ -68,6 +68,20 @@ export interface PublicReview {
   runtimeLabel?: string | null;
   /** Film release date (ISO) when the row carries one. */
   releaseDate?: string | null;
+  /** Production companies from TMDB, when the row carries them. */
+  studios?: string[];
+  /** Production countries from TMDB, when the row carries them. */
+  countries?: string[];
+  /** Spoken languages from TMDB, when the row carries them. */
+  languages?: string[];
+  /** Age rating for the row's region (TMDB), when known. */
+  certification?: string | null;
+  /** Franchise / collection name (TMDB), when the film belongs to one. */
+  collection?: string | null;
+  /** Production budget in USD, when TMDB carries a positive value. */
+  budget?: number | null;
+  /** Worldwide box office in USD, when TMDB carries a positive value. */
+  revenue?: number | null;
   publishedAt: string;
   updatedAt: string;
   authorName: string;

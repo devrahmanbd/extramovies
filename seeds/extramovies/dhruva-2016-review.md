@@ -1,27 +1,32 @@
 ---
 title: "Dhruva Review: Arvind Swamy Steals a Film Built For Ram Charan"
-slug: "dhruva-2016-review"
+slug: dhruva-2016-review
 rating: 7
 published_at: "2026-10-22T09:00:00.000Z"
 tmdb_id: 410994
-imdb_id: "tt6027478"
+imdb_id: tt6027478
 seo_title: "Dhruva (2016) Review: Is It Worth Watching?"
 seo_description: "Our Dhruva review: Ram Charan, Rakul Preet Singh and Arvind Swamy in the Telugu action thriller, the critical verdict, where to watch, and our rating."
-excerpt: "Watch it for Arvind Swamy. The Telugu action thriller with Ram Charan and Rakul Preet Singh runs on a taut script and one scene-stealing villain."
+excerpt: Watch it for Arvind Swamy. The Telugu action thriller with Ram Charan and Rakul Preet Singh runs on a taut script and one scene-stealing villain.
 managed_fields: "[\"seo_title\",\"seo_description\",\"excerpt\"]"
-movie_title: "Dhruva"
-movie_year: "2016"
+movie_title: Dhruva
+movie_year: 2016
 movie_genres: "[\"Crime\", \"Thriller\", \"Action\"]"
-movie_runtime: "165 min"
-movie_director: "Surender Reddy"
+movie_runtime: 165 min
+movie_director: Surender Reddy
 movie_cast: "[\"Ram Charan\", \"Rakul Preet Singh\", \"Arvind Swamy\", \"Navdeep\", \"Posani Krishna Murali\", \"Nassar\", \"Abhinaya\", \"Sayaji Shinde\"]"
 movie_overview: "A committed police officer is on a very dangerous mission to destroy the most corrupt person in the country, Siddharth Abhimanyu."
 movie_poster: "https://image.tmdb.org/t/p/w500/hh7D1fLjet1Ce1kcCkk5TVr3g9O.jpg"
-movie_imdb: "tt6027478"
-region: "US"
+movie_imdb: tt6027478
+region: US
 sites: "[\"extramovies\"]"
+movie_release_date: 2016-10-07
+movie_studio: "[\"Geetha Arts\"]"
+movie_country: "[\"India\"]"
+movie_language: "[\"Telugu\"]"
+movie_budget: 7403575
+media_type: movie
 ---
-
 Yes, Dhruva is worth watching, and the reason is Arvind Swamy. The Telugu action thriller pairs him with Ram Charan across a cat-and-mouse chase that runs on a taut script and one villain who keeps arriving before you are ready for him. The songs break the tension, the dubbing works against the hero, and the film earns its rating on the strength of two performances. Our rating is 7 out of 10.
 
 > **Spoiler-free verdict:** Watch it for the villain. A 165-minute Telugu action thriller with Ram Charan as ASP Dhruva, Rakul Preet Singh as the forensic expert Ishika, and Arvind Swamy as the scientist they are hunting. Rotten Tomatoes has no score for the film yet. You need no plot summary before pressing play.

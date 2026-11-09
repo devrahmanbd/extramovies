@@ -1,27 +1,35 @@
 ---
 title: "The Social Reckoning Review: Mikey Madison Carries a Loud Procedural"
-slug: "the-social-reckoning-2026-review"
-rating: 6.0
+slug: the-social-reckoning-2026-review
+rating: 6
 published_at: "2026-10-21T09:00:00.000Z"
 tmdb_id: 1281331
-imdb_id: "tt37510326"
+imdb_id: tt37510326
 seo_title: "The Social Reckoning (2026) Review: Is It Worth Watching?"
 seo_description: "Aaron Sorkin's The Social Reckoning (2026) stars Mikey Madison and Jeremy Allen White. Our drama review, with our 6 out of 10 verdict."
 excerpt: "Mikey Madison and Jeremy Allen White carry Sorkin's The Social Reckoning (2026), arguing a case the audience finished years ago. Our verdict."
 managed_fields: "[\"seo_description\",\"excerpt\"]"
-movie_title: "The Social Reckoning"
-movie_year: "2026"
+movie_title: The Social Reckoning
+movie_year: 2026
 movie_genres: "[\"Drama\", \"Thriller\"]"
-movie_runtime: "113 min"
-movie_director: "Aaron Sorkin"
+movie_runtime: 113 min
+movie_director: Aaron Sorkin
 movie_cast: "[\"Mikey Madison\", \"Jeremy Allen White\", \"Jeremy Strong\", \"Betty Gilpin\", \"Bill Burr\", \"Wunmi Mosaku\", \"Billy Magnussen\", \"Gbenga Akinnagbe\", \"Anna Lambe\", \"Aidan Laprete\", \"Kelley Pereira\", \"Nelson Franklin\"]"
 movie_overview: "Frances Haugen, a young Facebook engineer, enlists the help of Jeff Horwitz, a Wall Street Journal reporter, to go on a dangerous journey that ends up blowing the whistle on the social network's most guarded secrets."
 movie_poster: "https://image.tmdb.org/t/p/w500/7jK6NuxVg1XuEV7UdNa6KO03IgZ.jpg"
-movie_imdb: "tt37510326"
-region: "US"
+movie_imdb: tt37510326
+region: US
 sites: "[\"extramovies\"]"
+movie_release_date: 2026-10-07
+movie_studio: "[\"Columbia Pictures\", \"Alcon Entertainment\", \"TSG Entertainment\"]"
+movie_country: "[\"United States of America\"]"
+movie_language: "[\"English\"]"
+movie_certification: R
+movie_collection: The Social Network Collection
+movie_budget: 30000000
+movie_revenue: 16960786
+media_type: movie
 ---
-
 Yes, The Social Reckoning is worth watching, and mostly for the two people in it. Aaron Sorkin wrote, produced and directed, and the result is a 113-minute whistleblower procedural that argues a case the audience finished years ago. Mikey Madison and Jeremy Allen White carry it, Jeff Cronenweth photographs it, and Alexandre Desplat scores it, but the film is loud where it needed to be quiet. Rotten Tomatoes has it at 54 percent from 250 critic reviews and Metacritic at 51 from 58, both checked October 21, 2026.
 
 The business explains part of the split. Box Office Mojo, checked October 21, 2026, has the film at $8,287,839 domestic and $14,287,839 worldwide, opening with $5,018,263 in the United States on October 9 through Sony Pictures Releasing. The US certificate is R for language, and the running time is 113 minutes on TMDB, which Rotten Tomatoes and Box Office Mojo both list as 112.

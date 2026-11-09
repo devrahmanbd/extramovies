@@ -1,27 +1,32 @@
 ---
 title: "Animals Review: A Sharp Kidnap Premise, a Script With No Off Switch"
-slug: "animals-2026-review"
+slug: animals-2026-review
 rating: 4.5
 published_at: "2026-10-21T09:00:00.000Z"
 tmdb_id: 1236045
-imdb_id: "tt31049299"
+imdb_id: tt31049299
 seo_title: "Animals (2026) Review: Is It Worth Watching?"
 seo_description: "Ben Affleck's Animals (2026) stars Kerry Washington and Gillian Anderson. Our ransom thriller review, with our 4.5 out of 10 verdict."
 excerpt: "The premise is sharp and Gillian Anderson is the best thing in it, but the script will not stop explaining itself. Our Animals (2026) verdict."
 managed_fields: "[\"seo_description\",\"excerpt\"]"
-movie_title: "Animals"
-movie_year: "2026"
+movie_title: Animals
+movie_year: 2026
 movie_genres: "[\"Thriller\", \"Drama\"]"
-movie_runtime: "106 min"
-movie_director: "Ben Affleck"
+movie_runtime: 106 min
+movie_director: Ben Affleck
 movie_cast: "[\"Ben Affleck\", \"Kerry Washington\", \"Gillian Anderson\", \"Steven Yeun\", \"Adriana Paz\", \"Luis Gerardo Méndez\", \"Christopher Woodley\", \"Jacob Estrada\", \"Ray Fisher\", \"Chris Gann\"]"
 movie_overview: "When the son of an L.A. mayoral candidate is kidnapped, he and his wife have a few hours to come up with the ransom payment. With most of their money spent on his political campaign, they have to get their hands dirty and expose a side of their lives they never intended to see the light of day."
 movie_poster: "https://image.tmdb.org/t/p/w500/iISM36voS1E8gX9BM0DVK0kgi3E.jpg"
-movie_imdb: "tt31049299"
-region: "US"
+movie_imdb: tt31049299
+region: US
 sites: "[\"extramovies\"]"
+movie_release_date: 2026-10-09
+movie_studio: "[\"Artists Equity\", \"Makeready\", \"Fifth Season\"]"
+movie_country: "[\"United States of America\"]"
+movie_language: "[\"English\", \"Spanish\"]"
+movie_certification: R
+media_type: movie
 ---
-
 Animals is worth watching for its premise and for two performers in it. Ben Affleck's sixth directing job is a Netflix ransom thriller about a Los Angeles mayoral candidate whose son is taken on Halloween, and the best thing about it is a moral question the story asks over and over and never settles. What the film does with that question is where it goes wrong. Critics noticed. Rotten Tomatoes has it at 32 percent from 73 reviews and Metacritic sits at 33 from 21 critic reviews, both checked on October 21, 2026.
 
 The film arrived on Netflix on October 9, 2026 with a limited theatrical run, runs 106 minutes and carries an R rating. Netflix's own weekly Top 10, published on October 21, 2026, has Animals holding the top spot on the English-language film list for the week of October 12, 2026, with 30.8 million views. That is reach. The numbers below are the approval.

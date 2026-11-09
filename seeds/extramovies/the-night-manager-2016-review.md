@@ -1,24 +1,29 @@
 ---
 title: "The Night Manager Review: le Carré Adapted With Style and a Return Worth the Wait"
-slug: "the-night-manager-2016-review"
+slug: the-night-manager-2016-review
 rating: 8.3
 tmdb_id: 61859
-imdb_id: "tt1399664"
+imdb_id: tt1399664
 seo_title: "The Night Manager (2016) Review: Is It Worth Watching?"
 seo_description: "Our The Night Manager review: Hiddleston and Laurie in le Carré's spy novel, 91% RT season 1, season 2's 86% return, and our verdict."
 excerpt: "Hiddleston is the most charming spy on television, Laurie the arms dealer worth his time. Our The Night Manager review of both seasons and the verdict."
-movie_title: "The Night Manager"
-movie_year: "2016"
+movie_title: The Night Manager
+movie_year: 2016
 movie_genres: "[\"Drama\", \"Mystery\", \"Crime\"]"
-movie_director: "David Farr"
+movie_director: David Farr
 movie_cast: "[\"Tom Hiddleston\", \"Hugh Laurie\", \"Diego Calva\", \"Camila Morrone\", \"Paul Chahidi\", \"Hayley Squires\", \"Indira Varma\"]"
 movie_overview: "Former British soldier Jonathan Pine navigates the shadowy recesses of Whitehall and Washington where an unholy alliance operates between the intelligence community and the secret arms trade. To infiltrate the inner circle of lethal arms dealer Richard Onslow Roper, Pine must himself become a criminal."
 movie_poster: "https://image.tmdb.org/t/p/w500/1MccRnw41qQjREuZkovqP2UX1i3.jpg"
-movie_imdb: "tt1399664"
-region: "US"
+movie_imdb: tt1399664
+region: US
 sites: "[\"extramovies\"]"
+movie_release_date: 2016-02-21
+movie_studio: "[\"BBC\", \"The Ink Factory\", \"Demarest Films\", \"Character 7\", \"127 Wall\", \"Nostromo Pictures\", \"The Ink Factory\", \"Hangtime International Pictures\"]"
+movie_country: "[\"United Kingdom\", \"United States of America\", \"Spain\"]"
+movie_language: "[\"English\", \"Spanish\"]"
+movie_certification: TV-MA
+media_type: tv
 ---
-
 The Night Manager is the rare adaptation that improves on its source by picking one idea and dressing it perfectly: the spy as a beautiful object. Tom Hiddleston plays Jonathan Pine, an ex-soldier running a Cairo hotel who walks into British intelligence and out into the arms trade, and Susanne Bier films the whole thing like a luxury ad with a body count. Rotten Tomatoes has season 1 at 91% with an 8.4/10 average from 67 critics, and the Emmys agreed: the miniseries won two. When the BBC brought it back in January 2026 after a ten-year gap, season 2 landed at 86%.
 
 > **Spoiler-free verdict:** A modern spy classic, and the ten-year-old one still holds. Start with the 2016 season, then decide for yourself about the return. Worth watching for Hiddleston and Hugh Laurie alone.

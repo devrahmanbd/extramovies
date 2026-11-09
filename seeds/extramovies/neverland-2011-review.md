@@ -1,27 +1,32 @@
 ---
 title: "Neverland Review: Ifans, Friel and a Peter Pan Prequel That Outstays Its Welcome"
-slug: "neverland-2011-review"
+slug: neverland-2011-review
 rating: 5.5
 published_at: "2026-10-21T09:00:00.000Z"
 tmdb_id: 43720
-imdb_id: "tt1720619"
+imdb_id: tt1720619
 seo_title: "Neverland (2011) Review: Is It Worth Watching?"
 seo_description: "Our Neverland review: the 2011 Syfy Peter Pan prequel with Rhys Ifans and Anna Friel, its Rotten Tomatoes score, where to watch, and our verdict."
-excerpt: "Watch it for Rhys Ifans. The 2011 Syfy Peter Pan prequel is well cast and badly padded. Rotten Tomatoes says 57 percent from 14 critic reviews. Our verdict."
+excerpt: Watch it for Rhys Ifans. The 2011 Syfy Peter Pan prequel is well cast and badly padded. Rotten Tomatoes says 57 percent from 14 critic reviews. Our verdict.
 managed_fields: "[\"seo_title\",\"seo_description\",\"excerpt\"]"
-movie_title: "Neverland"
-movie_year: "2011"
+movie_title: Neverland
+movie_year: 2011
 movie_genres: "[\"Sci-Fi & Fantasy\", \"Action & Adventure\"]"
-movie_runtime: "170 min"
-movie_director: "Nick Willing"
+movie_runtime: 170 min
+movie_director: Nick Willing
 movie_cast: "[\"Charlie Rowe\", \"Rhys Ifans\", \"Anna Friel\", \"Keira Knightley\", \"Bob Hoskins\", \"Charles Dance\", \"Q'orianka Kilcher\", \"Raoul Max Trujillo\", \"Cas Anvar\", \"James Ainsworth\", \"Patrick Gibson\", \"Brandon Robinson\", \"Chase Willoughby\", \"Charlotte Atkinson\"]"
 movie_overview: "Raised on the streets of turn-of-the-century London, orphaned Peter and his pals survive by their fearless wits as cunning young pickpockets. Now they have been rounded up by their mentor Jimmy Hook to snatch a priceless, some believe magical, treasure which transports them to Neverland."
 movie_poster: "https://image.tmdb.org/t/p/w500/6XKjKNL9DsI8d1b9wCdetVGGqGR.jpg"
-movie_imdb: "tt1720619"
-region: "US"
+movie_imdb: tt1720619
+region: US
 sites: "[\"extramovies\"]"
+movie_release_date: 2011-12-04
+movie_studio: "[\"Parallel Films\", \"MNG Films\", \"Syfy\", \"Sky Movies\", \"Ingenious Broadcasting\"]"
+movie_country: "[\"Ireland\", \"United Kingdom\", \"United States of America\"]"
+movie_language: "[\"English\"]"
+movie_certification: TV-PG
+media_type: tv
 ---
-
 Yes, Neverland is worth watching, but mostly for the actors. The 2011 Syfy miniseries is a two-part prequel to J.M. Barrie's Peter Pan, written and directed by Nick Willing, and the programme itself runs 170 minutes, the two 85-minute parts TMDB lists, while the Syfy broadcast ran to the four hours Variety's credits block records. Rhys Ifans plays Jimmy Hook with a bank robber's calm, Anna Friel plays the pirate captain Elizabeth Bonny like she has been at sea since birth, and Bob Hoskins turns up one last time in the role of Smee. Then the script puts its feet up. Rotten Tomatoes has the miniseries at 57 percent from 14 critic reviews, Metacritic at 59 from 14 critic reviews, both checked on October 22, 2026.
 
 > **Spoiler-free verdict:** Watch it for Ifans and Friel, skip it if you want a Peter Pan that moves. A two-part fantasy miniseries that aired on Syfy in December 2011, with a 57 percent Tomatometer from 14 critic reviews and a Metascore of 59, both checked on October 22, 2026. You need no plot summary before pressing play.

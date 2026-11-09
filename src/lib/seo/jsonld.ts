@@ -181,19 +181,33 @@ export function breadcrumbJsonLd(
   };
 }
 
-export function movieJsonLd(
+/**
+ * The Movie/TVSeries fields shared by the standalone movie node and the
+ * Review's itemReviewed node. Only facts the row carries: a missing studio,
+ * country, language, certification, franchise or release date drops its key
+ * instead of printing an empty claim. Budget and box office are not schema.org
+ * Movie properties, so they stay in the visible fact card only.
+ */
+function movieCoreFields(
   review: PublicReview,
-  origin: string,
   mediaType: ReviewMediaType | null = "movie",
 ): JsonLd {
-  void origin;
   const isSeries = mediaType === "tv";
   const source = tmdbSourceUrl(review.tmdbId, mediaType);
-  const movie: JsonLd = {
-    "@context": "https://schema.org",
-    "@type": isSeries ? "TVSeries" : "Movie",
+  const clean = (value: string) => value.replace(/\s+/g, " ").trim();
+  const studios = (review.studios ?? []).map(clean).filter(Boolean);
+  const countries = (review.countries ?? []).map(clean).filter(Boolean);
+  const languages = (review.languages ?? []).map(clean).filter(Boolean);
+  const certification =
+    typeof review.certification === "string" ? clean(review.certification) : "";
+  const collection =
+    typeof review.collection === "string" ? clean(review.collection) : "";
+  const releaseDate =
+    typeof review.releaseDate === "string" ? review.releaseDate.trim() : "";
+  return {
     name: review.movieTitle,
     ...(review.year ? { dateCreated: String(review.year) } : {}),
+    ...(releaseDate ? { datePublished: releaseDate } : {}),
     ...(review.genres.length > 0 ? { genre: review.genres } : {}),
     // The TMDB record is the same title, not a source the title is based on.
     // `sameAs` is the disambiguating identifier; `isBasedOn` stays on the
@@ -204,8 +218,43 @@ export function movieJsonLd(
     // a Movie director on a TVSeries node.
     ...(isSeries ? {} : directorField(review.director)),
     ...(review.posterUrl ? { image: review.posterUrl } : {}),
+    ...(studios.length > 0
+      ? {
+          productionCompany: studios.map((name) => ({
+            "@type": "Organization",
+            name,
+          })),
+        }
+      : {}),
+    ...(countries.length > 0
+      ? {
+          countryOfOrigin: countries.map((name) => ({
+            "@type": "Country",
+            name,
+          })),
+        }
+      : {}),
+    ...(languages.length > 0
+      ? { inLanguage: languages.length === 1 ? languages[0] : languages }
+      : {}),
+    ...(certification ? { contentRating: certification } : {}),
+    ...(!isSeries && collection
+      ? { isPartOf: { "@type": "CreativeWorkSeries", name: collection } }
+      : {}),
   };
-  return movie;
+}
+
+export function movieJsonLd(
+  review: PublicReview,
+  origin: string,
+  mediaType: ReviewMediaType | null = "movie",
+): JsonLd {
+  void origin;
+  return {
+    "@context": "https://schema.org",
+    "@type": mediaType === "tv" ? "TVSeries" : "Movie",
+    ...movieCoreFields(review, mediaType),
+  };
 }
 
 export function articleJsonLd(
@@ -263,12 +312,7 @@ export function myReviewJsonLd(
     ...(source ? { isBasedOn: source } : {}),
     itemReviewed: {
       "@type": isSeries ? "TVSeries" : "Movie",
-      name: review.movieTitle,
-      ...(review.year ? { dateCreated: String(review.year) } : {}),
-      ...(review.genres.length > 0 ? { genre: review.genres } : {}),
-      ...(source ? { sameAs: source } : {}),
-      ...(isSeries ? {} : directorField(review.director)),
-      ...(review.posterUrl ? { image: review.posterUrl } : {}),
+      ...movieCoreFields(review, mediaType),
     },
     mainEntityOfPage: { "@type": "WebPage", "@id": canonical },
     inLanguage: "en",

@@ -1,25 +1,32 @@
 ---
 title: "Transcendence Review: A Gorgeous Machine With a Script That Gives Up"
-slug: "transcendence-2014-review"
+slug: transcendence-2014-review
 rating: 0
 tmdb_id: 157353
-imdb_id: "tt2209764"
+imdb_id: tt2209764
 seo_title: "Transcendence (2014) Review: Is It Worth Watching?"
 seo_description: "Our Transcendence review: Wally Pfister's 2014 AI thriller with Johnny Depp and Morgan Freeman, shot on 35mm, where to watch, and our verdict."
 excerpt: "Watch it for the 35mm photography and the argument about uploaded minds. Wally Pfister's 2014 Depp and Freeman thriller is gorgeous, and the last act gives up."
-movie_title: "Transcendence"
-movie_year: "2014"
+movie_title: Transcendence
+movie_year: 2014
 movie_genres: "[\"Thriller\", \"Science Fiction\", \"Drama\", \"Mystery\"]"
-movie_runtime: "119 min"
-movie_director: "Wally Pfister"
+movie_runtime: 119 min
+movie_director: Wally Pfister
 movie_cast: "[\"Johnny Depp\", \"Rebecca Hall\", \"Morgan Freeman\", \"Paul Bettany\", \"Cillian Murphy\", \"Kate Mara\", \"Cole Hauser\", \"Clifton Collins Jr.\"]"
 movie_overview: "Two leading computer scientists work toward their goal of Technological Singularity,  as a radical anti-technology organization fights to prevent them from creating a world where computers can transcend the abilities of the human brain."
 movie_poster: "https://image.tmdb.org/t/p/w500/i3JqPtiJWnidaif3UA2K2Eng0hp.jpg"
-movie_imdb: "tt2209764"
-region: "US"
+movie_imdb: tt2209764
+region: US
 sites: "[\"extramovies\"]"
+movie_release_date: 2014-04-16
+movie_studio: "[\"Alcon Entertainment\", \"DMG Entertainment\", \"Straight Up Films\"]"
+movie_country: "[\"United States of America\"]"
+movie_language: "[\"English\"]"
+movie_certification: PG-13
+movie_budget: 100000000
+movie_revenue: 103039258
+media_type: movie
 ---
-
 Yes, Transcendence is worth watching, and the case for it is the camera rather than the story. Wally Pfister's directorial debut is a photographed argument about what happens when a scientist's mind is uploaded into a computer, and Jess Hall shot it on 35mm in the New Mexico desert, so it looks like a film nobody hurried. The script by Jack Paglen cannot hold what the camera keeps finding. Johnny Depp is on screen for a fraction of the runtime. Rotten Tomatoes has the film at 19 percent from 226 critic reviews, read on October 20, 2026. The box office was worse. None of that cancels the picture.
 
 It opened in American cinemas on April 18, 2014, after a premiere in New York on April 10. It took $23 million in North America and $80 million in the rest of the world, $103 million worldwide, against a budget reported between $100 million and $150 million. Deadline Hollywood estimated the loss to the studio could reach $100 million and put a more realistic figure near $35 million. The opening weekend was $10.9 million across 3,455 theaters, fourth in the country behind Captain America: The Winter Soldier, Heaven Is for Real and Rio 2. Then it disappeared.

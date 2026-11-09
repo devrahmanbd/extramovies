@@ -1,27 +1,33 @@
 ---
 title: "Runner Review: Alan Ritchson and Owen Wilson Deserve a Better Movie"
-slug: "runner-2026-review"
+slug: runner-2026-review
 rating: 6.5
 published_at: "2026-10-21T09:00:00.000Z"
 tmdb_id: 1377237
-imdb_id: "tt31349844"
+imdb_id: tt31349844
 seo_title: "Runner (2026) Review: Is It Worth Watching?"
 seo_description: "Scott Waugh's Runner (2026) stars Alan Ritchson and Owen Wilson. Our action comedy review, with our 6.5 out of 10 verdict."
-excerpt: "Ritchson and Wilson have chemistry and Waugh stages the fights superbly. The film around them is generic and brutal. Our Runner (2026) verdict."
+excerpt: Ritchson and Wilson have chemistry and Waugh stages the fights superbly. The film around them is generic and brutal. Our Runner (2026) verdict.
 managed_fields: "[\"seo_description\",\"excerpt\"]"
-movie_title: "Runner"
-movie_year: "2026"
+movie_title: Runner
+movie_year: 2026
 movie_genres: "[\"Action\", \"Comedy\"]"
-movie_runtime: "97 min"
-movie_director: "Scott Waugh"
+movie_runtime: 97 min
+movie_director: Scott Waugh
 movie_cast: "[\"Alan Ritchson\", \"Owen Wilson\", \"Rodrigo Santoro\", \"Leila George\", \"Kate Box\", \"Peta Sergeant\", \"Cecilia Toussaint\", \"Geraldine Hakewill\", \"Goran D. Kleut\", \"Scarlett Crabtree\"]"
 movie_overview: "A former soldier is thrown into a brutal race against time when a critical medical delivery makes him and his unlikely partner the targets of a ruthless cartel. As the mission spirals into a deadly manhunt, every detour, delay, and bullet pushes them closer to failure. With betrayal closing in from every side, they must survive the chase and deliver their cargo to save the life of a little girl."
 movie_poster: "https://image.tmdb.org/t/p/w500/yBKMAIj7clP42UkFejhGDBBoTpb.jpg"
-movie_imdb: "tt31349844"
-region: "US"
+movie_imdb: tt31349844
+region: US
 sites: "[\"extramovies\"]"
+movie_release_date: 2026-09-07
+movie_studio: "[\"Broken Road Productions\", \"AllyCat Entertainment\", \"Nickel City Pictures\", \"A Higher Standard\", \"G2 Dispatch\", \"International Media Funds Management\", \"Bright White Light\", \"2521 Entertainment\"]"
+movie_country: "[\"United States of America\", \"Australia\", \"United Kingdom\"]"
+movie_language: "[\"English\", \"Portuguese\", \"Spanish\", \"French\"]"
+movie_certification: PG-13
+movie_revenue: 18094381
+media_type: movie
 ---
-
 Runner is worth watching if you are the kind of viewer who wants a car chase for what a car chase is. Alan Ritchson and Owen Wilson have real chemistry, and Scott Waugh stages the fights, the shootouts and the chases with the fluency of a working stuntman. The film wrapped around them is generic, extremely gory and unsure what it wants to be. The audience is split down the middle, and the split is the honest verdict.
 
 > **Spoiler-free verdict:** Worth it for the action, and only for the action. A 97-minute buddy thriller shot in Brisbane and the Gold Coast, with two actors who sell the partnership and a script that does not. Rotten Tomatoes has it at 78 percent from 63 critic reviews. The audience numbers pull in opposite directions, and we explain why below.

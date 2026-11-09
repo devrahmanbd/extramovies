@@ -1,27 +1,34 @@
 ---
 title: "Resident Evil Review: A Franchise Reboot With Real Jokes and Real Teeth"
-slug: "resident-evil-2026-review"
+slug: resident-evil-2026-review
 rating: 7.5
 published_at: "2026-10-21T09:00:00.000Z"
 tmdb_id: 1423191
-imdb_id: "tt35538033"
+imdb_id: tt35538033
 seo_title: "Resident Evil Review (2026): Is It Worth Watching?"
 seo_description: "Zach Cregger's Resident Evil (2026) stars Austin Abrams in a 95-minute horror reboot. Our review, with our 7.5 out of 10 verdict."
 excerpt: "Austin Abrams carries a horror reboot with real jokes and real teeth. Our Resident Evil (2026) review, with the verdict."
 managed_fields: "[\"seo_title\",\"seo_description\",\"excerpt\"]"
-movie_title: "Resident Evil"
-movie_year: "2026"
+movie_title: Resident Evil
+movie_year: 2026
 movie_genres: "[\"Horror\", \"Science Fiction\", \"Adventure\"]"
-movie_runtime: "95 min"
-movie_director: "Zach Cregger"
+movie_runtime: 95 min
+movie_director: Zach Cregger
 movie_cast: "[\"Austin Abrams\", \"Paul Walter Hauser\", \"Kali Reis\", \"Zach Cherry\", \"Johnno Wilson\", \"Shaun W. Loeser\", \"Zach Cregger\", \"Emily Piggford\", \"Will Merrick\", \"Zoe Bellas\"]"
 movie_overview: "Medical courier Bryan unwittingly finds himself fighting for survival as one fateful, horrifying night collapses around him in chaos."
 movie_poster: "https://image.tmdb.org/t/p/w500/i7UyjfPio0VFHB9rBUZSFyhOoM8.jpg"
-movie_imdb: "tt35538033"
-region: "US"
+movie_imdb: tt35538033
+region: US
 sites: "[\"extramovies\"]"
+movie_release_date: 2026-09-16
+movie_studio: "[\"Constantin Film\", \"Subconscious\", \"Vertigo Entertainment\", \"Davis Films\", \"Columbia Pictures\", \"PlayStation Productions\", \"TriStar Pictures\"]"
+movie_country: "[\"United States of America\", \"Germany\", \"France\"]"
+movie_language: "[\"English\"]"
+movie_certification: R
+movie_budget: 75000000
+movie_revenue: 400290973
+media_type: movie
 ---
-
 Yes, Resident Evil is worth watching, and it is worth the ninety-five minutes it asks for. Zach Cregger's reboot is the first film in this franchise built on horror instead of noise. Austin Abrams carries it with a performance that is funny, frightened and completely physical. The last act gets away from the director. Everything before that is a real thrill ride.
 
 > **Spoiler-free verdict:** Watch it. A 95-minute horror comedy with creature effects you can feel, an Austin Abrams performance running on panic and pratfalls, and a body count that earns its scares. Rotten Tomatoes has it at 96 percent from 300 critic reviews. You need no plot summary before pressing play.

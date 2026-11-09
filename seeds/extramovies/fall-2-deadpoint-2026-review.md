@@ -1,27 +1,35 @@
 ---
 title: "Fall 2: Deadpoint Review: A Working Altitude Movie With a Thin Script"
-slug: "fall-2-deadpoint-2026-review"
+slug: fall-2-deadpoint-2026-review
 rating: 5.5
 published_at: "2026-10-21T09:00:00.000Z"
 tmdb_id: 1101412
-imdb_id: "tt31192372"
+imdb_id: tt31192372
 seo_title: "Fall 2: Deadpoint (2026) Review: Is It Worth Watching?"
 seo_description: "The Spierig brothers' Fall 2: Deadpoint (2026) stars Harriet Slater and Arsema Thomas. Our survival thriller review, with our 5.5 out of 10 verdict."
 excerpt: "The vertigo works and the characters do not. The Spierig brothers land a watchable B-movie. Our Fall 2: Deadpoint (2026) verdict."
 managed_fields: "[\"seo_description\",\"excerpt\"]"
 movie_title: "Fall 2: Deadpoint"
-movie_year: "2026"
+movie_year: 2026
 movie_genres: "[\"Thriller\"]"
-movie_runtime: "98 min"
+movie_runtime: 98 min
 movie_director: "Peter Spierig, Michael Spierig"
 movie_cast: "[\"Harriet Slater\", \"Arsema Thomas\", \"Tom Brittney\", \"Virginia Gardner\", \"Sahajak Boonthanakit\", \"Korakod Yensuk\", \"Jordan Coleman\", \"Einar Haraldsson\"]"
 movie_overview: "On a perilous climb across Thailand's Mount Kwan, two climbers become trapped thousands of feet above the ground, where vertigo-inducing heights, sheer exposure, and impossible odds turn every moment into a fight for survival."
 movie_poster: "https://image.tmdb.org/t/p/w500/fgSm5ylwiXbIHn8UbUXDjk9RRu4.jpg"
-movie_imdb: "tt31192372"
-region: "US"
+movie_imdb: tt31192372
+region: US
 sites: "[\"extramovies\"]"
+movie_release_date: 2026-09-01
+movie_studio: "[\"Tea Shop Productions\", \"Capstone Pictures\", \"Flawless Production\", \"Cousin Jones\"]"
+movie_country: "[\"United Kingdom\", \"United States of America\", \"Thailand\"]"
+movie_language: "[\"English\"]"
+movie_certification: PG-13
+movie_collection: Fall Collection
+movie_budget: 3000000
+movie_revenue: 9256541
+media_type: movie
 ---
-
 Fall 2: Deadpoint is worth watching if you want the height and can live without the characters. The Spierig brothers moved Scott Mann's survival premise off a desert radio tower and onto an 11,000-foot face in Thailand, and the camera work puts you there so completely that you will feel the drop in your stomach. The script underneath is thin, the drug-running subplot is stapled on late, and the effects show their seams. At 98 minutes it is a watchable B-movie with a patient first act and a final act that finally has something to say.
 
 The business is small. The Numbers has Fall 2: Deadpoint at $5,044,421 domestic and $26,694,950 worldwide, with a $2,320,061 opening weekend. The Guardian's Benjamin Lee explained why the sequel exists at all, noting that the 2022 original cost just $3 million, and Time Out's Hanna Flint reported that it made seven times its budget. Critics split down the middle. Rotten Tomatoes has the Tomatometer at 53 percent from 59 reviews, and Metacritic sits at 54 from 12 critic reviews.

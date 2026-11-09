@@ -1,27 +1,35 @@
 ---
 title: "Toy Story 5 Review: Jessie Takes the Lead and the Franchise Finally Grows Up"
-slug: "toy-story-5-2026-review"
+slug: toy-story-5-2026-review
 rating: 7.4
 published_at: "2026-10-21T09:00:00.000Z"
 tmdb_id: 1084244
-imdb_id: "tt29355505"
+imdb_id: tt29355505
 seo_title: "Toy Story 5 Review (2026): Is It Worth Watching?"
 seo_description: "Andrew Stanton's Toy Story 5 (2026) gives the franchise to Joan Cusack's Jessie. Our Pixar sequel review, with our 7.4 out of 10 verdict."
 excerpt: "Joan Cusack's Jessie takes the lead in Andrew Stanton's Toy Story 5 (2026). Immaculate animation, a script that repeats itself. Our verdict."
 managed_fields: "[\"seo_title\",\"seo_description\",\"excerpt\"]"
-movie_title: "Toy Story 5"
-movie_year: "2026"
+movie_title: Toy Story 5
+movie_year: 2026
 movie_genres: "[\"Animation\", \"Family\", \"Comedy\", \"Adventure\"]"
-movie_runtime: "102 min"
-movie_director: "Andrew Stanton"
+movie_runtime: 102 min
+movie_director: Andrew Stanton
 movie_cast: "[\"Joan Cusack\", \"Tom Hanks\", \"Tim Allen\", \"Conan O'Brien\", \"Scarlett Spears\", \"Greta Lee\", \"Shelby Rabara\", \"Mykal-Michelle Harris\", \"Craig Robinson\", \"Jay Hernandez\"]"
 movie_overview: "When Bonnie receives a Lilypad tablet as a gift and becomes obsessed, Buzz, Woody, Jessie and the rest of the gang's jobs become exponentially harder when they have to go head to head with the all-new threat to playtime."
 movie_poster: "https://image.tmdb.org/t/p/w500/sfQtVlIHljToOwYjhe21KPGzZWK.jpg"
-movie_imdb: "tt29355505"
-region: "US"
+movie_imdb: tt29355505
+region: US
 sites: "[\"extramovies\"]"
+movie_release_date: 2026-06-17
+movie_studio: "[\"Pixar\"]"
+movie_country: "[\"United States of America\"]"
+movie_language: "[\"English\", \"Spanish\"]"
+movie_certification: PG
+movie_collection: Toy Story Collection
+movie_budget: 250000000
+movie_revenue: 1148032461
+media_type: movie
 ---
-
 See Toy Story 5, and take the children. Andrew Stanton has handed the franchise to Joan Cusack's Jessie, made the enemy a frog-shaped tablet, and built a 102-minute argument for going outside and playing. The animation is immaculate and the theme is the right one for 2026. The script repeats itself, the adults are written small, and the sharpest review of it says the picture is dead at heart.
 
 > **Spoiler-free verdict:** Worth it, especially for a family. A 102-minute Pixar comedy that gives the franchise a new lead in Jessie and a subject it has never had, screen time versus play. Rotten Tomatoes has it at 92 percent from 331 critic reviews. You need no plot summary before pressing play.

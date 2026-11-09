@@ -402,3 +402,132 @@ export function taxonomyPageMeta(
     robots: taxonomyRobots(entry),
   };
 }
+
+// ---------------------------------------------------------------------------
+// At a glance (PS-3)
+// ---------------------------------------------------------------------------
+
+export interface TaxonomyFactLink {
+  label: string;
+  path: string;
+}
+
+export interface TaxonomyFact {
+  label: string;
+  /** Plain value, used when the fact has no links. */
+  value?: string;
+  /** Linked values (genres, directors, cast), already ranked. */
+  links?: TaxonomyFactLink[];
+}
+
+export interface TaxonomyGlance {
+  facts: TaxonomyFact[];
+  /** One short paragraph: what this page covers and what it does not. */
+  scope: string;
+}
+
+/** Count each value once per review (a duplicated credit is not two credits). */
+function countOncePerReview(values: string[]): Map<string, number> {
+  const counts = new Map<string, number>();
+  for (const value of new Set(values.map((v) => v.replace(/\s+/g, " ").trim()).filter(Boolean))) {
+    counts.set(value, (counts.get(value) ?? 0) + 1);
+  }
+  return counts;
+}
+
+/** Merge per-review counts into one corpus count. */
+function addCounts(target: Map<string, number>, source: Map<string, number>): void {
+  for (const [value, count] of source) {
+    target.set(value, (target.get(value) ?? 0) + count);
+  }
+}
+
+/** Ranked links for one taxonomy axis, most-used first, ties alphabetical. */
+function rankedLinks(
+  counts: Map<string, number>,
+  kind: TaxonomyKind,
+  limit: number,
+  excludeSlug?: string,
+): TaxonomyFactLink[] {
+  return [...counts.entries()]
+    .filter(([label]) => {
+      const slug = slugifyTaxonomy(label);
+      return slug !== "" && slug !== excludeSlug;
+    })
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+    .slice(0, limit)
+    .map(([label]) => ({
+      label,
+      path: taxonomyPath(kind, slugifyTaxonomy(label)),
+    }));
+}
+
+/**
+ * The data-driven "At a glance" block for a taxonomy page.
+ *
+ * Every value is computed from the entry's own published reviews. A fact
+ * with nothing to say is omitted, never printed as an empty row. The scope
+ * paragraph states the limit honestly: this is a review index, not a
+ * filmography or a complete genre survey.
+ */
+export function taxonomyGlance(entry: TaxonomyEntry): TaxonomyGlance {
+  const reviews = entry.reviews;
+  const facts: TaxonomyFact[] = [
+    { label: "Reviews", value: taxonomyCountText(entry) },
+  ];
+
+  const years = reviews
+    .map((review) => review.year)
+    .filter((year): year is number => typeof year === "number" && year > 0);
+  if (years.length > 0) {
+    const min = Math.min(...years);
+    const max = Math.max(...years);
+    facts.push({ label: "Years", value: min === max ? String(min) : `${min}-${max}` });
+  }
+
+  const genreCounts = new Map<string, number>();
+  const directorCounts = new Map<string, number>();
+  const castCounts = new Map<string, number>();
+  for (const review of reviews) {
+    addCounts(genreCounts, countOncePerReview(review.genres ?? []));
+    addCounts(directorCounts, countOncePerReview(directorNames(review.director)));
+    addCounts(castCounts, countOncePerReview(review.cast ?? []));
+  }
+
+  const genreLinks =
+    entry.kind === "category"
+      ? rankedLinks(genreCounts, "category", 3, entry.slug)
+      : rankedLinks(genreCounts, "category", 4);
+  if (genreLinks.length > 0) {
+    facts.push({
+      label: entry.kind === "category" ? "Related genres" : "Genres",
+      links: genreLinks,
+    });
+  }
+
+  if (entry.kind !== "director") {
+    const directorLinks = rankedLinks(directorCounts, "director", 4);
+    if (directorLinks.length > 0) {
+      facts.push({ label: "Directors", links: directorLinks });
+    }
+  }
+
+  if (entry.kind !== "cast") {
+    const frequentCast = new Map(
+      [...castCounts].filter(([, count]) => count >= 2),
+    );
+    const castLinks = rankedLinks(frequentCast, "cast", 3);
+    if (castLinks.length > 0) {
+      facts.push({ label: "Frequent cast", links: castLinks });
+    }
+  }
+
+  const scope =
+    entry.kind === "cast"
+      ? `This is a review index, not a filmography. A film appears only when the site has published a review that credits ${entry.label} in the cast. The list is ordered newest first, and every entry links to the full review.`
+      : entry.kind === "director"
+        ? `This is a review index, not a complete filmography. A film appears only when the site has published a review of a film directed by ${entry.label}. The list is ordered newest first, and every entry links to the full review.`
+        : `This is a review index, not a complete genre survey. A film appears only when the site has published a review filed under ${entry.label}. The list is ordered newest first, and every entry links to the full review.`;
+
+  return { facts, scope };
+}

@@ -1,24 +1,29 @@
 ---
 title: "Condor Review: The Smart CIA Thriller Nobody Could Find"
-slug: "condor-2018-review"
+slug: condor-2018-review
 rating: 7.9
 tmdb_id: 71146
-imdb_id: "tt6510950"
+imdb_id: tt6510950
 seo_title: "Condor (2018) Review: Worth Watching This CIA Thriller?"
 seo_description: "Our Condor review: Max Irons in the Three Days of the Condor series, 87% RT season 1, why it died on Audience Network, and our verdict."
 excerpt: "A smartly expanded Three Days of the Condor with Max Irons, killed by its own channel. Our Condor review: the cast, the scores, and where to find it."
-movie_title: "Condor"
-movie_year: "2018"
+movie_title: Condor
+movie_year: 2018
 movie_genres: "[\"Crime\", \"Drama\"]"
 movie_director: "Jason Smilovic, Todd Katzberg, Ken Robinson"
 movie_cast: "[\"Max Irons\", \"Constance Zimmer\", \"Alexei Bondar\", \"Isidora Goreshter\", \"Kristen Hager\", \"Eric Johnson\"]"
 movie_overview: "Young CIA analyst Joe Turner has his idealism tested when he learns that the CIA has been using an algorithm he developed to spy on American citizens, leading the organization to a terrorist plot that threatens the lives of millions.  Inspired by Sydney Pollack's 1975 political thriller Three Days of the Condor."
 movie_poster: "https://image.tmdb.org/t/p/w500/xgmkmT4Uik4QpvRipYUxcqNx5yR.jpg"
-movie_imdb: "tt6510950"
-region: "US"
+movie_imdb: tt6510950
+region: US
 sites: "[\"extramovies\"]"
+movie_release_date: 2018-06-06
+movie_studio: "[\"MGM Television\", \"Skydance Television\", \"Apophasis Unproductions\", \"Audience Network\", \"Paramount Television Studios\"]"
+movie_country: "[\"United States of America\"]"
+movie_language: "[\"English\"]"
+movie_certification: TV-MA
+media_type: tv
 ---
-
 Condor is what a good adaptation looks like and what bad distribution can do to it. Jason Smilovic's series takes Sydney Pollack's 1975 thriller Three Days of the Condor, itself from James Grady's novel, and expands the six days into ten episodes of surveillance-state paranoia, with Max Irons as Joe Turner, the CIA analyst who returns from lunch to find his office murdered. Season 1 holds 87% on Rotten Tomatoes, the supporting cast is a genuine embarrassment, and almost nobody watched it, because AT&T put it on the Audience Network, a channel only DIRECTV customers could receive. The show was canceled after two seasons.
 
 > **Spoiler-free verdict:** Worth finding, genuinely. Condor is smarter than its numbers suggest and the cast around Irons is the reason. The conspiracy plotting wobbles; the performances do not. Track it down on a streaming channel.

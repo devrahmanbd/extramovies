@@ -109,6 +109,20 @@ export function ratingFact(rating: number | undefined | null): string | null {
 }
 
 /**
+ * A positive USD amount ("$200,000,000") from TMDB's budget/revenue fields.
+ * Zero, a negative, a non-number or a missing value returns null: an unknown
+ * budget is never printed as "$0".
+ */
+export function moneyFact(value: unknown): string | null {
+  if (typeof value !== "number" || !Number.isFinite(value) || value <= 0) return null;
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 0,
+  }).format(value);
+}
+
+/**
  * Where the film can be watched, from the same sources the watch box uses:
  * TMDB provider rows (hidden when the region has no data) plus the
  * editor's manual links. Null when the review carries no watch data.
@@ -168,6 +182,13 @@ export function keyFactRows(
   if (opts?.includeDirector ?? true) add("Director", review.director);
   add("Cast", castFact(review.cast));
   add("Genres", (review.genres ?? []).map(oneLine).filter(Boolean).join(", "));
+  add("Studio", (review.studios ?? []).map(oneLine).filter(Boolean).join(", "));
+  add("Country", (review.countries ?? []).map(oneLine).filter(Boolean).join(", "));
+  add("Language", (review.languages ?? []).map(oneLine).filter(Boolean).join(", "));
+  add("Certification", review.certification);
+  add("Franchise", review.collection);
+  add("Budget", moneyFact(review.budget));
+  add("Box office", moneyFact(review.revenue));
   add("Our rating", ratingFact(review.rating));
   add("Our verdict", review.verdict);
 

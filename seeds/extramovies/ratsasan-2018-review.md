@@ -1,5 +1,5 @@
 ---
-title: "Ratsasan Ending Explained and Full Movie Review"
+title: Ratsasan Ending Explained and Full Movie Review
 slug: ratsasan-2018-review
 rating: 7.4
 tmdb_id: 412862
@@ -15,10 +15,14 @@ movie_cast: "Vishnu Vishal,Amala Paul,Suzane George,Munishkanth,Kaali Venkat"
 movie_overview: "A serial killer is murdering school girls, and a newbie cop has to track him down before the victim count increases."
 movie_poster: "https://image.tmdb.org/t/p/w500/mRObdeazn263na5zXzZSRJTBvi7.jpg"
 movie_imdb: tt7060344
-region: "US"
+region: US
 sites: "[\"extramovies\"]"
+movie_release_date: 2018-10-05
+movie_studio: "[\"Axess Film Factory\"]"
+movie_country: "[\"India\"]"
+movie_language: "[\"Tamil\"]"
+media_type: movie
 ---
-
 # Ratsasan Ending Explained and Full Movie Review
 
 The Ratsasan ending explained in one line: the magician is not the mother, it is her son, and he has been playing the act the whole time. Ram Kumar's 2018 Tamil thriller sits at 7.4/10 on TMDB from 213 votes and 8.3/10 on IMDb from 62,000 ratings, with 95 percent on the Rotten Tomatoes Popcornmeter from fewer than 50 audience ratings and no Tomatometer reviews logged, all checked October 28, 2026. The claim worth arguing is that the twist chain works because every false answer is delivered by the procedure itself, not by a cheat, and that the film's one real weakness is what it chooses to make the true answer look like.

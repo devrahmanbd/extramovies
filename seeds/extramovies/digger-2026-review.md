@@ -1,27 +1,34 @@
 ---
 title: "Digger Review: Tom Cruise's Best Performance in a Film That Shouts"
-slug: "digger-2026-review"
+slug: digger-2026-review
 rating: 5.5
 published_at: "2026-10-21T09:00:00.000Z"
 tmdb_id: 1248832
-imdb_id: "tt31450459"
+imdb_id: tt31450459
 seo_title: "Digger Review (2026): Is It Worth Watching?"
 seo_description: "Alejandro González Iñárritu's Digger (2026) stars Tom Cruise and Riz Ahmed. Our review of the oil thriller, with our 5.5 out of 10 verdict."
 excerpt: "Tom Cruise gives the performance of his career in Iñárritu's Digger (2026). The film shouts every thought it has. Our verdict."
 managed_fields: "[\"seo_title\",\"seo_description\",\"excerpt\"]"
-movie_title: "Digger"
-movie_year: "2026"
+movie_title: Digger
+movie_year: 2026
 movie_genres: "[\"Comedy\", \"Drama\"]"
-movie_runtime: "129 min"
-movie_director: "Alejandro González Iñárritu"
+movie_runtime: 129 min
+movie_director: Alejandro González Iñárritu
 movie_cast: "[\"Tom Cruise\", \"Riz Ahmed\", \"John Goodman\", \"Sandra Hüller\", \"Michael Stuhlbarg\", \"Jesse Plemons\", \"Emma D'Arcy\", \"Burn Gorman\", \"Sophie Wilde\", \"Robert John Burke\"]"
 movie_overview: "The most powerful man in the world embarks on a frantic mission to prove he is humanity's savior before the disaster he's unleashed destroys everything."
 movie_poster: "https://image.tmdb.org/t/p/w500/1ATXKrIPJyKNwnJ6lcG088Sa6zi.jpg"
-movie_imdb: "tt31450459"
-region: "US"
+movie_imdb: tt31450459
+region: US
 sites: "[\"extramovies\"]"
+movie_release_date: 2026-09-28
+movie_studio: "[\"Warner Bros. Pictures\", \"Legendary Pictures\", \"Domain Entertainment\"]"
+movie_country: "[\"United States of America\"]"
+movie_language: "[\"English\", \"Spanish\", \"French\", \"Mandarin\"]"
+movie_certification: R
+movie_budget: 180000000
+movie_revenue: 49026582
+media_type: movie
 ---
-
 Digger is worth watching for Tom Cruise and for the images of a world coming apart that the rest of the film keeps interrupting. Alejandro González Iñárritu's satire puts Cruise in prosthetics as an ageing Texas oil tycoon who talks the White House into solving a crisis he caused, and the performance is the best thing in the film. The film around it is loud, smug and slow. Critics and audiences split on the same line. Rotten Tomatoes has it at 53 percent from 333 reviews and Metacritic sits at 46 from 60 critic reviews, both checked on October 21, 2026.
 
 Digger opened in US cinemas through Warner Bros. Pictures on October 2, 2026, runs 129 minutes and carries an R rating for pervasive language. The Numbers, checked on October 21, 2026, has it at $17,328,096 domestic and $41,828,096 worldwide. The film was produced by Legendary Pictures and Warner Bros. Pictures, shot by Emmanuel Lubezki, designed by Dennis Gassner, and scored by Cosmo Sheldrake.

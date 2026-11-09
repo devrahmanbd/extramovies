@@ -1,27 +1,31 @@
 ---
 title: "Ang Probinsyano Review: A Philippine Cop Drama That Became a National Argument"
-slug: "ang-probinsyano-2015-review"
+slug: ang-probinsyano-2015-review
 rating: 6.5
 published_at: "2026-10-21T09:00:00.000Z"
 tmdb_id: 66515
-imdb_id: "tt6155146"
+imdb_id: tt6155146
 seo_title: "Ang Probinsyano (2015) Review: Is It Worth Watching?"
 seo_description: "Our Ang Probinsyano review: the 2015 ABS-CBN cop drama with Coco Martin, its ratings record, the fight with the police, and our verdict."
-excerpt: "Watch it for Coco Martin and for the Philippine television it made. Ang Probinsyano ran for seven years and argued with the police. Our verdict."
+excerpt: Watch it for Coco Martin and for the Philippine television it made. Ang Probinsyano ran for seven years and argued with the police. Our verdict.
 managed_fields: "[\"seo_title\",\"seo_description\",\"excerpt\"]"
-movie_title: "Ang Probinsyano"
-movie_year: "2015"
+movie_title: Ang Probinsyano
+movie_year: 2015
 movie_genres: "[\"Drama\", \"Action & Adventure\"]"
-movie_runtime: "45-minute episode"
+movie_runtime: 45-minute episode
 movie_director: "Malu L. Sevilla, Avel E. Sunpongco, Toto Natividad"
 movie_cast: "[\"Coco Martin\", \"John Arcilla\", \"Lorna Tolentino\", \"Rowell Santiago\", \"Angel Aquino\", \"John Prats\", \"Michael de Mesa\", \"Raymart Santiago\", \"Shaina Magdayao\", \"Susan Roces\", \"Jaime Fabregas\", \"Tirso Cruz III\", \"Marc Solis\", \"CJ Ramos\"]"
 movie_overview: "Ador is a well known and respected CIDG Police Official, with a loving family as his support. Cardo, on the other hand, loves the solitude of the mountains in the province as a SAF Trooper. Their lives take a sudden turn when Ador gets himself entangled in a syndicate by being betrayed by one of his own colleagues, resulting to his death. To conceal this fact, Cardo was ordered to pretend to be Ador and finish the mission what his brother left behind. He will also be force to pretend to his brother's family and friends, and be re-united with his grandmother, whom he despised, for assuming she abandoned him."
 movie_poster: "https://image.tmdb.org/t/p/w500/uX5ldo2snjJuZ8P9AxOharboxJn.jpg"
-movie_imdb: "tt6155146"
-region: "US"
+movie_imdb: tt6155146
+region: US
 sites: "[\"extramovies\"]"
+movie_release_date: 2015-09-28
+movie_studio: "[\"Dreamscape Entertainment Television\"]"
+movie_country: "[\"Philippines\"]"
+movie_language: "[\"Tagalog\"]"
+media_type: tv
 ---
-
 Ang Probinsyano is worth watching for Coco Martin and for what it accidentally became, which is a seven-year argument between Philippine television and the Philippine National Police. The ABS-CBN action drama ran in Filipino from September 28, 2015 to August 12, 2022, nine seasons and more than 1,600 episodes, and it held the top of the national ratings for three years running and is still counted among the most-watched series in Philippine television. It is also long, lumpy, melodramatic and a little absurd, and the middle seasons are a slog of shootouts and courtroom beats that earned the show more extensions than the writing deserved. Every ratings figure in this review was checked on October 22, 2026.
 
 > **Spoiler-free verdict:** Watch it for Martin, for Susan Roces, and for a Filipino audience's argument with the police, which is the most interesting thing in it. Skip it if you want tight plotting. A Philippine action drama that ran on ABS-CBN from September 2015 to August 2022, with a 47.2 percent peak national television rating, checked on October 22, 2026. You need no plot summary before pressing play.

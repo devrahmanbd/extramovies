@@ -1,25 +1,32 @@
 ---
 title: "Jupiter Ascending Review: Gorgeous Effects, Broken Story"
-slug: "jupiter-ascending-2015-review"
+slug: jupiter-ascending-2015-review
 rating: 0
 tmdb_id: 76757
-imdb_id: "tt1617661"
+imdb_id: tt1617661
 seo_title: "Jupiter Ascending (2015) Review: Is It Worth Watching?"
 seo_description: "Our Jupiter Ascending review: the Wachowskis' 127-minute space opera with Tatum and Kunis, 27% on Rotten Tomatoes as of October 2026, where to watch it."
 excerpt: "Watch it for the design, skip it for the script. The Wachowskis' space opera is gorgeous and hollow. Rotten Tomatoes has it at 27 percent as of October 2026."
-movie_title: "Jupiter Ascending"
-movie_year: "2015"
+movie_title: Jupiter Ascending
+movie_year: 2015
 movie_genres: "[\"Science Fiction\", \"Fantasy\", \"Action\"]"
-movie_runtime: "127 min"
+movie_runtime: 127 min
 movie_director: "Lana Wachowski, Lilly Wachowski"
 movie_cast: "[\"Mila Kunis\", \"Channing Tatum\", \"Eddie Redmayne\", \"Sean Bean\", \"Douglas Booth\", \"Tuppence Middleton\", \"Nikki Amuka-Bird\", \"Christina Cole\", \"Edward Hogg\", \"Maria Doyle Kennedy\", \"Vanessa Kirby\", \"Jeremy Swift\", \"Bae Doona\", \"Gugu Mbatha-Raw\", \"Tim Pigott-Smith\", \"Terry Gilliam\"]"
 movie_overview: "In a universe where human genetic material is the most precious commodity, an impoverished young Earth woman becomes the key to strategic maneuvers and internal strife within a powerful dynasty…"
 movie_poster: "https://image.tmdb.org/t/p/w500/xzQ25m9vrdyvpLX74T3B3KB40Ou.jpg"
-movie_imdb: "tt1617661"
-region: "US"
+movie_imdb: tt1617661
+region: US
 sites: "[\"extramovies\"]"
+movie_release_date: 2015-02-04
+movie_studio: "[\"Warner Bros. Pictures\", \"Village Roadshow Pictures\", \"RatPac Entertainment\", \"Anarchos Productions\"]"
+movie_country: "[\"United States of America\"]"
+movie_language: "[\"English\", \"Russian\"]"
+movie_certification: PG-13
+movie_budget: 176000000
+movie_revenue: 184000000
+media_type: movie
 ---
-
 Yes, Jupiter Ascending is worth watching, and the reason is the craft. Lana and Lilly Wachowski's space opera spends 127 minutes on production design and has little left for the story. Mila Kunis plays Jupiter Jones, a Chicago house cleaner who sells her egg cells to buy a telescope, and Channing Tatum plays Caine Wise, a genetically engineered soldier sent to Earth to find her.
 
 The film opened on February 6, 2015, took $184 million worldwide against a budget of $176 to $210 million, and collected 27 percent on Rotten Tomatoes from 273 critic reviews, read on October 20, 2026. It also became one of those expensive flops that grew a small, stubborn afterlife, the kind of film people keep arguing about long after the marketing stopped. The picture work is the reason to spend an evening with it.

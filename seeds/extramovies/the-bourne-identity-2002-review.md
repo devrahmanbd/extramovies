@@ -1,24 +1,32 @@
 ---
 title: "The Bourne Identity Review: The Film That Redesigned the Modern Spy Thriller"
-slug: "the-bourne-identity-2002-review"
+slug: the-bourne-identity-2002-review
 rating: 7.9
 tmdb_id: 2501
-imdb_id: "tt0258463"
+imdb_id: tt0258463
 seo_title: "The Bourne Identity (2002) Review: Is It Worth Watching?"
 seo_description: "Our The Bourne Identity review: Matt Damon as the amnesiac spy, 84% RT, the Paris chase, franchise context, and our verdict."
 excerpt: "A man wakes in the sea with no name and a Swiss bank number. Our The Bourne Identity review: why Liman's 2002 thriller still sets the standard."
-movie_title: "The Bourne Identity"
-movie_year: "2002"
+movie_title: The Bourne Identity
+movie_year: 2002
 movie_genres: "[\"Action\", \"Mystery\", \"Thriller\"]"
-movie_director: "Doug Liman"
+movie_director: Doug Liman
 movie_cast: "[\"Matt Damon\", \"Franka Potente\", \"Chris Cooper\", \"Clive Owen\", \"Brian Cox\", \"Julia Stiles\"]"
 movie_overview: "Wounded to the brink of death and suffering from amnesia, Jason Bourne is rescued at sea by a fisherman. With nothing to go on but a Swiss bank account number, he starts to reconstruct his life, but finds that many people he encounters want him dead. Bourne realizes that he has the combat and mental skills of a world-class spy, but who does he work for?"
 movie_poster: "https://image.tmdb.org/t/p/w500/aP8swke3gmowbkfZ6lmNidu0y9p.jpg"
-movie_imdb: "tt0258463"
-region: "US"
+movie_imdb: tt0258463
+region: US
 sites: "[\"extramovies\"]"
+movie_release_date: 2002-06-14
+movie_studio: "[\"Universal Pictures\", \"Hypnotic\", \"Kalima Productions\", \"Stillking Films\", \"The Kennedy/Marshall Company\"]"
+movie_country: "[\"United States of America\", \"Germany\", \"Czech Republic\"]"
+movie_language: "[\"English\", \"French\", \"German\", \"Dutch\", \"Italian\"]"
+movie_certification: PG-13
+movie_collection: The Bourne Collection
+movie_budget: 60000000
+movie_revenue: 214034224
+media_type: movie
 ---
-
 The Bourne Identity is the spy thriller that threw out the tuxedo and kept the tradecraft. Doug Liman's 2002 film opens with fishermen pulling a nearly dead man out of the Mediterranean and ends with a generation of espionage films rebuilt in its image: no quips, no gadgets, just a body that remembers how to kill and a mind that does not remember why. Rotten Tomatoes has it at 84% from 193 critics with a consensus calling it an action thriller "that delivers, and then some," Metacritic scored 68 from 38 reviews for generally favorable notices, and IMDb users rate it 7.8/10 from 611,000 votes, checked October 24, 2026. Matt Damon's Jason Bourne became the template every grounded spy series since has followed.
 
 > **Spoiler-free verdict:** Lean, smart, and endlessly rewatchable. Bourne rebuilds the genre on identity rather than gadgets, Damon plays it dead straight, and the Paris sequence alone justifies the reputation. Start here, then decide how far down the franchise you go.

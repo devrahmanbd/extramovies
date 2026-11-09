@@ -1,27 +1,31 @@
 ---
 title: "Gandhi Talks Review: The Silence Works, the Second Half Drags"
-slug: "gandhi-talks-2026-review"
+slug: gandhi-talks-2026-review
 rating: 6.5
 published_at: "2026-10-22T09:00:00.000Z"
 tmdb_id: 786567
-imdb_id: "tt8205190"
+imdb_id: tt8205190
 seo_title: "Gandhi Talks (2026) Review: Is It Worth Watching?"
 seo_description: "Our Gandhi Talks review: the silent comedy with Vijay Sethupathi, Arvind Swamy and A.R. Rahman's score, the critical verdict, where to watch, and our rating."
 excerpt: "Watch it. A wordless comedy about an unemployed man and a ruined builder, carried by A.R. Rahman's score. The first half is sharp, the second half sags."
 managed_fields: "[\"seo_title\",\"seo_description\",\"excerpt\"]"
-movie_title: "Gandhi Talks"
-movie_year: "2026"
+movie_title: Gandhi Talks
+movie_year: 2026
 movie_genres: "[\"Comedy\"]"
-movie_runtime: "133 min"
-movie_director: "Kishor Pandurang Belekar"
+movie_runtime: 133 min
+movie_director: Kishor Pandurang Belekar
 movie_cast: "[\"Vijay Sethupathi\", \"Arvind Swamy\", \"Aditi Rao Hydari\", \"Siddharth Jadhav\", \"Divay Dhamija\", \"Rohini Hattangadi\", \"Usha Nadkarni\", \"Zarina Wahab\"]"
 movie_overview: "A young, unemployed graduate Mahadev's struggles to land a job through any means possible and crosses paths with a businessman and petty thief."
 movie_poster: "https://image.tmdb.org/t/p/w500/p4iQT3s97T3gQOLhTj0UplzYMOj.jpg"
-movie_imdb: "tt8205190"
-region: "US"
+movie_imdb: tt8205190
+region: US
 sites: "[\"extramovies\"]"
+movie_release_date: 2026-01-30
+movie_studio: "[\"Movie Mill Entertainment\", \"Zee Studios\", \"Kyoorius Digital Private Limited\", \"Pincmoon Meta Studios\"]"
+movie_country: "[\"India\"]"
+movie_language: "[\"No Language\"]"
+media_type: movie
 ---
-
 Yes, Gandhi Talks is worth watching, with conditions. Kishor Pandurang Belekar's silent comedy asks a crowd to sit through a story with no dialogue, and for its first hour the gamble pays off. A.R. Rahman's score carries the jokes, the city and the two broken men at its centre. Then the script loads up with exposition and the film sags. Our rating is 6.5 out of 10.
 
 > **Spoiler-free verdict:** Watch it if you can give a wordless film your attention. A 133-minute silent comedy, out in Hindi, Malayalam, Telugu and Tamil, carried by Vijay Sethupathi as the unemployed Mahadev and Arvind Swamy as the builder whose empire is collapsing, with an A.R. Rahman score doing the talking. Rotten Tomatoes had 5 critic reviews and no score when we checked on October 22, 2026. You need no plot summary before pressing play.

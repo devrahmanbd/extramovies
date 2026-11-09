@@ -1,0 +1,129 @@
+---
+/**
+ * TaxonomyAtAGlance — the data-driven fact block on cast, director and
+ * category pages (PS-3).
+ *
+ * Every row is computed from the entry's own published reviews by
+ * taxonomyGlance(); a fact with nothing to say is omitted. The scope
+ * paragraph states the page's limit honestly: a review index, not a
+ * filmography or a complete genre survey.
+ */
+import type { TaxonomyGlance } from "../../lib/seo/taxonomy";
+
+interface Props {
+  glance: TaxonomyGlance;
+}
+
+const { glance } = Astro.props;
+const { facts, scope } = glance;
+---
+
+{facts.length > 0 ? (
+  <section class="taxfacts" aria-labelledby="taxonomy-facts">
+    <h2 id="taxonomy-facts" class="taxfacts-title">At a glance</h2>
+    <dl class="taxfacts-list">
+      {facts.map((fact) => (
+        <div class="taxfacts-row">
+          <dt>{fact.label}</dt>
+          <dd>
+            {fact.value ? <span>{fact.value}</span> : null}
+            {fact.links && fact.links.length > 0 ? (
+              <span class="taxfacts-links">
+                {fact.links.map((link, i) => (
+                  <>{i > 0 ? ", " : ""}<a href={link.path}>{link.label}</a></>
+                ))}
+              </span>
+            ) : null}
+          </dd>
+        </div>
+      ))}
+    </dl>
+    <p class="taxfacts-scope">{scope}</p>
+  </section>
+) : null}
+
+<style>
+  .taxfacts {
+    margin: var(--space-6) 0 0;
+    padding: var(--space-5) var(--space-6);
+    border: 1px solid var(--color-rule);
+    border-left: 3px solid var(--color-accent);
+    border-radius: var(--radius-card);
+    background: var(--color-paper-2);
+    max-width: var(--measure);
+  }
+
+  .taxfacts-title {
+    font-family: var(--font-sans);
+    font-size: var(--text-xs);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-ink-2);
+    margin: 0 0 var(--space-3);
+    line-height: 1.2;
+  }
+
+  .taxfacts-list {
+    margin: 0;
+    display: grid;
+    gap: 0;
+  }
+
+  .taxfacts-row {
+    display: grid;
+    grid-template-columns: 8.5rem minmax(0, 1fr);
+    gap: var(--space-3);
+    padding: var(--space-2) 0;
+    border-top: 1px solid var(--color-rule);
+    min-width: 0;
+  }
+
+  .taxfacts-row:first-child {
+    border-top: 0;
+  }
+
+  .taxfacts-row dt {
+    font-family: var(--font-sans);
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-ink-2);
+    margin: 0;
+  }
+
+  .taxfacts-row dd {
+    margin: 0;
+    font-size: var(--text-sm);
+    line-height: var(--leading-body);
+    color: var(--color-ink);
+    overflow-wrap: anywhere;
+  }
+
+  .taxfacts-links a {
+    text-decoration: underline;
+    text-underline-offset: 0.18em;
+  }
+
+  .taxfacts-links a:hover {
+    color: var(--color-accent);
+  }
+
+  .taxfacts-scope {
+    margin: var(--space-4) 0 0;
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--color-rule);
+    font-size: var(--text-sm);
+    line-height: var(--leading-body);
+    color: var(--color-ink-2);
+  }
+
+  @media (max-width: 30rem) {
+    .taxfacts {
+      padding: var(--space-4);
+    }
+
+    .taxfacts-row {
+      grid-template-columns: 6.5rem minmax(0, 1fr);
+    }
+  }
+</style>

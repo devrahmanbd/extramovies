@@ -1,24 +1,29 @@
 ---
 title: "Tom Clancy's Jack Ryan Review: Amazon's Franchise Machine at Its Most Watchable"
-slug: "jack-ryan-2018-review"
+slug: jack-ryan-2018-review
 rating: 7.8
 tmdb_id: 73375
-imdb_id: "tt5057054"
+imdb_id: tt5057054
 seo_title: "Jack Ryan (2018) Review: Worth Watching on Prime Video?"
 seo_description: "Our Jack Ryan review: Krasinski as Clancy's analyst, four seasons with RT scores rising 75% to 87%, the Ghost War film, and our verdict."
 excerpt: "Krasinski trades desk duty for the field across four seasons that only got better. Our Tom Clancy's Jack Ryan review with RT scores and franchise context."
 movie_title: "Tom Clancy's Jack Ryan"
-movie_year: "2018"
+movie_year: 2018
 movie_genres: "[\"Action & Adventure\", \"Drama\"]"
 movie_director: "Graham Roland, Carlton Cuse"
 movie_cast: "[\"John Krasinski\", \"Wendell Pierce\", \"Abbie Cornish\", \"Okieriete Onaodowan\", \"Louis Ozawa\", \"Michael Kelly\"]"
 movie_overview: "When CIA analyst Jack Ryan stumbles upon a suspicious series of bank transfers his search for answers pulls him from the safety of his desk job and catapults him into a deadly game of cat and mouse throughout Europe and the Middle East, with a rising terrorist figurehead preparing for a massive attack against the US and her allies."
 movie_poster: "https://image.tmdb.org/t/p/w500/cO4py3L3q5GNPrA0qr1wVDrosK1.jpg"
-movie_imdb: "tt5057054"
-region: "US"
+movie_imdb: tt5057054
+region: US
 sites: "[\"extramovies\"]"
+movie_release_date: 2018-08-30
+movie_studio: "[\"Amazon Studios\", \"Platinum Dunes\", \"Skydance Television\", \"Genre Arts\", \"Push, Boot.\", \"Paramount Television Studios\"]"
+movie_country: "[\"United States of America\"]"
+movie_language: "[\"Arabic\", \"English\", \"French\", \"German\", \"Japanese\", \"Russian\", \"Spanish\", \"Turkish\"]"
+movie_certification: TV-MA
+media_type: tv
 ---
-
 Tom Clancy's Jack Ryan is the Clancy hero rebuilt for streaming: the analyst who goes to the field, played by John Krasinski with more physical commitment than the role requires. Across four seasons on Prime Video the show followed a rare curve, getting better as it went, from 75% on Rotten Tomatoes for season 1 to 87% for the 2023 finale run. It ended where the character always did, promoted out of the action, and the franchise continued in 2026 with the feature Jack Ryan: Ghost War. As a full watch, it is the most consistently entertaining of the recent CIA series.
 
 > **Spoiler-free verdict:** Yes, worth watching, and the middle seasons are the reward. Big-budget espionage with real location work, a committed lead, and a finale that closes the loop. Start at season 1 and let it build.

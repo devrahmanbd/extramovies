@@ -1,27 +1,34 @@
 ---
 title: "The Fix Review: Liam Neeson Does the Work, the Script Fumbles the Goods"
-slug: "the-fix-2026-review"
-rating: 4.0
+slug: the-fix-2026-review
+rating: 4
 published_at: "2026-10-21T09:00:00.000Z"
 tmdb_id: 1228834
-imdb_id: "tt9601292"
+imdb_id: tt9601292
 seo_title: "The Fix (2026) Review: Is It Worth Watching?"
 seo_description: "Guy Moshe's The Fix (2026) stars Liam Neeson and Zachary Levi. Our Tehran action thriller review, with our 4 out of 10 verdict."
-excerpt: "The Kabul flashback is worth the ticket and the rest of it is mud. Liam Neeson carries it. Our The Fix (2026) verdict."
+excerpt: The Kabul flashback is worth the ticket and the rest of it is mud. Liam Neeson carries it. Our The Fix (2026) verdict.
 managed_fields: "[\"seo_description\",\"excerpt\"]"
-movie_title: "The Fix"
-movie_year: "2026"
+movie_title: The Fix
+movie_year: 2026
 movie_genres: "[\"Action\", \"Thriller\"]"
-movie_runtime: "142 min"
-movie_director: "Guy Moshe"
+movie_runtime: 142 min
+movie_director: Guy Moshe
 movie_cast: "[\"Zachary Levi\", \"Liam Neeson\", \"Wes Chatham\", \"Quincy Isaiah\", \"Jake Choi\", \"Augusto Aguilera\", \"Grant Harvey\", \"Annet Mahendru\", \"Elnaaz Norouzi\", \"Lara Wolf\", \"Navid Negahban\", \"Numan Acar\"]"
 movie_overview: "Disillusioned by the end of the war in Afghanistan, a group of disgraced, war-torn ex-CIA operatives set out to Tehran to take down a life-changing score."
 movie_poster: "https://image.tmdb.org/t/p/w500/jlP8XDjZN89GrpM3je5Uf8Grqx8.jpg"
-movie_imdb: "tt9601292"
-region: "US"
+movie_imdb: tt9601292
+region: US
 sites: "[\"extramovies\"]"
+movie_release_date: 2026-09-10
+movie_studio: "[\"Astral Future\", \"Dreamtime Entertainment\", \"Oakhurst Entertainment\", \"BondIt Media Capital\", \"Blue Rider Pictures\", \"Rabbits Black\", \"Thomasville Pictures\", \"Eyevox Entertainment\", \"Latigo Films\", \"SE Film Production\"]"
+movie_country: "[\"United States of America\", \"Ukraine\"]"
+movie_language: "[\"Arabic\", \"English\"]"
+movie_certification: R
+movie_budget: 32000000
+movie_revenue: 1279761
+media_type: movie
 ---
-
 The Fix is worth one long flashback and a patient performance from Liam Neeson. Guy Moshe's Tehran heist has a real moral spine, a cast that can play it, and a Kabul sequence that lands hard, and then it spends the rest of its 142 minutes explaining itself. Critics were unkind about it. Rotten Tomatoes has it at 16 percent from 31 reviews and Metacritic sits at 37 from 7 critic reviews, both checked on October 21, 2026.
 
 The film opened in US cinemas through Inaugural Entertainment on September 11, 2026, runs 142 minutes and carries an R rating for language, strong bloody violence and some nudity. The Numbers, checked on October 21, 2026, has it at $1,184,543 domestic and $1,219,375 worldwide. It was originally called Hotel Tehran, and it is based on an original idea by Bazzel Baz, a former CIA Intelligence Special Operations Group officer.

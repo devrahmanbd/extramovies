@@ -1,24 +1,29 @@
 ---
 title: "The Americans Review: The Cold War Marriage That Became TV's Great Spy Drama"
-slug: "the-americans-2013-review"
+slug: the-americans-2013-review
 rating: 8.7
 tmdb_id: 46533
-imdb_id: "tt2149175"
+imdb_id: tt2149175
 seo_title: "The Americans (2013) Review: Worth Watching on Hulu?"
 seo_description: "Our The Americans review: Keri Russell and Matthew Rhys as KGB spies, 96% RT average, 18 Emmy nominations, the finale, and our verdict."
 excerpt: "Keri Russell and Matthew Rhys play married KGB spies in 1980s Washington. Our The Americans review: season scores, Emmys, and where to watch."
-movie_title: "The Americans"
-movie_year: "2013"
+movie_title: The Americans
+movie_year: 2013
 movie_genres: "[\"Crime\", \"Drama\"]"
-movie_director: "Joe Weisberg"
+movie_director: Joe Weisberg
 movie_cast: "[\"Keri Russell\", \"Matthew Rhys\", \"Holly Taylor\", \"Keidrich Sellati\", \"Noah Emmerich\", \"Costa Ronin\", \"Margo Martindale\"]"
 movie_overview: "Set during the Cold War period in the 1980s, The Americans is the story of Elizabeth and Philip Jennings, two Soviet KGB officers posing as an American married couple in the suburbs of Washington D.C. and their neighbor, Stan Beeman, an FBI Counterintelligence agent."
 movie_poster: "https://image.tmdb.org/t/p/w500/w1UBlxEXhbKe8sp0fxFZh7MqTce.jpg"
-movie_imdb: "tt2149175"
-region: "US"
+movie_imdb: tt2149175
+region: US
 sites: "[\"extramovies\"]"
+movie_release_date: 2013-01-30
+movie_studio: "[\"DreamWorks Television\", \"Nemofilms\", \"Amblin Television\", \"Fox Television Studios\", \"Fox 21 Television Studios\", \"FX Productions\"]"
+movie_country: "[\"United States of America\"]"
+movie_language: "[\"Russian\", \"English\"]"
+movie_certification: TV-MA
+media_type: tv
 ---
-
 The Americans is the spy show where the marriage is the mission. Joe Weisberg's FX series runs six seasons from 2013 to 2018, and its premise never changes: two KGB officers, Elizabeth and Philip Jennings (Keri Russell, Matthew Rhys), pose as a suburban Washington married couple while their neighbor Stan Beeman (Noah Emmerich) hunts Soviet illegals for the FBI. What changes is everything else, because the arranged cover marriage turns into a real one. Rotten Tomatoes' season 6 sits at 99% with a 9.3/10 average from 199 critics, the show drew 18 Emmy nominations including two Outstanding Drama Series bids, and Matthew Rhys won Lead Actor for the final season. IMDb users have it at 8.4/10 from 127,000 votes, checked October 24, 2026. This is the best marriage drama ever disguised as an espionage procedural.
 
 > **Spoiler-free verdict:** Essential. Six tight seasons, a perfect final run, and two lead performances that hold the Cold War and a family in the same frame. Start at season 1 and let it take its time.

@@ -1,25 +1,32 @@
 ---
 title: "The Death of Robin Hood Review: No Arrows, All Atonement"
-slug: "the-death-of-robin-hood-2026-review"
-rating: 6.0
+slug: the-death-of-robin-hood-2026-review
+rating: 6
 tmdb_id: 1284465
-imdb_id: "tt32273171"
+imdb_id: tt32273171
 seo_title: "The Death of Robin Hood (2026) Review: Stream It or Skip It?"
 seo_description: "Our Death of Robin Hood review: Sarnoski's grim legend with Jackman and Comer, 69% on Rotten Tomatoes, HBO Max streaming details, and our 6.0/10 verdict."
 excerpt: "Grisly opening, brooding middle, quiet ending. Jackman and Comer commit, action fans won't. Our Death of Robin Hood review with where to stream it."
-movie_title: "The Death of Robin Hood"
-movie_year: "2026"
+movie_title: The Death of Robin Hood
+movie_year: 2026
 movie_genres: "[\"Adventure\", \"Drama\", \"Action\"]"
-movie_runtime: "123 min"
-movie_director: "Michael Sarnoski"
+movie_runtime: 123 min
+movie_director: Michael Sarnoski
 movie_cast: "[\"Hugh Jackman\", \"Jodie Comer\", \"Bill Skarsgård\", \"Murray Bartlett\", \"Noah Jupe\"]"
 movie_overview: "Grappling with his past after a life of crime and murder, Robin Hood finds himself gravely injured after a battle he thought would be his last. In the hands of a mysterious woman, he is offered a chance at salvation."
 movie_poster: "https://image.tmdb.org/t/p/w500/13MmRwmG5NmaMfU8qNrtgGXisiD.jpg"
-movie_imdb: "tt32273171"
-region: "US"
+movie_imdb: tt32273171
+region: US
 sites: "[\"extramovies\"]"
+movie_release_date: 2026-06-18
+movie_studio: "[\"Lyrical Media\", \"Ryder Picture Company\", \"Northern Ireland Screen\"]"
+movie_country: "[\"United States of America\", \"United Kingdom\"]"
+movie_language: "[\"English\"]"
+movie_certification: R
+movie_budget: 25000000
+movie_revenue: 9896460
+media_type: movie
 ---
-
 The Death of Robin Hood trades arrows and merry men for a deathbed reckoning, and the trade mostly works. Michael Sarnoski, who made Pig, directs Hugh Jackman as a wounded Robin recovering at a priory under the care of a sister with her own judgment to pass. It is a slow, grisly film with a quiet ending, and it earns its patience in most of the places that count. Anyone hunting a Friday night action fix should look elsewhere.
 
 This Robin Hood is not based on a book. Sarnoski builds from the old death ballads, the ones where a prioress bleeds the outlaw dry on an island, a strand of the legend Richard Lester wanted for Robin and Marian back in 1976. Sarnoski's version opened in US theaters on June 19, 2026, rated R at 123 minutes, and the theatrical run fizzled: $9.9 million worldwide against a $25 million budget. Critics were kinder than the box office. Rotten Tomatoes has the Tomatometer at 69 percent from 189 reviews, Metacritic sits at 61, and paying audiences graded the film a CinemaScore C+.

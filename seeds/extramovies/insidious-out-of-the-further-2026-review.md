@@ -1,27 +1,35 @@
 ---
 title: "Insidious: Out of the Further Review: Good Scares, Hollow Mythology"
-slug: "insidious-out-of-the-further-2026-review"
+slug: insidious-out-of-the-further-2026-review
 rating: 5.8
 published_at: "2026-10-21T09:00:00.000Z"
 tmdb_id: 1291595
-imdb_id: "tt32393988"
+imdb_id: tt32393988
 seo_title: "Insidious: Out of the Further (2026) Review: Worth It?"
 seo_description: "Jacob Chase's Insidious: Out of the Further (2026) stars Amelia Eve and Lin Shaye. Our horror sequel review, with our 5.8 out of 10 verdict."
 excerpt: "The pillow fort is genuinely scary. The mythology is not. Our Insidious: Out of the Further (2026) verdict."
 managed_fields: "[\"seo_title\",\"seo_description\",\"excerpt\"]"
 movie_title: "Insidious: Out of the Further"
-movie_year: "2026"
+movie_year: 2026
 movie_genres: "[\"Horror\", \"Thriller\"]"
-movie_runtime: "106 min"
-movie_director: "Jacob Chase"
+movie_runtime: 106 min
+movie_director: Jacob Chase
 movie_cast: "[\"Amelia Eve\", \"Island Austin\", \"Brandon Perea\", \"Lin Shaye\", \"Maisie Richardson-Sellers\", \"Sam Spruell\", \"Joseph Lopez\", \"Laura Gordon\", \"Robina Beard\", \"Susan Gray\"]"
 movie_overview: "Gemma, a young mother raising her daughter in the house she grew up in, discovers she can travel into The Further, where she possesses an ability to bring what lives there back to the real world."
 movie_poster: "https://image.tmdb.org/t/p/w500/4tTrW9dXCByS5wt2pXVWb58zNjz.jpg"
-movie_imdb: "tt32393988"
-region: "US"
+movie_imdb: tt32393988
+region: US
 sites: "[\"extramovies\"]"
+movie_release_date: 2026-08-19
+movie_studio: "[\"Screen Gems\", \"Stage 6 Films\", \"Atomic Monster\", \"TSG Entertainment\", \"Blumhouse Atomic\", \"Oren Peli Productions\"]"
+movie_country: "[\"United States of America\"]"
+movie_language: "[\"English\"]"
+movie_certification: PG-13
+movie_collection: Insidious Collection
+movie_budget: 18000000
+movie_revenue: 171602602
+media_type: movie
 ---
-
 Insidious: Out of the Further is worth watching for its two best set pieces and its lead, and for very little else. Jacob Chase's sixth Insidious arrives in US cinemas on August 21, 2026 and keeps the machinery turning. Amelia Eve plays a dental hygienist who walks into The Further in her sleep and can drag spirits back with her. The pillow-fort sequence in the second act is genuinely unnerving. The characters never get there, and by the last act the mythology has been replaced by set dressing.
 
 The money tells a different story. The Numbers has the film at $66,092,129 domestic and $170,638,859 worldwide against an $18 million production budget, with $25,106,020 of the domestic total arriving in the opening weekend. People paid to be scared. Critics did not agree they were. Rotten Tomatoes has the Tomatometer at 57 percent from 136 reviews, and Metacritic sits at 47 from 26 critic reviews.

@@ -1,5 +1,5 @@
 ---
-title: "777 Charlie Ending Explained and Movie Review"
+title: 777 Charlie Ending Explained and Movie Review
 slug: 777-charlie-2022-review
 rating: 7.6
 tmdb_id: 634120
@@ -15,10 +15,14 @@ movie_cast: "Rakshit Shetty,Sangeetha Sringeri,Raj B. Shetty,Danish Sait,Bobby S
 movie_overview: "A reclusive factory worker in Mysore takes in a stray Labrador puppy named Charlie, and the friendship carries him across India to the snowfields of Kashmir."
 movie_poster: "https://image.tmdb.org/t/p/w500/qArPmXH0aWsT3SEtYl8XrU2Oz48.jpg"
 movie_imdb: tt7466810
-region: "US"
+region: US
 sites: "[\"extramovies\"]"
+movie_release_date: 2022-06-10
+movie_studio: "[\"Paramvah Studios\"]"
+movie_country: "[\"India\"]"
+movie_language: "[\"Kannada\"]"
+media_type: movie
 ---
-
 # 777 Charlie Ending Explained and Movie Review
 
 The 777 Charlie ending explained in one sentence: Charlie dies in Dharma's arms in Kashmir, and the newborn she hid inside the temple altar means he does not have to go on alone. The 2022 Kannada film holds 7.6/10 on TMDB from 82 votes and 100% on Rotten Tomatoes from 5 critics, so the 777 Charlie review question is not whether the dog movie works. It does. Here is the full 777 Charlie movie story explained, scene by scene.

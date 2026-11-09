@@ -1,26 +1,31 @@
 ---
 title: "Matchbox the Movie Review: Great Stunts, Thin Script, Blatant Toy Sale"
-slug: "matchbox-the-movie-2026-review"
+slug: matchbox-the-movie-2026-review
 rating: 6
 published_at: "2026-10-17T09:00:00.000Z"
 tmdb_id: 1148365
-imdb_id: "tt28498219"
+imdb_id: tt28498219
 seo_title: "Matchbox the Movie (2026) Review: Stream It or Skip It?"
 seo_description: "Our Matchbox review: Hargrave's stunts, Cena's charm, 24 percent Tomatometer, where to watch on Apple TV+, and our 6.0/10 verdict."
 excerpt: "24 percent Tomatometer, fun stunts, thin script. Our Matchbox the Movie review: where to watch on Apple TV+, and the stream or skip verdict."
-movie_title: "Matchbox the Movie"
-movie_year: "2026"
+movie_title: Matchbox the Movie
+movie_year: 2026
 movie_genres: "[\"Action\", \"Comedy\", \"Adventure\"]"
-movie_runtime: "127 min"
-movie_director: "Sam Hargrave"
+movie_runtime: 127 min
+movie_director: Sam Hargrave
 movie_cast: "[\"John Cena\", \"Jessica Biel\", \"Arturo Castro\", \"Sam Richardson\", \"Teyonah Parris\"]"
 movie_overview: "When a group of former childhood friends reconnect, their reunion takes a wild turn as they stumble upon a dangerous international plot."
 movie_poster: "https://image.tmdb.org/t/p/w500/lFKA4GMz36dImEy3DQPdPF7G4V9.jpg"
-movie_imdb: "tt28498219"
-region: "US"
+movie_imdb: tt28498219
+region: US
 sites: "[\"extramovies\"]"
+movie_release_date: 2026-10-05
+movie_studio: "[\"Mattel Studios\", \"Skydance Media\"]"
+movie_country: "[\"United States of America\"]"
+movie_language: "[\"English\"]"
+movie_certification: PG-13
+media_type: movie
 ---
-
 Stream it or skip it? Stream it, but only on a couch and only with family expectations. Matchbox the Movie hands Extraction director Sam Hargrave a Mattel brand, John Cena, and 127 minutes, and the result splits cleanly down the middle: genuinely fun action wrapped around a story that exists to sell die cast cars.
 
 Cena plays Sean, a CIA man who drags his childhood friends into a warhead chase. Jessica Biel, Arturo Castro, Sam Richardson, and Teyonah Parris supply civilian panic while Danai Gurira and Golshifteh Farahani add class the script does not earn. Nell Minow at RogerEbert.com gave it three stars for spirit and sweetness, the friendliest major verdict it got. Variety, the Guardian, and the Times found it loud, familiar, and hollow. All of these readings are true at once, which is why the audience scores sit in the middle: 49 percent popcornmeter, about 5.7 on IMDb, 2.34 out of 5 on Letterboxd, against a 24 percent Tomatometer.

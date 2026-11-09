@@ -1,24 +1,29 @@
 ---
 title: "Homeland Review: The CIA Drama That Made Unlikability a Superpower"
-slug: "homeland-2011-review"
+slug: homeland-2011-review
 rating: 8.2
 tmdb_id: 1407
-imdb_id: "tt1796960"
+imdb_id: tt1796960
 seo_title: "Homeland (2011) Review: Worth Watching on Netflix?"
 seo_description: "Our Homeland review: Claire Danes as Carrie Mathison, eight seasons from 100% to 85% on RT, the finale's verdict, and our verdict."
 excerpt: "Eight seasons of CIA moral accounting built on Claire Danes' fearless Carrie Mathison. Our Homeland review: season scores, the finale, and where to watch."
-movie_title: "Homeland"
-movie_year: "2011"
+movie_title: Homeland
+movie_year: 2011
 movie_genres: "[\"Drama\", \"War & Politics\", \"Crime\"]"
 movie_director: "Alex Gansa, Howard Gordon"
 movie_cast: "[\"Claire Danes\", \"Mandy Patinkin\", \"Maury Sterling\", \"Numan Acar\", \"Nimrat Kaur\"]"
 movie_overview: "CIA officer Carrie Mathison is tops in her field despite being bipolar, which makes her volatile and unpredictable. With the help of her long-time mentor Saul Berenson, Carrie fearlessly risks everything, including her personal well-being and even sanity, at every turn."
 movie_poster: "https://image.tmdb.org/t/p/w500/6GAvS2e6VIRsms9FpVt33PsCoEW.jpg"
-movie_imdb: "tt1796960"
-region: "US"
+movie_imdb: tt1796960
+region: US
 sites: "[\"extramovies\"]"
+movie_release_date: 2011-10-02
+movie_studio: "[\"Showtime Networks\", \"Teakwood Lane Productions\", \"Cherry Pie Productions\", \"Keshet Broadcasting\", \"Fox 21\", \"Fox 21 Television Studios\", \"Keshet International\"]"
+movie_country: "[\"United States of America\", \"Israel\"]"
+movie_language: "[\"English\"]"
+movie_certification: TV-MA
+media_type: tv
 ---
-
 Homeland is the drama that treated bipolar disorder as an operational asset, and Claire Danes played Carrie Mathison as if the distinction did not exist. Eight seasons on Showtime, from 2011 to 2020, produced the rare long-run curve that ends on an up: season 1 sits at 100% on Rotten Tomatoes, season 8 at 85%, with the critics consensus calling the final run "a tautly thrilling final season that fittingly finishes the job Carrie Mathison started all those years ago." The pilot opened as Showtime's highest-rated drama premiere in eight years. The series finale, aired April 26, 2020, closed the argument without resolving it, which was always the point.
 
 > **Spoiler-free verdict:** Start with the Brody seasons and commit to all eight. This is spy fiction as character study, and Danes' performance ranks among the great television turns. The finale rewards the patience.

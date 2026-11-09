@@ -1,27 +1,35 @@
 ---
 title: "Deadpool Review: The Comic Book Movie That Talks Back"
-slug: "deadpool-2016-review"
+slug: deadpool-2016-review
 rating: 7.5
 published_at: "2026-10-22T09:00:00.000Z"
 tmdb_id: 293660
-imdb_id: "tt1431045"
+imdb_id: tt1431045
 seo_title: "Deadpool (2016) Review: Is It Worth Watching?"
 seo_description: "Our Deadpool review: Tim Miller's R-rated Marvel satire with Ryan Reynolds, the critical verdict, where to watch in the US, and our rating."
 excerpt: "Watch it. Tim Miller's 2016 Marvel satire with Ryan Reynolds is still the funniest superhero film made. Rotten Tomatoes has it at 85 percent from 345 reviews."
 managed_fields: "[\"seo_title\",\"seo_description\",\"excerpt\"]"
-movie_title: "Deadpool"
-movie_year: "2016"
+movie_title: Deadpool
+movie_year: 2016
 movie_genres: "[\"Action\", \"Adventure\", \"Comedy\"]"
-movie_runtime: "108 min"
-movie_director: "Tim Miller"
+movie_runtime: 108 min
+movie_director: Tim Miller
 movie_cast: "[\"Ryan Reynolds\", \"Morena Baccarin\", \"Ed Skrein\", \"T.J. Miller\", \"Gina Carano\", \"Leslie Uggams\", \"Brianna Hildebrand\", \"Stefan Kapicic\", \"Karan Soni\", \"Michael Benyaer\"]"
 movie_overview: "The origin story of former Special Forces operative turned mercenary Wade Wilson, who, after being subjected to a rogue experiment that leaves him with accelerated healing powers, adopts the alter ego Deadpool. Armed with his new abilities and a dark, twisted sense of humor, Deadpool hunts down the man who nearly destroyed his life."
 movie_poster: "https://image.tmdb.org/t/p/w500/3E53WEZJqP6aM84D8CckXx4pIHw.jpg"
-movie_imdb: "tt1431045"
-region: "US"
+movie_imdb: tt1431045
+region: US
 sites: "[\"extramovies\"]"
+movie_release_date: 2016-02-09
+movie_studio: "[\"20th Century Fox\", \"The Donners' Company\", \"Genre Films\", \"Marvel Entertainment\"]"
+movie_country: "[\"United States of America\"]"
+movie_language: "[\"English\"]"
+movie_certification: R
+movie_collection: Deadpool Collection
+movie_budget: 58000000
+movie_revenue: 782837347
+media_type: movie
 ---
-
 Yes, Deadpool is worth watching, and it is worth rewatching. Tim Miller's 2016 Marvel satire is still the sharpest comedy in the superhero genre, because it treats the whole apparatus as a joke and gets away with it. Ryan Reynolds plays Wade Wilson, the movie breaks the fourth wall every time it feels like it, and nobody at the studio had the nerve to sand it down. Rotten Tomatoes has it at 85 percent from 345 reviews. Our rating is 7.5 out of 10.
 
 > **Spoiler-free verdict:** Watch it. A 108-minute R-rated superhero comedy with Ryan Reynolds, Morena Baccarin and T.J. Miller, and the rare Marvel film that treats its own lore as a punchline. Rotten Tomatoes has it at 85 percent from 345 critic reviews and a 90 percent Popcornmeter. You need no plot summary before pressing play.

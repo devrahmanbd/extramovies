@@ -1,24 +1,32 @@
 ---
 title: "Sicario Review: Villeneuve's Border Thriller Still Cuts Deep"
-slug: "sicario-2015-review"
+slug: sicario-2015-review
 rating: 8.1
 tmdb_id: 273481
-imdb_id: "tt3397884"
+imdb_id: tt3397884
 seo_title: "Sicario (2015) Review: Is It Worth Watching?"
 seo_description: "Our Sicario review: Emily Blunt and Benicio del Toro in Villeneuve's cartel thriller, 91% RT, Taylor Sheridan's debut, and our verdict."
 excerpt: "Emily Blunt walks into a war she was not briefed for. Our Sicario review: the 91% RT verdict, Del Toro's performance, and where to watch."
-movie_title: "Sicario"
-movie_year: "2015"
+movie_title: Sicario
+movie_year: 2015
 movie_genres: "[\"Action\", \"Crime\", \"Thriller\"]"
-movie_director: "Denis Villeneuve"
+movie_director: Denis Villeneuve
 movie_cast: "[\"Emily Blunt\", \"Benicio del Toro\", \"Josh Brolin\", \"Victor Garber\", \"Jon Bernthal\", \"Daniel Kaluuya\", \"Jeffrey Donovan\"]"
-movie_overview: "An idealistic FBI agent is enlisted by a government task force to aid in the escalating war against drugs at the border area between the U.S. and Mexico."
+movie_overview: An idealistic FBI agent is enlisted by a government task force to aid in the escalating war against drugs at the border area between the U.S. and Mexico.
 movie_poster: "https://image.tmdb.org/t/p/w500/lz8vNyXeidqqOdJW9ZjnDAMb5Vr.jpg"
-movie_imdb: "tt3397884"
-region: "US"
+movie_imdb: tt3397884
+region: US
 sites: "[\"extramovies\"]"
+movie_release_date: 2015-09-17
+movie_studio: "[\"Lionsgate\", \"Black Label Media\", \"Thunder Road\"]"
+movie_country: "[\"United States of America\"]"
+movie_language: "[\"Spanish\", \"English\"]"
+movie_certification: R
+movie_collection: Sicario Collection
+movie_budget: 30000000
+movie_revenue: 84997446
+media_type: movie
 ---
-
 Sicario is a war movie where the war has no rules and the good cop is the only one who read them. Denis Villeneuve's 2015 border thriller follows FBI agent Kate Macer (Emily Blunt), recruited onto a task force led by Josh Brolin's Matt Graver, whose real instrument is Benicio del Toro's Alejandro, a sicario with a private agenda. Rotten Tomatoes has it at 91% from 279 critics with an 8.1/10 average, Metacritic scored 82 out of 100 for universal acclaim, and IMDb users rate it 7.7/10 from more than half a million votes, checked October 24, 2026. Taylor Sheridan's screenwriting debut launched a run of American frontier dramas, and this remains the sharpest of them.
 
 > **Spoiler-free verdict:** A tense, morally ugly masterpiece of a thriller. Sicario earns its dread with real tradecraft, Blunt's straight-faced honesty, and Del Toro's quiet devastation. Not a comfortable watch, a great one.

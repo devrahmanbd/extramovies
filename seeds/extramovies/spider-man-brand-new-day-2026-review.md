@@ -1,27 +1,35 @@
 ---
 title: "Spider-Man: Brand New Day Review: A Bleak Reset, With Zendaya Holding It Up"
-slug: "spider-man-brand-new-day-2026-review"
+slug: spider-man-brand-new-day-2026-review
 rating: 7
 published_at: "2026-10-21T09:00:00.000Z"
 tmdb_id: 969681
-imdb_id: "tt22084616"
+imdb_id: tt22084616
 seo_title: "Spider-Man: Brand New Day Review (2026): Is It Worth It?"
 seo_description: "Destin Daniel Cretton's Spider-Man: Brand New Day (2026) stars Tom Holland and Zendaya. Our review of the reset, with our 7 out of 10 verdict."
 excerpt: "Tom Holland is 30 and lonely in Cretton's Spider-Man: Brand New Day (2026), and Zendaya rescues the film. Our verdict."
 managed_fields: "[\"seo_title\",\"seo_description\",\"excerpt\",\"featured\"]"
 movie_title: "Spider-Man: Brand New Day"
-movie_year: "2026"
+movie_year: 2026
 movie_genres: "[\"Science Fiction\", \"Action\", \"Adventure\"]"
-movie_runtime: "145 min"
-movie_director: "Destin Daniel Cretton"
+movie_runtime: 145 min
+movie_director: Destin Daniel Cretton
 movie_cast: "[\"Tom Holland\", \"Sadie Sink\", \"Tramell Tillman\", \"Zendaya\", \"Jacob Batalon\", \"Jon Bernthal\", \"Mark Ruffalo\", \"Florence Pugh\", \"Liza Colón-Zayas\", \"Marisa Tomei\"]"
 movie_overview: "Fighting crime full-time as Spider-Man in a world that doesn't remember him, and the pressure of seeing his old friends move on without him, sparks a change in Peter Parker he may not have the power to control. But that transformation might also be the only thing that can stop a shocking new threat to the city and those he loves: a powerful villain no one can even see."
 movie_poster: "https://image.tmdb.org/t/p/w500/bjiS5ipwxb9JFy3XRRN4OAilSeX.jpg"
-movie_imdb: "tt22084616"
-region: "US"
+movie_imdb: tt22084616
+region: US
 sites: "[\"extramovies\"]"
+movie_release_date: 2026-07-29
+movie_studio: "[\"Marvel Studios\", \"Columbia Pictures\", \"Pascal Pictures\", \"TSG Entertainment\"]"
+movie_country: "[\"United States of America\"]"
+movie_language: "[\"English\"]"
+movie_certification: PG-13
+movie_collection: Spider-Man (MCU) Collection
+movie_budget: 225000000
+movie_revenue: 2519512338
+media_type: movie
 ---
-
 Yes, Spider-Man: Brand New Day is worth watching, with one warning about the length. Destin Daniel Cretton's reset of the franchise is a bruised and quiet film about a man nobody knows, and the sadness in it arrives late. It also runs long, and the climax is over before the characters are. Both facts matter.
 
 > **Spoiler-free verdict:** Watch it, and give it the time it takes, because the last stretch is where the picture earns its sadness. A 145-minute superhero drama carried by Tom Holland and Zendaya. Rotten Tomatoes has it at 90 percent from 439 critic reviews, while Metacritic has it at 66 from 56 critic reviews, and the gap between those two numbers is the argument in miniature. You need no plot summary before pressing play.

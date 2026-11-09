@@ -1,27 +1,34 @@
 ---
 title: "Disclosure Day Review: Spielberg's Chase Machine Runs Out of Questions"
-slug: "disclosure-day-2026-review"
+slug: disclosure-day-2026-review
 rating: 7
 published_at: "2026-10-21T09:00:00.000Z"
 tmdb_id: 1275779
-imdb_id: "tt15047880"
+imdb_id: tt15047880
 seo_title: "Disclosure Day (2026) Review: Is It Worth Watching?"
 seo_description: "Steven Spielberg's Disclosure Day (2026) stars Emily Blunt and Josh O'Connor in a 146-minute sci-fi thriller. Our review, with our 7 out of 10 verdict."
 excerpt: "Emily Blunt carries a propulsive Spielberg chase thriller whose script keeps explaining itself. Our Disclosure Day (2026) review, with the verdict."
 managed_fields: "[\"seo_title\",\"seo_description\",\"excerpt\"]"
-movie_title: "Disclosure Day"
-movie_year: "2026"
+movie_title: Disclosure Day
+movie_year: 2026
 movie_genres: "[\"Science Fiction\", \"Thriller\"]"
-movie_runtime: "146 min"
-movie_director: "Steven Spielberg"
+movie_runtime: 146 min
+movie_director: Steven Spielberg
 movie_cast: "[\"Emily Blunt\", \"Josh O'Connor\", \"Colin Firth\", \"Eve Hewson\", \"Colman Domingo\", \"Wyatt Russell\", \"Henry Lloyd-Hughes\", \"Elizabeth Marvel\", \"Hettienne Park\", \"Tommy Martinez\", \"Gabby Beans\", \"Jeremy Shamos\"]"
 movie_overview: "A cybersecurity expert becomes a whistleblower after uncovering secrets about aliens, putting him on the run from a corporation. Meanwhile, a meteorologist experiencing strange phenomena joins forces with him to prove there's life beyond our understanding."
 movie_poster: "https://image.tmdb.org/t/p/w500/AnJ8IQJI23hNpYXVNaythu061Ru.jpg"
-movie_imdb: "tt15047880"
-region: "US"
+movie_imdb: tt15047880
+region: US
 sites: "[\"extramovies\"]"
+movie_release_date: 2026-06-10
+movie_studio: "[\"Universal Pictures\", \"Amblin Entertainment\"]"
+movie_country: "[\"United States of America\"]"
+movie_language: "[\"English\", \"Russian\", \"Korean\"]"
+movie_certification: PG-13
+movie_budget: 115000000
+movie_revenue: 244633645
+media_type: movie
 ---
-
 Yes, Disclosure Day is worth watching, and it is worth watching for Emily Blunt. Steven Spielberg's first feature since The Fabelmans (2022) is a 146-minute chase thriller that runs at full speed for most of its length and then loses interest in the question it has been asking since the first frame. Blunt's Kansas City meteorologist is the best thing in it, and the script is the problem. Critics noticed. Rotten Tomatoes has the film at 79 percent from 443 critic reviews and Metacritic at 74 from 63, both checked on October 22, 2026.
 
 > **Spoiler-free verdict:** Watch it. A 146-minute, PG-13 science fiction thriller carrying Emily Blunt, shot by Janusz Kaminski, scored by John Williams, and held together by a chase that never stops moving. Rotten Tomatoes says 79 percent from 443 critic reviews and Metacritic says 74 from 63, checked October 22, 2026. You need no plot summary before pressing play.

@@ -16,6 +16,7 @@
     "export": "tsx scripts/export.ts",
     "import": "tsx scripts/import.ts",
     "import:tmdb": "tsx scripts/import-tmdb.ts",
+    "enrich:tmdb": "tsx scripts/enrich-tmdb.ts",
     "db:generate": "drizzle-kit generate --dialect sqlite --schema src/lib/db/schema.ts --out migrations",
     "db:migrate:local": "mkdir -p data && sqlite3 data/local.db < migrations/0001_init.sql",
     "db:migrate": "tsx scripts/migrate-sql.ts",

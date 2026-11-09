@@ -67,11 +67,23 @@ function str(v: unknown): string | undefined {
   return typeof v === 'string' && v.trim() ? v.trim() : undefined;
 }
 
+/** A positive finite number from a seed value ("200000000", 200000000). */
+function positiveNumber(v: unknown): number | undefined {
+  if (typeof v === 'number' && Number.isFinite(v) && v > 0) return v;
+  if (typeof v === 'string' && v.trim()) {
+    const n = Number(v.replace(/[,_$\s]/g, ''));
+    return Number.isFinite(n) && n > 0 ? n : undefined;
+  }
+  return undefined;
+}
+
 /**
  * Movie metadata carried in seed frontmatter (movie_title, movie_year,
  * movie_genres, movie_runtime, movie_director, movie_cast, movie_overview,
- * movie_poster, movie_imdb). Absent when the file carries none, so plain
- * text imports behave exactly as before.
+ * movie_poster, movie_imdb, movie_release_date, movie_studio, movie_country,
+ * movie_language, movie_certification, movie_collection, movie_budget,
+ * movie_revenue). Absent when the file carries none, so plain text imports
+ * behave exactly as before.
  */
 function buildMovieMeta(extras: Record<string, unknown>): Record<string, unknown> | undefined {
   const movie: Record<string, unknown> = {};
@@ -95,6 +107,22 @@ function buildMovieMeta(extras: Record<string, unknown>): Record<string, unknown
   if (movieId) movie.movieId = movieId;
   const imdbId = str(extras.movie_imdb) ?? str(extras.imdb_id);
   if (imdbId) movie.imdbId = imdbId;
+  const releaseDate = str(extras.movie_release_date);
+  if (releaseDate) movie.releaseDate = releaseDate;
+  const studios = strArray(extras.movie_studio);
+  if (studios) movie.studios = studios;
+  const countries = strArray(extras.movie_country);
+  if (countries) movie.countries = countries;
+  const languages = strArray(extras.movie_language);
+  if (languages) movie.languages = languages;
+  const certification = str(extras.movie_certification);
+  if (certification) movie.certification = certification;
+  const collection = str(extras.movie_collection);
+  if (collection) movie.collection = collection;
+  const budget = positiveNumber(extras.movie_budget);
+  if (budget !== undefined) movie.budget = budget;
+  const revenue = positiveNumber(extras.movie_revenue);
+  if (revenue !== undefined) movie.revenue = revenue;
   return Object.keys(movie).length > 0 ? movie : undefined;
 }
 
@@ -254,6 +282,9 @@ export async function importMarkdown(
         ...(typeof extras.region === 'string' && extras.region.trim() ? { region: extras.region.trim() } : {}),
         imdbId: review.imdb_id,
         tmdbId: review.tmdb_id,
+        ...(extras.media_type === 'movie' || extras.media_type === 'tv'
+          ? { mediaType: extras.media_type }
+          : {}),
         ...(publish || !review.published_at
           ? { publishedAt: review.published_at }
           : {}),

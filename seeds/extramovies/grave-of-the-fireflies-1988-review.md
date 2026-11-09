@@ -1,24 +1,31 @@
 ---
-title: "Grave of the Fireflies Ending Explained and Full Review"
-slug: "grave-of-the-fireflies-1988-review"
+title: Grave of the Fireflies Ending Explained and Full Review
+slug: grave-of-the-fireflies-1988-review
 rating: 8.45
 tmdb_id: 12477
-imdb_id: "tt0095327"
+imdb_id: tt0095327
 seo_title: "Grave of the Fireflies Ending Explained: Why Seita Dies"
 seo_description: "Grave of the Fireflies ending explained: why Seita and Setsuko die, what Takahata refused to call an anti-war film, and where to watch it."
 excerpt: "Takahata shows you the deaths first, then makes you decide who to blame. Our Grave of the Fireflies review: the ending, the aunt, the 100 percent score."
-movie_title: "Grave of the Fireflies"
-movie_year: "1988"
+movie_title: Grave of the Fireflies
+movie_year: 1988
 movie_genres: "[\"Animation\", \"Drama\", \"War\"]"
-movie_director: "Isao Takahata"
+movie_director: Isao Takahata
 movie_cast: "[\"Tsutomu Tatsumi\", \"Ayano Shiraishi\", \"Yoshiko Shinohara\", \"Akemi Yamaguchi\", \"Masayo Sakai\", \"Kazumi Nozaki\"]"
 movie_overview: "In the final months of World War II, 14-year-old Seita and his sister Setsuko are orphaned when their mother is killed during an air raid in Kobe, Japan. After a falling out with their aunt, they move into an abandoned bomb shelter. With no surviving relatives and their emergency rations depleted, Seita and Setsuko struggle to survive."
 movie_poster: "https://image.tmdb.org/t/p/w500/k9tv1rXZbOhH7eiCk378x61kNQ1.jpg"
-movie_imdb: "tt0095327"
-region: "US"
+movie_imdb: tt0095327
+region: US
 sites: "[\"extramovies\"]"
+movie_release_date: 1988-04-16
+movie_studio: "[\"Studio Ghibli\"]"
+movie_country: "[\"Japan\"]"
+movie_language: "[\"Japanese\"]"
+movie_certification: NR
+movie_budget: 3700000
+movie_revenue: 4979495
+media_type: movie
 ---
-
 # Grave of the Fireflies Ending Explained and Full Review
 
 The Grave of the Fireflies ending explained in one line: Seita dies at the train station on September 21, 1945, about a month after Setsuko starves to death in the shelter on August 22, and the film then returns both children to the hill above the city as ghosts who keep watching a Japan they never got to live in. Isao Takahata's 1988 Studio Ghibli tragedy sits at 8.45/10 on TMDB from 6,915 votes and 8.5/10 on IMDb from roughly 400,000 ratings, and Rotten Tomatoes holds it at 100 percent from 50 critics, all checked October 27, 2026. Nothing about that record suggests a recap. It suggests an argument, and this review is about the argument.

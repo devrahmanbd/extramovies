@@ -1,27 +1,32 @@
 ---
 title: "A Nice Indian Boy Review: A Wedding Movie With a Sense of Humour"
-slug: "a-nice-indian-boy-2025-review"
+slug: a-nice-indian-boy-2025-review
 rating: 8
 published_at: "2026-10-22T09:00:00.000Z"
 tmdb_id: 1128614
-imdb_id: "tt16431330"
+imdb_id: tt16431330
 seo_title: "A Nice Indian Boy (2025) Review: Is It Worth Watching?"
 seo_description: "Our A Nice Indian Boy review: Karan Soni and Jonathan Groff's rom-com, the critical verdict, where to watch in the US, and our rating."
 excerpt: "Watch it. Roshan Sethi's rom-com with Karan Soni and Jonathan Groff is warm, funny and honest about family. Rotten Tomatoes says 95 percent."
 managed_fields: "[\"seo_title\",\"seo_description\",\"excerpt\"]"
-movie_title: "A Nice Indian Boy"
-movie_year: "2025"
+movie_title: A Nice Indian Boy
+movie_year: 2025
 movie_genres: "[\"Romance\", \"Comedy\"]"
-movie_runtime: "96 min"
-movie_director: "Roshan Sethi"
+movie_runtime: 96 min
+movie_director: Roshan Sethi
 movie_cast: "[\"Karan Soni\", \"Jonathan Groff\", \"Sunita Mani\", \"Zarna Garg\", \"Harish Patel\", \"Peter S. Kim\", \"Sean Amsing\", \"Sas Goldberg\"]"
 movie_overview: "When Naveen brings his fiancé Jay home to meet his traditional Indian family, they must contend with accepting his white-orphan-artist boyfriend and helping them plan the Indian wedding of their dreams."
 movie_poster: "https://image.tmdb.org/t/p/w500/xfY2FZlnm5uaQbaWR9IYW41J1xG.jpg"
-movie_imdb: "tt16431330"
-region: "US"
+movie_imdb: tt16431330
+region: US
 sites: "[\"extramovies\"]"
+movie_release_date: 2025-04-04
+movie_studio: "[\"Levantine Films\", \"Wayfarer Studios\"]"
+movie_country: "[\"United States of America\"]"
+movie_language: "[\"English\", \"Hindi\"]"
+movie_certification: NR
+media_type: movie
 ---
-
 Yes, A Nice Indian Boy is worth watching. Roshan Sethi's rom-com is small, warm and unusually honest about the work of loving somebody your family has not met yet. Karan Soni and Jonathan Groff carry a story that could have been syrup and is instead funny, specific and a little bruised. Rotten Tomatoes, checked on October 22, 2026, has it at 95 percent from 77 reviews. Our rating is 8 out of 10.
 
 > **Spoiler-free verdict:** Watch it. A 96-minute Hindi-English romantic comedy with Karan Soni as the doctor and Jonathan Groff as the photographer, a wedding to plan and a family to win over. Rotten Tomatoes had it at 95 percent from 77 critic reviews when we checked on October 22, 2026. You need no plot summary before pressing play.

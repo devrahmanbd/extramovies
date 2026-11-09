@@ -1,27 +1,31 @@
 ---
 title: "Hitler: The Rise of Evil Review: Robert Carlyle's Hitler and a Miniseries That Dodges the Worst of It"
-slug: "hitler-the-rise-of-evil-2003-review"
+slug: hitler-the-rise-of-evil-2003-review
 rating: 6
 published_at: "2026-10-21T09:00:00.000Z"
 tmdb_id: 46976
-imdb_id: "tt0346293"
+imdb_id: tt0346293
 seo_title: "Hitler: The Rise of Evil (2003) Review: Is It Worth It?"
 seo_description: "Our Hitler: The Rise of Evil review: the 2003 CBC and CBS miniseries with Robert Carlyle, its Rotten Tomatoes standing, where to watch, and our verdict."
-excerpt: "Watch it for Robert Carlyle. The 2003 CBC and CBS miniseries has a superb lead and stops before the worst of it. One critic review on Rotten Tomatoes."
+excerpt: Watch it for Robert Carlyle. The 2003 CBC and CBS miniseries has a superb lead and stops before the worst of it. One critic review on Rotten Tomatoes.
 managed_fields: "[\"seo_title\",\"seo_description\",\"excerpt\"]"
 movie_title: "Hitler: The Rise of Evil"
-movie_year: "2003"
+movie_year: 2003
 movie_genres: "[\"Drama\", \"War & Politics\"]"
-movie_runtime: "190 min"
-movie_director: "Christian Duguay"
+movie_runtime: 190 min
+movie_director: Christian Duguay
 movie_cast: "[\"Robert Carlyle\", \"Peter O'Toole\", \"Peter Stormare\", \"Matthew Modine\", \"Liev Schreiber\", \"Julianna Margulies\", \"Stockard Channing\", \"Jena Malone\", \"Friedrich von Thun\", \"Zoe Telford\", \"Terence Harvey\", \"Justin Salinger\", \"Chris Larkin\", \"James Babson\"]"
 movie_overview: "This biopic profiles history's most spectacular madman, tracing his journey from humble roots to complete mastery of Germany."
 movie_poster: "https://image.tmdb.org/t/p/w500/9cPhBxrWixXrwayDohvqwk0jnEQ.jpg"
-movie_imdb: "tt0346293"
-region: "US"
+movie_imdb: tt0346293
+region: US
 sites: "[\"extramovies\"]"
+movie_release_date: 2003-05-18
+movie_studio: "[\"Alliance Atlantis\"]"
+movie_country: "[\"Canada\"]"
+movie_language: "[\"English\"]"
+media_type: tv
 ---
-
 Yes, Hitler: The Rise of Evil is worth watching for Robert Carlyle and for little else in the production. The 2003 CBC and CBS miniseries, directed by Christian Duguay and running 190 minutes across two parts as Rotten Tomatoes lists it, has one performance of a leader that carries most of that running time and a script that treats the rest of Germany as scenery. The critical record is thin. Rotten Tomatoes carries a single critic review and no Tomatometer percentage, Letterboxd's member average is 3.26 from 12,642 ratings, and Metacritic does not list the title. All checked on October 22, 2026.
 
 > **Spoiler-free verdict:** Watch it for Carlyle, who is extraordinary, and for Peter O'Toole as Hindenburg. Skip it if you want the worst of Hitler on screen, because the miniseries stops before the worst and then narrates the rest. A two-part, 190-minute CBC and CBS miniseries from 2003, with a single critic review and no Tomatometer percentage on Rotten Tomatoes and a 3.26 member average on Letterboxd, checked on October 22, 2026. You need no plot summary before pressing play.

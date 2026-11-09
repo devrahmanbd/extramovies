@@ -1,27 +1,34 @@
 ---
 title: "Hope Review: Na Hong-jin's Korean Monster Epic Peaks in Its First Hour"
-slug: "hope-2026-review"
+slug: hope-2026-review
 rating: 6.9
 published_at: "2026-10-21T09:00:00.000Z"
 tmdb_id: 1058424
-imdb_id: "tt27369017"
+imdb_id: tt27369017
 seo_title: "Hope (2026) Review: Is It Worth Watching?"
 seo_description: "Na Hong-jin's Hope (2026) stars Hwang Jung-min and Hoyeon. Our Korean monster epic review, with our 6.9 out of 10 verdict."
 excerpt: "Hwang Jung-min and Hoyeon carry Na Hong-jin's Hope (2026), the most entertaining Korean monster movie of the year. Our verdict."
 managed_fields: "[\"seo_title\",\"seo_description\",\"excerpt\"]"
-movie_title: "Hope"
-movie_year: "2026"
+movie_title: Hope
+movie_year: 2026
 movie_genres: "[\"Science Fiction\", \"Mystery\", \"Action\"]"
-movie_runtime: "157 min"
-movie_director: "Na Hong-jin"
+movie_runtime: 157 min
+movie_director: Na Hong-jin
 movie_cast: "[\"Hwang Jung-min\", \"Zo In-sung\", \"Hoyeon\", \"Alicia Vikander\", \"Michael Fassbender\", \"Taylor Russell\", \"Cameron Britton\", \"Lee Sang-hee\", \"Um Mun-suk\", \"Im Hyun-sik\"]"
 movie_overview: "In the remote South Korean village of Hope Harbor, police chief Bum-seok and officer Sung-ae are called to investigate a mysterious creature wreaking havoc on the community. But all is not as it seems, and perceptions can be misleading. What begins as ignorance plants the seed of disaster, escalating through human conflict into a tragedy of cosmic proportions."
 movie_poster: "https://image.tmdb.org/t/p/w500/6VY1ZKgpsc8CfGsQcCGiYEgHdH0.jpg"
-movie_imdb: "tt27369017"
-region: "US"
+movie_imdb: tt27369017
+region: US
 sites: "[\"extramovies\"]"
+movie_release_date: 2026-07-15
+movie_studio: "[\"Forged Films\", \"Plus M Entertainment\", \"Westworld Story\"]"
+movie_country: "[\"South Korea\"]"
+movie_language: "[\"Korean\"]"
+movie_certification: R
+movie_budget: 46000000
+movie_revenue: 49456866
+media_type: movie
 ---
-
 Hope (2026) is worth watching for its first hour, which is one of the most exhilarating stretches of action in recent Korean cinema. The rest is a different proposition. Na Hong-jin's creature epic, his first feature since The Wailing, turned a village near the DMZ into a war zone and then kept turning, and it opened in US cinemas through Neon on September 9, 2026 after premiering in competition at Cannes in May. The problems arrive after the hour mark. The creature's CGI stutters, the characters stop existing, and the last ten minutes hand out lore without resolution.
 
 The scale is the story here. IndieWire's David Ehrlich reported that Hope is the most expensive film ever made in Korea, with a rumored budget of about 50 billion won, and Empire's Harry Stainer wrote that it "has made headlines as South Korea's most expensive movie of all time". Critics mostly liked the gamble. Rotten Tomatoes has the Tomatometer at 79 percent from 177 reviews, and Metacritic sits at 67 from 37 critic reviews.

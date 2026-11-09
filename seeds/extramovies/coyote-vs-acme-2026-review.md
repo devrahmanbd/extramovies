@@ -1,27 +1,34 @@
 ---
 title: "Coyote vs. Acme Review: A Lawsuit Comedy That Earns Its Verdict"
-slug: "coyote-vs-acme-2026-review"
+slug: coyote-vs-acme-2026-review
 rating: 7.5
 published_at: "2026-10-21T09:00:00.000Z"
 tmdb_id: 1204680
-imdb_id: "tt1756855"
+imdb_id: tt1756855
 seo_title: "Coyote vs. Acme Review (2026): Is It Worth Watching?"
 seo_description: "Dave Green's Coyote vs. Acme (2026) stars Will Forte and John Cena in a 103-minute Looney Tunes comedy. Our review, with our 7.5 out of 10 verdict."
 excerpt: "A court case, a talking lawsuit and Wile E. Coyote finally fighting back. Our Coyote vs. Acme (2026) review, with the verdict."
 managed_fields: "[\"seo_title\",\"seo_description\",\"excerpt\"]"
-movie_title: "Coyote vs. Acme"
-movie_year: "2026"
+movie_title: Coyote vs. Acme
+movie_year: 2026
 movie_genres: "[\"Comedy\", \"Adventure\", \"Family\"]"
-movie_runtime: "103 min"
-movie_director: "Dave Green"
+movie_runtime: 103 min
+movie_director: Dave Green
 movie_cast: "[\"Will Forte\", \"Lana Condor\", \"John Cena\", \"Tone Bell\", \"Martha Kelly\", \"Luis Guzmán\", \"P.J. Byrne\", \"John Early\", \"Nancy Linehan Charles\", \"Kenneth Choi\", \"Ernie Vigil\", \"Eric Bauza\"]"
 movie_overview: "After Acme products fail him one too many times in his dogged pursuit of the Roadrunner, Wile E. Coyote decides to hire a billboard lawyer to sue the Acme Corporation."
 movie_poster: "https://image.tmdb.org/t/p/w500/kYDCl2y0VPvhT5eYWbMRInPoB03.jpg"
-movie_imdb: "tt1756855"
-region: "US"
+movie_imdb: tt1756855
+region: US
 sites: "[\"extramovies\"]"
+movie_release_date: 2026-08-20
+movie_studio: "[\"Troll Court Entertainment\", \"Keylight Pictures\", \"Warner Animation Group\", \"Warner Bros. Pictures\"]"
+movie_country: "[\"United States of America\"]"
+movie_language: "[\"English\"]"
+movie_certification: PG
+movie_budget: 72000000
+movie_revenue: 101528842
+media_type: movie
 ---
-
 Yes, Coyote vs. Acme is worth watching, and it is worth watching in a cinema with the sound turned up. Dave Green's live action and animation comedy treats seventy years of the Coyote and Road Runner chase as a legal proceeding, and it lands the joke and the argument in the same scene. Will Forte carries it and John Cena undercuts him. The gags land hard enough to cover the runtime. Rotten Tomatoes has it at 96 percent from 299 critic reviews and Metacritic at 77 from 46, both checked on October 22, 2026.
 
 > **Spoiler-free verdict:** Watch it. A 103-minute, PG Looney Tunes comedy that turns Wile E. Coyote into a plaintiff, pairs Will Forte with John Cena, and mixes live action with animation. Rotten Tomatoes says 96 percent from 299 critic reviews and Metacritic says 77 from 46, checked October 22, 2026. You need no plot summary before pressing play.

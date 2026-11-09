@@ -15,10 +15,15 @@ movie_cast: "Genden Phuntsok,Tom Hiddleston,Willem Dafoe,Johnny Flynn,Caitríona
 movie_overview: "In 1953, Sherpa climber Tenzing Norgay joins Colonel John Hunt's British Everest expedition and, with Edmund Hillary, stands on the summit of Mount Everest as one of the first two people to reach it."
 movie_poster: "https://image.tmdb.org/t/p/w500/eI0QW02PYqhnmIvLRdn9vrfVVP7.jpg"
 movie_imdb: tt6262770
-region: "US"
+region: US
 sites: "[\"extramovies\"]"
+movie_release_date: 2026-10-09
+movie_studio: "[\"Cross City Films\", \"See-Saw Films\", \"Apple Studios\"]"
+movie_country: "[\"Australia\", \"United Kingdom\", \"United States of America\"]"
+movie_language: "[\"English\", \"Nepali\"]"
+movie_certification: PG
+media_type: movie
 ---
-
 # Tenzing Review: Ending, Release Date, Where to Watch
 
 The Tenzing review starts with the scoreboard, checked October 29, 2026: 98% on Rotten Tomatoes from 63 reviews, 67 on Metacritic from 18 critics, 7.5/10 on IMDb, and 8.3/10 on TMDB from 208 votes. Jennifer Peedom's Everest drama premiered at Telluride on September 4, played a limited theatrical run in the United States and Australia on October 9, and reached Apple TV+ worldwide on October 16. This Tenzing review gives the verdict first, then the climb, the ending question, and where to watch it.

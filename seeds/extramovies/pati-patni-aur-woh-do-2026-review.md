@@ -1,27 +1,33 @@
 ---
 title: "Pati Patni Aur Woh Do Review: A Farce That Forgets Its Own Jokes"
-slug: "pati-patni-aur-woh-do-2026-review"
+slug: pati-patni-aur-woh-do-2026-review
 rating: 4.5
 published_at: "2026-10-22T09:00:00.000Z"
 tmdb_id: 1320660
-imdb_id: "tt33054858"
+imdb_id: tt33054858
 seo_title: "Pati Patni Aur Woh Do (2026) Review: Is It Worth Watching?"
 seo_description: "Our Pati Patni Aur Woh Do review: Ayushmann Khurrana and Rakul Preet Singh's comedy, the critical verdict, where to watch, and our rating."
 excerpt: "Skip it. Mudassar Aziz's comedy has a fine cast in a good city and a script that keeps losing the thread. Rotten Tomatoes has it at 17 percent from 12 reviews."
 managed_fields: "[\"seo_title\",\"seo_description\",\"excerpt\"]"
-movie_title: "Pati Patni Aur Woh Do"
-movie_year: "2026"
+movie_title: Pati Patni Aur Woh Do
+movie_year: 2026
 movie_genres: "[\"Comedy\", \"Drama\", \"Romance\"]"
-movie_runtime: "117 min"
-movie_director: "Mudassar Aziz"
+movie_runtime: 117 min
+movie_director: Mudassar Aziz
 movie_cast: "[\"Ayushmann Khurrana\", \"Rakul Preet Singh\", \"Sara Ali Khan\", \"Wamiqa Gabbi\", \"Tigmanshu Dhulia\", \"Vijay Raaz\", \"Ayesha Raza Mishra\", \"Vishal Vashishtha\"]"
 movie_overview: "A seemingly perfect marriage in Prayagraj takes an unexpected turn when one decision leads to a chain of misunderstandings, suspicion and comedic chaos."
 movie_poster: "https://image.tmdb.org/t/p/w500/x0RUPvba4JlCCkyyEZGlQFIFVuF.jpg"
-movie_imdb: "tt33054858"
-region: "US"
+movie_imdb: tt33054858
+region: US
 sites: "[\"extramovies\"]"
+movie_release_date: 2026-05-15
+movie_studio: "[\"T-Series\", \"B.R. Studios\"]"
+movie_country: "[\"India\"]"
+movie_language: "[\"Hindi\"]"
+movie_certification: PG-13
+movie_collection: Pati Patni Aur Woh Collection
+media_type: movie
 ---
-
 No, Pati Patni Aur Woh Do is not worth watching. Mudassar Aziz has a good idea, a good cast and a good city, and the film's own machinery eats all three. A forest officer in Prayagraj pretends to be the boyfriend of the woman a local politician's son is dating, and the joke then runs for 117 minutes without a punchline. Rotten Tomatoes, checked on October 22, 2026, has it at 17 percent from 12 reviews. Our rating is 4.5 out of 10.
 
 > **Spoiler-free verdict:** Skip it. A 117-minute Hindi comedy with Ayushmann Khurrana, Rakul Preet Singh and Sara Ali Khan, set in the lanes of Prayagraj, and built on a misunderstanding that the screenplay never bothers to tighten. Rotten Tomatoes had it at 17 percent from 12 reviews when we checked on October 22, 2026. You need no plot summary before pressing play.

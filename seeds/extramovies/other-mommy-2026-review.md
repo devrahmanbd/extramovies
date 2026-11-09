@@ -1,27 +1,34 @@
 ---
 title: "Other Mommy Review: Jessica Chastain Carries a Horror Film That Falters"
-slug: "other-mommy-2026-review"
+slug: other-mommy-2026-review
 rating: 4.5
 published_at: "2026-10-21T09:00:00.000Z"
 tmdb_id: 1400837
-imdb_id: "tt36586020"
+imdb_id: tt36586020
 seo_title: "Other Mommy (2026) Review: Is It Worth Watching?"
 seo_description: "Rob Savage's Other Mommy (2026) stars Jessica Chastain as the mother and the monster. Our horror review, with our 4.5 out of 10 verdict."
 excerpt: "Chastain plays the mother and the monster, and the jump scares add up to nothing. Our Other Mommy (2026) verdict."
 managed_fields: "[\"seo_description\",\"excerpt\"]"
-movie_title: "Other Mommy"
-movie_year: "2026"
+movie_title: Other Mommy
+movie_year: 2026
 movie_genres: "[\"Horror\"]"
-movie_runtime: "93 min"
-movie_director: "Rob Savage"
+movie_runtime: 93 min
+movie_director: Rob Savage
 movie_cast: "[\"Jessica Chastain\", \"Jay Duplass\", \"Arabella Olivia Clark\", \"Karen Allen\", \"Arian Moayed\", \"Dichen Lachman\", \"Sean Kaufman\"]"
 movie_overview: "Young Bela forms a relationship with a sinister entity in her home that looks uncannily like her own mother, drawing her into a terrifying and increasingly dark world."
 movie_poster: "https://image.tmdb.org/t/p/w500/fGRNCssTRrhYZxNzykGGCoMsAVq.jpg"
-movie_imdb: "tt36586020"
-region: "US"
+movie_imdb: tt36586020
+region: US
 sites: "[\"extramovies\"]"
+movie_release_date: 2026-10-07
+movie_studio: "[\"Spin a Black Yarn\", \"Blumhouse Atomic\"]"
+movie_country: "[\"United States of America\"]"
+movie_language: "[\"English\"]"
+movie_certification: R
+movie_budget: 18000000
+movie_revenue: 110828497
+media_type: movie
 ---
-
 Other Mommy is not worth watching as horror. It is worth watching for two performances, and the rest of Rob Savage's film, which opened in US theaters through Universal on October 9, 2026, is a stack of loud noises around a story with too much in it and too little underneath. The premise is strong. A demon that has copied a mother comes to take a child's heart. The execution is fifty jump scares that all arrive the same way, and a tone that keeps turning while the thing on screen is doing something else entirely. Critics noticed. Rotten Tomatoes has the film at 18 percent from 89 reviews and Metacritic sits at 38 from 14 critic reviews, both checked on October 21, 2026.
 
 The money tells a different story. The Numbers, checked on October 21, 2026, has Other Mommy at $45,415,130 domestic and $79,625,130 worldwide against a $19 million production budget, which is four times what it cost, with $27,805,825 of the domestic total arriving in the opening weekend from 3,365 theatres. People bought tickets. They did not all love what they bought. The certificate in the US is R and the runtime is 93 minutes.

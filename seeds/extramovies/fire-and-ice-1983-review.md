@@ -1,25 +1,32 @@
 ---
 title: "Fire and Ice (1983) Review: The Cult Animation That Still Looks Like a Painting"
-slug: "fire-and-ice-1983-review"
+slug: fire-and-ice-1983-review
 rating: 0
 tmdb_id: 15035
-imdb_id: "tt0085542"
+imdb_id: tt0085542
 seo_title: "Fire and Ice (1983) Review: Is It Worth Watching?"
 seo_description: "Our Fire and Ice review: Bakshi's rotoscoped 1983 cult animation, Frazetta's art, the 2026 4K UHD release, where to stream it, and our verdict."
 excerpt: "Bakshi's rotoscoped 1983 fantasy still looks like a Frazetta painting. The art endures, the script loops, the 2026 4K UHD release gives it a second run."
-movie_title: "Fire and Ice"
-movie_year: "1983"
+movie_title: Fire and Ice
+movie_year: 1983
 movie_genres: "[\"Animation\", \"Fantasy\", \"Science Fiction\", \"Adventure\"]"
-movie_runtime: "82 min"
-movie_director: "Ralph Bakshi"
+movie_runtime: 82 min
+movie_director: Ralph Bakshi
 movie_cast: "[\"Randy Norton\", \"Cynthia Leake\", \"Steve Sandor\", \"Sean Hannon\", \"Leo Gordon\", \"William Ostrander\", \"Eileen O'Neill\", \"Elizabeth Lloyd Shaw\"]"
 movie_overview: "The villainous Nekron and his mother, Queen Juliana, plot against the human race from their frigid fortress. Creating mass destruction with huge glaciers, mother and son incur the wrath of Larn, a warrior whose entire village was destroyed by ice. When Nekron's underlings kidnap the beautiful Princess Teegra, Larn sets out to rescue her, assisted by the fierce and enigmatic Darkwolf."
 movie_poster: "https://image.tmdb.org/t/p/w500/qj7j4vbdQKW8JXjyFHpIJlFrbmY.jpg"
-movie_imdb: "tt0085542"
-region: "US"
+movie_imdb: tt0085542
+region: US
 sites: "[\"extramovies\"]"
+movie_release_date: 1983-03-25
+movie_studio: "[\"Ralph Bakshi/Frank Frazetta Productions\", \"PSO\"]"
+movie_country: "[\"United States of America\"]"
+movie_language: "[\"English\"]"
+movie_certification: PG
+movie_budget: 1200000
+movie_revenue: 760883
+media_type: movie
 ---
-
 Yes, Fire and Ice is worth watching. Ralph Bakshi's 1983 sword and sorcery feature still looks like a Frank Frazetta painting that learned to move, and the art is the part that has held up. The script is a different story. It is thin and it circles back on itself, asking you to accept a world drawn with far more care than the story sitting underneath it. Blue Underground put the picture on 4K UHD on June 30, 2026, with a Dolby Atmos track, a Bakshi commentary and a bonus soundtrack CD, so the film is easier to see today than it has been in decades.
 
 Bakshi directed, Frazetta produced and designed the world, and Gerry Conway and Roy Thomas, who had written Conan for Marvel, scripted it. The AFI Catalog records 82 minutes, an MPAA certificate of PG, and a US release on August 19, 1983, after the January premiere at the Avoriaz Film Festival in France. The budget was $10 million.

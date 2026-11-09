@@ -1,27 +1,34 @@
 ---
 title: "Street Fighter Review: Faithful to the Games, Lost in Its Own Plot"
-slug: "street-fighter-2026-review"
+slug: street-fighter-2026-review
 rating: 5.5
 published_at: "2026-10-21T09:00:00.000Z"
 tmdb_id: 1153576
-imdb_id: "tt27419420"
+imdb_id: tt27419420
 seo_title: "Street Fighter (2026) Review: Is It Worth Watching?"
 seo_description: "Kitao Sakurai's Street Fighter (2026) stars Andrew Koji and Noah Centineo. Our game adaptation review, with our 5.5 out of 10 verdict."
 excerpt: "The fights land and the cast knows the games, but the script runs four plotlines at once. Our Street Fighter (2026) verdict."
 managed_fields: "[\"seo_description\",\"excerpt\"]"
-movie_title: "Street Fighter"
-movie_year: "2026"
+movie_title: Street Fighter
+movie_year: 2026
 movie_genres: "[\"Action\", \"Fantasy\"]"
-movie_runtime: "120 min"
-movie_director: "Kitao Sakurai"
+movie_runtime: 120 min
+movie_director: Kitao Sakurai
 movie_cast: "[\"Andrew Koji\", \"Noah Centineo\", \"Callina Liang\", \"David Dastmalchian\", \"Jason Momoa\", \"Cody Rhodes\", \"Mel Jarnson\", \"Vidyut Jammwal\", \"Andrew Schulz\", \"50 Cent\"]"
 movie_overview: "In 1993, estranged Street Fighters Ryu and Ken Masters are thrown back into combat when the mysterious Chun-Li recruits them for the next World Warrior Tournament: a brutal clash of fists, fate, and fury. But behind this battle royale lies a deadly conspiracy that forces them to face off against each other and the demons of their past. And if they don't, it's GAME OVER!"
 movie_poster: "https://image.tmdb.org/t/p/w500/pwUb3gdkSrlyMZWs0MFOQg3N5s7.jpg"
-movie_imdb: "tt27419420"
-region: "US"
+movie_imdb: tt27419420
+region: US
 sites: "[\"extramovies\"]"
+movie_release_date: 2026-10-13
+movie_studio: "[\"Capcom\", \"Legendary Pictures\"]"
+movie_country: "[\"Japan\", \"United States of America\"]"
+movie_language: "[\"English\"]"
+movie_certification: PG-13
+movie_budget: 82000000
+movie_revenue: 91912121
+media_type: movie
 ---
-
 Street Fighter is worth watching for the fights, and for not much else. Kitao Sakurai's adaptation of the Capcom games opened in US theaters through Paramount on October 16, 2026, and it hands you 120 minutes of game-accurate moves, fully animated interludes, and a cast of people who plainly grew up on the arcade cabinet. The story is where it falls apart. Four plotlines share the same running time, most of the tournament happens off screen, and the screenplay never finds a shape for the thing it is about. Critics noticed. Rotten Tomatoes has it at 42 percent from 120 reviews and Metacritic sits at 44 from 26 critic reviews, both checked on October 21, 2026.
 
 The Numbers, checked on October 21, 2026, has the film at $32,666,830 domestic and $52,766,830 worldwide against an $82 million production budget, with $30,775,377 of that domestic total arriving in the opening weekend from 3,575 theatres. The certificate in the US is PG-13, and the runtime is two hours with no credit.

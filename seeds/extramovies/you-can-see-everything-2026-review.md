@@ -1,27 +1,34 @@
 ---
 title: "You Can See Everything Review: Scrambled Eggs, an Escape Kit, and No Answers"
-slug: "you-can-see-everything-2026-review"
+slug: you-can-see-everything-2026-review
 rating: 8.8
 published_at: "2026-10-21T09:00:00.000Z"
 tmdb_id: 1765072
-imdb_id: "tt45368240"
+imdb_id: tt45368240
 seo_title: "You Can See Everything (2026) Review: Is It Worth Watching?"
 seo_description: "Nathan Fielder and Lance Oppenheim filmed Elizabeth Holmes for three years. Our You Can See Everything (2026) review, with our 8.8 out of 10 verdict."
 excerpt: "Three years with Elizabeth Holmes, and the film refuses to give her a verdict. Our You Can See Everything (2026) review."
 managed_fields: "[\"seo_description\",\"excerpt\"]"
-movie_title: "You Can See Everything"
-movie_year: "2026"
+movie_title: You Can See Everything
+movie_year: 2026
 movie_genres: "[\"Documentary\"]"
-movie_runtime: "174 min"
+movie_runtime: 174 min
 movie_director: "Nathan Fielder, Lance Oppenheim"
 movie_cast: "[\"Elizabeth Holmes\", \"Nathan Fielder\", \"Billy Evans\", \"Amanda Seyfried\", \"Christopher Abbott\", \"Lance Oppenheim\", \"Christian Rasmus Holmes IV\", \"Noel Anne\", \"Gary Wilmes\", \"Phillip Andre Botello\"]"
 movie_overview: "Thirty-four days before she's sent to prison, notorious Silicon Valley founder Elizabeth Holmes invites a skeptical film crew to document her every move. What begins as an intimate portrait of an enigmatic felon becomes a mind-bending three-year journey into the abyss."
 movie_poster: "https://image.tmdb.org/t/p/w500/Ap8QwmKfSjYbWC4XIP8w9pdn72O.jpg"
-movie_imdb: "tt45368240"
-region: "US"
+movie_imdb: tt45368240
+region: US
 sites: "[\"extramovies\"]"
+movie_release_date: 2026-10-16
+movie_studio: "[\"Blow Out Productions\", \"To Be Formed\", \"A24\"]"
+movie_country: "[\"United States of America\"]"
+movie_language: "[\"English\"]"
+movie_certification: R
+movie_budget: 7000000
+movie_revenue: 63882597
+media_type: movie
 ---
-
 Yes, You Can See Everything is worth watching, and the five days since it opened in US cinemas are not enough to settle what it does. Nathan Fielder and Lance Oppenheim's documentary about Elizabeth Holmes runs 174 minutes, was built on three years of access to her and Billy Evans in a rented house in Del Mar, and refuses to deliver a verdict on either of them. The critics are close to unanimous. Rotten Tomatoes has it at 98 percent from 146 critic reviews and Metacritic at 97 from 40, both checked October 21, 2026. The audience record is five days old, and the panels disagree with each other.
 
 The money is the surprise. Box Office Mojo, checked October 21, 2026, has the film at $18,177,533 domestic, of which $15,601,418 arrived in the opening weekend across 855 theatres, and no international total reported yet. Variety's Clayton Davis noted that this is a number most nonfiction films never see in a full run. An R-rated documentary about a convicted fraudster, three years in the making, and it opened on 855 screens. The certificate is R for language and some graphic nudity.

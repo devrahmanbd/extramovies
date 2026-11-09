@@ -130,7 +130,22 @@ export function reviewToMarkdown(r: PortableReview): string {
     data[f] = v ?? (f === 'rating' || f === 'tmdb_id' ? v ?? null : v ?? null);
   }
   // Preserve a small set of known extras without breaking the contract.
-  for (const k of ['excerpt', 'director', 'year', 'genres', 'status']) {
+  for (const k of [
+    'excerpt',
+    'director',
+    'year',
+    'genres',
+    'status',
+    'movie_release_date',
+    'movie_studio',
+    'movie_country',
+    'movie_language',
+    'movie_certification',
+    'movie_collection',
+    'movie_budget',
+    'movie_revenue',
+    'media_type',
+  ]) {
     if (r[k] !== undefined) data[k] = r[k];
   }
   return stringifyFrontmatter(data, r.body ?? '');

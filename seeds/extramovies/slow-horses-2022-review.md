@@ -1,24 +1,29 @@
 ---
 title: "Slow Horses Review: The Best Spy Show on Television Keeps Raising Its Own Ceiling"
-slug: "slow-horses-2022-review"
+slug: slow-horses-2022-review
 rating: 8.7
 tmdb_id: 95480
-imdb_id: "tt5875444"
+imdb_id: tt5875444
 seo_title: "Slow Horses (2022) Review: Worth Watching on Apple TV+?"
 seo_description: "Our Slow Horses review: Gary Oldman as Jackson Lamb, 98% RT overall, season 6 at 100%, the Mick Herron books, and our verdict."
 excerpt: "Gary Oldman's Jackson Lamb leads MI5's dumping ground to 98% on RT. Our Slow Horses review: why season 6 hit 100% and what the show does differently."
-movie_title: "Slow Horses"
-movie_year: "2022"
+movie_title: Slow Horses
+movie_year: 2022
 movie_genres: "[\"Crime\", \"Drama\", \"Mystery\"]"
-movie_director: "Mick Herron"
+movie_director: Mick Herron
 movie_cast: "[\"Gary Oldman\", \"Jack Lowden\", \"Kristin Scott Thomas\", \"Hugo Weaving\", \"Saskia Reeves\", \"Christopher Chung\"]"
 movie_overview: "Follow a dysfunctional team of MI5 agents, and their obnoxious boss, the notorious Jackson Lamb, as they navigate the espionage world's smoke and mirrors to defend England from sinister forces."
 movie_poster: "https://image.tmdb.org/t/p/w500/AdYr4DjOgXvDUMwu6vEhZy1Rnxk.jpg"
-movie_imdb: "tt5875444"
-region: "US"
+movie_imdb: tt5875444
+region: US
 sites: "[\"extramovies\"]"
+movie_release_date: 2022-04-01
+movie_studio: "[\"See-Saw Films\", \"Flying Studio Pictures\", \"Sony Pictures Television\"]"
+movie_country: "[\"United Kingdom\", \"United States of America\"]"
+movie_language: "[\"English\"]"
+movie_certification: TV-MA
+media_type: tv
 ---
-
 Slow Horses is the spy show that wins by lowering expectations and then exceeding them every season. Mick Herron's Slough House novels become Apple TV+ series about MI5's failure pile, the disgraced agents parked in a shabby office under Jackson Lamb (Gary Oldman), a rude, flatulent, brilliant spymaster who treats his team like inventory. Rotten Tomatoes has the series at 98% across 243 reviews, and season 6, which finished its weekly run on October 21, 2026, arrived at 100% and set an all-time RT audience score record along the way. This is currently the most reliable hour of espionage on television.
 
 > **Spoiler-free verdict:** Start at season 1 immediately. Slow Horses refreshes the genre by letting its spies be bumbling, and Oldman turns contempt into tradecraft. Six seasons deep, it has not missed.

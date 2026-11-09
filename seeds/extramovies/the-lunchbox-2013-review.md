@@ -1,24 +1,30 @@
 ---
-title: "The Lunchbox Ending Explained and Movie Review"
-slug: "the-lunchbox-2013-review"
+title: The Lunchbox Ending Explained and Movie Review
+slug: the-lunchbox-2013-review
 rating: 7.4
 tmdb_id: 191714
-imdb_id: "tt2350496"
+imdb_id: tt2350496
 seo_title: "The Lunchbox Ending Explained: Did the Letter Arrive?"
 seo_description: "The Lunchbox ending explained: Saajan and Ila never meet on screen, every letter arrives, and the withheld reunion is the point. Review."
 excerpt: "The Lunchbox swaps a meet-cute for a post office. Irrfan Khan and Nimrat Kaur carry a romance built on paper, and the ending withholds the pay"
-movie_title: "The Lunchbox"
-movie_year: "2013"
+movie_title: The Lunchbox
+movie_year: 2013
 movie_genres: "[\"Drama\", \"Romance\"]"
-movie_director: "Ritesh Batra"
+movie_director: Ritesh Batra
 movie_cast: "[\"Irrfan Khan\", \"Nimrat Kaur\", \"Nawazuddin Siddiqui\", \"Lillete Dubey\", \"Nasir Khan\", \"Bharati Achrekar\"]"
 movie_overview: "A mistaken delivery in Mumbai's famously efficient lunchbox delivery system (Mumbai's Dabbawallahs) connects a young housewife to a stranger in the dusk of his life. They build a fantasy world together through notes in the lunchbox. Gradually, this fantasy threatens to overwhelm their reality."
 movie_poster: "https://image.tmdb.org/t/p/w500/jSOiz1h97i3qwjZJXY8SeLvjPsl.jpg"
-movie_imdb: "tt2350496"
-region: "US"
+movie_imdb: tt2350496
+region: US
 sites: "[\"extramovies\"]"
+movie_release_date: 2013-09-20
+movie_studio: "[\"DAR Motion Pictures\", \"A.S.A.P. Films\", \"Sikhya Entertainment\", \"National Film Development Corporation of India\", \"Rohfilm\", \"Cine Mosaic\", \"ARTE France Cinéma\", \"Nittin Keni Creations\"]"
+movie_country: "[\"France\", \"Germany\", \"India\", \"United States of America\"]"
+movie_language: "[\"English\", \"Hindi\"]"
+movie_budget: 3400000
+movie_revenue: 17240000
+media_type: movie
 ---
-
 # The Lunchbox Ending Explained and Movie Review
 
 The Lunchbox ending explained in one line: every letter arrives and the meeting never does, and that withholding is the argument of Ritesh Batra's 2013 debut. The film grossed $17.2 million against a $3.4 million budget and holds 97% on Rotten Tomatoes from 123 critics, which makes it one of the most efficient small films in modern Hindi cinema. Its originality is structural rather than decorative: this is a romance that never once puts its two leads in the same frame, and the film treats that absence as the subject instead of the obstacle.

@@ -1,5 +1,5 @@
 ---
-title: "Premam Ending Explained and Full Movie Review"
+title: Premam Ending Explained and Full Movie Review
 slug: premam-2015-review
 rating: 7.6
 tmdb_id: 341895
@@ -15,10 +15,16 @@ movie_cast: "Nivin Pauly,Sai Pallavi,Madonna Sebastian,Anupama Parameswaran,Shab
 movie_overview: "Three stages in George's life, and three girls he encounters in each stage."
 movie_poster: "https://image.tmdb.org/t/p/w500/wfMgsfDrtouYOM6MbrkHtU96Xij.jpg"
 movie_imdb: tt4679210
-region: "US"
+region: US
 sites: "[\"extramovies\"]"
+movie_release_date: 2015-05-29
+movie_studio: "[\"Anwar Rasheed Entertainments\"]"
+movie_country: "[\"India\"]"
+movie_language: "[\"Malayalam\", \"Tamil\"]"
+movie_budget: 620000
+movie_revenue: 1100000
+media_type: movie
 ---
-
 # Premam Ending Explained and Full Movie Review
 
 The Premam ending explained in one line: Malar remembers George and says nothing about it. Alphonse Puthren's 2015 Malayalam romance carries 7.6/10 on TMDB from 133 votes and 8.3/10 on IMDb from about 29,000 ratings, and Rotten Tomatoes logs a 77 percent Tomatometer from the single critic review it holds for the film, all checked October 28, 2026. The argument this review will make is that Premam is less a love triangle than a study of how one man absorbs rejection, and that the last scene quietly hands the moral weight to the woman the plot had already written off.

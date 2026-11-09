@@ -1,0 +1,8 @@
+---
+/**
+ * Secondary-intent alias (QS-3). The canonical ranked list lives at
+ * /lists/best-films-2026; this short path is the query-shaped entry point
+ * and 301s there, so the two URLs never compete.
+ */
+return Astro.redirect("/lists/best-films-2026", 301);
+---

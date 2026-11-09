@@ -1,24 +1,31 @@
 ---
 title: "Magadheera Review: Ram Charan's Epic, Story and Ending"
-slug: "magadheera-2009-review"
+slug: magadheera-2009-review
 rating: 7.3
 tmdb_id: 23790
-imdb_id: "tt1447500"
+imdb_id: tt1447500
 seo_title: "Magadheera Review: Rajamouli's Epic, Story and Ending"
 seo_description: "Our Magadheera review: Ram Charan and Kajal Aggarwal in Rajamouli's Telugu epic, the 400-year reincarnation story, and where to watch it."
 excerpt: "Rajamouli opens with the end of the flashback and still lands it. Our Magadheera review: Ram Charan, Kajal Aggarwal, the reincarnation story, the verdict."
-movie_title: "Magadheera"
-movie_year: "2009"
+movie_title: Magadheera
+movie_year: 2009
 movie_genres: "[\"Action\"]"
-movie_director: "S. S. Rajamouli"
+movie_director: S. S. Rajamouli
 movie_cast: "[\"Ram Charan\", \"Kajal Aggarwal\", \"Dev Gill\", \"Srihari\", \"Sarath Babu\", \"Sunil Varma\", \"Brahmanandam\", \"Saloni Aswani\"]"
 movie_overview: "A street-bike racer chances upon a woman and is struck by visions of a past life where they were both star-crossed lovers in a war-ridden kingdom 400 years ago, while the reincarnation of his romantic rival emerges with murderous intent."
 movie_poster: "https://image.tmdb.org/t/p/w500/xK7MEV56GF291VG0U5XnVJuvNv3.jpg"
-movie_imdb: "tt1447500"
-region: "US"
+movie_imdb: tt1447500
+region: US
 sites: "[\"extramovies\"]"
+movie_release_date: 2009-07-31
+movie_studio: "[\"Geetha Arts\"]"
+movie_country: "[\"India\"]"
+movie_language: "[\"Sanskrit\", \"Telugu\"]"
+movie_certification: PG
+movie_budget: 4583500
+movie_revenue: 15278500
+media_type: movie
 ---
-
 # Magadheera Review: Ram Charan's Epic, Story and Ending
 
 The Magadheera review in one line: S. S. Rajamouli opens his 2009 Telugu epic with three minutes from the end of its own flashback, tells you that two people fall off a cliff, and then spends 164 minutes making that fall matter. TMDB scores the film 7.3/10 from 159 votes, IMDb users rate it 7.7/10 from about 29,000 ratings, and Rotten Tomatoes files no critic score for it whatsoever while 86 percent of its 500-plus audience ratings run positive, all checked October 27, 2026. A film with no Tomatometer entry and a seven-figure following is exactly the kind of gap this Magadheera review exists to fill.

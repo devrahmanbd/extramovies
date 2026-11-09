@@ -1,27 +1,34 @@
 ---
 title: "Sense and Sensibility (2026) Review: Edgar-Jones and Creed-Miles Carry a Faithful Austen"
-slug: "sense-and-sensibility-2026-review"
-rating: 7.0
+slug: sense-and-sensibility-2026-review
+rating: 7
 published_at: "2026-10-21T09:00:00.000Z"
 tmdb_id: 1503762
-imdb_id: "tt13609648"
+imdb_id: tt13609648
 seo_title: "Sense and Sensibility (2026) Review: Is It Worth Watching?"
 seo_description: "Georgia Oakley's Sense and Sensibility (2026) stars Daisy Edgar-Jones and Esmé Creed-Miles. Our Austen review, with our 7 out of 10 verdict."
 excerpt: "A faithful Austen with Daisy Edgar-Jones and Esmé Creed-Miles, and two leads that carry it. Our Sense and Sensibility (2026) verdict."
 managed_fields: "[\"seo_description\",\"excerpt\"]"
-movie_title: "Sense and Sensibility"
-movie_year: "2026"
+movie_title: Sense and Sensibility
+movie_year: 2026
 movie_genres: "[\"Drama\", \"Romance\"]"
-movie_runtime: "132 min"
-movie_director: "Georgia Oakley"
+movie_runtime: 132 min
+movie_director: Georgia Oakley
 movie_cast: "[\"Daisy Edgar-Jones\", \"Esmé Creed-Miles\", \"Bodhi Rae Breathnach\", \"Caitríona Balfe\", \"Fiona Shaw\", \"George MacKay\", \"Herbert Nordrum\", \"Frank Dillane\", \"Tom Brooke\", \"Stacy Martin\", \"Turlough Convery\", \"Chloe Pirrie\"]"
 movie_overview: "A charming, witty, and deeply relatable story of love and sisterhood."
 movie_poster: "https://image.tmdb.org/t/p/w500/czsyPHosFNbh4PPqXfqWu1aBXnA.jpg"
-movie_imdb: "tt13609648"
-region: "US"
+movie_imdb: tt13609648
+region: US
 sites: "[\"extramovies\"]"
+movie_release_date: 2026-09-23
+movie_studio: "[\"Focus Features\", \"Working Title\", \"November Pictures\", \"Kiddo Films\"]"
+movie_country: "[\"United Kingdom\", \"United States of America\"]"
+movie_language: "[\"English\"]"
+movie_certification: PG
+movie_budget: 25000000
+movie_revenue: 33773081
+media_type: movie
 ---
-
 Yes, the 2026 Sense and Sensibility is worth watching, and the first thing to settle is which version you are reading about. This is Georgia Oakley's adaptation, with Daisy Edgar-Jones as Elinor Dashwood and Esmé Creed-Miles as Marianne, photographed in Sussex and Devon by Arnaud Potier and released by Focus Features in October 2026. It is not Ang Lee's 1995 film with Emma Thompson and Kate Winslet, and it is not the 2008 BBC miniseries. Rotten Tomatoes has it at 77 percent from 106 critic reviews and Metacritic at 71 from 40, both checked October 21, 2026.
 
 The business is healthy for a literary adaptation. Box Office Mojo, checked October 21, 2026, has the film at $7,887,315 domestic and $19,188,315 worldwide, including $11,301,000 from outside North America, with a $7,203,465 US opening on October 16 through Focus Features. It premiered at the Odeon Luxe Leicester Square in London on September 15 and at the Delphi Filmpalast in Berlin on September 21. The US certificate is PG and the runtime is 132 minutes.

@@ -11,6 +11,12 @@ import {
   taxonomyEntries,
   isTaxonomyIndexable,
 } from "../lib/seo/taxonomy";
+import {
+  editorialLists,
+  listIsIndexable,
+  listPath,
+  resolveListItems,
+} from "../lib/seo/lists";
 
 export const GET: APIRoute = async ({ url }) => {
   const origin = siteOrigin(url.origin);
@@ -33,6 +39,18 @@ export const GET: APIRoute = async ({ url }) => {
         priority: 0.5,
       })),
   );
+  // Editorial lists are a supporting content type, not reviews. A list joins
+  // the sitemap only when the site publishes enough reviews to make it
+  // indexable (src/lib/seo/lists.ts). The hub is listed only when at least
+  // one list qualifies, so a brand with a thin archive never advertises an
+  // empty hub.
+  const listEntries = editorialLists()
+    .map((list) => ({ list, items: resolveListItems(list, latest) }))
+    .filter(({ items }) => listIsIndexable(items));
+  const newestList = listEntries
+    .map(({ list }) => list.updated)
+    .sort()
+    .pop();
   // Series hubs stay review-driven and self-canonical: a series page never
   // renders a review, so /series/<tmdbId> IS its own canonical and a series
   // review puts it in the sitemap. Film hubs are deliberately NOT listed: a
@@ -54,6 +72,22 @@ export const GET: APIRoute = async ({ url }) => {
     { loc: `${origin}/about`, changefreq: "monthly", priority: 0.6 },
     { loc: `${origin}/contact`, changefreq: "monthly", priority: 0.4 },
     { loc: `${origin}/editorial-policy`, changefreq: "monthly", priority: 0.5 },
+    ...(listEntries.length > 0
+      ? [
+          {
+            loc: `${origin}/lists`,
+            changefreq: "weekly" as const,
+            priority: 0.7,
+            ...(newestList ? { lastmod: newestList } : {}),
+          },
+          ...listEntries.map(({ list }) => ({
+            loc: `${origin}${listPath(list.slug)}`,
+            lastmod: list.updated,
+            changefreq: "monthly" as const,
+            priority: 0.6,
+          })),
+        ]
+      : []),
     ...authors.map((name) => ({
       loc: `${origin}/author/${slugifyTaxonomy(name)}`,
       changefreq: "monthly" as const,

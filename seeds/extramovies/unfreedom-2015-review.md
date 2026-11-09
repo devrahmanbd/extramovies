@@ -1,25 +1,28 @@
 ---
 title: "Unfreedom Review: Unflinching Subject, Unsteady Execution"
-slug: "unfreedom-2015-review"
+slug: unfreedom-2015-review
 rating: 0
 tmdb_id: 329864
-imdb_id: "tt2049630"
+imdb_id: tt2049630
 seo_title: "Unfreedom (2015) Review: Is It Worth Watching?"
 seo_description: "Our Unfreedom review: Raj Amit Kumar's banned Indian drama with Victor Banerjee and Preeti Gupta, 0 percent on Rotten Tomatoes as of October 2026, verdict."
 excerpt: "Unflinching and heavy-handed in equal measure. Raj Amit Kumar's banned Indian drama is worth one hard watch. Rotten Tomatoes: 0 percent as of October 2026."
-movie_title: "Unfreedom"
-movie_year: "2015"
+movie_title: Unfreedom
+movie_year: 2015
 movie_genres: "[\"Romance\", \"Crime\", \"Drama\"]"
-movie_runtime: "102 min"
-movie_director: "Raj Amit Kumar"
+movie_runtime: 102 min
+movie_director: Raj Amit Kumar
 movie_cast: "[\"Victor Banerjee\", \"Adil Hussain\", \"Bhanu Uday\", \"Preeti Gupta\", \"Bhavani Lee\", \"Ankur Vikal\", \"Seema Rahmani\", \"Samrat Chakrabarti\"]"
-movie_overview: "A Muslim fundamentalist in New York kidnaps a liberal Muslim scholar with intent to kill. A closeted lesbian in New Delhi kidnaps her activist bisexual lover with intent to marry. The resulting torture and violence evokes a brutal struggle of identities against unfreedom."
+movie_overview: A Muslim fundamentalist in New York kidnaps a liberal Muslim scholar with intent to kill. A closeted lesbian in New Delhi kidnaps her activist bisexual lover with intent to marry. The resulting torture and violence evokes a brutal struggle of identities against unfreedom.
 movie_poster: "https://image.tmdb.org/t/p/w500/4aVScKvEeY8i9Recn1LKTcOJZtq.jpg"
-movie_imdb: "tt2049630"
-region: "US"
+movie_imdb: tt2049630
+region: US
 sites: "[\"extramovies\"]"
+movie_release_date: 2015-05-29
+movie_country: "[\"India\", \"United States of America\"]"
+movie_language: "[\"English\", \"Hindi\"]"
+media_type: movie
 ---
-
 Yes, Unfreedom is worth watching, once, and only if you can sit through a film that never looks away. Raj Amit Kumar's 2015 debut runs two stories that never join: a Pakistani terrorist in New York sent to kill a liberal Muslim scholar, and a closeted woman in New Delhi told to marry a man she does not want. The censor board refused to certify it in India, and the director's appeal to a tribunal left the ban in place. It has an argument that outruns the filmmaking. As of October 20, 2026, Rotten Tomatoes has it at 0 percent from 11 critic reviews.
 
 > **Spoiler-free verdict:** Yes, with a warning. Unfreedom is a 102-minute English-language drama from India that never got a cinema release at home. Victor Banerjee, Bhanu Uday and Preeti Gupta carry the two halves, and the two strands never quite lock together. Rotten Tomatoes says 0 percent from 11 critic reviews and Letterboxd members average it at 2.88 out of 5, as of October 20, 2026. You need no plot summary before pressing play.

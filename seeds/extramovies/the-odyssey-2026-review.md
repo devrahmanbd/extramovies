@@ -1,27 +1,34 @@
 ---
 title: "The Odyssey Review: A Vast Epic That Never Quite Breaks Your Heart"
-slug: "the-odyssey-2026-review"
+slug: the-odyssey-2026-review
 rating: 8
 published_at: "2026-10-21T09:00:00.000Z"
 tmdb_id: 1368337
-imdb_id: "tt33764258"
+imdb_id: tt33764258
 seo_title: "The Odyssey (2026) Review: Is It Worth Watching?"
 seo_description: "Christopher Nolan's The Odyssey (2026) stars Matt Damon and Anne Hathaway. Our review of the Greek epic, with our 8 out of 10 verdict."
 excerpt: "Nolan's The Odyssey (2026) is vast and strangely cold. Matt Damon plays a trickster worn down to a mask. Our verdict."
 managed_fields: "[\"seo_description\",\"excerpt\"]"
-movie_title: "The Odyssey"
-movie_year: "2026"
+movie_title: The Odyssey
+movie_year: 2026
 movie_genres: "[\"Adventure\", \"Action\", \"Fantasy\"]"
-movie_runtime: "173 min"
-movie_director: "Christopher Nolan"
+movie_runtime: 173 min
+movie_director: Christopher Nolan
 movie_cast: "[\"Matt Damon\", \"Tom Holland\", \"Anne Hathaway\", \"Robert Pattinson\", \"Himesh Patel\", \"Charlize Theron\", \"John Leguizamo\", \"Travis Scott\", \"Corey Hawkins\", \"Jarreth J. Merz\"]"
 movie_overview: "Odysseus, the legendary King of Ithaca, embarks on a long and perilous journey home following the Trojan War. Throughout his voyage, he is forced to confront the whims of gods, mythological monsters, and trials that stretch both his cunning and his humanity to the breaking point."
 movie_poster: "https://image.tmdb.org/t/p/w500/5rhTDKUhPYvpdQIijFIs5VoWsON.jpg"
-movie_imdb: "tt33764258"
-region: "US"
+movie_imdb: tt33764258
+region: US
 sites: "[\"extramovies\"]"
+movie_release_date: 2026-07-15
+movie_studio: "[\"Universal Pictures\", \"Syncopy\"]"
+movie_country: "[\"United Kingdom\", \"United States of America\"]"
+movie_language: "[\"English\"]"
+movie_certification: R
+movie_budget: 250000000
+movie_revenue: 1796113523
+media_type: movie
 ---
-
 Yes, The Odyssey is worth watching, and it is the rare blockbuster that earns the three hours it asks for. Christopher Nolan's Greek epic is vast and strangely cold. Critics have almost nothing but praise for it, and audiences mostly agree, though the one dissenting number points at the film's real weakness before you have seen a frame of it.
 
 > **Spoiler-free verdict:** Watch it, and pay for the best screen you can find. A 173-minute epic shot entirely on IMAX film, carried by Matt Damon. Rotten Tomatoes has it at 94 percent from 515 critic reviews and Metacritic has it at 88 from 63 critic reviews. You need no plot summary before pressing play. The film does not stop to explain itself.

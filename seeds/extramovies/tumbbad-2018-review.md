@@ -1,5 +1,5 @@
 ---
-title: "Tumbbad Ending Explained and Full Movie Review"
+title: Tumbbad Ending Explained and Full Movie Review
 slug: tumbbad-2018-review
 rating: 7.6
 tmdb_id: 538858
@@ -15,10 +15,16 @@ movie_cast: "Sohum Shah,Mohammad Samad,Harsh K.,Rudra Soni,Jyoti Malshe"
 movie_overview: "Vinayak Rao returns to his ancestral village of Tumbbad to claim a gold treasure guarded by the cursed god Hastar, and pays for it across three generations."
 movie_poster: "https://image.tmdb.org/t/p/w500/z1xOCxw780WFJC5uCTMfCkQ4Agi.jpg"
 movie_imdb: tt8239946
-region: "US"
+region: US
 sites: "[\"extramovies\"]"
+movie_release_date: 2018-10-12
+movie_studio: "[\"Filmgate Films\", \"Film i Väst\", \"Sohum Shah FIlms\", \"Colour Yellow Productions\", \"Eros International\"]"
+movie_country: "[\"India\", \"Sweden\"]"
+movie_language: "[\"English\", \"Hindi\", \"Marathi\"]"
+movie_certification: NR
+movie_collection: Tumbbad Collection
+media_type: movie
 ---
-
 # Tumbbad Ending Explained and Full Movie Review
 
 The Tumbbad ending explained in one line: Vinayak trades three generations for gold, and his son refuses the trade, which is why the curse finally stops. The 2018 film sits at 7.6/10 on TMDB from 373 votes and holds 86% on Rotten Tomatoes from 28 reviews, so the Tumbbad movie review writes itself. What follows is the full story, the Hastar myth behind it, and where to watch it.
