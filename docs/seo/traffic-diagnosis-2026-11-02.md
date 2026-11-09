@@ -232,3 +232,22 @@ python3 scripts/seo/gsc_api.py inspect --site sc-domain:extramovies.org \
 ```
 
 Harness: `docs/seo/holisticseo-harness.md` (baseline 42/100).
+
+## 2026-11-09 deploy note (07a7b13, prod-extra run 42614438861, success)
+
+The /lists content type shipped to production: `/lists` plus
+`/lists/best-films-2026`, `/lists/indian-cinema`,
+`/lists/best-action-movies` are live (200, indexable) and in the
+sitemap (103 → 107 URLs); `/best-of-2026` 301s to
+`/lists/best-films-2026`; taxonomy pages gained "At a glance" blocks.
+EN-2 (TMDB facts: studio, release date, country, language,
+certification, budget, box office) is enriched in all 62 seeds but
+pending on production: the deploy only refreshes `managed_fields` on
+published rows, so live review pages do not show the new KeyFacts rows
+or JSON-LD fields until the enriched seeds are re-imported or edited
+in `/admin`. Harness score proposed 82/100 (Competitive), up from 74.
+URL Inspection on the four new URLs: all unknown to Google (recrawl
+lag — no traffic/index movement claimable yet). Watch at the next
+weekly run: index coverage of the four list URLs, then 28-day
+clicks/impressions. Sanctioned path stands: sitemap resubmit + the
+owner's manual Request Indexing clicks; no CDP/API submission.

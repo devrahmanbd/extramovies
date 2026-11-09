@@ -383,3 +383,55 @@ seeds.
 - 2026-11-02: first version, baseline 42/100.
 - 2026-11-06: second run, 74/100 (Developing); HF1-HF3 closed, TM-3 remains
   the only open P0, EE-1 remains the only open hard-fail substance.
+- 2026-11-09: third run (smoke-verified, no full link-graph crawl),
+  82/100 (Competitive). TM-3 and QS-3 closed by the /lists content type;
+  PS-3 improved to PARTIAL ("At a glance"); EN-2 improved to PARTIAL
+  (seeds enriched, production rows pending re-import). Sitemap 103 → 107.
+  Full run: `data/legacy/holisticseo-audit-2026-11-09.md` (untracked).
+  EE-1 (named human critic) remains an owner decision.
+
+---
+
+## 9. Third run, 2026-11-09
+
+Live site after commit `07a7b13` ("seo: add /lists content type, taxonomy
+At a glance, TMDB facts on reviews"), GH run 42614438861 on `prod-extra`,
+success in 38s. Sitemap snapshot: 107 URLs in `https://extramovies.org/sitemap.xml`
+(was 103) — the four new URLs are `/lists` plus three list pages
+(`/lists/best-films-2026`, `/lists/indian-cinema`,
+`/lists/best-action-movies`). Smoke checks (2026-11-09, no credentials):
+`/lists` 200 lists the 3 indexable lists and the "Browse by genre" block,
+`index, follow`, CollectionPage+ItemList JSON-LD with `numberOfItems: 3`;
+all three list pages 200 indexable; `/best-of-2026` 301s to
+`/lists/best-films-2026`; `/category/action` 200 with a non-empty
+"At a glance" block plus scope paragraph. URL Inspection (read-only) on
+the four new URLs: all four "URL is unknown to Google" — expected recrawl
+lag, no index movement claimable yet.
+
+| Section | Earned | Weight |
+|---|---|---|
+| Topical map and coverage | 14 | 20 |
+| Contextual relevance | 13 | 15 |
+| Entity coverage | 12 | 15 |
+| Query semantics | 13 | 15 |
+| Internal linking | 15 | 15 |
+| Page segmentation | 9 | 10 |
+| E-E-A-T | 6 | 10 |
+| **Total** | **82** | **100** |
+
+**Score: 82/100 (Competitive), up from 74/100 (Developing).** HF1, HF2 and
+HF3 remain closed; HF4 is not formally triggered (EE-2 PARTIAL) but EE-1
+still FAILs (byline is "The Editor", owner decision). Movement, counted
+not vibes: TM 10→14 (TM-3 closed, +4); QS 11→13 (QS-3 closed, +2);
+EN 11→12 (EN-2 PARTIAL, +1); PS 8→9 (PS-3 PARTIAL, +1); CR, IL, EE
+unchanged. Open P1s: EE-1 (FAIL), EN-2 live (PARTIAL — all 62 seeds are
+enriched with `movie_studio` 61/62, `movie_release_date` 62/62,
+`movie_country` 62/62, `movie_language` 62/62, `movie_certification`
+53/62, `movie_budget`/`movie_revenue` 38/62, but already-published
+production rows are NOT refreshed by the deploy: `--refresh` only
+re-writes `managed_fields` (seo_title, seo_description, excerpt), so
+live KeyFacts and the Movie JSON-LD do not yet show the new facts —
+verified on the Top Gun: Maverick review page; they go live only after
+a re-import or `/admin` edits). PS-3 is PARTIAL (taxonomy hubs gained
+"At a glance"; thin cast hubs remain). UNVERIFIED this run: full link
+graph crawl and any index/traffic movement.
