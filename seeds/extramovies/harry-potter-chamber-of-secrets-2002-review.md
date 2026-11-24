@@ -1,6 +1,7 @@
 ---
 title: "Harry Potter and the Chamber of Secrets Review: The Most Faithful Cut"
 slug: harry-potter-chamber-of-secrets-2002-review
+published_at: "2026-11-26T09:00:00.000Z"
 rating: 7.4
 tmdb_id: 672
 imdb_id: tt0295297

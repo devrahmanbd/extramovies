@@ -1,6 +1,7 @@
 ---
 title: "Pirates of the Caribbean: At World's End Review: The $300 Million Gamble That Mostly Pays"
 slug: potc-at-worlds-end-2007-review
+published_at: "2026-11-26T09:00:00.000Z"
 rating: 7.1
 tmdb_id: 285
 imdb_id: tt0449088

@@ -1,6 +1,7 @@
 ---
 title: "Pirates of the Caribbean: Dead Man's Chest Review: Davy Jones Deserves His Billion"
 slug: potc-dead-mans-chest-2006-review
+published_at: "2026-11-26T09:00:00.000Z"
 rating: 7.4
 tmdb_id: 58
 imdb_id: tt0383574

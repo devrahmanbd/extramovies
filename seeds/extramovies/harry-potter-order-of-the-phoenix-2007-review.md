@@ -1,6 +1,7 @@
 ---
 title: "Harry Potter and the Order of the Phoenix Review: The Rebellion Begins"
 slug: harry-potter-order-of-the-phoenix-2007-review
+published_at: "2026-11-26T09:00:00.000Z"
 rating: 7.7
 tmdb_id: 675
 imdb_id: tt0373889

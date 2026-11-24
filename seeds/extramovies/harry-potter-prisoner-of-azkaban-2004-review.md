@@ -1,6 +1,7 @@
 ---
 title: "Harry Potter and the Prisoner of Azkaban Review: The Tonal Pivot"
 slug: harry-potter-prisoner-of-azkaban-2004-review
+published_at: "2026-11-26T09:00:00.000Z"
 rating: 8.6
 tmdb_id: 673
 imdb_id: tt0304141

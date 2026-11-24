@@ -1,6 +1,7 @@
 ---
 title: "Pirates of the Caribbean: On Stranger Tides Review: A Billion-Dollar Voyage With an Empty Deck"
 slug: potc-on-stranger-tides-2011-review
+published_at: "2026-11-26T09:00:00.000Z"
 rating: 5.2
 tmdb_id: 1865
 imdb_id: tt1298650

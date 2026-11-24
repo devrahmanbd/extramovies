@@ -1,6 +1,7 @@
 ---
 title: "Harry Potter and the Deathly Hallows: Part 1 Review: The War on Foot"
 slug: harry-potter-deathly-hallows-part-1-2010-review
+published_at: "2026-11-26T09:00:00.000Z"
 rating: 7.5
 tmdb_id: 12444
 imdb_id: tt0926084

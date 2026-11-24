@@ -1,6 +1,7 @@
 ---
 title: "Harry Potter and the Half-Blood Prince Review: The Year the War Waited"
 slug: harry-potter-half-blood-prince-2009-review
+published_at: "2026-11-26T09:00:00.000Z"
 rating: 7.0
 tmdb_id: 767
 imdb_id: tt0417741

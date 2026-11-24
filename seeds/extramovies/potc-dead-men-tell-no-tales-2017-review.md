@@ -1,6 +1,7 @@
 ---
 title: "Pirates of the Caribbean: Dead Men Tell No Tales Review: A Fifth Film That Runs the Series Aground"
 slug: potc-dead-men-tell-no-tales-2017-review
+published_at: "2026-11-26T09:00:00.000Z"
 rating: 4.9
 tmdb_id: 166426
 imdb_id: tt1790809

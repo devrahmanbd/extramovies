@@ -1,6 +1,7 @@
 ---
 title: "Harry Potter and the Deathly Hallows: Part 2 Review: The Finale Earns the End"
 slug: harry-potter-deathly-hallows-part-2-2011-review
+published_at: "2026-11-26T09:00:00.000Z"
 rating: 9.0
 tmdb_id: 12445
 imdb_id: tt1201607

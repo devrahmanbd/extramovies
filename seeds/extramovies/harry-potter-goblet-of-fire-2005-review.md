@@ -1,6 +1,7 @@
 ---
 title: "Harry Potter and the Goblet of Fire Review: Voldemort Rises"
 slug: harry-potter-goblet-of-fire-2005-review
+published_at: "2026-11-26T09:00:00.000Z"
 rating: 8.0
 tmdb_id: 674
 imdb_id: tt0330373
